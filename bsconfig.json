@@ -2,12 +2,10 @@
   "name": "rescript-nextjs-template",
   "namespace": false,
   "reason": { "react-jsx": 3 },
-  "refmt": 3,
   "bs-dependencies": ["@rescript/react"],
+  "bsc-flags": ["-open Belt"],
   "ppx-flags": [],
-  "sources": [
-    { "dir": "src", "subdirs": true }
-  ],
+  "sources": [{ "dir": "src", "subdirs": true }],
   "package-specs": {
     "module": "es6",
     "in-source": true
