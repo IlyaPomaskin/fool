@@ -24,7 +24,7 @@ let lastListItem = (list: list<'a>) => List.get(list, List.size(list) - 1)
 
 let getTrump = (deck: deck, players: list<player>) => {
   let lastCard = lastListItem(deck)
-  let lastPlayer = lastListItem(players)
+  let lastPlayer = lastListItem(players->List.keep(p => List.length(p.cards) != 0))
 
   switch (lastCard, lastPlayer) {
   | (Some(card), _) => Some(fst(card))

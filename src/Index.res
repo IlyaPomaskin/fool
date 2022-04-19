@@ -7,6 +7,8 @@ let players = list{
   Player.make("ddd"),
   Player.make("eee"),
   Player.make("fff"),
+  Player.make("zzzfff"),
+  Player.make("fdafff"),
 }
 
 type props = {

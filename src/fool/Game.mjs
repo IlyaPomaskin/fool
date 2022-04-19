@@ -59,7 +59,9 @@ function lastListItem(list) {
 
 function getTrump(deck, players) {
   var lastCard = lastListItem(deck);
-  var lastPlayer = lastListItem(players);
+  var lastPlayer = lastListItem(Belt_List.keep(players, (function (p) {
+              return Belt_List.length(p.cards) !== 0;
+            })));
   if (lastCard !== undefined) {
     return lastCard[0];
   } else if (lastPlayer !== undefined) {
