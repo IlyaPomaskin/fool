@@ -11,7 +11,7 @@ import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 function make(login) {
   return {
           id: login,
-          sessionId: Js_math.random_int(0, 10000000),
+          sessionId: "session:" + String(Js_math.random_int(0, 10000000)),
           cards: /* [] */0
         };
 }

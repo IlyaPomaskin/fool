@@ -1,6 +1,6 @@
 type playerId = string
 
-type sessionId = int
+type sessionId = string
 
 type player = {
   id: playerId,
@@ -10,7 +10,7 @@ type player = {
 
 let make = (login: playerId) => {
   id: login,
-  sessionId: Js.Math.random_int(0, 10000000),
+  sessionId: "session:" ++ string_of_int(Js.Math.random_int(0, 10000000)),
   cards: list{},
 }
 

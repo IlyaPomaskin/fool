@@ -1,12 +1,12 @@
 open UiUtils
 
 @react.component
-let make = (~player: Player.player) => {
-  <div>
-    {uiStr("id: " ++ player.id)}
-    <br />
-    {uiStr("sessionId: " ++ Int.toString(player.sessionId))}
-    <br />
-    <CardUI.deck deck={player.cards} />
+let make = (~className: string="", ~player: Player.player, ()) => {
+  <div className={className}>
+    <div>
+      <span className="font-bold"> {uiStr(player.id)} </span>
+      {uiStr(" (" ++ player.sessionId ++ ")")}
+    </div>
+    <div> <CardUI.deck deck={player.cards} /> </div>
   </div>
 }

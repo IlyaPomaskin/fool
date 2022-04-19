@@ -5,10 +5,16 @@ import * as CardUI from "./CardUI.mjs";
 import * as UiUtils from "../UiUtils.mjs";
 
 function PlayerUI(Props) {
+  var classNameOpt = Props.className;
   var player = Props.player;
-  return React.createElement("div", undefined, UiUtils.uiStr("id: " + player.id), React.createElement("br", undefined), UiUtils.uiStr("sessionId: " + String(player.sessionId)), React.createElement("br", undefined), React.createElement(CardUI.deck, {
-                  deck: player.cards
-                }));
+  var className = classNameOpt !== undefined ? classNameOpt : "";
+  return React.createElement("div", {
+              className: className
+            }, React.createElement("div", undefined, React.createElement("span", {
+                      className: "font-bold"
+                    }, UiUtils.uiStr(player.id)), UiUtils.uiStr(" (" + player.sessionId + ")")), React.createElement("div", undefined, React.createElement(CardUI.deck, {
+                      deck: player.cards
+                    })));
 }
 
 var make = PlayerUI;
