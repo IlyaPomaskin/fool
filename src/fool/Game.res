@@ -1,9 +1,9 @@
-type gameInLobby = {
+type inLobby = {
   players: list<Player.player>,
   ready: list<Player.player>,
 }
 
-type gameInProgress = {
+type inProgress = {
   attacker: Player.player,
   defender: Player.player,
   players: list<Player.player>,
@@ -13,25 +13,29 @@ type gameInProgress = {
   pass: list<Player.player>,
 }
 
-let makeGameInLobby = (authorId: Player.playerId) => {
+type state = 
+  | InLobby(inLobby)
+  | InProgress(inProgress)
+
+let makeGameInLobby = (authorId: Player.playerId) => InLobby({
   players: list{Player.make(authorId)},
   ready: list{},
-}
+})
 
-let logoutPlayer = (game: gameInLobby, player: Player.player) => {
+let logoutPlayer = (game: inLobby, player: Player.player) => InLobby({
   ...game,
   players: Belt.List.keep(game.players, item => item !== player),
-}
+})
 
-let enterGame = (game: gameInLobby, player: Player.player) => {
+let enterGame = (game: inLobby, player: Player.player) => InLobby({
   ...game,
   players: List.add(game.players, player),
-}
+})
 
-let toggleReady = (game: gameInLobby, player: Player.player) => {
+let toggleReady = (game: inLobby, player: Player.player) => InLobby({
   ...game,
   players: Utils.toggleArrayItem(game.players, player),
-}
+})
 
 let lastListItem = (list: list<'a>) => List.get(list, List.size(list) - 1)
 
@@ -45,8 +49,8 @@ let getTrump = (deck: Card.deck, players: list<Player.player>) => {
   | (None, None) => None
   }
 }
-
-let startGame = (game: gameInLobby): result<gameInProgress, string> => {
+ 
+let startGame = (game: inLobby): result<state, string> => {
   let (players, deck) = Player.dealDeckToPlayers(Card.makeShuffledDeck(), game.players)
 
   let trump = Option.mapWithDefault(getTrump(deck, players), Error("No trump"), Utils.makeOk)
@@ -59,7 +63,7 @@ let startGame = (game: gameInLobby): result<gameInProgress, string> => {
 
   switch (trump, attacker, defender) {
   | (Ok(trump), Ok(attacker), Ok(defender)) =>
-    Ok({
+    Ok(InProgress({
       attacker: attacker,
       defender: defender,
       table: list{},
@@ -67,14 +71,14 @@ let startGame = (game: gameInLobby): result<gameInProgress, string> => {
       pass: list{},
       players: players,
       deck: deck,
-    })
+    }))
   | (Error(a), _, _) => Error(a)
   | (_, Error(a), _) => Error(a)
   | (_, _, Error(a)) => Error(a)
   }
 }
 
-let isDefender = (game: gameInProgress, player: Player.player) => {
+let isDefender = (game: inProgress, player: Player.player) => {
   game.defender == player
 }
 
@@ -82,11 +86,11 @@ let isPlayerHasCard = (player: Player.player, card: Card.card) => {
   List.has(player.cards, card, Utils.equals)
 }
 
-let isCorrectAdditionalCard = (game: gameInProgress, card: Card.card) => {
+let isCorrectAdditionalCard = (game: inProgress, card: Card.card) => {
   game.table->Card.getFlatTableCards->Belt.List.has(card, Utils.equals)
 }
 
-let isValidMove = (game: gameInProgress, player: Player.player, card: Card.card) => {
+let isValidMove = (game: inProgress, player: Player.player, card: Card.card) => {
   if !isDefender(game, player) {
     Error("Player is not a defender")
   } else if !isPlayerHasCard(player, card) {
@@ -94,12 +98,12 @@ let isValidMove = (game: gameInProgress, player: Player.player, card: Card.card)
   } else if !isCorrectAdditionalCard(game, card) {
     Error("Incorrect card")
   } else {
-    Ok(game)
+    Ok(InProgress(game))
   }
 }
 
-let move = (game: gameInProgress, player: Player.player, card: Card.card): result<
-  gameInProgress,
+let move = (game: inProgress, player: Player.player, card: Card.card): result<
+  state,
   string,
 > => {
   let isValid = isValidMove(game, player, card)
@@ -107,40 +111,40 @@ let move = (game: gameInProgress, player: Player.player, card: Card.card): resul
   if !Result.isError(isValid) {
     isValid
   } else {
-    Ok({
+    Ok(InProgress({
       ...game,
       players: List.map(game.players, p => {
         ...p,
         cards: Player.removeCard(p, card),
       }),
-    })
+    }))
   }
 }
 
-let isValidPass = (game: gameInProgress, player: Player.player) => {
+let isValidPass = (game: inProgress, player: Player.player) => {
   if isDefender(game, player) {
     Error("Defender can't pass")
   } else if !Player.isPlayerExists(game.players, player) {
     Error("Player doesn't exists ")
   } else {
-    Ok(game)
+    Ok(InProgress(game))
   }
 }
 
-let pass = (game: gameInProgress, player: Player.player) => {
+let pass = (game: inProgress, player: Player.player) => {
   let isValid = isValidPass(game, player)
 
   if !Result.isError(isValid) {
     isValid
   } else {
-    Ok({
+    Ok(InProgress({
       ...game,
       pass: List.add(game.pass, player),
-    })
+    }))
   }
 }
 
-let isValidBeat = (game: gameInProgress, to: Card.card, by: Card.card, player: Player.player) => {
+let isValidBeat = (game: inProgress, to: Card.card, by: Card.card, player: Player.player) => {
   if !isDefender(game, player) {
     Error("Is not deffender")
   } else if isPlayerHasCard(player, by) {
@@ -148,17 +152,17 @@ let isValidBeat = (game: gameInProgress, to: Card.card, by: Card.card, player: P
   } else if Card.isValidTableBeat(to, by, game.trump) {
     Error("Wrong card to beat")
   } else {
-    Ok(game)
+    Ok(InProgress(game))
   }
 }
 
-let beat = (game: gameInProgress, to: Card.card, by: Card.card, player: Player.player) => {
+let beat = (game: inProgress, to: Card.card, by: Card.card, player: Player.player) => {
   let isValid = isValidBeat(game, to, by, player)
 
   if !Result.isError(isValid) {
     isValid
   } else {
-    Ok({
+    Ok(InProgress({
       ...game,
       players: List.map(game.players, p => {
         ...p,
@@ -171,25 +175,25 @@ let beat = (game: gameInProgress, to: Card.card, by: Card.card, player: Player.p
           (firstCard, secondCard)
         }
       }),
-    })
+    }))
   }
 }
 
-let isValidTake = (game: gameInProgress, player: Player.player) => {
+let isValidTake = (game: inProgress, player: Player.player) => {
   if isDefender(game, player) {
     Error("Player is not defender")
   } else {
-    Ok(game)
+    Ok(InProgress(game))
   }
 }
 
-let take = (game: gameInProgress, player: Player.player) => {
+let take = (game: inProgress, player: Player.player) => {
   let isValid = isValidTake(game, player)
 
   if !Result.isError(isValid) {
     isValid
   } else {
-    Ok({
+    Ok(InProgress({
       ...game,
       table: list{},
       players: List.map(game.players, p =>
@@ -202,6 +206,6 @@ let take = (game: gameInProgress, player: Player.player) => {
           p
         }
       ),
-    })
+    }))
   }
 }

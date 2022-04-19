@@ -10,34 +10,46 @@ import * as Belt_Result from "rescript/lib/es6/belt_Result.js";
 
 function makeGameInLobby(authorId) {
   return {
-          players: {
-            hd: Player.make(authorId),
-            tl: /* [] */0
-          },
-          ready: /* [] */0
+          TAG: /* InLobby */0,
+          _0: {
+            players: {
+              hd: Player.make(authorId),
+              tl: /* [] */0
+            },
+            ready: /* [] */0
+          }
         };
 }
 
 function logoutPlayer(game, player) {
   return {
-          players: Belt_List.keep(game.players, (function (item) {
-                  return item !== player;
-                })),
-          ready: game.ready
+          TAG: /* InLobby */0,
+          _0: {
+            players: Belt_List.keep(game.players, (function (item) {
+                    return item !== player;
+                  })),
+            ready: game.ready
+          }
         };
 }
 
 function enterGame(game, player) {
   return {
-          players: Belt_List.add(game.players, player),
-          ready: game.ready
+          TAG: /* InLobby */0,
+          _0: {
+            players: Belt_List.add(game.players, player),
+            ready: game.ready
+          }
         };
 }
 
 function toggleReady(game, player) {
   return {
-          players: Utils.toggleArrayItem(game.players, player),
-          ready: game.ready
+          TAG: /* InLobby */0,
+          _0: {
+            players: Utils.toggleArrayItem(game.players, player),
+            ready: game.ready
+          }
         };
 }
 
@@ -85,13 +97,16 @@ function startGame(game) {
         return {
                 TAG: /* Ok */0,
                 _0: {
-                  attacker: attacker._0,
-                  defender: defender._0,
-                  players: players,
-                  trump: trump._0,
-                  deck: deck,
-                  table: /* [] */0,
-                  pass: /* [] */0
+                  TAG: /* InProgress */1,
+                  _0: {
+                    attacker: attacker._0,
+                    defender: defender._0,
+                    players: players,
+                    trump: trump._0,
+                    deck: deck,
+                    table: /* [] */0,
+                    pass: /* [] */0
+                  }
                 }
               };
       } else {
@@ -132,7 +147,10 @@ function isValidMove(game, player, card) {
       if (isCorrectAdditionalCard(game, card)) {
         return {
                 TAG: /* Ok */0,
-                _0: game
+                _0: {
+                  TAG: /* InProgress */1,
+                  _0: game
+                }
               };
       } else {
         return {
@@ -160,19 +178,22 @@ function move(game, player, card) {
     return {
             TAG: /* Ok */0,
             _0: {
-              attacker: game.attacker,
-              defender: game.defender,
-              players: Belt_List.map(game.players, (function (p) {
-                      return {
-                              id: p.id,
-                              sessionId: p.sessionId,
-                              cards: Player.removeCard(p, card)
-                            };
-                    })),
-              trump: game.trump,
-              deck: game.deck,
-              table: game.table,
-              pass: game.pass
+              TAG: /* InProgress */1,
+              _0: {
+                attacker: game.attacker,
+                defender: game.defender,
+                players: Belt_List.map(game.players, (function (p) {
+                        return {
+                                id: p.id,
+                                sessionId: p.sessionId,
+                                cards: Player.removeCard(p, card)
+                              };
+                      })),
+                trump: game.trump,
+                deck: game.deck,
+                table: game.table,
+                pass: game.pass
+              }
             }
           };
   } else {
@@ -189,7 +210,10 @@ function isValidPass(game, player) {
   } else if (Player.isPlayerExists(game.players, player)) {
     return {
             TAG: /* Ok */0,
-            _0: game
+            _0: {
+              TAG: /* InProgress */1,
+              _0: game
+            }
           };
   } else {
     return {
@@ -205,13 +229,16 @@ function pass(game, player) {
     return {
             TAG: /* Ok */0,
             _0: {
-              attacker: game.attacker,
-              defender: game.defender,
-              players: game.players,
-              trump: game.trump,
-              deck: game.deck,
-              table: game.table,
-              pass: Belt_List.add(game.pass, player)
+              TAG: /* InProgress */1,
+              _0: {
+                attacker: game.attacker,
+                defender: game.defender,
+                players: game.players,
+                trump: game.trump,
+                deck: game.deck,
+                table: game.table,
+                pass: Belt_List.add(game.pass, player)
+              }
             }
           };
   } else {
@@ -234,7 +261,10 @@ function isValidBeat(game, to, by, player) {
     } else {
       return {
               TAG: /* Ok */0,
-              _0: game
+              _0: {
+                TAG: /* InProgress */1,
+                _0: game
+              }
             };
     }
   } else {
@@ -251,32 +281,35 @@ function beat(game, to, by, player) {
     return {
             TAG: /* Ok */0,
             _0: {
-              attacker: game.attacker,
-              defender: game.defender,
-              players: Belt_List.map(game.players, (function (p) {
-                      return {
-                              id: p.id,
-                              sessionId: p.sessionId,
-                              cards: Player.removeCard(p, by)
-                            };
-                    })),
-              trump: game.trump,
-              deck: game.deck,
-              table: Belt_List.map(game.table, (function (param) {
-                      var firstCard = param[0];
-                      if (Card.isCardEquals(firstCard, to)) {
-                        return [
-                                firstCard,
-                                by
-                              ];
-                      } else {
-                        return [
-                                firstCard,
-                                param[1]
-                              ];
-                      }
-                    })),
-              pass: game.pass
+              TAG: /* InProgress */1,
+              _0: {
+                attacker: game.attacker,
+                defender: game.defender,
+                players: Belt_List.map(game.players, (function (p) {
+                        return {
+                                id: p.id,
+                                sessionId: p.sessionId,
+                                cards: Player.removeCard(p, by)
+                              };
+                      })),
+                trump: game.trump,
+                deck: game.deck,
+                table: Belt_List.map(game.table, (function (param) {
+                        var firstCard = param[0];
+                        if (Card.isCardEquals(firstCard, to)) {
+                          return [
+                                  firstCard,
+                                  by
+                                ];
+                        } else {
+                          return [
+                                  firstCard,
+                                  param[1]
+                                ];
+                        }
+                      })),
+                pass: game.pass
+              }
             }
           };
   } else {
@@ -293,7 +326,10 @@ function isValidTake(game, player) {
   } else {
     return {
             TAG: /* Ok */0,
-            _0: game
+            _0: {
+              TAG: /* InProgress */1,
+              _0: game
+            }
           };
   }
 }
@@ -304,23 +340,26 @@ function take(game, player) {
     return {
             TAG: /* Ok */0,
             _0: {
-              attacker: game.attacker,
-              defender: game.defender,
-              players: Belt_List.map(game.players, (function (p) {
-                      if (Caml_obj.caml_equal(game.defender, p)) {
-                        return {
-                                id: p.id,
-                                sessionId: p.sessionId,
-                                cards: Belt_List.concat(p.cards, Card.getFlatTableCards(game.table))
-                              };
-                      } else {
-                        return p;
-                      }
-                    })),
-              trump: game.trump,
-              deck: game.deck,
-              table: /* [] */0,
-              pass: game.pass
+              TAG: /* InProgress */1,
+              _0: {
+                attacker: game.attacker,
+                defender: game.defender,
+                players: Belt_List.map(game.players, (function (p) {
+                        if (Caml_obj.caml_equal(game.defender, p)) {
+                          return {
+                                  id: p.id,
+                                  sessionId: p.sessionId,
+                                  cards: Belt_List.concat(p.cards, Card.getFlatTableCards(game.table))
+                                };
+                        } else {
+                          return p;
+                        }
+                      })),
+                trump: game.trump,
+                deck: game.deck,
+                table: /* [] */0,
+                pass: game.pass
+              }
             }
           };
   } else {
