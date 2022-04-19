@@ -8,3 +8,38 @@ body {
 }
 
 @tailwind utilities;
+
+.card {
+  border: solid 1px black;
+  border-radius: 4px;
+  width: 50px;
+  height: 70px;
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+}
+
+.card.♥, .card.♦ {
+  color: red;
+}
+
+.suit {
+  position: absolute;
+  left: 6px;
+  top: 4px;
+  font-size: 20px;
+}
+
+.rank {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.deck-card {
+  display: inline-block;
+  margin: 0 4px;
+}
