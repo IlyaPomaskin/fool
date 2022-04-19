@@ -18,23 +18,7 @@ function MainLayout$Navigation(Props) {
                           }, "Next", React.createElement("span", {
                                 className: "text-orange-800"
                               }, " + ReScript")))
-                }), React.createElement("div", {
-                  className: "flex w-2/3 justify-end"
-                }, React.createElement(Link, {
-                      href: "/",
-                      children: React.createElement("a", {
-                            className: "px-3"
-                          }, "Home")
-                    }), React.createElement(Link, {
-                      href: "/examples",
-                      children: React.createElement("a", {
-                            className: "px-3"
-                          }, "Examples")
-                    }), React.createElement("a", {
-                      className: "px-3 font-bold",
-                      href: "https://github.com/ryyppy/nextjs-default",
-                      target: "_blank"
-                    }, "Github")));
+                }));
 }
 
 function MainLayout(Props) {
