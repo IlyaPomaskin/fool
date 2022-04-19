@@ -1,12 +1,4 @@
-type playerId = string
-
-type sessionId = string
-
-type player = {
-  id: playerId,
-  sessionId: sessionId,
-  cards: Card.deck,
-}
+open Types
 
 let make = (login: playerId) => {
   id: login,
@@ -31,7 +23,7 @@ let getNextPlayer = (p: player, players: list<player>) => {
   }
 }
 
-let findFirstAttacker = (trump: Card.suit, players: list<player>) => {
+let findFirstAttacker = (trump: suit, players: list<player>) => {
   List.reduce(players, List.get(players, 0), (prev, next) => {
     let prevSmallestCard = Card.getSmallestValuableCard(
       trump,
@@ -44,14 +36,14 @@ let findFirstAttacker = (trump: Card.suit, players: list<player>) => {
   })
 }
 
-let dealToPlayer = (deck: Card.deck, player: player) => {
+let dealToPlayer = (deck: deck, player: player) => {
   let requiredCardsAmount = max(0, 5 - List.length(player.cards))
   let (playerCards, nextDeck) = Card.dealCards(requiredCardsAmount, deck)
 
   ({...player, cards: playerCards}, nextDeck)
 }
 
-let dealDeckToPlayers = (deck: Card.deck, players: list<player>) => {
+let dealDeckToPlayers = (deck: deck, players: list<player>) => {
   let (nextPlayers, nextDeck) = List.reduce(players, ([], deck), (
     (accPlayers, accDeck),
     player,
@@ -64,7 +56,7 @@ let dealDeckToPlayers = (deck: Card.deck, players: list<player>) => {
   (List.fromArray(nextPlayers), nextDeck)
 }
 
-let removeCard = (player: player, card: Card.card) => {
+let removeCard = (player: player, card: card) => {
   List.keep(player.cards, c => c !== card)
 }
 

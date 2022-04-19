@@ -12,7 +12,16 @@ var players_1 = {
   hd: Player.make("bbb"),
   tl: {
     hd: Player.make("ccc"),
-    tl: /* [] */0
+    tl: {
+      hd: Player.make("ddd"),
+      tl: {
+        hd: Player.make("eee"),
+        tl: {
+          hd: Player.make("fff"),
+          tl: /* [] */0
+        }
+      }
+    }
   }
 };
 

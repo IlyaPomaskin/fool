@@ -1,27 +1,4 @@
-type suit =
-  | Spades
-  | Hearts
-  | Diamonds
-  | Clubs
-
-type rank =
-  | Six
-  | Seven
-  | Eight
-  | Nine
-  | Ten
-  | Jack
-  | Queen
-  | King
-  | Ace
-
-type card = (suit, rank)
-
-type deck = list<card>
-
-type tableCards = (card, option<card>)
-
-type table = list<tableCards>
+open Types
 
 let suitsList = list{Spades, Hearts, Diamonds, Clubs}
 

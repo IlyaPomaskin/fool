@@ -1,6 +1,7 @@
 open UiUtils
+open Types
 
-let suitToColor = (suit: Card.suit) =>
+let suitToColor = (suit: suit) =>
   switch suit {
   | Spades => "text-slate-500"
   | Clubs => "text-slate-500"
@@ -10,7 +11,7 @@ let suitToColor = (suit: Card.suit) =>
 
 module CardUILocal = {
   @react.component
-  let make = (~className: string="", ~card: Card.card, ()) => {
+  let make = (~className: string="", ~card: card, ()) => {
     <div
       className={cx([
         "relative w-12 h-16",
@@ -34,11 +35,11 @@ module CardUILocal = {
 let make = CardUILocal.make
 
 @react.component
-let trump = (~suit: Card.suit, ()) =>
+let trump = (~suit: suit, ()) =>
   <div className={suitToColor(suit)}> {uiStr(Card.suitToString(suit))} </div>
 
 @react.component
-let deck = (~deck: Card.deck) =>
+let deck = (~deck: deck) =>
   switch deck {
   | list{} => <div> {uiStr("No cards in deck")} </div>
   | _ =>

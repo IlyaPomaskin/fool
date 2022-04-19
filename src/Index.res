@@ -1,14 +1,23 @@
-let players = list{Player.make("aaa"), Player.make("bbb"), Player.make("ccc")}
+open Types
+
+let players = list{
+  Player.make("aaa"),
+  Player.make("bbb"),
+  Player.make("ccc"),
+  Player.make("ddd"),
+  Player.make("eee"),
+  Player.make("fff"),
+}
 
 type props = {
-  inProgress: Game.state,
-  inLobby: Game.state,
+  inProgress: state,
+  inLobby: state,
 }
 
 let default = (p: props) =>
   <div> <GameUI game={p.inProgress} /> <br /> <GameUI game={p.inLobby} /> </div>
 
-let getServerSideProps = _ctx =>
+let getServerSideProps = _ctx => {
   Js.Promise.resolve({
     "props": {
       inProgress: Result.getExn(
@@ -20,3 +29,4 @@ let getServerSideProps = _ctx =>
       inLobby: Game.makeGameInLobby("owner"),
     },
   })
+}

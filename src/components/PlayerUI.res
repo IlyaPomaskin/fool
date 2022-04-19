@@ -1,7 +1,8 @@
 open UiUtils
+open Types
 
 @react.component
-let make = (~className: string="", ~player: Player.player, ()) => {
+let make = (~className: string="", ~player: player, ()) => {
   <div className={className}>
     <div>
       <span className="font-bold"> {uiStr(player.id)} </span>

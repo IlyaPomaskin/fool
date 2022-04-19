@@ -1,8 +1,9 @@
 open UiUtils
+open Types
 
 module InLobbyUI = {
   @react.component
-  let make = (~game: Game.inLobby) =>
+  let make = (~game: inLobby) =>
     <div>
       {uiStr("inLobby")}
       <br />
@@ -19,7 +20,7 @@ module InLobbyUI = {
 
 module InProgressUI = {
   @react.component
-  let make = (~game: Game.inProgress) =>
+  let make = (~game: inProgress) =>
     <div>
       {uiStr("inProgress")}
       <br />
@@ -38,8 +39,8 @@ module InProgressUI = {
 }
 
 @react.component
-let make = (~game: Game.state) =>
+let make = (~game: state) =>
   switch game {
-  | Game.InLobby(g) => <InLobbyUI game={g} />
-  | Game.InProgress(g) => <InProgressUI game={g} />
+  | InLobby(g) => <InLobbyUI game={g} />
+  | InProgress(g) => <InProgressUI game={g} />
   }
