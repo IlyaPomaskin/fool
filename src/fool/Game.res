@@ -13,7 +13,7 @@ type inProgress = {
   pass: list<Player.player>,
 }
 
-type state = 
+type state =
   | InLobby(inLobby)
   | InProgress(inProgress)
 
@@ -49,7 +49,7 @@ let getTrump = (deck: Card.deck, players: list<Player.player>) => {
   | (None, None) => None
   }
 }
- 
+
 let startGame = (game: inLobby): result<state, string> => {
   let (players, deck) = Player.dealDeckToPlayers(Card.makeShuffledDeck(), game.players)
 
@@ -63,15 +63,17 @@ let startGame = (game: inLobby): result<state, string> => {
 
   switch (trump, attacker, defender) {
   | (Ok(trump), Ok(attacker), Ok(defender)) =>
-    Ok(InProgress({
-      attacker: attacker,
-      defender: defender,
-      table: list{},
-      trump: trump,
-      pass: list{},
-      players: players,
-      deck: deck,
-    }))
+    Ok(
+      InProgress({
+        attacker: attacker,
+        defender: defender,
+        table: list{},
+        trump: trump,
+        pass: list{},
+        players: players,
+        deck: deck,
+      }),
+    )
   | (Error(a), _, _) => Error(a)
   | (_, Error(a), _) => Error(a)
   | (_, _, Error(a)) => Error(a)
@@ -102,22 +104,21 @@ let isValidMove = (game: inProgress, player: Player.player, card: Card.card) => 
   }
 }
 
-let move = (game: inProgress, player: Player.player, card: Card.card): result<
-  state,
-  string,
-> => {
+let move = (game: inProgress, player: Player.player, card: Card.card): result<state, string> => {
   let isValid = isValidMove(game, player, card)
 
   if !Result.isError(isValid) {
     isValid
   } else {
-    Ok(InProgress({
-      ...game,
-      players: List.map(game.players, p => {
-        ...p,
-        cards: Player.removeCard(p, card),
+    Ok(
+      InProgress({
+        ...game,
+        players: List.map(game.players, p => {
+          ...p,
+          cards: Player.removeCard(p, card),
+        }),
       }),
-    }))
+    )
   }
 }
 
@@ -137,10 +138,12 @@ let pass = (game: inProgress, player: Player.player) => {
   if !Result.isError(isValid) {
     isValid
   } else {
-    Ok(InProgress({
-      ...game,
-      pass: List.add(game.pass, player),
-    }))
+    Ok(
+      InProgress({
+        ...game,
+        pass: List.add(game.pass, player),
+      }),
+    )
   }
 }
 
@@ -162,20 +165,22 @@ let beat = (game: inProgress, to: Card.card, by: Card.card, player: Player.playe
   if !Result.isError(isValid) {
     isValid
   } else {
-    Ok(InProgress({
-      ...game,
-      players: List.map(game.players, p => {
-        ...p,
-        cards: Player.removeCard(p, by),
+    Ok(
+      InProgress({
+        ...game,
+        players: List.map(game.players, p => {
+          ...p,
+          cards: Player.removeCard(p, by),
+        }),
+        table: List.map(game.table, ((firstCard, secondCard)) => {
+          if Card.isCardEquals(firstCard, to) {
+            (firstCard, Some(by))
+          } else {
+            (firstCard, secondCard)
+          }
+        }),
       }),
-      table: List.map(game.table, ((firstCard, secondCard)) => {
-        if Card.isCardEquals(firstCard, to) {
-          (firstCard, Some(by))
-        } else {
-          (firstCard, secondCard)
-        }
-      }),
-    }))
+    )
   }
 }
 
@@ -193,19 +198,21 @@ let take = (game: inProgress, player: Player.player) => {
   if !Result.isError(isValid) {
     isValid
   } else {
-    Ok(InProgress({
-      ...game,
-      table: list{},
-      players: List.map(game.players, p =>
-        if isDefender(game, p) {
-          {
-            ...p,
-            cards: List.concat(p.cards, Card.getFlatTableCards(game.table)),
+    Ok(
+      InProgress({
+        ...game,
+        table: list{},
+        players: List.map(game.players, p =>
+          if isDefender(game, p) {
+            {
+              ...p,
+              cards: List.concat(p.cards, Card.getFlatTableCards(game.table)),
+            }
+          } else {
+            p
           }
-        } else {
-          p
-        }
-      ),
-    }))
+        ),
+      }),
+    )
   }
 }
