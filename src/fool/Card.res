@@ -109,3 +109,28 @@ let getFlatTableCards = (table: table) => {
   ->List.flatten
   ->List.keepMap(c => c)
 }
+
+let suitToString = (suit: suit) => {
+  switch suit {
+  | Spades => `♠`
+  | Hearts => `♥`
+  | Diamonds => `♦`
+  | Clubs => `♣`
+  }
+}
+
+let rankToString = (rank: rank) => {
+  switch rank {
+  | Six => "6"
+  | Seven => "7"
+  | Eight => "8"
+  | Nine => "9"
+  | Ten => "10"
+  | Jack => "J"
+  | Queen => "Q"
+  | King => "K"
+  | Ace => "A"
+  }
+}
+
+let cardToString = ((s, r): card) => suitToString(s) ++ " " ++ rankToString(r)

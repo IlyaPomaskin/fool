@@ -193,6 +193,48 @@ function getFlatTableCards(table) {
               }));
 }
 
+function suitToString(suit) {
+  switch (suit) {
+    case /* Spades */0 :
+        return "♠";
+    case /* Hearts */1 :
+        return "♥";
+    case /* Diamonds */2 :
+        return "♦";
+    case /* Clubs */3 :
+        return "♣";
+    
+  }
+}
+
+function rankToString(rank) {
+  switch (rank) {
+    case /* Six */0 :
+        return "6";
+    case /* Seven */1 :
+        return "7";
+    case /* Eight */2 :
+        return "8";
+    case /* Nine */3 :
+        return "9";
+    case /* Ten */4 :
+        return "10";
+    case /* Jack */5 :
+        return "J";
+    case /* Queen */6 :
+        return "Q";
+    case /* King */7 :
+        return "K";
+    case /* Ace */8 :
+        return "A";
+    
+  }
+}
+
+function cardToString(param) {
+  return suitToString(param[0]) + " " + rankToString(param[1]);
+}
+
 export {
   suitsList ,
   ranksList ,
@@ -211,6 +253,9 @@ export {
   isBeatByTrump ,
   isValidTableBeat ,
   getFlatTableCards ,
+  suitToString ,
+  rankToString ,
+  cardToString ,
   
 }
 /* No side effect */
