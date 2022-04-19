@@ -45,7 +45,7 @@ let findFirstAttacker = (trump: Card.suit, players: list<player>) => {
 }
 
 let dealToPlayer = (deck: Card.deck, player: player) => {
-  let requiredCardsAmount = max(0, 6 - List.length(player.cards))
+  let requiredCardsAmount = max(0, 5 - List.length(player.cards))
   let (playerCards, nextDeck) = Card.dealCards(requiredCardsAmount, deck)
 
   ({...player, cards: playerCards}, nextDeck)

@@ -50,7 +50,7 @@ function findFirstAttacker(trump, players) {
 }
 
 function dealToPlayer(deck, player) {
-  var requiredCardsAmount = Caml.caml_int_max(0, 6 - Belt_List.length(player.cards) | 0);
+  var requiredCardsAmount = Caml.caml_int_max(0, 5 - Belt_List.length(player.cards) | 0);
   var match = Card.dealCards(requiredCardsAmount, deck);
   return [
           {
