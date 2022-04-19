@@ -15,7 +15,7 @@
     "build": "rescript && next build",
     "now-build": "rescript && next build",
     "export": "next export",
-    "start": "next start -p $PORT",
+    "start": "next start -p 3000",
     "res:build": "rescript",
     "res:clean": "rescript clean",
     "res:start": "rescript build -w"
