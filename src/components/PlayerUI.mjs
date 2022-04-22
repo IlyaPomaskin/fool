@@ -4,22 +4,38 @@ import * as React from "react";
 import * as CardUI from "./CardUI.mjs";
 import * as UiUtils from "../UiUtils.mjs";
 
+function PlayerUI$Short(Props) {
+  var player = Props.player;
+  return React.createElement("div", undefined, React.createElement("span", {
+                  className: "font-bold"
+                }, UiUtils.uiStr(player.id)), UiUtils.uiStr(" (" + player.sessionId + ")"));
+}
+
+var Short = {
+  make: PlayerUI$Short
+};
+
 function PlayerUI(Props) {
   var classNameOpt = Props.className;
   var player = Props.player;
+  var onCardClick = Props.onCardClick;
   var className = classNameOpt !== undefined ? classNameOpt : "";
   return React.createElement("div", {
               className: className
-            }, React.createElement("div", undefined, React.createElement("span", {
-                      className: "font-bold"
-                    }, UiUtils.uiStr(player.id)), UiUtils.uiStr(" (" + player.sessionId + ")")), React.createElement("div", undefined, React.createElement(CardUI.deck, {
-                      deck: player.cards
+            }, React.createElement(PlayerUI$Short, {
+                  player: player
+                }), React.createElement("div", undefined, React.createElement(CardUI.deck, {
+                      deck: player.cards,
+                      onCardClick: onCardClick !== undefined ? onCardClick : (function (param) {
+                            
+                          })
                     })));
 }
 
 var make = PlayerUI;
 
 export {
+  Short ,
   make ,
   
 }

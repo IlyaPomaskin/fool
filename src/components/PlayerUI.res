@@ -1,13 +1,27 @@
 open UiUtils
 open Types
 
-@react.component
-let make = (~className: string="", ~player: player, ()) => {
-  <div className={className}>
+module Short = {
+  @react.component
+  let make = (~player: player) =>
     <div>
       <span className="font-bold"> {uiStr(player.id)} </span>
       {uiStr(" (" ++ player.sessionId ++ ")")}
     </div>
-    <div> <CardUI.deck deck={player.cards} /> </div>
+}
+
+@react.component
+let make = (~className: string="", ~player: player, ~onCardClick: option<card => unit>=?, ()) => {
+  <div className={className}>
+    <Short player={player} />
+    <div>
+      <CardUI.deck
+        deck={player.cards}
+        onCardClick={switch onCardClick {
+        | Some(fn) => fn
+        | None => _ => ()
+        }}
+      />
+    </div>
   </div>
 }
