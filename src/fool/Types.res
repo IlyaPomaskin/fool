@@ -51,3 +51,9 @@ type inProgress = {
 type state =
   | InLobby(inLobby)
   | InProgress(inProgress)
+
+type move =
+  | Take(player)
+  | Beat(player, card, card)
+  | Pass(player)
+  | Move(player, card)
