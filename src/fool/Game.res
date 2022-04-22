@@ -67,29 +67,30 @@ let isDefender = (game: inProgress, player: player) => {
   game.defender == player
 }
 
+let isAttacker = (game: inProgress, player: player) => {
+  game.attacker == player
+}
+
 let isPlayerHasCard = (player: player, card: card) => {
   List.has(player.cards, card, Utils.equals)
 }
 
 let isCorrectAdditionalCard = (game: inProgress, card: card) => {
-  game.table->Card.getFlatTableCards->Belt.List.has(card, Utils.equals)
+  game.table->Card.getFlatTableCards->List.has(card, Card.isCardEqualsByRank)
 }
 
-let isFirstMoveByAttacker = (game: inProgress, player: player) => {
-  let isFirstMove = List.length(game.table) === 0
-  let isAttacker = game.attacker == player
-
-  isFirstMove && isAttacker
+let isFirstMove = (game: inProgress) => {
+  List.length(game.table) === 0
 }
 
 let isValidMove = (game: inProgress, player: player, card: card) => {
-  if !isFirstMoveByAttacker(game, player) {
-    Error("First made not by attacker")
-  } else if !isDefender(game, player) {
-    Error("Player is not a defender")
+  if isDefender(game, player) {
+    Error("Defender can't make move")
+  } else if isFirstMove(game) && !isAttacker(game, player) {
+    Error("First move made not by attacker")
   } else if !isPlayerHasCard(player, card) {
     Error("Player don't have card")
-  } else if !isCorrectAdditionalCard(game, card) {
+  } else if !isFirstMove(game) && !isCorrectAdditionalCard(game, card) {
     Error("Incorrect card")
   } else {
     Ok(InProgress(game))

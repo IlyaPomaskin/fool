@@ -135,58 +135,52 @@ function isDefender(game, player) {
   return Caml_obj.caml_equal(game.defender, player);
 }
 
+function isAttacker(game, player) {
+  return Caml_obj.caml_equal(game.attacker, player);
+}
+
 function isPlayerHasCard(player, card) {
   return Belt_List.has(player.cards, card, Utils.equals);
 }
 
 function isCorrectAdditionalCard(game, card) {
-  return Belt_List.has(Card.getFlatTableCards(game.table), card, Utils.equals);
+  return Belt_List.has(Card.getFlatTableCards(game.table), card, Card.isCardEqualsByRank);
 }
 
-function isFirstMoveByAttacker(game, player) {
-  var isFirstMove = Belt_List.length(game.table) === 0;
-  var isAttacker = Caml_obj.caml_equal(game.attacker, player);
-  if (isFirstMove) {
-    return isAttacker;
-  } else {
-    return false;
-  }
+function isFirstMove(game) {
+  return Belt_List.length(game.table) === 0;
 }
 
 function isValidMove(game, player, card) {
-  if (isFirstMoveByAttacker(game, player)) {
-    if (Caml_obj.caml_equal(game.defender, player)) {
-      if (isPlayerHasCard(player, card)) {
-        if (isCorrectAdditionalCard(game, card)) {
-          return {
-                  TAG: /* Ok */0,
-                  _0: {
-                    TAG: /* InProgress */1,
-                    _0: game
-                  }
-                };
-        } else {
-          return {
-                  TAG: /* Error */1,
-                  _0: "Incorrect card"
-                };
-        }
-      } else {
-        return {
-                TAG: /* Error */1,
-                _0: "Player don't have card"
-              };
-      }
-    } else {
+  if (Caml_obj.caml_equal(game.defender, player)) {
+    return {
+            TAG: /* Error */1,
+            _0: "Defender can't make move"
+          };
+  } else if (isFirstMove(game) && !Caml_obj.caml_equal(game.attacker, player)) {
+    return {
+            TAG: /* Error */1,
+            _0: "First move made not by attacker"
+          };
+  } else if (isPlayerHasCard(player, card)) {
+    if (!isFirstMove(game) && !isCorrectAdditionalCard(game, card)) {
       return {
               TAG: /* Error */1,
-              _0: "Player is not a defender"
+              _0: "Incorrect card"
+            };
+    } else {
+      return {
+              TAG: /* Ok */0,
+              _0: {
+                TAG: /* InProgress */1,
+                _0: game
+              }
             };
     }
   } else {
     return {
             TAG: /* Error */1,
-            _0: "First made not by attacker"
+            _0: "Player don't have card"
           };
   }
 }
@@ -398,9 +392,10 @@ export {
   getTrump ,
   startGame ,
   isDefender ,
+  isAttacker ,
   isPlayerHasCard ,
   isCorrectAdditionalCard ,
-  isFirstMoveByAttacker ,
+  isFirstMove ,
   isValidMove ,
   move ,
   isValidPass ,
