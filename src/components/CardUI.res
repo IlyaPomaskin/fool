@@ -11,8 +11,12 @@ let suitToColor = (suit: suit) =>
 
 module CardUILocal = {
   @react.component
-  let make = (~className: string="", ~card: card, ()) => {
+  let make = (~className: string="", ~card: card, ~onClick: option<card => unit>=?, ()) => {
     <div
+      onClick={switch onClick {
+      | Some(fn) => _ => fn(card)
+      | None => _ => ()
+      }}
       className={cx([
         "relative w-12 h-16",
         "border rounded-md border-solid border-slate-500",
@@ -32,20 +36,27 @@ module CardUILocal = {
   }
 }
 
-let make = CardUILocal.make
+let make = (~className: string="", ~card: card, ~onClick: option<card => unit>=?, ()) => {
+  <CardUILocal className card onClick={onClick->Option.getWithDefault(noop)} />
+}
 
 @react.component
 let trump = (~suit: suit, ()) =>
   <div className={suitToColor(suit)}> {uiStr(Card.suitToString(suit))} </div>
 
 @react.component
-let deck = (~deck: deck) =>
+let deck = (~deck: deck, ~onCardClick: option<card => unit>=?, ()) =>
   switch deck {
   | list{} => <div> {uiStr("No cards in deck")} </div>
   | _ =>
     <div className="leading">
       {uiList(deck, card =>
-        <CardUILocal key={Card.cardToString(card)} className="inline-block mx-1" card={card} />
+        <CardUILocal
+          key={Card.cardToString(card)}
+          className="inline-block mx-1"
+          card={card}
+          onClick={Option.getWithDefault(onCardClick, noop)}
+        />
       )}
     </div>
   }
