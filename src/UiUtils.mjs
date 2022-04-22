@@ -17,10 +17,20 @@ function uiStr(text) {
   return text;
 }
 
+function noop(param) {
+  
+}
+
+function noop2(param, param$1) {
+  
+}
+
 export {
   cx ,
   uiList ,
   uiStr ,
+  noop ,
+  noop2 ,
   
 }
 /* No side effect */
