@@ -75,8 +75,17 @@ let isCorrectAdditionalCard = (game: inProgress, card: card) => {
   game.table->Card.getFlatTableCards->Belt.List.has(card, Utils.equals)
 }
 
+let isFirstMoveByAttacker = (game: inProgress, player: player) => {
+  let isFirstMove = List.length(game.table) === 0
+  let isAttacker = game.attacker == player
+
+  isFirstMove && isAttacker
+}
+
 let isValidMove = (game: inProgress, player: player, card: card) => {
-  if !isDefender(game, player) {
+  if !isFirstMoveByAttacker(game, player) {
+    Error("First made not by attacker")
+  } else if !isDefender(game, player) {
     Error("Player is not a defender")
   } else if !isPlayerHasCard(player, card) {
     Error("Player don't have card")
@@ -90,7 +99,7 @@ let isValidMove = (game: inProgress, player: player, card: card) => {
 let move = (game: inProgress, player: player, card: card): result<state, string> => {
   let isValid = isValidMove(game, player, card)
 
-  if !Result.isError(isValid) {
+  if Result.isError(isValid) {
     isValid
   } else {
     Ok(
@@ -100,6 +109,7 @@ let move = (game: inProgress, player: player, card: card): result<state, string>
           ...p,
           cards: Player.removeCard(p, card),
         }),
+        table: game.table->List.add((card, None)),
       }),
     )
   }

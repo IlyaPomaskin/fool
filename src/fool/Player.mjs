@@ -17,20 +17,21 @@ function make(login) {
 }
 
 function getNextPlayer(p, players) {
-  var playersCount = Belt_List.length(players);
-  var nonExistingPlayerIndex = playersCount + 1 | 0;
-  var foundPlayerIndex = Belt_List.reduceWithIndex(players, nonExistingPlayerIndex, (function (prev, item, index) {
+  var playersWithCards = Belt_List.keep(players, (function (p) {
+          return Belt_List.length(p.cards) !== 0;
+        }));
+  var foundPlayerIndex = Belt_List.reduceWithIndex(playersWithCards, -1, (function (prev, item, index) {
           if (item.id === p.id) {
             return index;
           } else {
             return prev;
           }
         }));
-  var nextPlayer = Belt_List.get(players, foundPlayerIndex);
+  var nextPlayer = Belt_List.get(playersWithCards, foundPlayerIndex + 1 | 0);
   if (nextPlayer !== undefined) {
     return nextPlayer;
   } else {
-    return Belt_List.get(players, 0);
+    return Belt_List.get(playersWithCards, 0);
   }
 }
 

@@ -7,19 +7,21 @@ let make = (login: playerId) => {
 }
 
 let getNextPlayer = (p: player, players: list<player>) => {
-  let playersCount = List.length(players)
-  let nonExistingPlayerIndex = playersCount + 1
-  let foundPlayerIndex = List.reduceWithIndex(players, nonExistingPlayerIndex, (
+  let playersWithCards = players->List.keep(p => List.length(p.cards) != 0)
+  let nonExistingPlayerIndex = -1
+  let foundPlayerIndex = playersWithCards->List.reduceWithIndex(nonExistingPlayerIndex, (
     prev,
     item,
     index,
-  ) => item.id === p.id ? index : prev)
+  ) => {
+    item.id === p.id ? index : prev
+  })
 
-  let nextPlayer = List.get(players, foundPlayerIndex)
+  let nextPlayer = List.get(playersWithCards, foundPlayerIndex + 1)
 
   switch nextPlayer {
-  | None => List.get(players, 0)
   | Some(_) => nextPlayer
+  | None => List.get(playersWithCards, 0)
   }
 }
 

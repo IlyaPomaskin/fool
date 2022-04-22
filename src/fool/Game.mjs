@@ -143,33 +143,50 @@ function isCorrectAdditionalCard(game, card) {
   return Belt_List.has(Card.getFlatTableCards(game.table), card, Utils.equals);
 }
 
+function isFirstMoveByAttacker(game, player) {
+  var isFirstMove = Belt_List.length(game.table) === 0;
+  var isAttacker = Caml_obj.caml_equal(game.attacker, player);
+  if (isFirstMove) {
+    return isAttacker;
+  } else {
+    return false;
+  }
+}
+
 function isValidMove(game, player, card) {
-  if (Caml_obj.caml_equal(game.defender, player)) {
-    if (isPlayerHasCard(player, card)) {
-      if (isCorrectAdditionalCard(game, card)) {
-        return {
-                TAG: /* Ok */0,
-                _0: {
-                  TAG: /* InProgress */1,
-                  _0: game
-                }
-              };
+  if (isFirstMoveByAttacker(game, player)) {
+    if (Caml_obj.caml_equal(game.defender, player)) {
+      if (isPlayerHasCard(player, card)) {
+        if (isCorrectAdditionalCard(game, card)) {
+          return {
+                  TAG: /* Ok */0,
+                  _0: {
+                    TAG: /* InProgress */1,
+                    _0: game
+                  }
+                };
+        } else {
+          return {
+                  TAG: /* Error */1,
+                  _0: "Incorrect card"
+                };
+        }
       } else {
         return {
                 TAG: /* Error */1,
-                _0: "Incorrect card"
+                _0: "Player don't have card"
               };
       }
     } else {
       return {
               TAG: /* Error */1,
-              _0: "Player don't have card"
+              _0: "Player is not a defender"
             };
     }
   } else {
     return {
             TAG: /* Error */1,
-            _0: "Player is not a defender"
+            _0: "First made not by attacker"
           };
   }
 }
@@ -177,6 +194,8 @@ function isValidMove(game, player, card) {
 function move(game, player, card) {
   var isValid = isValidMove(game, player, card);
   if (Belt_Result.isError(isValid)) {
+    return isValid;
+  } else {
     return {
             TAG: /* Ok */0,
             _0: {
@@ -193,13 +212,14 @@ function move(game, player, card) {
                       })),
                 trump: game.trump,
                 deck: game.deck,
-                table: game.table,
+                table: Belt_List.add(game.table, [
+                      card,
+                      undefined
+                    ]),
                 pass: game.pass
               }
             }
           };
-  } else {
-    return isValid;
   }
 }
 
@@ -380,6 +400,7 @@ export {
   isDefender ,
   isPlayerHasCard ,
   isCorrectAdditionalCard ,
+  isFirstMoveByAttacker ,
   isValidMove ,
   move ,
   isValidPass ,
