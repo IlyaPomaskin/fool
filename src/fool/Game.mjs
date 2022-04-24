@@ -3,8 +3,8 @@
 import * as Card from "./Card.mjs";
 import * as Utils from "./Utils.mjs";
 import * as Player from "./Player.mjs";
-import * as Caml_obj from "rescript/lib/es6/caml_obj.js";
 import * as Belt_List from "rescript/lib/es6/belt_List.js";
+import * as GameUtils from "./GameUtils.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Belt_Result from "rescript/lib/es6/belt_Result.js";
 
@@ -43,41 +43,11 @@ function enterGame(game, player) {
         };
 }
 
-function toggleReady(game, player) {
-  return {
-          TAG: /* InLobby */0,
-          _0: {
-            players: Utils.toggleArrayItem(game.players, player),
-            ready: game.ready
-          }
-        };
-}
-
-function lastListItem(list) {
-  return Belt_List.get(list, Belt_List.size(list) - 1 | 0);
-}
-
-function getTrump(deck, players) {
-  var lastCard = lastListItem(deck);
-  var lastPlayer = lastListItem(Belt_List.keep(players, (function (p) {
-              return Belt_List.length(p.cards) !== 0;
-            })));
-  if (lastCard !== undefined) {
-    return lastCard[0];
-  } else if (lastPlayer !== undefined) {
-    return Belt_Option.map(lastListItem(lastPlayer.cards), (function (prim) {
-                  return prim[0];
-                }));
-  } else {
-    return ;
-  }
-}
-
 function startGame(game) {
   var match = Player.dealDeckToPlayers(Card.makeShuffledDeck(undefined), game.players);
   var deck = match[1];
   var players = match[0];
-  var trump = Belt_Option.mapWithDefault(getTrump(deck, players), {
+  var trump = Belt_Option.mapWithDefault(GameUtils.getTrump(deck, players), {
         TAG: /* Error */1,
         _0: "No trump"
       }, Utils.makeOk);
@@ -131,39 +101,19 @@ function startGame(game) {
   }
 }
 
-function isDefender(game, player) {
-  return Caml_obj.caml_equal(game.defender, player);
-}
-
-function isAttacker(game, player) {
-  return Caml_obj.caml_equal(game.attacker, player);
-}
-
-function isPlayerHasCard(player, card) {
-  return Belt_List.has(player.cards, card, Utils.equals);
-}
-
-function isCorrectAdditionalCard(game, card) {
-  return Belt_List.has(Card.getFlatTableCards(game.table), card, Card.isCardEqualsByRank);
-}
-
-function isFirstMove(game) {
-  return Belt_List.length(game.table) === 0;
-}
-
 function isValidMove(game, player, card) {
-  if (Caml_obj.caml_equal(game.defender, player)) {
+  if (GameUtils.isDefender(game, player)) {
     return {
             TAG: /* Error */1,
             _0: "Defender can't make move"
           };
-  } else if (isFirstMove(game) && !Caml_obj.caml_equal(game.attacker, player)) {
+  } else if (GameUtils.isFirstMove(game) && !GameUtils.isAttacker(game, player)) {
     return {
             TAG: /* Error */1,
             _0: "First move made not by attacker"
           };
-  } else if (isPlayerHasCard(player, card)) {
-    if (!isFirstMove(game) && !isCorrectAdditionalCard(game, card)) {
+  } else if (GameUtils.isPlayerHasCard(player, card)) {
+    if (!GameUtils.isFirstMove(game) && !GameUtils.isCorrectAdditionalCard(game, card)) {
       return {
               TAG: /* Error */1,
               _0: "Incorrect card"
@@ -218,7 +168,7 @@ function move(game, player, card) {
 }
 
 function isValidPass(game, player) {
-  if (Caml_obj.caml_equal(game.defender, player)) {
+  if (GameUtils.isDefender(game, player)) {
     return {
             TAG: /* Error */1,
             _0: "Defender can't pass"
@@ -263,8 +213,8 @@ function pass(game, player) {
 }
 
 function isValidBeat(game, to, by, player) {
-  if (Caml_obj.caml_equal(game.defender, player)) {
-    if (isPlayerHasCard(player, by)) {
+  if (GameUtils.isDefender(game, player)) {
+    if (GameUtils.isPlayerHasCard(player, by)) {
       return {
               TAG: /* Error */1,
               _0: "Player dont have card"
@@ -334,7 +284,7 @@ function beat(game, to, by, player) {
 }
 
 function isValidTake(game, player) {
-  if (Caml_obj.caml_equal(game.defender, player)) {
+  if (GameUtils.isDefender(game, player)) {
     return {
             TAG: /* Error */1,
             _0: "Player is not defender"
@@ -361,7 +311,7 @@ function take(game, player) {
                 attacker: game.attacker,
                 defender: game.defender,
                 players: Belt_List.map(game.players, (function (p) {
-                        if (Caml_obj.caml_equal(game.defender, p)) {
+                        if (GameUtils.isDefender(game, p)) {
                           return {
                                   id: p.id,
                                   sessionId: p.sessionId,
@@ -387,15 +337,7 @@ export {
   makeGameInLobby ,
   logoutPlayer ,
   enterGame ,
-  toggleReady ,
-  lastListItem ,
-  getTrump ,
   startGame ,
-  isDefender ,
-  isAttacker ,
-  isPlayerHasCard ,
-  isCorrectAdditionalCard ,
-  isFirstMove ,
   isValidMove ,
   move ,
   isValidPass ,

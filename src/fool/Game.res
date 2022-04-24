@@ -1,4 +1,5 @@
 open Types
+open GameUtils
 
 let makeGameInLobby = (authorId: playerId) => InLobby({
   players: list{Player.make(authorId)},
@@ -14,24 +15,6 @@ let enterGame = (game: inLobby, player: player) => InLobby({
   ...game,
   players: List.add(game.players, player),
 })
-
-let toggleReady = (game: inLobby, player: player) => InLobby({
-  ...game,
-  players: Utils.toggleArrayItem(game.players, player),
-})
-
-let lastListItem = (list: list<'a>) => List.get(list, List.size(list) - 1)
-
-let getTrump = (deck: deck, players: list<player>) => {
-  let lastCard = lastListItem(deck)
-  let lastPlayer = lastListItem(players->List.keep(p => List.length(p.cards) != 0))
-
-  switch (lastCard, lastPlayer) {
-  | (Some(card), _) => Some(fst(card))
-  | (None, Some(player)) => Option.map(lastListItem(player.cards), fst)
-  | (None, None) => None
-  }
-}
 
 let startGame = (game: inLobby): result<state, string> => {
   let (players, deck) = Player.dealDeckToPlayers(Card.makeShuffledDeck(), game.players)
@@ -61,26 +44,6 @@ let startGame = (game: inLobby): result<state, string> => {
   | (_, Error(a), _) => Error(a)
   | (_, _, Error(a)) => Error(a)
   }
-}
-
-let isDefender = (game: inProgress, player: player) => {
-  game.defender == player
-}
-
-let isAttacker = (game: inProgress, player: player) => {
-  game.attacker == player
-}
-
-let isPlayerHasCard = (player: player, card: card) => {
-  List.has(player.cards, card, Utils.equals)
-}
-
-let isCorrectAdditionalCard = (game: inProgress, card: card) => {
-  game.table->Card.getFlatTableCards->List.has(card, Card.isCardEqualsByRank)
-}
-
-let isFirstMove = (game: inProgress) => {
-  List.length(game.table) === 0
 }
 
 let isValidMove = (game: inProgress, player: player, card: card) => {
