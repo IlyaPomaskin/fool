@@ -91,7 +91,7 @@ let pass = (game: inProgress, player: player) => {
 
   if Result.isError(isValid) {
     isValid
-  } else if isAllPassed(nextGameWithPassed) && isAllTableBeaten(nextGameWithPassed) {
+  } else if isAllPassed(nextGameWithPassed) && isAllTableBeaten(game) {
     let nextAttacker = Player.getNextPlayer(game.attacker, game.players)
     let nextDefender = nextAttacker->Option.flatMap(p => Player.getNextPlayer(p, game.players))
     let (nextPlayers, nextDeck) = Player.dealDeckToPlayers(game.deck, game.players)
@@ -131,9 +131,21 @@ let isValidBeat = (game: inProgress, to: card, by: card, player: player) => {
 let beat = (game: inProgress, to: card, by: card, player: player) => {
   let isValid = isValidBeat(game, to, by, player)
 
+  let nextGameWithBeaten = {
+    ...game,
+    table: game.table->List.map(((firstCard, secondCard)) => {
+      if Card.isCardEquals(firstCard, to) {
+        (firstCard, Some(by))
+      } else {
+        (firstCard, secondCard)
+      }
+    }),
+    players: List.map(game.players, p => {...p, cards: Player.removeCard(p, by)}),
+  }
+
   if Result.isError(isValid) {
     isValid
-  } else if isAllPassed(game) && isAllTableBeaten(game) {
+  } else if isAllPassed(game) && isAllTableBeaten(nextGameWithBeaten) {
     let nextAttacker = Player.getNextPlayer(game.attacker, game.players)
     let nextDefender = nextAttacker->Option.flatMap(p => Player.getNextPlayer(p, game.players))
     let (nextPlayers, nextDeck) = Player.dealDeckToPlayers(game.deck, game.players)
@@ -154,19 +166,7 @@ let beat = (game: inProgress, to: card, by: card, player: player) => {
     | _ => Error("Can't find next attacker/defender")
     }
   } else {
-    Ok(
-      InProgress({
-        ...game,
-        table: game.table->List.map(((firstCard, secondCard)) => {
-          if Card.isCardEquals(firstCard, to) {
-            (firstCard, Some(by))
-          } else {
-            (firstCard, secondCard)
-          }
-        }),
-        players: List.map(game.players, p => {...p, cards: Player.removeCard(p, by)}),
-      }),
-    )
+    Ok(InProgress(nextGameWithBeaten))
   }
 }
 
