@@ -16,18 +16,10 @@ function toggleArrayItem(list, item) {
   }
 }
 
-function makeOk(a) {
-  return {
-          TAG: /* Ok */0,
-          _0: a
-        };
-}
-
 var equals = Caml_obj.caml_equal;
 
 export {
   toggleArrayItem ,
-  makeOk ,
   equals ,
   
 }

@@ -47,56 +47,40 @@ function startGame(game) {
   var match = Player.dealDeckToPlayers(Card.makeShuffledDeck(undefined), game.players);
   var deck = match[1];
   var players = match[0];
-  var trump = Belt_Option.mapWithDefault(GameUtils.getTrump(deck, players), {
-        TAG: /* Error */1,
-        _0: "No trump"
-      }, Utils.makeOk);
-  var attacker = Belt_Result.flatMap(trump, (function (r) {
-          return Belt_Option.mapWithDefault(Player.findFirstAttacker(r, players), {
-                      TAG: /* Error */1,
-                      _0: "No attacker"
-                    }, Utils.makeOk);
+  var trump = GameUtils.getTrump(deck, players);
+  var attacker = Belt_Option.flatMap(trump, (function (tr) {
+          return Player.findFirstAttacker(tr, players);
         }));
-  var defender = Belt_Result.flatMap(attacker, (function (a) {
-          return Belt_Option.mapWithDefault(Player.getNextPlayer(a, players), {
-                      TAG: /* Error */1,
-                      _0: "No deffender"
-                    }, Utils.makeOk);
+  var defender = Belt_Option.flatMap(attacker, (function (at) {
+          return Player.getNextPlayer(at, players);
         }));
-  if (trump.TAG === /* Ok */0) {
-    if (attacker.TAG === /* Ok */0) {
-      if (defender.TAG === /* Ok */0) {
-        return {
-                TAG: /* Ok */0,
+  if (trump !== undefined) {
+    if (attacker !== undefined && defender !== undefined) {
+      return {
+              TAG: /* Ok */0,
+              _0: {
+                TAG: /* InProgress */1,
                 _0: {
-                  TAG: /* InProgress */1,
-                  _0: {
-                    attacker: attacker._0,
-                    defender: defender._0,
-                    players: players,
-                    trump: trump._0,
-                    deck: deck,
-                    table: /* [] */0,
-                    pass: /* [] */0
-                  }
+                  attacker: attacker,
+                  defender: defender,
+                  players: players,
+                  trump: trump,
+                  deck: deck,
+                  table: /* [] */0,
+                  pass: /* [] */0
                 }
-              };
-      } else {
-        return {
-                TAG: /* Error */1,
-                _0: defender._0
-              };
-      }
+              }
+            };
     } else {
       return {
               TAG: /* Error */1,
-              _0: attacker._0
+              _0: "Can't find next attacker/defender"
             };
     }
   } else {
     return {
             TAG: /* Error */1,
-            _0: trump._0
+            _0: "Can't find trump"
           };
   }
 }
@@ -107,13 +91,13 @@ function isValidMove(game, player, card) {
             TAG: /* Error */1,
             _0: "Defender can't make move"
           };
-  } else if (GameUtils.isFirstMove(game) && !GameUtils.isAttacker(game, player)) {
+  } else if (!GameUtils.isTableHasCards(game) && !GameUtils.isAttacker(game, player)) {
     return {
             TAG: /* Error */1,
             _0: "First move made not by attacker"
           };
   } else if (GameUtils.isPlayerHasCard(player, card)) {
-    if (!GameUtils.isFirstMove(game) && !GameUtils.isCorrectAdditionalCard(game, card)) {
+    if (GameUtils.isTableHasCards(game) && !GameUtils.isCorrectAdditionalCard(game, card)) {
       return {
               TAG: /* Error */1,
               _0: "Incorrect card"
@@ -184,7 +168,7 @@ function isValidPass(game, player) {
   } else {
     return {
             TAG: /* Error */1,
-            _0: "Player doesn't exists "
+            _0: "Player doesn't exists"
           };
   }
 }
@@ -192,6 +176,9 @@ function isValidPass(game, player) {
 function pass(game, player) {
   var isValid = isValidPass(game, player);
   if (Belt_Result.isError(isValid)) {
+    return isValid;
+  }
+  if (!(GameUtils.isAllPassed(game) && GameUtils.isAllTableBeaten(game))) {
     return {
             TAG: /* Ok */0,
             _0: {
@@ -203,12 +190,36 @@ function pass(game, player) {
                 trump: game.trump,
                 deck: game.deck,
                 table: game.table,
-                pass: Belt_List.add(game.pass, player)
+                pass: Utils.toggleArrayItem(game.pass, player)
+              }
+            }
+          };
+  }
+  var nextAttacker = Player.getNextPlayer(game.attacker, game.players);
+  var nextDefender = Belt_Option.flatMap(nextAttacker, (function (p) {
+          return Player.getNextPlayer(p, game.players);
+        }));
+  if (nextAttacker !== undefined && nextDefender !== undefined) {
+    return {
+            TAG: /* Ok */0,
+            _0: {
+              TAG: /* InProgress */1,
+              _0: {
+                attacker: nextAttacker,
+                defender: nextDefender,
+                players: game.players,
+                trump: game.trump,
+                deck: game.deck,
+                table: /* [] */0,
+                pass: /* [] */0
               }
             }
           };
   } else {
-    return isValid;
+    return {
+            TAG: /* Error */1,
+            _0: "Can't find next attacker/defender"
+          };
   }
 }
 
@@ -244,6 +255,8 @@ function isValidBeat(game, to, by, player) {
 function beat(game, to, by, player) {
   var isValid = isValidBeat(game, to, by, player);
   if (Belt_Result.isError(isValid)) {
+    return isValid;
+  } else {
     return {
             TAG: /* Ok */0,
             _0: {
@@ -278,24 +291,29 @@ function beat(game, to, by, player) {
               }
             }
           };
-  } else {
-    return isValid;
   }
 }
 
 function isValidTake(game, player) {
   if (GameUtils.isDefender(game, player)) {
+    if (GameUtils.isTableHasCards(game)) {
+      return {
+              TAG: /* Ok */0,
+              _0: {
+                TAG: /* InProgress */1,
+                _0: game
+              }
+            };
+    } else {
+      return {
+              TAG: /* Error */1,
+              _0: "Table is empty"
+            };
+    }
+  } else {
     return {
             TAG: /* Error */1,
             _0: "Player is not defender"
-          };
-  } else {
-    return {
-            TAG: /* Ok */0,
-            _0: {
-              TAG: /* InProgress */1,
-              _0: game
-            }
           };
   }
 }
@@ -303,13 +321,20 @@ function isValidTake(game, player) {
 function take(game, player) {
   var isValid = isValidTake(game, player);
   if (Belt_Result.isError(isValid)) {
+    return isValid;
+  }
+  var nextAttacker = Player.getNextPlayer(game.defender, game.players);
+  var nextDefender = Belt_Option.flatMap(nextAttacker, (function (p) {
+          return Player.getNextPlayer(p, game.players);
+        }));
+  if (nextAttacker !== undefined && nextDefender !== undefined) {
     return {
             TAG: /* Ok */0,
             _0: {
               TAG: /* InProgress */1,
               _0: {
-                attacker: game.attacker,
-                defender: game.defender,
+                attacker: nextAttacker,
+                defender: nextDefender,
                 players: Belt_List.map(game.players, (function (p) {
                         if (GameUtils.isDefender(game, p)) {
                           return {
@@ -324,12 +349,15 @@ function take(game, player) {
                 trump: game.trump,
                 deck: game.deck,
                 table: /* [] */0,
-                pass: game.pass
+                pass: /* [] */0
               }
             }
           };
   } else {
-    return isValid;
+    return {
+            TAG: /* Error */1,
+            _0: "Can't find next attacker/defender"
+          };
   }
 }
 

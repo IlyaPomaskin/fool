@@ -111,3 +111,5 @@ let rankToString = (rank: rank) => {
 }
 
 let cardToString = ((s, r): card) => suitToString(s) ++ " " ++ rankToString(r)
+
+let isDeckEmpty = (deck: deck) => List.length(deck) === 0

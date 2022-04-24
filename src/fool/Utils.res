@@ -8,6 +8,4 @@ let toggleArrayItem = (list: list<'a>, item: 'a): list<'a> => {
   }
 }
 
-let makeOk = (a: 'a) => Belt.Result.Ok(a)
-
 let equals = (a: 'a, b: 'b) => a == b

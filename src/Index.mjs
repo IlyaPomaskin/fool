@@ -34,17 +34,17 @@ function $$default(p) {
         
       });
   var setError = match$1[1];
-  var handleGameChange = function (a) {
-    if (a.TAG === /* Ok */0) {
-      var nextG = a._0;
+  var handleGameChange = function (game) {
+    if (game.TAG === /* Ok */0) {
+      var game$1 = game._0;
       Curry._1(nextGame, (function (param) {
-              return nextG;
+              return game$1;
             }));
       return Curry._1(setError, (function (param) {
                     
                   }));
     }
-    var err = a._0;
+    var err = game._0;
     return Curry._1(setError, (function (param) {
                   return err;
                 }));
@@ -66,9 +66,6 @@ function $$default(p) {
       
     }
   };
-  if (game.TAG !== /* InLobby */0) {
-    console.log(game._0);
-  }
   if (game.TAG === /* InLobby */0) {
     return React.createElement("div", undefined, UiUtils.uiStr("In lobby"));
   } else {

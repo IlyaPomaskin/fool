@@ -12,10 +12,10 @@ let default = (p: props) => {
   let (game, nextGame) = React.useState(() => p.inProgress)
   let (error, setError) = React.useState(() => None)
 
-  let handleGameChange = (a: result<state, string>) => {
-    switch a {
-    | Ok(nextG) => {
-        nextGame(_ => nextG)
+  let handleGameChange = (game: result<state, string>) => {
+    switch game {
+    | Ok(game) => {
+        nextGame(_ => game)
         setError(_ => None)
       }
     | Error(err) => setError(_ => Some(err))
@@ -36,13 +36,7 @@ let default = (p: props) => {
   }
 
   switch game {
-  | InProgress(g) => Js.log(g)
-  | _ => ()
-  }
-
-  switch game {
-  | InProgress(g) =>
-    <div>
+  | InProgress(g) => <div>
       <GameUI.InProgressUI game={g} onMove={handleMove} />
       <div>
         {error

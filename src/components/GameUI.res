@@ -18,22 +18,57 @@ module InLobbyUI = {
     </div>
 }
 
+module Button = {
+  @react.component
+  let make = (
+    ~disabled: bool=false,
+    ~className: string="",
+    ~onClick: ReactEvent.Mouse.t => unit=noop,
+    ~children: React.element,
+  ) => {
+    <button
+      disabled
+      className={cx([
+        className,
+        "p-1 border rounded-md border-solid border-slate-500",
+        disabled ? "border-slate-400 text-slate-400 cursor-not-allowed" : "",
+      ])}
+      onClick>
+      children
+    </button>
+  }
+}
+
 module ClientUI = {
   @react.component
   let make = (~className: string="", ~player: player, ~game: inProgress, ~onMove: move => unit) => {
+    let handleMove = (card: card) => {
+      onMove(Move(player, card))
+    }
+
     <div className={cx([className, "p-1 border rounded-md border-solid border-slate-500"])}>
-      <div> {uiStr("Current player:")} <PlayerUI.Short player /> </div>
-      <br />
-      <div>
-        {game.players->uiList(p =>
-          <div key={p.sessionId}>
-            <PlayerUI.Short player={p} /> {uiStr("Cards: " ++ p.cards->List.length->string_of_int)}
-          </div>
-        )}
+      <div className="mb-1">
+        {uiStr("Player: ")} <PlayerUI.Short className="inline-block" player />
       </div>
-      <div className="my-2"> <CardUI.table table={game.table} /> </div>
-      <br />
-      <CardUI.deck disabled={GameUtils.isPlayerCanMove(game, player)} deck={player.cards} />
+      {switch GameUtils.isPlayerDone(game, player) {
+      | true => uiStr("Done!")
+      | false =>
+        <CardUI.deck
+          className="mt-1"
+          disabled={!GameUtils.isPlayerCanMove(game, player)}
+          deck={player.cards}
+          onCardClick={handleMove}
+        />
+      }}
+      <Button
+        disabled={!GameUtils.isCanPass(game, player)}
+        className="mr-1"
+        onClick={_ => onMove(Pass(player))}>
+        {uiStr("pass " ++ string_of_bool(GameUtils.isPassed(game, player)))}
+      </Button>
+      <Button disabled={!GameUtils.isCanTake(game, player)} onClick={_ => onMove(Take(player))}>
+        {uiStr("take")}
+      </Button>
     </div>
   }
 }
@@ -48,12 +83,25 @@ module InProgressUI = {
       <div>
         {uiStr("Defender: ")} <PlayerUI.Short className="inline-block" player={game.defender} />
       </div>
+      <div>
+        {game.players->uiList(p =>
+          <div key={p.id}>
+            <PlayerUI.Short className="inline-block" player={p} />
+            {uiStr(" Cards: " ++ p.cards->List.length->string_of_int)}
+            {uiStr(GameUtils.isPassed(game, p) ? " pass" : "")}
+            {uiStr(GameUtils.isAttacker(game, p) ? " ATT" : "")}
+            {uiStr(GameUtils.isDefender(game, p) ? " DEF" : "")}
+          </div>
+        )}
+      </div>
       <div> {uiStr("Trump: ")} <CardUI.trump className="inline-block" suit={game.trump} /> </div>
       <div> {uiStr("Deck: " ++ game.deck->List.length->string_of_int)} </div>
       <div className="my-2"> {uiStr("Table:")} <CardUI.table table={game.table} /> </div>
       <div className="flex flex-wrap">
         {game.players->uiList(p =>
-          <ClientUI className="m-1 flex-initial w-96" player={p} game={game} onMove={onMove} />
+          <ClientUI
+            key={p.id} className="m-1 flex-initial w-96" player={p} game={game} onMove={onMove}
+          />
         )}
       </div>
     </div>

@@ -235,6 +235,10 @@ function cardToString(param) {
   return suitToString(param[0]) + " " + rankToString(param[1]);
 }
 
+function isDeckEmpty(deck) {
+  return Belt_List.length(deck) === 0;
+}
+
 export {
   suitsList ,
   ranksList ,
@@ -256,6 +260,7 @@ export {
   suitToString ,
   rankToString ,
   cardToString ,
+  isDeckEmpty ,
   
 }
 /* No side effect */

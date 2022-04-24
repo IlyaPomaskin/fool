@@ -22,15 +22,19 @@ function isCorrectAdditionalCard(game, card) {
   return Belt_List.has(Card.getFlatTableCards(game.table), card, Card.isCardEqualsByRank);
 }
 
-function isFirstMove(game) {
-  return Belt_List.length(game.table) === 0;
+function isTableHasCards(game) {
+  return Belt_List.length(game.table) > 0;
 }
 
 function isPlayerCanMove(game, player) {
-  if (isFirstMove(game)) {
-    return Caml_obj.caml_equal(game.attacker, player);
+  if (isTableHasCards(game)) {
+    if (Caml_obj.caml_equal(game.defender, player)) {
+      return false;
+    } else {
+      return true;
+    }
   } else {
-    return false;
+    return Caml_obj.caml_equal(game.attacker, player);
   }
 }
 
@@ -64,16 +68,73 @@ function getTrump(deck, players) {
   }
 }
 
+function isAllTableBeaten(game) {
+  var isBeaten = Belt_List.every(game.table, (function (param) {
+          return Belt_Option.isSome(param[1]);
+        }));
+  if (isTableHasCards(game)) {
+    return isBeaten;
+  } else {
+    return false;
+  }
+}
+
+function isPlayerDone(game, player) {
+  if (Card.isDeckEmpty(game.deck)) {
+    return Card.isDeckEmpty(player.cards);
+  } else {
+    return false;
+  }
+}
+
+function isCanTake(game, player) {
+  if (Caml_obj.caml_equal(game.defender, player) && isTableHasCards(game)) {
+    return !isAllTableBeaten(game);
+  } else {
+    return false;
+  }
+}
+
+function isCanPass(game, player) {
+  if (isTableHasCards(game)) {
+    return !Caml_obj.caml_equal(game.defender, player);
+  } else {
+    return false;
+  }
+}
+
+function isPassed(game, player) {
+  var inPassedList = Belt_List.has(game.pass, player, Utils.equals);
+  var hasCards = Card.isDeckEmpty(player.cards);
+  if (inPassedList) {
+    return true;
+  } else {
+    return !hasCards;
+  }
+}
+
+function isAllPassed(game) {
+  return Belt_List.every(game.players, (function (param) {
+                return isPassed(game, param);
+              }));
+}
+
 export {
   isDefender ,
   isAttacker ,
   isPlayerHasCard ,
   isCorrectAdditionalCard ,
-  isFirstMove ,
+  isTableHasCards ,
   isPlayerCanMove ,
   toggleReady ,
   lastListItem ,
   getTrump ,
+  isAllTableBeaten ,
+  isPlayerDone ,
+  isCanTake ,
+  isCanPass ,
+  isPassed ,
+  isAllPassed ,
   
 }
 /* No side effect */

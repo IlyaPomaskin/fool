@@ -71,12 +71,17 @@ function CardUI$trump(Props) {
 
 function CardUI$deck(Props) {
   var deck = Props.deck;
+  var classNameOpt = Props.className;
   var disabledOpt = Props.disabled;
   var onCardClick = Props.onCardClick;
+  var className = classNameOpt !== undefined ? classNameOpt : "";
   var disabled = disabledOpt !== undefined ? disabledOpt : false;
   if (deck) {
     return React.createElement("div", {
-                className: "leading"
+                className: UiUtils.cx([
+                      className,
+                      "leading"
+                    ])
               }, UiUtils.uiList(deck, (function (card) {
                       return React.createElement(CardUI$CardUILocal, {
                                   className: "inline-block mx-1",
@@ -87,7 +92,9 @@ function CardUI$deck(Props) {
                                 });
                     })));
   } else {
-    return React.createElement("div", undefined, UiUtils.uiStr("No cards in deck"));
+    return React.createElement("div", {
+                className: className
+              }, UiUtils.uiStr("No cards in deck"));
   }
 }
 

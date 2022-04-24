@@ -48,11 +48,17 @@ let trump = (~suit: suit, ~className: string="", ()) =>
   <div className={cx([className, suitToColor(suit)])}> {uiStr(Card.suitToString(suit))} </div>
 
 @react.component
-let deck = (~deck: deck, ~disabled: bool=false, ~onCardClick: option<card => unit>=?, ()) =>
+let deck = (
+  ~deck: deck,
+  ~className: string="",
+  ~disabled: bool=false,
+  ~onCardClick: option<card => unit>=?,
+  (),
+) =>
   switch deck {
-  | list{} => <div> {uiStr("No cards in deck")} </div>
+  | list{} => <div className> {uiStr("No cards in deck")} </div>
   | _ =>
-    <div className="leading">
+    <div className={cx([className, "leading"])}>
       {uiList(deck, card =>
         <CardUILocal
           key={Card.cardToString(card)}
