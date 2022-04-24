@@ -152,12 +152,7 @@ function move(game, player, card) {
 }
 
 function isValidPass(game, player) {
-  if (GameUtils.isDefender(game, player)) {
-    return {
-            TAG: /* Error */1,
-            _0: "Defender can't pass"
-          };
-  } else if (Player.isPlayerExists(game.players, player)) {
+  if (GameUtils.isCanPass(game, player)) {
     return {
             TAG: /* Ok */0,
             _0: {
@@ -168,7 +163,7 @@ function isValidPass(game, player) {
   } else {
     return {
             TAG: /* Error */1,
-            _0: "Player doesn't exists"
+            _0: "Can't pass"
           };
   }
 }

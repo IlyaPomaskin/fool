@@ -3,24 +3,22 @@
 import * as Caml_obj from "rescript/lib/es6/caml_obj.js";
 import * as Belt_List from "rescript/lib/es6/belt_List.js";
 
+var equals = Caml_obj.caml_equal;
+
 function toggleArrayItem(list, item) {
-  var hasItem = Belt_List.has(list, item, (function (first, second) {
-          return first === second;
-        }));
+  var hasItem = Belt_List.has(list, item, equals);
   if (hasItem) {
     return Belt_List.keep(list, (function (i) {
-                  return i !== item;
+                  return !Caml_obj.caml_equal(i, item);
                 }));
   } else {
     return Belt_List.add(list, item);
   }
 }
 
-var equals = Caml_obj.caml_equal;
-
 export {
-  toggleArrayItem ,
   equals ,
+  toggleArrayItem ,
   
 }
 /* No side effect */

@@ -105,11 +105,11 @@ function isCanPass(game, player) {
 
 function isPassed(game, player) {
   var inPassedList = Belt_List.has(game.pass, player, Utils.equals);
-  var hasCards = Card.isDeckEmpty(player.cards);
-  if (inPassedList) {
-    return true;
+  var hasCards = !Card.isDeckEmpty(player.cards);
+  if (hasCards) {
+    return inPassedList;
   } else {
-    return !hasCards;
+    return true;
   }
 }
 

@@ -75,10 +75,8 @@ let move = (game: inProgress, player: player, card: card): result<state, string>
 }
 
 let isValidPass = (game: inProgress, player: player) => {
-  if isDefender(game, player) {
-    Error("Defender can't pass")
-  } else if !Player.isPlayerExists(game.players, player) {
-    Error("Player doesn't exists")
+  if !GameUtils.isCanPass(game, player) {
+    Error("Can't pass")
   } else {
     Ok(InProgress(game))
   }

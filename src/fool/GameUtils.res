@@ -62,14 +62,15 @@ let isCanTake = (game: inProgress, player: player) => {
   isDefender(game, player) && isTableHasCards(game) && !isAllTableBeaten(game)
 }
 
-let isCanPass = (game: inProgress, player: player) =>
+let isCanPass = (game: inProgress, player: player) => {
   isTableHasCards(game) && !isDefender(game, player)
+}
 
 let isPassed = (game: inProgress, player: player) => {
   let inPassedList = game.pass->List.has(player, Utils.equals)
-  let hasCards = player.cards->Card.isDeckEmpty
+  let hasCards = !Card.isDeckEmpty(player.cards)
 
-  inPassedList || !hasCards
+  hasCards ? inPassedList : true
 }
 
 let isAllPassed = (game: inProgress) => {
