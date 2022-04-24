@@ -12,7 +12,7 @@ function PlayerUI$Short(Props) {
               className: className
             }, React.createElement("span", {
                   className: "font-bold"
-                }, UiUtils.uiStr(player.id)), UiUtils.uiStr(" (" + player.sessionId + ")"));
+                }, UiUtils.uiStr(player.id)));
 }
 
 var Short = {

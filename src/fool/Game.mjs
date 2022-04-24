@@ -221,22 +221,24 @@ function pass(game, player) {
 function isValidBeat(game, to, by, player) {
   if (GameUtils.isDefender(game, player)) {
     if (GameUtils.isPlayerHasCard(player, by)) {
+      if (Card.isValidTableBeat(to, by, game.trump)) {
+        return {
+                TAG: /* Error */1,
+                _0: "Invalid card beat"
+              };
+      } else {
+        return {
+                TAG: /* Ok */0,
+                _0: {
+                  TAG: /* InProgress */1,
+                  _0: game
+                }
+              };
+      }
+    } else {
       return {
               TAG: /* Error */1,
               _0: "Player dont have card"
-            };
-    } else if (Card.isValidTableBeat(to, by, game.trump)) {
-      return {
-              TAG: /* Error */1,
-              _0: "Wrong card to beat"
-            };
-    } else {
-      return {
-              TAG: /* Ok */0,
-              _0: {
-                TAG: /* InProgress */1,
-                _0: game
-              }
             };
     }
   } else {

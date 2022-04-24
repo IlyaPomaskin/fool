@@ -22,6 +22,7 @@ module Button = {
   @react.component
   let make = (
     ~disabled: bool=false,
+    ~pressed: bool=false,
     ~className: string="",
     ~onClick: ReactEvent.Mouse.t => unit=noop,
     ~children: React.element,
@@ -30,8 +31,11 @@ module Button = {
       disabled
       className={cx([
         className,
-        "p-1 border rounded-md border-solid border-slate-500",
-        disabled ? "border-slate-400 text-slate-400 cursor-not-allowed" : "",
+        "p-1 border rounded-md border-solid border-slate-500 bg-slate-100 shadow-sm hover:shadow-md",
+        pressed ? selected : "",
+        disabled
+          ? "border-slate-400 text-slate-400 cursor-not-allowed shadow-none hover:shadow-none"
+          : "",
       ])}
       onClick>
       children
@@ -42,9 +46,26 @@ module Button = {
 module ClientUI = {
   @react.component
   let make = (~className: string="", ~player: player, ~game: inProgress, ~onMove: move => unit) => {
+    let ((toBeat, beatBy), setBeat) = React.useState(() => (None, None))
+    let handleBeat = (isToCard: bool, card: card) => {
+      setBeat(((toBeat, beatBy)) => {
+        if isToCard {
+          let isSame = toBeat->Option.map(Utils.equals(card))->Option.getWithDefault(false)
+
+          isSame ? (None, beatBy) : (Some(card), beatBy)
+        } else {
+          let isSame = beatBy->Option.map(Utils.equals(card))->Option.getWithDefault(false)
+
+          isSame ? (toBeat, None) : (toBeat, Some(card))
+        }
+      })
+    }
+
     let handleMove = (card: card) => {
       onMove(Move(player, card))
     }
+
+    let isDef = GameUtils.isDefender(game, player)
 
     <div className={cx([className, "p-1 border rounded-md border-solid border-slate-500"])}>
       <div className="mb-1">
@@ -53,22 +74,60 @@ module ClientUI = {
       {switch GameUtils.isPlayerDone(game, player) {
       | true => uiStr("Done!")
       | false =>
-        <CardUI.deck
-          className="mt-1"
-          disabled={!GameUtils.isPlayerCanMove(game, player)}
-          deck={player.cards}
-          onCardClick={handleMove}
-        />
+        <div>
+          {switch isDef {
+          | true =>
+            <CardUI.table
+              isCardSelected={card =>
+                toBeat->Option.map(Utils.equals(card))->Option.getWithDefault(false)}
+              isCardDisabled={to =>
+                switch beatBy {
+                | Some(by) => Card.isValidTableBeat(to, by, game.trump)
+                | _ => false
+                }}
+              className="my-1"
+              table={game.table}
+              onCardClick={handleBeat(true)}
+            />
+          | false => React.null
+          }}
+          <CardUI.deck
+            className="mt-1"
+            disabled={isDef
+              ? !GameUtils.isTableHasCards(game)
+              : !GameUtils.isPlayerCanMove(game, player)}
+            isCardSelected={card =>
+              beatBy->Option.map(Utils.equals(card))->Option.getWithDefault(false)}
+            isCardDisabled={by =>
+              switch beatBy {
+              | Some(to) => Card.isValidTableBeat(to, by, game.trump)
+              | _ => false
+              }}
+            deck={player.cards}
+            onCardClick={isDef ? handleBeat(false) : handleMove}
+          />
+        </div>
       }}
-      <Button
-        disabled={!GameUtils.isCanPass(game, player)}
-        className="mr-1"
-        onClick={_ => onMove(Pass(player))}>
-        {uiStr("pass " ++ string_of_bool(GameUtils.isPassed(game, player)))}
-      </Button>
-      <Button disabled={!GameUtils.isCanTake(game, player)} onClick={_ => onMove(Take(player))}>
-        {uiStr("take")}
-      </Button>
+      <div className="grid grid-flow-col gap-1">
+        <Button
+          disabled={!GameUtils.isCanPass(game, player)}
+          pressed={GameUtils.isPassed(game, player)}
+          onClick={_ => onMove(Pass(player))}>
+          {uiStr("pass")}
+        </Button>
+        <Button disabled={!GameUtils.isCanTake(game, player)} onClick={_ => onMove(Take(player))}>
+          {uiStr("take")}
+        </Button>
+        <Button
+          disabled={!isDef || Option.isNone(toBeat) || Option.isNone(beatBy)}
+          onClick={_ =>
+            switch (toBeat, beatBy) {
+            | (Some(to), Some(by)) => onMove(Beat(player, to, by))
+            | _ => ()
+            }}>
+          {uiStr("beat")}
+        </Button>
+      </div>
     </div>
   }
 }

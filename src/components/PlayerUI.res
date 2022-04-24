@@ -6,7 +6,7 @@ module Short = {
   let make = (~className: string="", ~player: player) =>
     <div className>
       <span className="font-bold"> {uiStr(player.id)} </span>
-      {uiStr(" (" ++ player.sessionId ++ ")")}
+      // {uiStr(" (" ++ player.sessionId ++ ")")}
     </div>
 }
 

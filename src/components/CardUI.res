@@ -14,6 +14,7 @@ module CardUILocal = {
   let make = (
     ~className: string="",
     ~disabled: bool=false,
+    ~selected: bool=false,
     ~card: card,
     ~onClick: card => unit=noop,
     (),
@@ -25,6 +26,7 @@ module CardUILocal = {
         "border rounded-md border-solid border-slate-500",
         "cursor-pointer select-none",
         disabled ? "text-slate-300 border-slate-400" : suitToColor(fst(card)),
+        selected ? UiUtils.selected : UiUtils.unselected,
         className,
       ])}>
       <div className="absolute text-[18px] leading-[18px] inset-1">
@@ -52,6 +54,8 @@ let deck = (
   ~deck: deck,
   ~className: string="",
   ~disabled: bool=false,
+  ~isCardSelected: card => bool=_ => false,
+  ~isCardDisabled: card => bool=_ => false,
   ~onCardClick: option<card => unit>=?,
   (),
 ) =>
@@ -59,12 +63,13 @@ let deck = (
   | list{} => <div className> {uiStr("No cards in deck")} </div>
   | _ =>
     <div className={cx([className, "leading"])}>
-      {uiList(deck, card =>
+      {deck->uiList(card =>
         <CardUILocal
           key={Card.cardToString(card)}
+          selected={isCardSelected(card)}
           className="inline-block mx-1"
           card={card}
-          disabled
+          disabled={disabled || isCardDisabled(card)}
           onClick={Option.getWithDefault(onCardClick, noop)}
         />
       )}
@@ -72,8 +77,14 @@ let deck = (
   }
 
 @react.component
-let table = (~table: table) =>
-  <div>
+let table = (
+  ~className: string="",
+  ~isCardSelected: card => bool=_ => false,
+  ~isCardDisabled: card => bool=_ => false,
+  ~table: table,
+  ~onCardClick: card => unit=noop,
+) =>
+  <div className>
     {switch table {
     | list{} => uiStr("Table empty")
     | _ =>
@@ -81,10 +92,15 @@ let table = (~table: table) =>
         <div
           className="inline-block mx-1"
           key={Card.cardToString(to) ++
-          Option.getWithDefault(Option.map(by, Card.cardToString), "a")}>
-          <CardUILocal card={to} />
+          by->Option.map(Card.cardToString)->Option.getWithDefault("")}>
+          <CardUILocal
+            selected={isCardSelected(to)}
+            card={to}
+            disabled={Option.isSome(by) || isCardDisabled(to)}
+            onClick={onCardClick}
+          />
           {switch by {
-          | Some(byCard) => <CardUILocal card={byCard} />
+          | Some(byCard) => <CardUILocal disabled={Option.isSome(by)} card={byCard} />
           | None => <div> {uiStr("None")} </div>
           }}
         </div>

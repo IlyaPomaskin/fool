@@ -7,3 +7,7 @@ let uiStr = (text: string) => React.string(text)
 let noop = (_: 'a) => ()
 
 let noop2 = (_: 'a, _: 'a1) => ()
+
+let selected = "bg-slate-400"
+
+let unselected = ""

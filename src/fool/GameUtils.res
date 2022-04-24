@@ -9,6 +9,7 @@ let isAttacker = (game: inProgress, player: player) => {
 }
 
 let isPlayerHasCard = (player: player, card: card) => {
+  Js.log4("isPlayerHasCard", List.has(player.cards, card, Utils.equals), player.cards, card)
   List.has(player.cards, card, Utils.equals)
 }
 

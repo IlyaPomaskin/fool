@@ -25,12 +25,18 @@ function noop2(param, param$1) {
   
 }
 
+var selected = "bg-slate-400";
+
+var unselected = "";
+
 export {
   cx ,
   uiList ,
   uiStr ,
   noop ,
   noop2 ,
+  selected ,
+  unselected ,
   
 }
 /* No side effect */

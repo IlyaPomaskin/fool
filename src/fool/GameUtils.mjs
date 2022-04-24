@@ -15,6 +15,7 @@ function isAttacker(game, player) {
 }
 
 function isPlayerHasCard(player, card) {
+  console.log("isPlayerHasCard", Belt_List.has(player.cards, card, Utils.equals), player.cards, card);
   return Belt_List.has(player.cards, card, Utils.equals);
 }
 

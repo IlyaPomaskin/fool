@@ -21,10 +21,12 @@ function suitToColor(suit) {
 function CardUI$CardUILocal(Props) {
   var classNameOpt = Props.className;
   var disabledOpt = Props.disabled;
+  var selectedOpt = Props.selected;
   var card = Props.card;
   var onClickOpt = Props.onClick;
   var className = classNameOpt !== undefined ? classNameOpt : "";
   var disabled = disabledOpt !== undefined ? disabledOpt : false;
+  var selected = selectedOpt !== undefined ? selectedOpt : false;
   var onClick = onClickOpt !== undefined ? onClickOpt : UiUtils.noop;
   return React.createElement("div", {
               className: UiUtils.cx([
@@ -32,6 +34,7 @@ function CardUI$CardUILocal(Props) {
                     "border rounded-md border-solid border-slate-500",
                     "cursor-pointer select-none",
                     disabled ? "text-slate-300 border-slate-400" : suitToColor(card[0]),
+                    selected ? UiUtils.selected : UiUtils.unselected,
                     className
                   ]),
               onClick: disabled ? UiUtils.noop : (function (param) {
@@ -73,9 +76,17 @@ function CardUI$deck(Props) {
   var deck = Props.deck;
   var classNameOpt = Props.className;
   var disabledOpt = Props.disabled;
+  var isCardSelectedOpt = Props.isCardSelected;
+  var isCardDisabledOpt = Props.isCardDisabled;
   var onCardClick = Props.onCardClick;
   var className = classNameOpt !== undefined ? classNameOpt : "";
   var disabled = disabledOpt !== undefined ? disabledOpt : false;
+  var isCardSelected = isCardSelectedOpt !== undefined ? isCardSelectedOpt : (function (param) {
+        return false;
+      });
+  var isCardDisabled = isCardDisabledOpt !== undefined ? isCardDisabledOpt : (function (param) {
+        return false;
+      });
   if (deck) {
     return React.createElement("div", {
                 className: UiUtils.cx([
@@ -85,7 +96,8 @@ function CardUI$deck(Props) {
               }, UiUtils.uiList(deck, (function (card) {
                       return React.createElement(CardUI$CardUILocal, {
                                   className: "inline-block mx-1",
-                                  disabled: disabled,
+                                  disabled: disabled || Curry._1(isCardDisabled, card),
+                                  selected: Curry._1(isCardSelected, card),
                                   card: card,
                                   onClick: Belt_Option.getWithDefault(onCardClick, UiUtils.noop),
                                   key: Card.cardToString(card)
@@ -99,16 +111,34 @@ function CardUI$deck(Props) {
 }
 
 function CardUI$table(Props) {
+  var classNameOpt = Props.className;
+  var isCardSelectedOpt = Props.isCardSelected;
+  var isCardDisabledOpt = Props.isCardDisabled;
   var table = Props.table;
-  return React.createElement("div", undefined, table ? UiUtils.uiList(table, (function (param) {
+  var onCardClickOpt = Props.onCardClick;
+  var className = classNameOpt !== undefined ? classNameOpt : "";
+  var isCardSelected = isCardSelectedOpt !== undefined ? isCardSelectedOpt : (function (param) {
+        return false;
+      });
+  var isCardDisabled = isCardDisabledOpt !== undefined ? isCardDisabledOpt : (function (param) {
+        return false;
+      });
+  var onCardClick = onCardClickOpt !== undefined ? onCardClickOpt : UiUtils.noop;
+  return React.createElement("div", {
+              className: className
+            }, table ? UiUtils.uiList(table, (function (param) {
                       var by = param[1];
                       var to = param[0];
                       return React.createElement("div", {
-                                  key: Card.cardToString(to) + Belt_Option.getWithDefault(Belt_Option.map(by, Card.cardToString), "a"),
+                                  key: Card.cardToString(to) + Belt_Option.getWithDefault(Belt_Option.map(by, Card.cardToString), ""),
                                   className: "inline-block mx-1"
                                 }, React.createElement(CardUI$CardUILocal, {
-                                      card: to
+                                      disabled: Belt_Option.isSome(by) || Curry._1(isCardDisabled, to),
+                                      selected: Curry._1(isCardSelected, to),
+                                      card: to,
+                                      onClick: onCardClick
                                     }), by !== undefined ? React.createElement(CardUI$CardUILocal, {
+                                        disabled: Belt_Option.isSome(by),
                                         card: by
                                       }) : React.createElement("div", undefined, UiUtils.uiStr("None")));
                     })) : UiUtils.uiStr("Table empty"));

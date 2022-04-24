@@ -117,10 +117,10 @@ let pass = (game: inProgress, player: player) => {
 let isValidBeat = (game: inProgress, to: card, by: card, player: player) => {
   if !isDefender(game, player) {
     Error("Is not deffender")
-  } else if isPlayerHasCard(player, by) {
+  } else if !isPlayerHasCard(player, by) {
     Error("Player dont have card")
   } else if Card.isValidTableBeat(to, by, game.trump) {
-    Error("Wrong card to beat")
+    Error("Invalid card beat")
   } else {
     Ok(InProgress(game))
   }
