@@ -39,14 +39,14 @@ let findFirstAttacker = (trump: suit, players: list<player>) => {
 }
 
 let dealToPlayer = (deck: deck, player: player) => {
-  let requiredCardsAmount = max(0, 5 - List.length(player.cards))
+  let requiredCardsAmount = max(0, 6 - List.length(player.cards))
   let (playerCards, nextDeck) = Card.dealCards(requiredCardsAmount, deck)
 
-  ({...player, cards: playerCards}, nextDeck)
+  ({...player, cards: List.concat(player.cards, playerCards)}, nextDeck)
 }
 
 let dealDeckToPlayers = (deck: deck, players: list<player>) => {
-  let (nextPlayers, nextDeck) = List.reduce(players, ([], deck), (
+  let (nextPlayers, nextDeck) = players->List.reduce(([], deck), (
     (accPlayers, accDeck),
     player,
   ) => {

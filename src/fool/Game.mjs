@@ -170,23 +170,31 @@ function isValidPass(game, player) {
 
 function pass(game, player) {
   var isValid = isValidPass(game, player);
+  var nextGameWithPassed_attacker = game.attacker;
+  var nextGameWithPassed_defender = game.defender;
+  var nextGameWithPassed_players = game.players;
+  var nextGameWithPassed_trump = game.trump;
+  var nextGameWithPassed_deck = game.deck;
+  var nextGameWithPassed_table = game.table;
+  var nextGameWithPassed_pass = Utils.toggleArrayItem(game.pass, player);
+  var nextGameWithPassed = {
+    attacker: nextGameWithPassed_attacker,
+    defender: nextGameWithPassed_defender,
+    players: nextGameWithPassed_players,
+    trump: nextGameWithPassed_trump,
+    deck: nextGameWithPassed_deck,
+    table: nextGameWithPassed_table,
+    pass: nextGameWithPassed_pass
+  };
   if (Belt_Result.isError(isValid)) {
     return isValid;
   }
-  if (!(GameUtils.isAllPassed(game) && GameUtils.isAllTableBeaten(game))) {
+  if (!(GameUtils.isAllPassed(nextGameWithPassed) && GameUtils.isAllTableBeaten(nextGameWithPassed))) {
     return {
             TAG: /* Ok */0,
             _0: {
               TAG: /* InProgress */1,
-              _0: {
-                attacker: game.attacker,
-                defender: game.defender,
-                players: game.players,
-                trump: game.trump,
-                deck: game.deck,
-                table: game.table,
-                pass: Utils.toggleArrayItem(game.pass, player)
-              }
+              _0: nextGameWithPassed
             }
           };
   }
@@ -194,6 +202,7 @@ function pass(game, player) {
   var nextDefender = Belt_Option.flatMap(nextAttacker, (function (p) {
           return Player.getNextPlayer(p, game.players);
         }));
+  var match = Player.dealDeckToPlayers(game.deck, game.players);
   if (nextAttacker !== undefined && nextDefender !== undefined) {
     return {
             TAG: /* Ok */0,
@@ -202,9 +211,9 @@ function pass(game, player) {
               _0: {
                 attacker: nextAttacker,
                 defender: nextDefender,
-                players: game.players,
-                trump: game.trump,
-                deck: game.deck,
+                players: match[0],
+                trump: nextGameWithPassed_trump,
+                deck: match[1],
                 table: /* [] */0,
                 pass: /* [] */0
               }
@@ -253,7 +262,8 @@ function beat(game, to, by, player) {
   var isValid = isValidBeat(game, to, by, player);
   if (Belt_Result.isError(isValid)) {
     return isValid;
-  } else {
+  }
+  if (!(GameUtils.isAllPassed(game) && GameUtils.isAllTableBeaten(game))) {
     return {
             TAG: /* Ok */0,
             _0: {
@@ -287,6 +297,33 @@ function beat(game, to, by, player) {
                 pass: game.pass
               }
             }
+          };
+  }
+  var nextAttacker = Player.getNextPlayer(game.attacker, game.players);
+  var nextDefender = Belt_Option.flatMap(nextAttacker, (function (p) {
+          return Player.getNextPlayer(p, game.players);
+        }));
+  var match = Player.dealDeckToPlayers(game.deck, game.players);
+  if (nextAttacker !== undefined && nextDefender !== undefined) {
+    return {
+            TAG: /* Ok */0,
+            _0: {
+              TAG: /* InProgress */1,
+              _0: {
+                attacker: nextAttacker,
+                defender: nextDefender,
+                players: match[0],
+                trump: game.trump,
+                deck: match[1],
+                table: /* [] */0,
+                pass: /* [] */0
+              }
+            }
+          };
+  } else {
+    return {
+            TAG: /* Error */1,
+            _0: "Can't find next attacker/defender"
           };
   }
 }

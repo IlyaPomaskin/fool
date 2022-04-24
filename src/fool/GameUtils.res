@@ -1,11 +1,11 @@
 open Types
 
 let isDefender = (game: inProgress, player: player) => {
-  game.defender == player
+  game.defender.id === player.id
 }
 
 let isAttacker = (game: inProgress, player: player) => {
-  game.attacker == player
+  game.attacker.id === player.id
 }
 
 let isPlayerHasCard = (player: player, card: card) => {
@@ -75,5 +75,5 @@ let isPassed = (game: inProgress, player: player) => {
 }
 
 let isAllPassed = (game: inProgress) => {
-  game.players->List.every(isPassed(game))
+  game.players->List.keep(p => !isDefender(game, p))->List.every(isPassed(game))
 }

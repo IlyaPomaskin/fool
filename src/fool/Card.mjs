@@ -58,11 +58,12 @@ function makeShuffledDeck(param) {
 
 function dealCards(amount, deck) {
   var cardsToDeal = Belt_List.keepWithIndex(deck, (function (param, index) {
-          return index <= amount;
+          return index <= (amount - 1 | 0);
         }));
   var nextDeck = Belt_List.keepWithIndex(deck, (function (param, index) {
-          return index > amount;
+          return index > (amount - 1 | 0);
         }));
+  console.log("deal", amount, Belt_List.length(cardsToDeal));
   return [
           cardsToDeal,
           nextDeck

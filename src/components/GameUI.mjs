@@ -72,7 +72,7 @@ function GameUI$ClientUI(Props) {
   var match$1 = match[0];
   var beatBy = match$1[1];
   var toBeat = match$1[0];
-  var handleBeat = function (isToCard, card) {
+  var handleSelectToBeat = function (isToCard, card) {
     return Curry._1(setBeat, (function (param) {
                   var beatBy = param[1];
                   var toBeat = param[0];
@@ -108,6 +108,23 @@ function GameUI$ClientUI(Props) {
                   }
                 }));
   };
+  var handleBeat = function (param) {
+    if (toBeat !== undefined && beatBy !== undefined) {
+      Curry._1(setBeat, (function (param) {
+              return [
+                      undefined,
+                      undefined
+                    ];
+            }));
+      return Curry._1(onMove, {
+                  TAG: /* Beat */1,
+                  _0: player,
+                  _1: toBeat,
+                  _2: beatBy
+                });
+    }
+    
+  };
   var handleMove = function (card) {
     return Curry._1(onMove, {
                 TAG: /* Move */3,
@@ -116,6 +133,9 @@ function GameUI$ClientUI(Props) {
               });
   };
   var isDef = GameUtils.isDefender(game, player);
+  console.log(player.id, game.attacker, game.defender);
+  console.log(GameUtils.isDefender(game, player), GameUtils.isAttacker(game, player));
+  var match$2 = GameUtils.isAttacker(game, player);
   return React.createElement("div", {
               className: UiUtils.cx([
                     className,
@@ -126,44 +146,27 @@ function GameUI$ClientUI(Props) {
                 }, UiUtils.uiStr("Player: "), React.createElement(PlayerUI.Short.make, {
                       className: "inline-block",
                       player: player
-                    })), GameUtils.isPlayerDone(game, player) ? UiUtils.uiStr("Done!") : React.createElement("div", undefined, isDef ? React.createElement(CardUI.table, {
-                          className: "my-1",
-                          isCardSelected: (function (card) {
-                              return Belt_Option.getWithDefault(Belt_Option.map(toBeat, (function (param) {
-                                                return Utils.equals(card, param);
-                                              })), false);
-                            }),
-                          isCardDisabled: (function (to) {
-                              if (beatBy !== undefined) {
-                                return Card.isValidTableBeat(to, beatBy, game.trump);
-                              } else {
-                                return false;
-                              }
-                            }),
-                          table: game.table,
-                          onCardClick: (function (param) {
-                              return handleBeat(true, param);
-                            })
-                        }) : null, React.createElement(CardUI.deck, {
-                        deck: player.cards,
-                        className: "mt-1",
-                        disabled: isDef ? !GameUtils.isTableHasCards(game) : !GameUtils.isPlayerCanMove(game, player),
-                        isCardSelected: (function (card) {
-                            return Belt_Option.getWithDefault(Belt_Option.map(beatBy, (function (param) {
-                                              return Utils.equals(card, param);
-                                            })), false);
-                          }),
-                        isCardDisabled: (function (by) {
-                            if (beatBy !== undefined) {
-                              return Card.isValidTableBeat(beatBy, by, game.trump);
-                            } else {
-                              return false;
-                            }
-                          }),
-                        onCardClick: isDef ? (function (param) {
-                              return handleBeat(false, param);
-                            }) : handleMove
-                      })), React.createElement("div", {
+                    }), isDef ? UiUtils.uiStr(" def") : (
+                    match$2 ? UiUtils.uiStr(" att") : null
+                  )), GameUtils.isPlayerDone(game, player) ? UiUtils.uiStr("Done!") : React.createElement(CardUI.deck, {
+                    deck: player.cards,
+                    disabled: isDef ? !GameUtils.isTableHasCards(game) : !GameUtils.isPlayerCanMove(game, player),
+                    isCardSelected: (function (card) {
+                        return Belt_Option.getWithDefault(Belt_Option.map(beatBy, (function (param) {
+                                          return Utils.equals(card, param);
+                                        })), false);
+                      }),
+                    isCardDisabled: (function (by) {
+                        if (beatBy !== undefined) {
+                          return Card.isValidTableBeat(beatBy, by, game.trump);
+                        } else {
+                          return false;
+                        }
+                      }),
+                    onCardClick: isDef ? (function (param) {
+                          return handleSelectToBeat(false, param);
+                        }) : handleMove
+                  }), React.createElement("div", {
                   className: "grid grid-flow-col gap-1"
                 }, React.createElement(GameUI$Button, {
                       disabled: !GameUtils.isCanPass(game, player),
@@ -186,19 +189,29 @@ function GameUI$ClientUI(Props) {
                       children: UiUtils.uiStr("take")
                     }), React.createElement(GameUI$Button, {
                       disabled: !isDef || Belt_Option.isNone(toBeat) || Belt_Option.isNone(beatBy),
-                      onClick: (function (param) {
-                          if (toBeat !== undefined && beatBy !== undefined) {
-                            return Curry._1(onMove, {
-                                        TAG: /* Beat */1,
-                                        _0: player,
-                                        _1: toBeat,
-                                        _2: beatBy
-                                      });
-                          }
-                          
-                        }),
+                      onClick: handleBeat,
                       children: UiUtils.uiStr("beat")
-                    })));
+                    })), React.createElement("div", {
+                  className: "mt-1"
+                }, isDef ? React.createElement(CardUI.table, {
+                        className: "my-1",
+                        isCardSelected: (function (card) {
+                            return Belt_Option.getWithDefault(Belt_Option.map(toBeat, (function (param) {
+                                              return Utils.equals(card, param);
+                                            })), false);
+                          }),
+                        isCardDisabled: (function (to) {
+                            if (beatBy !== undefined) {
+                              return Card.isValidTableBeat(to, beatBy, game.trump);
+                            } else {
+                              return false;
+                            }
+                          }),
+                        table: game.table,
+                        onCardClick: (function (param) {
+                            return handleSelectToBeat(true, param);
+                          })
+                      }) : null));
 }
 
 var ClientUI = {

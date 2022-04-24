@@ -84,33 +84,35 @@ let isValidPass = (game: inProgress, player: player) => {
 
 let pass = (game: inProgress, player: player) => {
   let isValid = isValidPass(game, player)
+  let nextGameWithPassed = {
+    ...game,
+    pass: Utils.toggleArrayItem(game.pass, player),
+  }
 
   if Result.isError(isValid) {
     isValid
-  } else if isAllPassed(game) && isAllTableBeaten(game) {
+  } else if isAllPassed(nextGameWithPassed) && isAllTableBeaten(nextGameWithPassed) {
     let nextAttacker = Player.getNextPlayer(game.attacker, game.players)
     let nextDefender = nextAttacker->Option.flatMap(p => Player.getNextPlayer(p, game.players))
+    let (nextPlayers, nextDeck) = Player.dealDeckToPlayers(game.deck, game.players)
 
     switch (nextAttacker, nextDefender) {
     | (Some(a), Some(d)) =>
       Ok(
         InProgress({
-          ...game,
+          ...nextGameWithPassed,
           table: list{},
           pass: list{},
           attacker: a,
           defender: d,
+          players: nextPlayers,
+          deck: nextDeck,
         }),
       )
     | _ => Error("Can't find next attacker/defender")
     }
   } else {
-    Ok(
-      InProgress({
-        ...game,
-        pass: Utils.toggleArrayItem(game.pass, player),
-      }),
-    )
+    Ok(InProgress(nextGameWithPassed))
   }
 }
 
@@ -131,21 +133,38 @@ let beat = (game: inProgress, to: card, by: card, player: player) => {
 
   if Result.isError(isValid) {
     isValid
+  } else if isAllPassed(game) && isAllTableBeaten(game) {
+    let nextAttacker = Player.getNextPlayer(game.attacker, game.players)
+    let nextDefender = nextAttacker->Option.flatMap(p => Player.getNextPlayer(p, game.players))
+    let (nextPlayers, nextDeck) = Player.dealDeckToPlayers(game.deck, game.players)
+
+    switch (nextAttacker, nextDefender) {
+    | (Some(a), Some(d)) =>
+      Ok(
+        InProgress({
+          ...game,
+          table: list{},
+          pass: list{},
+          attacker: a,
+          defender: d,
+          players: nextPlayers,
+          deck: nextDeck,
+        }),
+      )
+    | _ => Error("Can't find next attacker/defender")
+    }
   } else {
     Ok(
       InProgress({
         ...game,
-        players: List.map(game.players, p => {
-          ...p,
-          cards: Player.removeCard(p, by),
-        }),
-        table: List.map(game.table, ((firstCard, secondCard)) => {
+        table: game.table->List.map(((firstCard, secondCard)) => {
           if Card.isCardEquals(firstCard, to) {
             (firstCard, Some(by))
           } else {
             (firstCard, secondCard)
           }
         }),
+        players: List.map(game.players, p => {...p, cards: Player.removeCard(p, by)}),
       }),
     )
   }

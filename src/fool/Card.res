@@ -12,8 +12,9 @@ let makeShuffledDeck = (): deck => {
 }
 
 let dealCards = (amount: int, deck: deck) => {
-  let cardsToDeal = List.keepWithIndex(deck, (_, index) => index <= amount)
-  let nextDeck = List.keepWithIndex(deck, (_, index) => index > amount)
+  let cardsToDeal = List.keepWithIndex(deck, (_, index) => index <= amount - 1)
+  let nextDeck = List.keepWithIndex(deck, (_, index) => index > amount - 1)
+  Js.log3("deal", amount, List.length(cardsToDeal))
 
   (cardsToDeal, nextDeck)
 }

@@ -2,16 +2,15 @@
 
 import * as Card from "./Card.mjs";
 import * as Utils from "./Utils.mjs";
-import * as Caml_obj from "rescript/lib/es6/caml_obj.js";
 import * as Belt_List from "rescript/lib/es6/belt_List.js";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 
 function isDefender(game, player) {
-  return Caml_obj.caml_equal(game.defender, player);
+  return game.defender.id === player.id;
 }
 
 function isAttacker(game, player) {
-  return Caml_obj.caml_equal(game.attacker, player);
+  return game.attacker.id === player.id;
 }
 
 function isPlayerHasCard(player, card) {
@@ -29,13 +28,13 @@ function isTableHasCards(game) {
 
 function isPlayerCanMove(game, player) {
   if (isTableHasCards(game)) {
-    if (Caml_obj.caml_equal(game.defender, player)) {
+    if (isDefender(game, player)) {
       return false;
     } else {
       return true;
     }
   } else {
-    return Caml_obj.caml_equal(game.attacker, player);
+    return isAttacker(game, player);
   }
 }
 
@@ -89,7 +88,7 @@ function isPlayerDone(game, player) {
 }
 
 function isCanTake(game, player) {
-  if (Caml_obj.caml_equal(game.defender, player) && isTableHasCards(game)) {
+  if (isDefender(game, player) && isTableHasCards(game)) {
     return !isAllTableBeaten(game);
   } else {
     return false;
@@ -98,7 +97,7 @@ function isCanTake(game, player) {
 
 function isCanPass(game, player) {
   if (isTableHasCards(game)) {
-    return !Caml_obj.caml_equal(game.defender, player);
+    return !isDefender(game, player);
   } else {
     return false;
   }
@@ -115,7 +114,9 @@ function isPassed(game, player) {
 }
 
 function isAllPassed(game) {
-  return Belt_List.every(game.players, (function (param) {
+  return Belt_List.every(Belt_List.keep(game.players, (function (p) {
+                    return !isDefender(game, p);
+                  })), (function (param) {
                 return isPassed(game, param);
               }));
 }
