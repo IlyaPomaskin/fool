@@ -20,21 +20,22 @@ function suitToColor(suit) {
 
 function CardUI$CardUILocal(Props) {
   var classNameOpt = Props.className;
+  var disabledOpt = Props.disabled;
   var card = Props.card;
-  var onClick = Props.onClick;
+  var onClickOpt = Props.onClick;
   var className = classNameOpt !== undefined ? classNameOpt : "";
+  var disabled = disabledOpt !== undefined ? disabledOpt : false;
+  var onClick = onClickOpt !== undefined ? onClickOpt : UiUtils.noop;
   return React.createElement("div", {
               className: UiUtils.cx([
                     "relative w-12 h-16",
                     "border rounded-md border-solid border-slate-500",
                     "cursor-pointer select-none",
-                    suitToColor(card[0]),
+                    disabled ? "text-slate-300 border-slate-400" : suitToColor(card[0]),
                     className
                   ]),
-              onClick: onClick !== undefined ? (function (param) {
+              onClick: disabled ? UiUtils.noop : (function (param) {
                     return Curry._1(onClick, card);
-                  }) : (function (param) {
-                    
                   })
             }, React.createElement("div", {
                   className: "absolute text-[18px] leading-[18px] inset-1"
@@ -58,20 +59,28 @@ function make(classNameOpt, card, onClick, param) {
 
 function CardUI$trump(Props) {
   var suit = Props.suit;
+  var classNameOpt = Props.className;
+  var className = classNameOpt !== undefined ? classNameOpt : "";
   return React.createElement("div", {
-              className: suitToColor(suit)
+              className: UiUtils.cx([
+                    className,
+                    suitToColor(suit)
+                  ])
             }, UiUtils.uiStr(Card.suitToString(suit)));
 }
 
 function CardUI$deck(Props) {
   var deck = Props.deck;
+  var disabledOpt = Props.disabled;
   var onCardClick = Props.onCardClick;
+  var disabled = disabledOpt !== undefined ? disabledOpt : false;
   if (deck) {
     return React.createElement("div", {
                 className: "leading"
               }, UiUtils.uiList(deck, (function (card) {
                       return React.createElement(CardUI$CardUILocal, {
                                   className: "inline-block mx-1",
+                                  disabled: disabled,
                                   card: card,
                                   onClick: Belt_Option.getWithDefault(onCardClick, UiUtils.noop),
                                   key: Card.cardToString(card)
@@ -82,9 +91,27 @@ function CardUI$deck(Props) {
   }
 }
 
+function CardUI$table(Props) {
+  var table = Props.table;
+  return React.createElement("div", undefined, table ? UiUtils.uiList(table, (function (param) {
+                      var by = param[1];
+                      var to = param[0];
+                      return React.createElement("div", {
+                                  key: Card.cardToString(to) + Belt_Option.getWithDefault(Belt_Option.map(by, Card.cardToString), "a"),
+                                  className: "inline-block mx-1"
+                                }, React.createElement(CardUI$CardUILocal, {
+                                      card: to
+                                    }), by !== undefined ? React.createElement(CardUI$CardUILocal, {
+                                        card: by
+                                      }) : React.createElement("div", undefined, UiUtils.uiStr("None")));
+                    })) : UiUtils.uiStr("Table empty"));
+}
+
 var trump = CardUI$trump;
 
 var deck = CardUI$deck;
+
+var table = CardUI$table;
 
 export {
   suitToColor ,
@@ -92,6 +119,7 @@ export {
   make ,
   trump ,
   deck ,
+  table ,
   
 }
 /* react Not a pure module */

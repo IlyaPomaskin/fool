@@ -20,6 +20,22 @@ let isFirstMove = (game: inProgress) => {
   List.length(game.table) === 0
 }
 
+let isPlayerCanMove = (game: inProgress, player: player) => {
+  if isFirstMove(game) {
+    isAttacker(game, player)
+  } else {
+    false
+  }
+
+  //   if isDefender(game, player) {
+  //     true
+  //   } else if isFirstMove(game) && !isAttacker(game, player) {
+  //     true
+  //   } else {
+  //     false
+  //   }
+}
+
 let toggleReady = (game: inLobby, player: player) => InLobby({
   ...game,
   players: Utils.toggleArrayItem(game.players, player),

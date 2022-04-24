@@ -6,6 +6,7 @@ import * as React from "react";
 import * as GameUI from "./components/GameUI.mjs";
 import * as Player from "./fool/Player.mjs";
 import * as UiUtils from "./UiUtils.mjs";
+import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Belt_Result from "rescript/lib/es6/belt_Result.js";
 
 var players_0 = Player.make("aaa");
@@ -33,7 +34,6 @@ function $$default(p) {
         
       });
   var setError = match$1[1];
-  var error = match$1[0];
   var handleGameChange = function (a) {
     if (a.TAG === /* Ok */0) {
       var nextG = a._0;
@@ -75,7 +75,9 @@ function $$default(p) {
     return React.createElement("div", undefined, React.createElement(GameUI.InProgressUI.make, {
                     game: game._0,
                     onMove: handleMove
-                  }), React.createElement("div", undefined, error !== undefined ? UiUtils.uiStr("Error: " + error) : UiUtils.uiStr("No errors")));
+                  }), React.createElement("div", undefined, Belt_Option.getWithDefault(Belt_Option.map(match$1[0], (function (err) {
+                              return UiUtils.uiStr("Error: " + err);
+                            })), UiUtils.uiStr("No errors"))));
   }
 }
 

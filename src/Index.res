@@ -45,10 +45,9 @@ let default = (p: props) => {
     <div>
       <GameUI.InProgressUI game={g} onMove={handleMove} />
       <div>
-        {switch error {
-        | Some(err) => uiStr("Error: " ++ err)
-        | None => uiStr("No errors")
-        }}
+        {error
+        ->Option.map(err => uiStr("Error: " ++ err))
+        ->Option.getWithDefault(uiStr("No errors"))}
       </div>
     </div>
   | InLobby(_) => <div> {uiStr("In lobby")} </div>

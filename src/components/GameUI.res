@@ -18,36 +18,42 @@ module InLobbyUI = {
     </div>
 }
 
+module ClientUI = {
+  @react.component
+  let make = (~className: string="", ~player: player, ~game: inProgress, ~onMove: move => unit) => {
+    <div className={cx([className, "p-1 border rounded-md border-solid border-slate-500"])}>
+      <div> {uiStr("Current player:")} <PlayerUI.Short player /> </div>
+      <br />
+      <div>
+        {game.players->uiList(p =>
+          <div key={p.sessionId}>
+            <PlayerUI.Short player={p} /> {uiStr("Cards: " ++ p.cards->List.length->string_of_int)}
+          </div>
+        )}
+      </div>
+      <div className="my-2"> <CardUI.table table={game.table} /> </div>
+      <br />
+      <CardUI.deck disabled={GameUtils.isPlayerCanMove(game, player)} deck={player.cards} />
+    </div>
+  }
+}
+
 module InProgressUI = {
   @react.component
   let make = (~game: inProgress, ~onMove: move => unit) =>
     <div>
-      {uiStr("inProgress")}
-      <div> {uiStr("deck:")} </div>
-      <div> <CardUI.deck deck={game.deck} /> </div>
-      {uiStr("players:")}
       <div>
-        {uiList(game.players, p =>
-          <PlayerUI key={p.id} player={p} onCardClick={(c: card) => onMove(Move(p, c))} />
-        )}
+        {uiStr("Attacker: ")} <PlayerUI.Short className="inline-block" player={game.attacker} />
       </div>
-      <div> {uiStr("trump:")} <CardUI.trump suit={game.trump} /> </div>
-      <div> {uiStr("attacker:")} <PlayerUI.Short player={game.attacker} /> </div>
-      <div> {uiStr("defender:")} <PlayerUI.Short player={game.defender} /> </div>
-      <br />
       <div>
-        {uiStr("table:")}
-        {uiList(game.table, ((to, by)) =>
-          <div
-            className="inline-block mx-1"
-            key={Card.cardToString(to) ++
-            Option.getWithDefault(Option.map(by, Card.cardToString), "a")}>
-            <CardUI.CardUILocal card={to} />
-            {switch by {
-            | Some(byCard) => <CardUI.CardUILocal card={byCard} />
-            | None => <div> {uiStr("None")} </div>
-            }}
-          </div>
+        {uiStr("Defender: ")} <PlayerUI.Short className="inline-block" player={game.defender} />
+      </div>
+      <div> {uiStr("Trump: ")} <CardUI.trump className="inline-block" suit={game.trump} /> </div>
+      <div> {uiStr("Deck: " ++ game.deck->List.length->string_of_int)} </div>
+      <div className="my-2"> {uiStr("Table:")} <CardUI.table table={game.table} /> </div>
+      <div className="flex flex-wrap">
+        {game.players->uiList(p =>
+          <ClientUI className="m-1 flex-initial w-96" player={p} game={game} onMove={onMove} />
         )}
       </div>
     </div>

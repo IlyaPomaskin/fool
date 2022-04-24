@@ -26,6 +26,14 @@ function isFirstMove(game) {
   return Belt_List.length(game.table) === 0;
 }
 
+function isPlayerCanMove(game, player) {
+  if (isFirstMove(game)) {
+    return Caml_obj.caml_equal(game.attacker, player);
+  } else {
+    return false;
+  }
+}
+
 function toggleReady(game, player) {
   return {
           TAG: /* InLobby */0,
@@ -62,6 +70,7 @@ export {
   isPlayerHasCard ,
   isCorrectAdditionalCard ,
   isFirstMove ,
+  isPlayerCanMove ,
   toggleReady ,
   lastListItem ,
   getTrump ,
