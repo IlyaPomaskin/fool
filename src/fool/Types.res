@@ -57,3 +57,9 @@ type move =
   | Beat(player, card, card)
   | Pass(player)
   | Move(player, card)
+
+type playerWinState =
+  | Playing
+  | Done
+  | Lose
+  | Draw

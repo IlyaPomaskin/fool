@@ -63,7 +63,6 @@ function dealCards(amount, deck) {
   var nextDeck = Belt_List.keepWithIndex(deck, (function (param, index) {
           return index > (amount - 1 | 0);
         }));
-  console.log("deal", amount, Belt_List.length(cardsToDeal));
   return [
           cardsToDeal,
           nextDeck

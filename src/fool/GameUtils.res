@@ -9,7 +9,6 @@ let isAttacker = (game: inProgress, player: player) => {
 }
 
 let isPlayerHasCard = (player: player, card: card) => {
-  Js.log4("isPlayerHasCard", List.has(player.cards, card, Utils.equals), player.cards, card)
   List.has(player.cards, card, Utils.equals)
 }
 
@@ -88,4 +87,21 @@ let isAllPassed = (game: inProgress) => {
 
 let isMaximumTableCards = (game: inProgress) => {
   game.table->List.length === 6
+}
+
+let getPlayerGameState = (game: inProgress, player: player) => {
+  let isThereCardsInDeck = !Card.isDeckEmpty(game.deck)
+  let isPlayerHasCards = !Card.isDeckEmpty(player.cards)
+  let isOtherPlayersHasCards =
+    game.players
+    ->List.keep(p => !Utils.equals(p, player))
+    ->List.keep(p => !Card.isDeckEmpty(p.cards))
+    ->List.length > 0
+
+  switch (isThereCardsInDeck, isOtherPlayersHasCards, isPlayerHasCards) {
+  | (false, false, true) => Lose
+  | (false, true, false) => Done
+  | (false, false, false) => Draw
+  | _ => Playing
+  }
 }

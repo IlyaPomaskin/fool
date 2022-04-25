@@ -14,7 +14,6 @@ function isAttacker(game, player) {
 }
 
 function isPlayerHasCard(player, card) {
-  console.log("isPlayerHasCard", Belt_List.has(player.cards, card, Utils.equals), player.cards, card);
   return Belt_List.has(player.cards, card, Utils.equals);
 }
 
@@ -138,6 +137,29 @@ function isMaximumTableCards(game) {
   return Belt_List.length(game.table) === 6;
 }
 
+function getPlayerGameState(game, player) {
+  var isThereCardsInDeck = !Card.isDeckEmpty(game.deck);
+  var isPlayerHasCards = !Card.isDeckEmpty(player.cards);
+  var isOtherPlayersHasCards = Belt_List.length(Belt_List.keep(Belt_List.keep(game.players, (function (p) {
+                  return !Utils.equals(p, player);
+                })), (function (p) {
+              return !Card.isDeckEmpty(p.cards);
+            }))) > 0;
+  if (isThereCardsInDeck) {
+    return /* Playing */0;
+  } else if (isOtherPlayersHasCards) {
+    if (isPlayerHasCards) {
+      return /* Playing */0;
+    } else {
+      return /* Done */1;
+    }
+  } else if (isPlayerHasCards) {
+    return /* Lose */2;
+  } else {
+    return /* Draw */3;
+  }
+}
+
 export {
   isDefender ,
   isAttacker ,
@@ -156,6 +178,7 @@ export {
   isPassed ,
   isAllPassed ,
   isMaximumTableCards ,
+  getPlayerGameState ,
   
 }
 /* No side effect */

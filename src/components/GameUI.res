@@ -75,10 +75,15 @@ module ClientUI = {
       onMove(Move(player, card))
     }
 
+    let handleTake = _ => {
+      setBeat(_ => (None, None))
+      onMove(Take(player))
+    }
+
     let isDef = GameUtils.isDefender(game, player)
 
     React.useEffect1(() => {
-      if !isDef && (Option.isSome(toBeat) || Option.isSome(beatBy)) {
+      if !isDef {
         setBeat(_ => (None, None))
       }
 
@@ -95,9 +100,11 @@ module ClientUI = {
         | _ => React.null
         }}
       </div>
-      {switch GameUtils.isPlayerDone(game, player) {
-      | true => uiStr("Done!")
-      | false =>
+      {switch GameUtils.getPlayerGameState(game, player) {
+      | Done => uiStr("Done")
+      | Lose => uiStr("Lose")
+      | Draw => uiStr("Draw")
+      | Playing =>
         <CardUI.deck
           disabled={isDef
             ? !GameUtils.isTableHasCards(game)
@@ -120,7 +127,7 @@ module ClientUI = {
           onClick={_ => onMove(Pass(player))}>
           {uiStr("pass")}
         </Button>
-        <Button disabled={!GameUtils.isCanTake(game, player)} onClick={_ => onMove(Take(player))}>
+        <Button disabled={!GameUtils.isCanTake(game, player)} onClick={handleTake}>
           {uiStr("take")}
         </Button>
         <Button
