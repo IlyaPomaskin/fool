@@ -6,7 +6,8 @@
   "dependencies": {
     "next": "10.2.3",
     "react": "17.0.1",
-    "react-dom": "17.0.1"
+    "react-dom": "17.0.1",
+    "rescript-logger": "^2.1.0"
   },
   "repository": "https://github.com/ryyppy/rescript-nextjs-template",
   "scripts": {
@@ -23,6 +24,7 @@
   "devDependencies": {
     "@rescript/react": "0.10.3",
     "autoprefixer": "10.4.4",
+    "bs-platform": "9.0.2",
     "cssnano": "5.0.5",
     "gentype": "4.1",
     "next-transpile-modules": "7.1.2",
