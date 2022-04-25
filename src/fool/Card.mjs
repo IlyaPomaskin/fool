@@ -90,6 +90,10 @@ function ltCardByRank(param, param$1) {
   return param[1] < param$1[1];
 }
 
+function gtCardByRank(c1, c2) {
+  return !ltCardByRank(c1, c2);
+}
+
 function sortCardsByRank(first, second) {
   if (ltCardByRank(first, second)) {
     return -1;
@@ -173,8 +177,18 @@ function isBeatByTrump(to, by, trump) {
 }
 
 function isValidTableBeat(to, by, trump) {
-  if (isCardEqualsBySuit(to, by) && ltCardByRank(to, by)) {
-    return isBeatByTrump(to, by, trump);
+  var match = isTrump(trump, to);
+  var match$1 = isTrump(trump, by);
+  if (match) {
+    if (match$1) {
+      return ltCardByRank(to, by);
+    } else {
+      return false;
+    }
+  } else if (match$1) {
+    return true;
+  } else if (isCardEqualsBySuit(to, by)) {
+    return ltCardByRank(to, by);
   } else {
     return false;
   }
@@ -249,6 +263,7 @@ export {
   isCardEqualsByRank ,
   isCardEquals ,
   ltCardByRank ,
+  gtCardByRank ,
   sortCardsByRank ,
   removeCard ,
   isAllCardsAreBeat ,

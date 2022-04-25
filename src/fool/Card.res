@@ -27,6 +27,7 @@ let isCardEquals = (first: card, second: card) =>
   isCardEqualsBySuit(first, second) && isCardEqualsByRank(first, second)
 
 let ltCardByRank = ((_, r1): card, (_, r2): card) => r1 < r2
+let gtCardByRank = (c1: card, c2: card) => !ltCardByRank(c1, c2)
 
 let sortCardsByRank = (first: card, second: card) => ltCardByRank(first, second) ? -1 : 1
 
@@ -78,7 +79,12 @@ let isBeatByTrump = (to: card, by: card, trump: suit) => {
 }
 
 let isValidTableBeat = (to: card, by: card, trump: suit) => {
-  isCardEqualsBySuit(to, by) && ltCardByRank(to, by) && isBeatByTrump(to, by, trump)
+  switch (isTrump(trump, to), isTrump(trump, by)) {
+  | (false, true) => true
+  | (true, false) => false
+  | (true, true) => ltCardByRank(to, by)
+  | (false, false) => isCardEqualsBySuit(to, by) && ltCardByRank(to, by)
+  }
 }
 
 let getFlatTableCards = (table: table) => {

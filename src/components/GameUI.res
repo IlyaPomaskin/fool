@@ -77,8 +77,13 @@ module ClientUI = {
 
     let isDef = GameUtils.isDefender(game, player)
 
-    Js.log3(player.id, game.attacker, game.defender)
-    Js.log2(GameUtils.isDefender(game, player), GameUtils.isAttacker(game, player))
+    React.useEffect1(() => {
+      if !isDef && (Option.isSome(toBeat) || Option.isSome(beatBy)) {
+        setBeat(_ => (None, None))
+      }
+
+      None
+    }, [isDef])
 
     <div className={cx([className, "p-1 border rounded-md border-solid border-slate-500"])}>
       <div className="mb-1">
@@ -100,8 +105,8 @@ module ClientUI = {
           isCardSelected={card =>
             beatBy->Option.map(Utils.equals(card))->Option.getWithDefault(false)}
           isCardDisabled={by =>
-            switch beatBy {
-            | Some(to) => Card.isValidTableBeat(to, by, game.trump)
+            switch toBeat {
+            | Some(to) => !Card.isValidTableBeat(to, by, game.trump)
             | _ => false
             }}
           deck={player.cards}
@@ -131,7 +136,7 @@ module ClientUI = {
               toBeat->Option.map(Utils.equals(card))->Option.getWithDefault(false)}
             isCardDisabled={to =>
               switch beatBy {
-              | Some(by) => Card.isValidTableBeat(to, by, game.trump)
+              | Some(by) => !Card.isValidTableBeat(to, by, game.trump)
               | _ => false
               }}
             className="my-1"
@@ -140,6 +145,10 @@ module ClientUI = {
           />
         | false => React.null
         }}
+      </div>
+      <div>
+        {uiStr("to: " ++ toBeat->Option.map(Card.cardToString)->Option.getWithDefault("None"))}
+        {uiStr(" by: " ++ beatBy->Option.map(Card.cardToString)->Option.getWithDefault("None"))}
       </div>
     </div>
   }
@@ -157,18 +166,17 @@ module InProgressUI = {
       </div>
       <div>
         {game.players->uiList(p =>
-          <div key={p.id}>
+          <div key={p.id} className="inline-block mr-3">
             <PlayerUI.Short className="inline-block" player={p} />
-            {uiStr(" Cards: " ++ p.cards->List.length->string_of_int)}
-            {uiStr(GameUtils.isPassed(game, p) ? " pass" : "")}
-            {uiStr(GameUtils.isAttacker(game, p) ? " ATT" : "")}
-            {uiStr(GameUtils.isDefender(game, p) ? " DEF" : "")}
+            {uiStr(" (" ++ p.cards->List.length->string_of_int ++ ")")}
+            {uiStr(GameUtils.isPassed(game, p) ? " (pass) " : "")}
+            {uiStr(GameUtils.isAttacker(game, p) ? " (ATT) " : "")}
+            {uiStr(GameUtils.isDefender(game, p) ? " (DEF) " : "")}
           </div>
         )}
       </div>
       <div> {uiStr("Trump: ")} <CardUI.trump className="inline-block" suit={game.trump} /> </div>
       <div> {uiStr("Deck: " ++ game.deck->List.length->string_of_int)} </div>
-      <div className="my-2"> {uiStr("Table:")} <CardUI.table table={game.table} /> </div>
       <div className="flex flex-wrap">
         {game.players->uiList(p =>
           <ClientUI

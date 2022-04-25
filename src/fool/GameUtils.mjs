@@ -87,6 +87,19 @@ function isPlayerDone(game, player) {
   }
 }
 
+function isPlayerLose(game, player) {
+  var playersWithCards = Belt_List.keep(game.players, (function (p) {
+          return Belt_List.length(p.cards) > 0;
+        }));
+  var isOnlyOnePlayerLeft = Belt_List.length(playersWithCards) === 1;
+  var isCurrentPlayerLeft = Belt_List.has(game.players, player, Utils.equals);
+  if (isOnlyOnePlayerLeft) {
+    return isCurrentPlayerLeft;
+  } else {
+    return false;
+  }
+}
+
 function isCanTake(game, player) {
   if (isDefender(game, player) && isTableHasCards(game)) {
     return !isAllTableBeaten(game);
@@ -121,6 +134,10 @@ function isAllPassed(game) {
               }));
 }
 
+function isMaximumTableCards(game) {
+  return Belt_List.length(game.table) === 6;
+}
+
 export {
   isDefender ,
   isAttacker ,
@@ -133,10 +150,12 @@ export {
   getTrump ,
   isAllTableBeaten ,
   isPlayerDone ,
+  isPlayerLose ,
   isCanTake ,
   isCanPass ,
   isPassed ,
   isAllPassed ,
+  isMaximumTableCards ,
   
 }
 /* No side effect */

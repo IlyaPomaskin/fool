@@ -48,6 +48,8 @@ let isValidMove = (game: inProgress, player: player, card: card) => {
     Error("First move made not by attacker")
   } else if !isPlayerHasCard(player, card) {
     Error("Player don't have card")
+  } else if isMaximumTableCards(game) {
+    Error("Maximum cards on table")
   } else if isTableHasCards(game) && !isCorrectAdditionalCard(game, card) {
     Error("Incorrect card")
   } else {
@@ -82,35 +84,36 @@ let isValidPass = (game: inProgress, player: player) => {
   }
 }
 
+let finishRound = (game: inProgress) => {
+  let nextAttacker = Player.getNextPlayer(game.attacker, game.players)
+  let nextDefender = nextAttacker->Option.flatMap(p => Player.getNextPlayer(p, game.players))
+  let (nextPlayers, nextDeck) = Player.dealDeckToPlayers(game.deck, game.players)
+
+  switch (nextAttacker, nextDefender) {
+  | (Some(a), Some(d)) =>
+    Ok(
+      InProgress({
+        ...game,
+        table: list{},
+        pass: list{},
+        attacker: a,
+        defender: d,
+        players: nextPlayers,
+        deck: nextDeck,
+      }),
+    )
+  | _ => Error("Can't find next attacker/defender")
+  }
+}
+
 let pass = (game: inProgress, player: player) => {
   let isValid = isValidPass(game, player)
-  let nextGameWithPassed = {
-    ...game,
-    pass: Utils.toggleArrayItem(game.pass, player),
-  }
+  let nextGameWithPassed = {...game, pass: Utils.toggleArrayItem(game.pass, player)}
 
   if Result.isError(isValid) {
     isValid
   } else if isAllPassed(nextGameWithPassed) && isAllTableBeaten(game) {
-    let nextAttacker = Player.getNextPlayer(game.attacker, game.players)
-    let nextDefender = nextAttacker->Option.flatMap(p => Player.getNextPlayer(p, game.players))
-    let (nextPlayers, nextDeck) = Player.dealDeckToPlayers(game.deck, game.players)
-
-    switch (nextAttacker, nextDefender) {
-    | (Some(a), Some(d)) =>
-      Ok(
-        InProgress({
-          ...nextGameWithPassed,
-          table: list{},
-          pass: list{},
-          attacker: a,
-          defender: d,
-          players: nextPlayers,
-          deck: nextDeck,
-        }),
-      )
-    | _ => Error("Can't find next attacker/defender")
-    }
+    finishRound(nextGameWithPassed)
   } else {
     Ok(InProgress(nextGameWithPassed))
   }
@@ -121,7 +124,7 @@ let isValidBeat = (game: inProgress, to: card, by: card, player: player) => {
     Error("Is not deffender")
   } else if !isPlayerHasCard(player, by) {
     Error("Player dont have card")
-  } else if Card.isValidTableBeat(to, by, game.trump) {
+  } else if !Card.isValidTableBeat(to, by, game.trump) {
     Error("Invalid card beat")
   } else {
     Ok(InProgress(game))
@@ -131,42 +134,25 @@ let isValidBeat = (game: inProgress, to: card, by: card, player: player) => {
 let beat = (game: inProgress, to: card, by: card, player: player) => {
   let isValid = isValidBeat(game, to, by, player)
 
-  let nextGameWithBeaten = {
-    ...game,
-    table: game.table->List.map(((firstCard, secondCard)) => {
-      if Card.isCardEquals(firstCard, to) {
-        (firstCard, Some(by))
-      } else {
-        (firstCard, secondCard)
-      }
-    }),
-    players: List.map(game.players, p => {...p, cards: Player.removeCard(p, by)}),
-  }
-
   if Result.isError(isValid) {
     isValid
-  } else if isAllPassed(game) && isAllTableBeaten(nextGameWithBeaten) {
-    let nextAttacker = Player.getNextPlayer(game.attacker, game.players)
-    let nextDefender = nextAttacker->Option.flatMap(p => Player.getNextPlayer(p, game.players))
-    let (nextPlayers, nextDeck) = Player.dealDeckToPlayers(game.deck, game.players)
-
-    switch (nextAttacker, nextDefender) {
-    | (Some(a), Some(d)) =>
-      Ok(
-        InProgress({
-          ...game,
-          table: list{},
-          pass: list{},
-          attacker: a,
-          defender: d,
-          players: nextPlayers,
-          deck: nextDeck,
-        }),
-      )
-    | _ => Error("Can't find next attacker/defender")
-    }
   } else {
-    Ok(InProgress(nextGameWithBeaten))
+    Ok(
+      InProgress({
+        {
+          ...game,
+          pass: list{},
+          table: game.table->List.map(((firstCard, secondCard)) => {
+            if Card.isCardEquals(firstCard, to) {
+              (firstCard, Some(by))
+            } else {
+              (firstCard, secondCard)
+            }
+          }),
+          players: List.map(game.players, p => {...p, cards: Player.removeCard(p, by)}),
+        }
+      }),
+    )
   }
 }
 

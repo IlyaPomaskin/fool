@@ -97,7 +97,12 @@ function isValidMove(game, player, card) {
             _0: "First move made not by attacker"
           };
   } else if (GameUtils.isPlayerHasCard(player, card)) {
-    if (GameUtils.isTableHasCards(game) && !GameUtils.isCorrectAdditionalCard(game, card)) {
+    if (GameUtils.isMaximumTableCards(game)) {
+      return {
+              TAG: /* Error */1,
+              _0: "Maximum cards on table"
+            };
+    } else if (GameUtils.isTableHasCards(game) && !GameUtils.isCorrectAdditionalCard(game, card)) {
       return {
               TAG: /* Error */1,
               _0: "Incorrect card"
@@ -168,145 +173,7 @@ function isValidPass(game, player) {
   }
 }
 
-function pass(game, player) {
-  var isValid = isValidPass(game, player);
-  var nextGameWithPassed_attacker = game.attacker;
-  var nextGameWithPassed_defender = game.defender;
-  var nextGameWithPassed_players = game.players;
-  var nextGameWithPassed_trump = game.trump;
-  var nextGameWithPassed_deck = game.deck;
-  var nextGameWithPassed_table = game.table;
-  var nextGameWithPassed_pass = Utils.toggleArrayItem(game.pass, player);
-  var nextGameWithPassed = {
-    attacker: nextGameWithPassed_attacker,
-    defender: nextGameWithPassed_defender,
-    players: nextGameWithPassed_players,
-    trump: nextGameWithPassed_trump,
-    deck: nextGameWithPassed_deck,
-    table: nextGameWithPassed_table,
-    pass: nextGameWithPassed_pass
-  };
-  if (Belt_Result.isError(isValid)) {
-    return isValid;
-  }
-  if (!(GameUtils.isAllPassed(nextGameWithPassed) && GameUtils.isAllTableBeaten(game))) {
-    return {
-            TAG: /* Ok */0,
-            _0: {
-              TAG: /* InProgress */1,
-              _0: nextGameWithPassed
-            }
-          };
-  }
-  var nextAttacker = Player.getNextPlayer(game.attacker, game.players);
-  var nextDefender = Belt_Option.flatMap(nextAttacker, (function (p) {
-          return Player.getNextPlayer(p, game.players);
-        }));
-  var match = Player.dealDeckToPlayers(game.deck, game.players);
-  if (nextAttacker !== undefined && nextDefender !== undefined) {
-    return {
-            TAG: /* Ok */0,
-            _0: {
-              TAG: /* InProgress */1,
-              _0: {
-                attacker: nextAttacker,
-                defender: nextDefender,
-                players: match[0],
-                trump: nextGameWithPassed_trump,
-                deck: match[1],
-                table: /* [] */0,
-                pass: /* [] */0
-              }
-            }
-          };
-  } else {
-    return {
-            TAG: /* Error */1,
-            _0: "Can't find next attacker/defender"
-          };
-  }
-}
-
-function isValidBeat(game, to, by, player) {
-  if (GameUtils.isDefender(game, player)) {
-    if (GameUtils.isPlayerHasCard(player, by)) {
-      if (Card.isValidTableBeat(to, by, game.trump)) {
-        return {
-                TAG: /* Error */1,
-                _0: "Invalid card beat"
-              };
-      } else {
-        return {
-                TAG: /* Ok */0,
-                _0: {
-                  TAG: /* InProgress */1,
-                  _0: game
-                }
-              };
-      }
-    } else {
-      return {
-              TAG: /* Error */1,
-              _0: "Player dont have card"
-            };
-    }
-  } else {
-    return {
-            TAG: /* Error */1,
-            _0: "Is not deffender"
-          };
-  }
-}
-
-function beat(game, to, by, player) {
-  var isValid = isValidBeat(game, to, by, player);
-  var nextGameWithBeaten_attacker = game.attacker;
-  var nextGameWithBeaten_defender = game.defender;
-  var nextGameWithBeaten_players = Belt_List.map(game.players, (function (p) {
-          return {
-                  id: p.id,
-                  sessionId: p.sessionId,
-                  cards: Player.removeCard(p, by)
-                };
-        }));
-  var nextGameWithBeaten_trump = game.trump;
-  var nextGameWithBeaten_deck = game.deck;
-  var nextGameWithBeaten_table = Belt_List.map(game.table, (function (param) {
-          var firstCard = param[0];
-          if (Card.isCardEquals(firstCard, to)) {
-            return [
-                    firstCard,
-                    by
-                  ];
-          } else {
-            return [
-                    firstCard,
-                    param[1]
-                  ];
-          }
-        }));
-  var nextGameWithBeaten_pass = game.pass;
-  var nextGameWithBeaten = {
-    attacker: nextGameWithBeaten_attacker,
-    defender: nextGameWithBeaten_defender,
-    players: nextGameWithBeaten_players,
-    trump: nextGameWithBeaten_trump,
-    deck: nextGameWithBeaten_deck,
-    table: nextGameWithBeaten_table,
-    pass: nextGameWithBeaten_pass
-  };
-  if (Belt_Result.isError(isValid)) {
-    return isValid;
-  }
-  if (!(GameUtils.isAllPassed(game) && GameUtils.isAllTableBeaten(nextGameWithBeaten))) {
-    return {
-            TAG: /* Ok */0,
-            _0: {
-              TAG: /* InProgress */1,
-              _0: nextGameWithBeaten
-            }
-          };
-  }
+function finishRound(game) {
   var nextAttacker = Player.getNextPlayer(game.attacker, game.players);
   var nextDefender = Belt_Option.flatMap(nextAttacker, (function (p) {
           return Player.getNextPlayer(p, game.players);
@@ -332,6 +199,112 @@ function beat(game, to, by, player) {
     return {
             TAG: /* Error */1,
             _0: "Can't find next attacker/defender"
+          };
+  }
+}
+
+function pass(game, player) {
+  var isValid = isValidPass(game, player);
+  var nextGameWithPassed_attacker = game.attacker;
+  var nextGameWithPassed_defender = game.defender;
+  var nextGameWithPassed_players = game.players;
+  var nextGameWithPassed_trump = game.trump;
+  var nextGameWithPassed_deck = game.deck;
+  var nextGameWithPassed_table = game.table;
+  var nextGameWithPassed_pass = Utils.toggleArrayItem(game.pass, player);
+  var nextGameWithPassed = {
+    attacker: nextGameWithPassed_attacker,
+    defender: nextGameWithPassed_defender,
+    players: nextGameWithPassed_players,
+    trump: nextGameWithPassed_trump,
+    deck: nextGameWithPassed_deck,
+    table: nextGameWithPassed_table,
+    pass: nextGameWithPassed_pass
+  };
+  if (Belt_Result.isError(isValid)) {
+    return isValid;
+  } else if (GameUtils.isAllPassed(nextGameWithPassed) && GameUtils.isAllTableBeaten(game)) {
+    return finishRound(nextGameWithPassed);
+  } else {
+    return {
+            TAG: /* Ok */0,
+            _0: {
+              TAG: /* InProgress */1,
+              _0: nextGameWithPassed
+            }
+          };
+  }
+}
+
+function isValidBeat(game, to, by, player) {
+  if (GameUtils.isDefender(game, player)) {
+    if (GameUtils.isPlayerHasCard(player, by)) {
+      if (Card.isValidTableBeat(to, by, game.trump)) {
+        return {
+                TAG: /* Ok */0,
+                _0: {
+                  TAG: /* InProgress */1,
+                  _0: game
+                }
+              };
+      } else {
+        return {
+                TAG: /* Error */1,
+                _0: "Invalid card beat"
+              };
+      }
+    } else {
+      return {
+              TAG: /* Error */1,
+              _0: "Player dont have card"
+            };
+    }
+  } else {
+    return {
+            TAG: /* Error */1,
+            _0: "Is not deffender"
+          };
+  }
+}
+
+function beat(game, to, by, player) {
+  var isValid = isValidBeat(game, to, by, player);
+  if (Belt_Result.isError(isValid)) {
+    return isValid;
+  } else {
+    return {
+            TAG: /* Ok */0,
+            _0: {
+              TAG: /* InProgress */1,
+              _0: {
+                attacker: game.attacker,
+                defender: game.defender,
+                players: Belt_List.map(game.players, (function (p) {
+                        return {
+                                id: p.id,
+                                sessionId: p.sessionId,
+                                cards: Player.removeCard(p, by)
+                              };
+                      })),
+                trump: game.trump,
+                deck: game.deck,
+                table: Belt_List.map(game.table, (function (param) {
+                        var firstCard = param[0];
+                        if (Card.isCardEquals(firstCard, to)) {
+                          return [
+                                  firstCard,
+                                  by
+                                ];
+                        } else {
+                          return [
+                                  firstCard,
+                                  param[1]
+                                ];
+                        }
+                      })),
+                pass: /* [] */0
+              }
+            }
           };
   }
 }
@@ -411,6 +384,7 @@ export {
   isValidMove ,
   move ,
   isValidPass ,
+  finishRound ,
   pass ,
   isValidBeat ,
   beat ,

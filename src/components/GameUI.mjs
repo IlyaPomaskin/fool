@@ -133,8 +133,17 @@ function GameUI$ClientUI(Props) {
               });
   };
   var isDef = GameUtils.isDefender(game, player);
-  console.log(player.id, game.attacker, game.defender);
-  console.log(GameUtils.isDefender(game, player), GameUtils.isAttacker(game, player));
+  React.useEffect((function () {
+          if (!isDef && (Belt_Option.isSome(toBeat) || Belt_Option.isSome(beatBy))) {
+            Curry._1(setBeat, (function (param) {
+                    return [
+                            undefined,
+                            undefined
+                          ];
+                  }));
+          }
+          
+        }), [isDef]);
   var match$2 = GameUtils.isAttacker(game, player);
   return React.createElement("div", {
               className: UiUtils.cx([
@@ -157,8 +166,8 @@ function GameUI$ClientUI(Props) {
                                         })), false);
                       }),
                     isCardDisabled: (function (by) {
-                        if (beatBy !== undefined) {
-                          return Card.isValidTableBeat(beatBy, by, game.trump);
+                        if (toBeat !== undefined) {
+                          return !Card.isValidTableBeat(toBeat, by, game.trump);
                         } else {
                           return false;
                         }
@@ -202,7 +211,7 @@ function GameUI$ClientUI(Props) {
                           }),
                         isCardDisabled: (function (to) {
                             if (beatBy !== undefined) {
-                              return Card.isValidTableBeat(to, beatBy, game.trump);
+                              return !Card.isValidTableBeat(to, beatBy, game.trump);
                             } else {
                               return false;
                             }
@@ -211,7 +220,7 @@ function GameUI$ClientUI(Props) {
                         onCardClick: (function (param) {
                             return handleSelectToBeat(true, param);
                           })
-                      }) : null));
+                      }) : null), React.createElement("div", undefined, UiUtils.uiStr("to: " + Belt_Option.getWithDefault(Belt_Option.map(toBeat, Card.cardToString), "None")), UiUtils.uiStr(" by: " + Belt_Option.getWithDefault(Belt_Option.map(beatBy, Card.cardToString), "None"))));
 }
 
 var ClientUI = {
@@ -229,19 +238,16 @@ function GameUI$InProgressUI(Props) {
                       player: game.defender
                     })), React.createElement("div", undefined, UiUtils.uiList(game.players, (function (p) {
                         return React.createElement("div", {
-                                    key: p.id
+                                    key: p.id,
+                                    className: "inline-block mr-3"
                                   }, React.createElement(PlayerUI.Short.make, {
                                         className: "inline-block",
                                         player: p
-                                      }), UiUtils.uiStr(" Cards: " + String(Belt_List.length(p.cards))), UiUtils.uiStr(GameUtils.isPassed(game, p) ? " pass" : ""), UiUtils.uiStr(GameUtils.isAttacker(game, p) ? " ATT" : ""), UiUtils.uiStr(GameUtils.isDefender(game, p) ? " DEF" : ""));
+                                      }), UiUtils.uiStr(" (" + String(Belt_List.length(p.cards)) + ")"), UiUtils.uiStr(GameUtils.isPassed(game, p) ? " (pass) " : ""), UiUtils.uiStr(GameUtils.isAttacker(game, p) ? " (ATT) " : ""), UiUtils.uiStr(GameUtils.isDefender(game, p) ? " (DEF) " : ""));
                       }))), React.createElement("div", undefined, UiUtils.uiStr("Trump: "), React.createElement(CardUI.trump, {
                       suit: game.trump,
                       className: "inline-block"
                     })), React.createElement("div", undefined, UiUtils.uiStr("Deck: " + String(Belt_List.length(game.deck)))), React.createElement("div", {
-                  className: "my-2"
-                }, UiUtils.uiStr("Table:"), React.createElement(CardUI.table, {
-                      table: game.table
-                    })), React.createElement("div", {
                   className: "flex flex-wrap"
                 }, UiUtils.uiList(game.players, (function (p) {
                         return React.createElement(GameUI$ClientUI, {

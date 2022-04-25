@@ -59,6 +59,14 @@ let isPlayerDone = (game: inProgress, player: player) => {
   Card.isDeckEmpty(game.deck) && Card.isDeckEmpty(player.cards)
 }
 
+let isPlayerLose = (game: inProgress, player: player) => {
+  let playersWithCards = game.players->List.keep(p => p.cards->List.length > 0)
+  let isOnlyOnePlayerLeft = playersWithCards->List.length === 1
+  let isCurrentPlayerLeft = game.players->List.has(player, Utils.equals)
+
+  isOnlyOnePlayerLeft && isCurrentPlayerLeft
+}
+
 let isCanTake = (game: inProgress, player: player) => {
   isDefender(game, player) && isTableHasCards(game) && !isAllTableBeaten(game)
 }
@@ -76,4 +84,8 @@ let isPassed = (game: inProgress, player: player) => {
 
 let isAllPassed = (game: inProgress) => {
   game.players->List.keep(p => !isDefender(game, p))->List.every(isPassed(game))
+}
+
+let isMaximumTableCards = (game: inProgress) => {
+  game.table->List.length === 6
 }
