@@ -3,7 +3,7 @@
 import * as Caml from "rescript/lib/es6/caml.js";
 import * as Card from "./Card.mjs";
 import * as Deck from "./Deck.mjs";
-import * as Utils from "./Utils.mjs";
+import * as Utils from "../Utils.mjs";
 import * as Js_math from "rescript/lib/es6/js_math.js";
 import * as Belt_List from "rescript/lib/es6/belt_List.js";
 import * as Belt_Array from "rescript/lib/es6/belt_Array.js";

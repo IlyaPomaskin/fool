@@ -2,10 +2,10 @@
 
 import * as Game from "./fool/Game.mjs";
 import * as Curry from "rescript/lib/es6/curry.js";
+import * as Utils from "./Utils.mjs";
 import * as React from "react";
 import * as GameUI from "./components/GameUI.mjs";
 import * as Player from "./fool/Player.mjs";
-import * as UiUtils from "./UiUtils.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Belt_Result from "rescript/lib/es6/belt_Result.js";
 
@@ -67,14 +67,14 @@ function $$default(p) {
     }
   };
   if (game.TAG === /* InLobby */0) {
-    return React.createElement("div", undefined, UiUtils.uiStr("In lobby"));
+    return React.createElement("div", undefined, Utils.uiStr("In lobby"));
   } else {
     return React.createElement("div", undefined, React.createElement(GameUI.InProgressUI.make, {
                     game: game._0,
                     onMove: handleMove
                   }), React.createElement("div", undefined, Belt_Option.getWithDefault(Belt_Option.map(match$1[0], (function (err) {
-                              return UiUtils.uiStr("Error: " + err);
-                            })), UiUtils.uiStr("No errors"))));
+                              return Utils.uiStr("Error: " + err);
+                            })), Utils.uiStr("No errors"))));
   }
 }
 

@@ -1,4 +1,4 @@
-open UiUtils
+open Utils
 open Types
 
 let suitToColor = (suit: suit) =>
@@ -26,7 +26,7 @@ module CardUILocal = {
         "border rounded-md border-solid border-slate-500",
         "cursor-pointer select-none",
         disabled ? "text-slate-300 border-slate-400" : suitToColor(fst(card)),
-        selected ? UiUtils.selected : UiUtils.unselected,
+        selected ? Utils.selected : Utils.unselected,
         className,
       ])}>
       <div className="absolute text-[18px] leading-[18px] inset-1">
@@ -56,7 +56,7 @@ let deck = (
   ~disabled: bool=false,
   ~isCardSelected: card => bool=_ => false,
   ~isCardDisabled: card => bool=_ => false,
-  ~onCardClick: option<card => unit>=?,
+  ~onCardClick: card => unit=noop,
   (),
 ) =>
   switch deck {
@@ -68,9 +68,9 @@ let deck = (
           key={Card.cardToString(card)}
           selected={isCardSelected(card)}
           className="inline-block mx-1"
-          card={card}
+          card
           disabled={disabled || isCardDisabled(card)}
-          onClick={Option.getWithDefault(onCardClick, noop)}
+          onClick={onCardClick}
         />
       )}
     </div>

@@ -2,8 +2,8 @@
 
 import * as Card from "../fool/Card.mjs";
 import * as Curry from "rescript/lib/es6/curry.js";
+import * as Utils from "../Utils.mjs";
 import * as React from "react";
-import * as UiUtils from "../UiUtils.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 
 function suitToColor(suit) {
@@ -27,24 +27,24 @@ function CardUI$CardUILocal(Props) {
   var className = classNameOpt !== undefined ? classNameOpt : "";
   var disabled = disabledOpt !== undefined ? disabledOpt : false;
   var selected = selectedOpt !== undefined ? selectedOpt : false;
-  var onClick = onClickOpt !== undefined ? onClickOpt : UiUtils.noop;
+  var onClick = onClickOpt !== undefined ? onClickOpt : Utils.noop;
   return React.createElement("div", {
-              className: UiUtils.cx([
+              className: Utils.cx([
                     "relative w-12 h-16",
                     "border rounded-md border-solid border-slate-500",
                     "cursor-pointer select-none",
                     disabled ? "text-slate-300 border-slate-400" : suitToColor(card[0]),
-                    selected ? UiUtils.selected : UiUtils.unselected,
+                    selected ? Utils.selected : Utils.unselected,
                     className
                   ]),
-              onClick: disabled ? UiUtils.noop : (function (param) {
+              onClick: disabled ? Utils.noop : (function (param) {
                     return Curry._1(onClick, card);
                   })
             }, React.createElement("div", {
                   className: "absolute text-[18px] leading-[18px] inset-1"
-                }, UiUtils.uiStr(Card.suitToString(card[0]))), React.createElement("div", {
+                }, Utils.uiStr(Card.suitToString(card[0]))), React.createElement("div", {
                   className: "absolute top-1/2 left-1/2 font-bold text-[18px] leading-[18px] translate-y-[-50%] translate-x-[-50%]"
-                }, UiUtils.uiStr(Card.rankToString(card[1]))));
+                }, Utils.uiStr(Card.rankToString(card[1]))));
 }
 
 var CardUILocal = {
@@ -56,7 +56,7 @@ function make(classNameOpt, card, onClick, param) {
   return React.createElement(CardUI$CardUILocal, {
               className: className,
               card: card,
-              onClick: Belt_Option.getWithDefault(onClick, UiUtils.noop)
+              onClick: Belt_Option.getWithDefault(onClick, Utils.noop)
             });
 }
 
@@ -65,11 +65,11 @@ function CardUI$trump(Props) {
   var classNameOpt = Props.className;
   var className = classNameOpt !== undefined ? classNameOpt : "";
   return React.createElement("div", {
-              className: UiUtils.cx([
+              className: Utils.cx([
                     className,
                     suitToColor(suit)
                   ])
-            }, UiUtils.uiStr(Card.suitToString(suit)));
+            }, Utils.uiStr(Card.suitToString(suit)));
 }
 
 function CardUI$deck(Props) {
@@ -78,7 +78,7 @@ function CardUI$deck(Props) {
   var disabledOpt = Props.disabled;
   var isCardSelectedOpt = Props.isCardSelected;
   var isCardDisabledOpt = Props.isCardDisabled;
-  var onCardClick = Props.onCardClick;
+  var onCardClickOpt = Props.onCardClick;
   var className = classNameOpt !== undefined ? classNameOpt : "";
   var disabled = disabledOpt !== undefined ? disabledOpt : false;
   var isCardSelected = isCardSelectedOpt !== undefined ? isCardSelectedOpt : (function (param) {
@@ -87,26 +87,27 @@ function CardUI$deck(Props) {
   var isCardDisabled = isCardDisabledOpt !== undefined ? isCardDisabledOpt : (function (param) {
         return false;
       });
+  var onCardClick = onCardClickOpt !== undefined ? onCardClickOpt : Utils.noop;
   if (deck) {
     return React.createElement("div", {
-                className: UiUtils.cx([
+                className: Utils.cx([
                       className,
                       "leading"
                     ])
-              }, UiUtils.uiList(deck, (function (card) {
+              }, Utils.uiList(deck, (function (card) {
                       return React.createElement(CardUI$CardUILocal, {
                                   className: "inline-block mx-1",
                                   disabled: disabled || Curry._1(isCardDisabled, card),
                                   selected: Curry._1(isCardSelected, card),
                                   card: card,
-                                  onClick: Belt_Option.getWithDefault(onCardClick, UiUtils.noop),
+                                  onClick: onCardClick,
                                   key: Card.cardToString(card)
                                 });
                     })));
   } else {
     return React.createElement("div", {
                 className: className
-              }, UiUtils.uiStr("No cards in deck"));
+              }, Utils.uiStr("No cards in deck"));
   }
 }
 
@@ -123,10 +124,10 @@ function CardUI$table(Props) {
   var isCardDisabled = isCardDisabledOpt !== undefined ? isCardDisabledOpt : (function (param) {
         return false;
       });
-  var onCardClick = onCardClickOpt !== undefined ? onCardClickOpt : UiUtils.noop;
+  var onCardClick = onCardClickOpt !== undefined ? onCardClickOpt : Utils.noop;
   return React.createElement("div", {
               className: className
-            }, table ? UiUtils.uiList(table, (function (param) {
+            }, table ? Utils.uiList(table, (function (param) {
                       var by = param[1];
                       var to = param[0];
                       return React.createElement("div", {
@@ -140,8 +141,8 @@ function CardUI$table(Props) {
                                     }), by !== undefined ? React.createElement(CardUI$CardUILocal, {
                                         disabled: Belt_Option.isSome(by),
                                         card: by
-                                      }) : React.createElement("div", undefined, UiUtils.uiStr("None")));
-                    })) : UiUtils.uiStr("Table empty"));
+                                      }) : React.createElement("div", undefined, Utils.uiStr("None")));
+                    })) : Utils.uiStr("Table empty"));
 }
 
 var trump = CardUI$trump;

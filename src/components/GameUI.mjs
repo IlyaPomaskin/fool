@@ -3,10 +3,9 @@
 import * as Card from "../fool/Card.mjs";
 import * as Curry from "rescript/lib/es6/curry.js";
 import * as Table from "../fool/Table.mjs";
-import * as Utils from "../fool/Utils.mjs";
+import * as Utils from "../Utils.mjs";
 import * as React from "react";
 import * as CardUI from "./CardUI.mjs";
-import * as UiUtils from "../UiUtils.mjs";
 import * as PlayerUI from "./PlayerUI.mjs";
 import * as Belt_List from "rescript/lib/es6/belt_List.js";
 import * as GameUtils from "../fool/GameUtils.mjs";
@@ -14,12 +13,12 @@ import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 
 function GameUI$InLobbyUI(Props) {
   var game = Props.game;
-  return React.createElement("div", undefined, UiUtils.uiStr("inLobby"), React.createElement("br", undefined), React.createElement("br", undefined), UiUtils.uiStr("players:"), React.createElement("br", undefined), React.createElement("div", undefined, UiUtils.uiList(game.players, (function (p) {
+  return React.createElement("div", undefined, Utils.uiStr("inLobby"), React.createElement("br", undefined), React.createElement("br", undefined), Utils.uiStr("players:"), React.createElement("br", undefined), React.createElement("div", undefined, Utils.uiList(game.players, (function (p) {
                         return React.createElement(PlayerUI.make, {
                                     player: p,
                                     key: p.id
                                   });
-                      }))), React.createElement("br", undefined), UiUtils.uiStr("ready:"), React.createElement("br", undefined), React.createElement("div", undefined, UiUtils.uiList(game.ready, (function (p) {
+                      }))), React.createElement("br", undefined), Utils.uiStr("ready:"), React.createElement("br", undefined), React.createElement("div", undefined, Utils.uiList(game.ready, (function (p) {
                         return React.createElement(PlayerUI.make, {
                                     player: p,
                                     key: p.id
@@ -40,12 +39,12 @@ function GameUI$Button(Props) {
   var disabled = disabledOpt !== undefined ? disabledOpt : false;
   var pressed = pressedOpt !== undefined ? pressedOpt : false;
   var className = classNameOpt !== undefined ? classNameOpt : "";
-  var onClick = onClickOpt !== undefined ? onClickOpt : UiUtils.noop;
+  var onClick = onClickOpt !== undefined ? onClickOpt : Utils.noop;
   return React.createElement("button", {
-              className: UiUtils.cx([
+              className: Utils.cx([
                     className,
                     "p-1 border rounded-md border-solid border-slate-500 bg-slate-100 shadow-sm hover:shadow-md",
-                    pressed ? UiUtils.selected : "",
+                    pressed ? Utils.selected : "",
                     disabled ? "border-slate-400 text-slate-400 cursor-not-allowed shadow-none hover:shadow-none" : ""
                   ]),
               disabled: disabled,
@@ -184,13 +183,13 @@ function GameUI$ClientUI(Props) {
             });
         break;
     case /* Done */1 :
-        tmp = UiUtils.uiStr("Done");
+        tmp = Utils.uiStr("Done");
         break;
     case /* Lose */2 :
-        tmp = UiUtils.uiStr("Lose");
+        tmp = Utils.uiStr("Lose");
         break;
     case /* Draw */3 :
-        tmp = UiUtils.uiStr("Draw");
+        tmp = Utils.uiStr("Draw");
         break;
     
   }
@@ -219,17 +218,17 @@ function GameUI$ClientUI(Props) {
     tmp$1 = null;
   }
   return React.createElement("div", {
-              className: UiUtils.cx([
+              className: Utils.cx([
                     className,
                     "p-1 border rounded-md border-solid border-slate-500"
                   ])
             }, React.createElement("div", {
                   className: "mb-1"
-                }, UiUtils.uiStr("Player: "), React.createElement(PlayerUI.Short.make, {
+                }, Utils.uiStr("Player: "), React.createElement(PlayerUI.Short.make, {
                       className: "inline-block",
                       player: player
-                    }), isDef ? UiUtils.uiStr(" def") : (
-                    match$2 ? UiUtils.uiStr(" att") : null
+                    }), isDef ? Utils.uiStr(" def") : (
+                    match$2 ? Utils.uiStr(" att") : null
                   )), tmp, React.createElement("div", {
                   className: "grid grid-flow-col gap-1"
                 }, React.createElement(GameUI$Button, {
@@ -241,18 +240,18 @@ function GameUI$ClientUI(Props) {
                                       _0: player
                                     });
                         }),
-                      children: UiUtils.uiStr("pass")
+                      children: Utils.uiStr("pass")
                     }), React.createElement(GameUI$Button, {
                       disabled: !GameUtils.isCanTake(game, player),
                       onClick: handleTake,
-                      children: UiUtils.uiStr("take")
+                      children: Utils.uiStr("take")
                     }), React.createElement(GameUI$Button, {
                       disabled: !isDef || Belt_Option.isNone(toBeat) || Belt_Option.isNone(beatBy),
                       onClick: handleBeat,
-                      children: UiUtils.uiStr("beat")
+                      children: Utils.uiStr("beat")
                     })), React.createElement("div", {
                   className: "mt-1"
-                }, tmp$1), React.createElement("div", undefined, UiUtils.uiStr("to: " + Belt_Option.getWithDefault(Belt_Option.map(toBeat, Card.cardToString), "None")), UiUtils.uiStr(" by: " + Belt_Option.getWithDefault(Belt_Option.map(beatBy, Card.cardToString), "None"))));
+                }, tmp$1), React.createElement("div", undefined, Utils.uiStr("to: " + Belt_Option.getWithDefault(Belt_Option.map(toBeat, Card.cardToString), "None")), Utils.uiStr(" by: " + Belt_Option.getWithDefault(Belt_Option.map(beatBy, Card.cardToString), "None"))));
 }
 
 var ClientUI = {
@@ -262,26 +261,26 @@ var ClientUI = {
 function GameUI$InProgressUI(Props) {
   var game = Props.game;
   var onMove = Props.onMove;
-  return React.createElement("div", undefined, React.createElement("div", undefined, UiUtils.uiStr("Attacker: "), React.createElement(PlayerUI.Short.make, {
+  return React.createElement("div", undefined, React.createElement("div", undefined, Utils.uiStr("Attacker: "), React.createElement(PlayerUI.Short.make, {
                       className: "inline-block",
                       player: game.attacker
-                    })), React.createElement("div", undefined, UiUtils.uiStr("Defender: "), React.createElement(PlayerUI.Short.make, {
+                    })), React.createElement("div", undefined, Utils.uiStr("Defender: "), React.createElement(PlayerUI.Short.make, {
                       className: "inline-block",
                       player: game.defender
-                    })), React.createElement("div", undefined, UiUtils.uiList(game.players, (function (p) {
+                    })), React.createElement("div", undefined, Utils.uiList(game.players, (function (p) {
                         return React.createElement("div", {
                                     key: p.id,
                                     className: "inline-block mr-3"
                                   }, React.createElement(PlayerUI.Short.make, {
                                         className: "inline-block",
                                         player: p
-                                      }), UiUtils.uiStr(" (" + String(Belt_List.length(p.cards)) + ")"), UiUtils.uiStr(GameUtils.isPassed(game, p) ? " (pass) " : ""), UiUtils.uiStr(GameUtils.isAttacker(game, p) ? " (ATT) " : ""), UiUtils.uiStr(GameUtils.isDefender(game, p) ? " (DEF) " : ""));
-                      }))), React.createElement("div", undefined, UiUtils.uiStr("Trump: "), React.createElement(CardUI.trump, {
+                                      }), Utils.uiStr(" (" + String(Belt_List.length(p.cards)) + ")"), Utils.uiStr(GameUtils.isPassed(game, p) ? " (pass) " : ""), Utils.uiStr(GameUtils.isAttacker(game, p) ? " (ATT) " : ""), Utils.uiStr(GameUtils.isDefender(game, p) ? " (DEF) " : ""));
+                      }))), React.createElement("div", undefined, Utils.uiStr("Trump: "), React.createElement(CardUI.trump, {
                       suit: game.trump,
                       className: "inline-block"
-                    })), React.createElement("div", undefined, UiUtils.uiStr("Deck: " + String(Belt_List.length(game.deck)))), React.createElement("div", {
+                    })), React.createElement("div", undefined, Utils.uiStr("Deck: " + String(Belt_List.length(game.deck)))), React.createElement("div", {
                   className: "flex flex-wrap"
-                }, UiUtils.uiList(game.players, (function (p) {
+                }, Utils.uiList(game.players, (function (p) {
                         return React.createElement(GameUI$ClientUI, {
                                     className: "m-1 flex-initial w-96",
                                     player: p,

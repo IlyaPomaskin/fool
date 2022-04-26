@@ -1,5 +1,5 @@
 open Types
-open UiUtils
+open Utils
 
 let players = list{Player.make("aaa"), Player.make("bbb"), Player.make("ccc")}
 
@@ -36,7 +36,8 @@ let default = (p: props) => {
   }
 
   switch game {
-  | InProgress(g) => <div>
+  | InProgress(g) =>
+    <div>
       <GameUI.InProgressUI game={g} onMove={handleMove} />
       <div>
         {error

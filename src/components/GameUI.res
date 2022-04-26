@@ -1,4 +1,4 @@
-open UiUtils
+open Utils
 open Types
 
 module InLobbyUI = {

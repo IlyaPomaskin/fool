@@ -1,4 +1,4 @@
-open UiUtils
+open Utils
 open Types
 
 module Short = {
@@ -11,17 +11,9 @@ module Short = {
 }
 
 @react.component
-let make = (~className: string="", ~player: player, ~onCardClick: option<card => unit>=?, ()) => {
+let make = (~className: string="", ~player: player, ~onCardClick: card => unit=noop, ()) => {
   <div className={className}>
     <Short player={player} />
-    <div>
-      <CardUI.deck
-        deck={player.cards}
-        onCardClick={switch onCardClick {
-        | Some(fn) => fn
-        | None => _ => ()
-        }}
-      />
-    </div>
+    <div> <CardUI.deck deck={player.cards} onCardClick={onCardClick} /> </div>
   </div>
 }
