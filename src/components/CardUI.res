@@ -9,7 +9,7 @@ let suitToColor = (suit: suit) =>
   | Diamonds => "text-red-900 dark:text-cyan-300"
   }
 
-module CardUIBase = {
+module Base = {
   @react.component
   let make = (
     ~className: string="",
@@ -34,7 +34,7 @@ module CardUIBase = {
   }
 }
 
-module CardUILocal = {
+module Local = {
   @react.component
   let make = (
     ~className: string="",
@@ -44,11 +44,16 @@ module CardUILocal = {
     ~onClick: card => unit=noop,
     (),
   ) => {
-    <CardUIBase
+    <Base
       disabled
       selected
-      className={cx([className, disabled ? "text-slate-300" : suitToColor(fst(card))])}
+      className={cx([
+        className,
+        disabled ? "text-slate-300" : suitToColor(fst(card)),
+        "overflow-hidden",
+      ])}
       onClick={_ => onClick(card)}>
+      <div className="absolute w-full h-full bg-gradient-to-tl from-purple-200 to-pink-200 " />
       <div className="absolute text-[18px] leading-[18px] inset-1">
         {uiStr(Card.suitToString(fst(card)))}
       </div>
@@ -57,22 +62,24 @@ module CardUILocal = {
         "font-bold text-[18px] leading-[18px] " ++ "translate-y-[-50%] translate-x-[-50%]"}>
         {uiStr(Card.rankToString(snd(card)))}
       </div>
-    </CardUIBase>
+    </Base>
+  }
+}
+
+module Empty = {
+  @react.component
+  let make = (~className: string="", ~onClick: card => unit=noop) => {
+    <Base className={cx([className, "overflow-hidden"])} onClick>
+      <div
+        className="absolute w-full h-full bg-gradient-to-tl from-purple-500 to-pink-500 bg-opacity-50"
+      />
+    </Base>
   }
 }
 
 @react.component
-let empty = (~className: string="", ~onClick: card => unit=noop) => {
-  <CardUIBase className={cx([className, "overflow-hidden"])} onClick>
-    <div
-      className="absolute w-full h-full bg-gradient-to-tl from-purple-400 to-pink-400 bg-opacity-50"
-    />
-  </CardUIBase>
-}
-
-@react.component
 let make = (~className: string="", ~card: card, ~onClick: card => unit=noop) => {
-  <CardUILocal className onClick card />
+  <Local className onClick card />
 }
 
 @react.component
@@ -94,7 +101,7 @@ let deck = (
   | _ =>
     <div className={cx([className, "leading"])}>
       {deck->uiList(card =>
-        <CardUILocal
+        <Local
           key={Card.cardToString(card)}
           selected={isCardSelected(card)}
           className="inline-block mx-1"
@@ -123,15 +130,16 @@ let table = (
           className="inline-block mx-1"
           key={Card.cardToString(to) ++
           by->Option.map(Card.cardToString)->Option.getWithDefault("")}>
-          <CardUILocal
+          <Local
+            className="mb-1"
             selected={isCardSelected(to)}
             card={to}
             disabled={Option.isSome(by) || isCardDisabled(to)}
             onClick={onCardClick}
           />
           {switch by {
-          | Some(byCard) => <CardUILocal disabled={Option.isSome(by)} card={byCard} />
-          | None => <div> {uiStr("None")} </div>
+          | Some(byCard) => <Local disabled={Option.isSome(by)} card={byCard} />
+          | None => <Empty />
           }}
         </div>
       )

@@ -39,7 +39,6 @@ let default = (p: props) => {
   | InProgress(game) =>
     <div>
       <GameUI.InProgressUI game={game} />
-      <CardUI.empty />
       <div className="flex flex-wrap">
         {game.players->uiList(player =>
           <ClientUI

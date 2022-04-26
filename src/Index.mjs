@@ -4,7 +4,6 @@ import * as Game from "./fool/Game.mjs";
 import * as Curry from "rescript/lib/es6/curry.js";
 import * as Utils from "./Utils.mjs";
 import * as React from "react";
-import * as CardUI from "./components/CardUI.mjs";
 import * as GameUI from "./components/GameUI.mjs";
 import * as Player from "./fool/Player.mjs";
 import * as ClientUI from "./components/ClientUI.mjs";
@@ -74,7 +73,7 @@ function $$default(p) {
   var game$1 = game._0;
   return React.createElement("div", undefined, React.createElement(GameUI.InProgressUI.make, {
                   game: game$1
-                }), React.createElement(CardUI.empty, {}), React.createElement("div", {
+                }), React.createElement("div", {
                   className: "flex flex-wrap"
                 }, Utils.uiList(game$1.players, (function (player) {
                         return React.createElement(ClientUI.make, {

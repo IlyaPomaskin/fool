@@ -18,7 +18,7 @@ function suitToColor(suit) {
   }
 }
 
-function CardUI$CardUIBase(Props) {
+function CardUI$Base(Props) {
   var classNameOpt = Props.className;
   var disabledOpt = Props.disabled;
   var selectedOpt = Props.selected;
@@ -41,11 +41,11 @@ function CardUI$CardUIBase(Props) {
             }, children);
 }
 
-var CardUIBase = {
-  make: CardUI$CardUIBase
+var Base = {
+  make: CardUI$Base
 };
 
-function CardUI$CardUILocal(Props) {
+function CardUI$Local(Props) {
   var classNameOpt = Props.className;
   var disabledOpt = Props.disabled;
   var selectedOpt = Props.selected;
@@ -55,10 +55,11 @@ function CardUI$CardUILocal(Props) {
   var disabled = disabledOpt !== undefined ? disabledOpt : false;
   var selected = selectedOpt !== undefined ? selectedOpt : false;
   var onClick = onClickOpt !== undefined ? onClickOpt : Utils.noop;
-  return React.createElement(CardUI$CardUIBase, {
+  return React.createElement(CardUI$Base, {
               className: Utils.cx([
                     className,
-                    disabled ? "text-slate-300" : suitToColor(card[0])
+                    disabled ? "text-slate-300" : suitToColor(card[0]),
+                    "overflow-hidden"
                   ]),
               disabled: disabled,
               selected: selected,
@@ -67,32 +68,38 @@ function CardUI$CardUILocal(Props) {
                 }),
               children: null
             }, React.createElement("div", {
+                  className: "absolute w-full h-full bg-gradient-to-tl from-purple-200 to-pink-200 "
+                }), React.createElement("div", {
                   className: "absolute text-[18px] leading-[18px] inset-1"
                 }, Utils.uiStr(Card.suitToString(card[0]))), React.createElement("div", {
                   className: "absolute top-1/2 left-1/2 font-bold text-[18px] leading-[18px] translate-y-[-50%] translate-x-[-50%]"
                 }, Utils.uiStr(Card.rankToString(card[1]))));
 }
 
-var CardUILocal = {
-  make: CardUI$CardUILocal
+var Local = {
+  make: CardUI$Local
 };
 
-function CardUI$empty(Props) {
+function CardUI$Empty(Props) {
   var classNameOpt = Props.className;
   var onClickOpt = Props.onClick;
   var className = classNameOpt !== undefined ? classNameOpt : "";
   var onClick = onClickOpt !== undefined ? onClickOpt : Utils.noop;
-  return React.createElement(CardUI$CardUIBase, {
+  return React.createElement(CardUI$Base, {
               className: Utils.cx([
                     className,
                     "overflow-hidden"
                   ]),
               onClick: onClick,
               children: React.createElement("div", {
-                    className: "absolute w-full h-full bg-gradient-to-tl from-purple-400 to-pink-400 bg-opacity-50"
+                    className: "absolute w-full h-full bg-gradient-to-tl from-purple-500 to-pink-500 bg-opacity-50"
                   })
             });
 }
+
+var Empty = {
+  make: CardUI$Empty
+};
 
 function CardUI(Props) {
   var classNameOpt = Props.className;
@@ -100,7 +107,7 @@ function CardUI(Props) {
   var onClickOpt = Props.onClick;
   var className = classNameOpt !== undefined ? classNameOpt : "";
   var onClick = onClickOpt !== undefined ? onClickOpt : Utils.noop;
-  return React.createElement(CardUI$CardUILocal, {
+  return React.createElement(CardUI$Local, {
               className: className,
               card: card,
               onClick: onClick
@@ -142,7 +149,7 @@ function CardUI$deck(Props) {
                       "leading"
                     ])
               }, Utils.uiList(deck, (function (card) {
-                      return React.createElement(CardUI$CardUILocal, {
+                      return React.createElement(CardUI$Local, {
                                   className: "inline-block mx-1",
                                   disabled: disabled || Curry._1(isCardDisabled, card),
                                   selected: Curry._1(isCardSelected, card),
@@ -180,19 +187,18 @@ function CardUI$table(Props) {
                       return React.createElement("div", {
                                   key: Card.cardToString(to) + Belt_Option.getWithDefault(Belt_Option.map(by, Card.cardToString), ""),
                                   className: "inline-block mx-1"
-                                }, React.createElement(CardUI$CardUILocal, {
+                                }, React.createElement(CardUI$Local, {
+                                      className: "mb-1",
                                       disabled: Belt_Option.isSome(by) || Curry._1(isCardDisabled, to),
                                       selected: Curry._1(isCardSelected, to),
                                       card: to,
                                       onClick: onCardClick
-                                    }), by !== undefined ? React.createElement(CardUI$CardUILocal, {
+                                    }), by !== undefined ? React.createElement(CardUI$Local, {
                                         disabled: Belt_Option.isSome(by),
                                         card: by
-                                      }) : React.createElement("div", undefined, Utils.uiStr("None")));
+                                      }) : React.createElement(CardUI$Empty, {}));
                     })) : Utils.uiStr("Table empty"));
 }
-
-var empty = CardUI$empty;
 
 var make = CardUI;
 
@@ -204,9 +210,9 @@ var table = CardUI$table;
 
 export {
   suitToColor ,
-  CardUIBase ,
-  CardUILocal ,
-  empty ,
+  Base ,
+  Local ,
+  Empty ,
   make ,
   trump ,
   deck ,
