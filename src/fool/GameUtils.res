@@ -13,7 +13,7 @@ let isPlayerHasCard = (player: player, card: card) => {
 }
 
 let isCorrectAdditionalCard = (game: inProgress, card: card) => {
-  game.table->Table.getFlatCards->List.has(card, Card.isCardEqualsByRank)
+  game.table->Table.getFlatCards->List.has(card, Card.isEqualsByRank)
 }
 
 let isPlayerCanMove = (game: inProgress, player: player) => {
@@ -43,7 +43,7 @@ let getTrump = (deck: deck, players: list<player>) => {
 }
 
 let isPlayerDone = (game: inProgress, player: player) => {
-  Card.isDeckEmpty(game.deck) && Card.isDeckEmpty(player.cards)
+  Deck.isEmpty(game.deck) && Deck.isEmpty(player.cards)
 }
 
 let isPlayerLose = (game: inProgress, player: player) => {
@@ -64,7 +64,7 @@ let isCanPass = (game: inProgress, player: player) => {
 
 let isPassed = (game: inProgress, player: player) => {
   let inPassedList = game.pass->List.has(player, Utils.equals)
-  let hasCards = !Card.isDeckEmpty(player.cards)
+  let hasCards = !Deck.isEmpty(player.cards)
 
   hasCards ? inPassedList : true
 }
@@ -74,12 +74,12 @@ let isAllPassed = (game: inProgress) => {
 }
 
 let getPlayerGameState = (game: inProgress, player: player) => {
-  let isThereCardsInDeck = !Card.isDeckEmpty(game.deck)
-  let isPlayerHasCards = !Card.isDeckEmpty(player.cards)
+  let isThereCardsInDeck = !Deck.isEmpty(game.deck)
+  let isPlayerHasCards = !Deck.isEmpty(player.cards)
   let isOtherPlayersHasCards =
     game.players
     ->List.keep(p => !Utils.equals(p, player))
-    ->List.keep(p => !Card.isDeckEmpty(p.cards))
+    ->List.keep(p => !Deck.isEmpty(p.cards))
     ->List.length > 0
 
   switch (isThereCardsInDeck, isOtherPlayersHasCards, isPlayerHasCards) {

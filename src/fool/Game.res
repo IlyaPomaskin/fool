@@ -17,7 +17,7 @@ let enterGame = (game: inLobby, player: player) => InLobby({
 })
 
 let startGame = (game: inLobby): result<state, string> => {
-  let (players, deck) = Player.dealDeckToPlayers(Card.makeShuffledDeck(), game.players)
+  let (players, deck) = Player.dealDeckToPlayers(Deck.makeShuffled(), game.players)
 
   let trump = getTrump(deck, players)
   let attacker = trump->Option.flatMap(tr => Player.findFirstAttacker(tr, players))
@@ -124,7 +124,7 @@ let isValidBeat = (game: inProgress, to: card, by: card, player: player) => {
     Error("Is not deffender")
   } else if !isPlayerHasCard(player, by) {
     Error("Player dont have card")
-  } else if !Card.isValidTableBeat(to, by, game.trump) {
+  } else if !Card.isValidBeat(to, by, game.trump) {
     Error("Invalid card beat")
   } else {
     Ok(InProgress(game))
@@ -143,7 +143,7 @@ let beat = (game: inProgress, to: card, by: card, player: player) => {
           ...game,
           pass: list{},
           table: game.table->List.map(((firstCard, secondCard)) => {
-            if Card.isCardEquals(firstCard, to) {
+            if Card.isEquals(firstCard, to) {
               (firstCard, Some(by))
             } else {
               (firstCard, secondCard)

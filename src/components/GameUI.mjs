@@ -170,7 +170,7 @@ function GameUI$ClientUI(Props) {
         };
         var isCardDisabled = function (by) {
           return Belt_Option.getWithDefault(Belt_Option.map(toBeat, (function (to) {
-                            return !Card.isValidTableBeat(to, by, game.trump);
+                            return !Card.isValidBeat(to, by, game.trump);
                           })), false);
         };
         tmp = React.createElement(CardUI.deck, {
@@ -203,7 +203,7 @@ function GameUI$ClientUI(Props) {
     };
     var isCardDisabled$1 = function (to) {
       return Belt_Option.getWithDefault(Belt_Option.map(beatBy, (function (by) {
-                        return !Card.isValidTableBeat(to, by, game.trump);
+                        return !Card.isValidBeat(to, by, game.trump);
                       })), false);
     };
     tmp$1 = React.createElement(CardUI.table, {

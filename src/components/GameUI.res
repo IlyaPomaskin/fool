@@ -114,7 +114,7 @@ module ClientUI = {
 
           let isCardDisabled = by =>
             toBeat
-            ->Option.map(to => !Card.isValidTableBeat(to, by, game.trump))
+            ->Option.map(to => !Card.isValidBeat(to, by, game.trump))
             ->Option.getWithDefault(false)
 
           <CardUI.deck
@@ -149,7 +149,7 @@ module ClientUI = {
 
             let isCardDisabled = to =>
               beatBy
-              ->Option.map(by => !Card.isValidTableBeat(to, by, game.trump))
+              ->Option.map(by => !Card.isValidBeat(to, by, game.trump))
               ->Option.getWithDefault(false)
 
             <CardUI.table

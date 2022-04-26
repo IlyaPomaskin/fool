@@ -27,12 +27,12 @@ let getNextPlayer = (p: player, players: list<player>) => {
 
 let findFirstAttacker = (trump: suit, players: list<player>) => {
   List.reduce(players, List.get(players, 0), (prev, next) => {
-    let prevSmallestCard = Card.getSmallestValuableCard(
+    let prevSmallestCard = Deck.getSmallestValuableCard(
       trump,
       Belt.Option.getWithDefault(Belt.Option.map(prev, a => a.cards), list{}),
     )
-    let nextSmallestCard = Card.getSmallestValuableCard(trump, next.cards)
-    let smallestCard = Card.getSmallestCard(trump, prevSmallestCard, nextSmallestCard)
+    let nextSmallestCard = Deck.getSmallestValuableCard(trump, next.cards)
+    let smallestCard = Card.getSmallest(trump, prevSmallestCard, nextSmallestCard)
 
     smallestCard === nextSmallestCard ? Some(next) : prev
   })
@@ -40,7 +40,7 @@ let findFirstAttacker = (trump: suit, players: list<player>) => {
 
 let dealToPlayer = (deck: deck, player: player) => {
   let requiredCardsAmount = max(0, 6 - List.length(player.cards))
-  let (playerCards, nextDeck) = Card.dealCards(requiredCardsAmount, deck)
+  let (playerCards, nextDeck) = Deck.dealCards(requiredCardsAmount, deck)
 
   ({...player, cards: List.concat(player.cards, playerCards)}, nextDeck)
 }

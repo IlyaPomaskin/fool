@@ -2,6 +2,7 @@
 
 import * as Caml from "rescript/lib/es6/caml.js";
 import * as Card from "./Card.mjs";
+import * as Deck from "./Deck.mjs";
 import * as Utils from "./Utils.mjs";
 import * as Js_math from "rescript/lib/es6/js_math.js";
 import * as Belt_List from "rescript/lib/es6/belt_List.js";
@@ -37,11 +38,11 @@ function getNextPlayer(p, players) {
 
 function findFirstAttacker(trump, players) {
   return Belt_List.reduce(players, Belt_List.get(players, 0), (function (prev, next) {
-                var prevSmallestCard = Card.getSmallestValuableCard(trump, Belt_Option.getWithDefault(Belt_Option.map(prev, (function (a) {
+                var prevSmallestCard = Deck.getSmallestValuableCard(trump, Belt_Option.getWithDefault(Belt_Option.map(prev, (function (a) {
                                 return a.cards;
                               })), /* [] */0));
-                var nextSmallestCard = Card.getSmallestValuableCard(trump, next.cards);
-                var smallestCard = Card.getSmallestCard(trump, prevSmallestCard, nextSmallestCard);
+                var nextSmallestCard = Deck.getSmallestValuableCard(trump, next.cards);
+                var smallestCard = Card.getSmallest(trump, prevSmallestCard, nextSmallestCard);
                 if (smallestCard === nextSmallestCard) {
                   return next;
                 } else {
@@ -52,7 +53,7 @@ function findFirstAttacker(trump, players) {
 
 function dealToPlayer(deck, player) {
   var requiredCardsAmount = Caml.caml_int_max(0, 6 - Belt_List.length(player.cards) | 0);
-  var match = Card.dealCards(requiredCardsAmount, deck);
+  var match = Deck.dealCards(requiredCardsAmount, deck);
   return [
           {
             id: player.id,
