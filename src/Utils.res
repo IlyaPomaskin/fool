@@ -27,3 +27,18 @@ let toggleArrayItem = (list: list<'a>, item: 'a): list<'a> => {
 let lastListItem = (list: list<'a>) => list->List.get(List.size(list) - 1)
 
 let identity = (a: 'a) => a
+
+let rec numbersToEmoji = (number: int) =>
+  switch number {
+  | 0 => `0️⃣`
+  | 1 => `1️⃣`
+  | 2 => `2️⃣`
+  | 3 => `3️⃣`
+  | 4 => `4️⃣`
+  | 5 => `5️⃣`
+  | 6 => `6️⃣`
+  | 7 => `7️⃣`
+  | 8 => `8️⃣`
+  | 9 => `9️⃣`
+  | _ => numbersToEmoji(number / 10) ++ numbersToEmoji(mod(number, 10))
+  }

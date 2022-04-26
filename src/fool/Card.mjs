@@ -92,13 +92,13 @@ function isValidBeat(to, by, trump) {
 function suitToString(suit) {
   switch (suit) {
     case /* Spades */0 :
-        return "♠";
+        return "♤";
     case /* Hearts */1 :
-        return "♥";
+        return "♡";
     case /* Diamonds */2 :
-        return "♦";
+        return "♢";
     case /* Clubs */3 :
-        return "♣";
+        return "♧";
     
   }
 }

@@ -46,10 +46,10 @@ let isValidBeat = (to: card, by: card, trump: suit) => {
 
 let suitToString = (suit: suit) => {
   switch suit {
-  | Spades => `♠`
-  | Hearts => `♥`
-  | Diamonds => `♦`
-  | Clubs => `♣`
+  | Spades => `♤`
+  | Hearts => `♡`
+  | Diamonds => `♢`
+  | Clubs => `♧`
   }
 }
 

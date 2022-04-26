@@ -9,6 +9,31 @@ let suitToColor = (suit: suit) =>
   | Diamonds => "text-red-900 dark:text-cyan-300"
   }
 
+module CardUIBase = {
+  @react.component
+  let make = (
+    ~className: string="",
+    ~disabled: bool=false,
+    ~selected: bool=false,
+    ~onClick: _ => unit=noop,
+    ~children: React.element,
+    (),
+  ) => {
+    <div
+      onClick={disabled ? noop : onClick}
+      className={cx([
+        "relative w-12 h-16",
+        "border rounded-md border-solid border-slate-500",
+        "cursor-pointer select-none",
+        disabled ? "border-slate-400" : "",
+        selected ? Utils.selected : Utils.unselected,
+        className,
+      ])}>
+      children
+    </div>
+  }
+}
+
 module CardUILocal = {
   @react.component
   let make = (
@@ -19,16 +44,11 @@ module CardUILocal = {
     ~onClick: card => unit=noop,
     (),
   ) => {
-    <div
-      onClick={disabled ? noop : _ => onClick(card)}
-      className={cx([
-        "relative w-12 h-16",
-        "border rounded-md border-solid border-slate-500",
-        "cursor-pointer select-none",
-        disabled ? "text-slate-300 border-slate-400" : suitToColor(fst(card)),
-        selected ? Utils.selected : Utils.unselected,
-        className,
-      ])}>
+    <CardUIBase
+      disabled
+      selected
+      className={cx([className, disabled ? "text-slate-300" : suitToColor(fst(card))])}
+      onClick={_ => onClick(card)}>
       <div className="absolute text-[18px] leading-[18px] inset-1">
         {uiStr(Card.suitToString(fst(card)))}
       </div>
@@ -37,12 +57,22 @@ module CardUILocal = {
         "font-bold text-[18px] leading-[18px] " ++ "translate-y-[-50%] translate-x-[-50%]"}>
         {uiStr(Card.rankToString(snd(card)))}
       </div>
-    </div>
+    </CardUIBase>
   }
 }
 
-let make = (~className: string="", ~card: card, ~onClick: option<card => unit>=?, ()) => {
-  <CardUILocal className card onClick={onClick->Option.getWithDefault(noop)} />
+@react.component
+let empty = (~className: string="", ~onClick: card => unit=noop) => {
+  <CardUIBase className={cx([className, "overflow-hidden"])} onClick>
+    <div
+      className="absolute w-full h-full bg-gradient-to-tl from-purple-400 to-pink-400 bg-opacity-50"
+    />
+  </CardUIBase>
+}
+
+@react.component
+let make = (~className: string="", ~card: card, ~onClick: card => unit=noop) => {
+  <CardUILocal className onClick card />
 }
 
 @react.component

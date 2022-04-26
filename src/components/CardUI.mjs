@@ -18,6 +18,33 @@ function suitToColor(suit) {
   }
 }
 
+function CardUI$CardUIBase(Props) {
+  var classNameOpt = Props.className;
+  var disabledOpt = Props.disabled;
+  var selectedOpt = Props.selected;
+  var onClickOpt = Props.onClick;
+  var children = Props.children;
+  var className = classNameOpt !== undefined ? classNameOpt : "";
+  var disabled = disabledOpt !== undefined ? disabledOpt : false;
+  var selected = selectedOpt !== undefined ? selectedOpt : false;
+  var onClick = onClickOpt !== undefined ? onClickOpt : Utils.noop;
+  return React.createElement("div", {
+              className: Utils.cx([
+                    "relative w-12 h-16",
+                    "border rounded-md border-solid border-slate-500",
+                    "cursor-pointer select-none",
+                    disabled ? "border-slate-400" : "",
+                    selected ? Utils.selected : Utils.unselected,
+                    className
+                  ]),
+              onClick: disabled ? Utils.noop : onClick
+            }, children);
+}
+
+var CardUIBase = {
+  make: CardUI$CardUIBase
+};
+
 function CardUI$CardUILocal(Props) {
   var classNameOpt = Props.className;
   var disabledOpt = Props.disabled;
@@ -28,18 +55,17 @@ function CardUI$CardUILocal(Props) {
   var disabled = disabledOpt !== undefined ? disabledOpt : false;
   var selected = selectedOpt !== undefined ? selectedOpt : false;
   var onClick = onClickOpt !== undefined ? onClickOpt : Utils.noop;
-  return React.createElement("div", {
+  return React.createElement(CardUI$CardUIBase, {
               className: Utils.cx([
-                    "relative w-12 h-16",
-                    "border rounded-md border-solid border-slate-500",
-                    "cursor-pointer select-none",
-                    disabled ? "text-slate-300 border-slate-400" : suitToColor(card[0]),
-                    selected ? Utils.selected : Utils.unselected,
-                    className
+                    className,
+                    disabled ? "text-slate-300" : suitToColor(card[0])
                   ]),
-              onClick: disabled ? Utils.noop : (function (param) {
-                    return Curry._1(onClick, card);
-                  })
+              disabled: disabled,
+              selected: selected,
+              onClick: (function (param) {
+                  return Curry._1(onClick, card);
+                }),
+              children: null
             }, React.createElement("div", {
                   className: "absolute text-[18px] leading-[18px] inset-1"
                 }, Utils.uiStr(Card.suitToString(card[0]))), React.createElement("div", {
@@ -51,12 +77,33 @@ var CardUILocal = {
   make: CardUI$CardUILocal
 };
 
-function make(classNameOpt, card, onClick, param) {
+function CardUI$empty(Props) {
+  var classNameOpt = Props.className;
+  var onClickOpt = Props.onClick;
   var className = classNameOpt !== undefined ? classNameOpt : "";
+  var onClick = onClickOpt !== undefined ? onClickOpt : Utils.noop;
+  return React.createElement(CardUI$CardUIBase, {
+              className: Utils.cx([
+                    className,
+                    "overflow-hidden"
+                  ]),
+              onClick: onClick,
+              children: React.createElement("div", {
+                    className: "absolute w-full h-full bg-gradient-to-tl from-purple-400 to-pink-400 bg-opacity-50"
+                  })
+            });
+}
+
+function CardUI(Props) {
+  var classNameOpt = Props.className;
+  var card = Props.card;
+  var onClickOpt = Props.onClick;
+  var className = classNameOpt !== undefined ? classNameOpt : "";
+  var onClick = onClickOpt !== undefined ? onClickOpt : Utils.noop;
   return React.createElement(CardUI$CardUILocal, {
               className: className,
               card: card,
-              onClick: Belt_Option.getWithDefault(onClick, Utils.noop)
+              onClick: onClick
             });
 }
 
@@ -145,6 +192,10 @@ function CardUI$table(Props) {
                     })) : Utils.uiStr("Table empty"));
 }
 
+var empty = CardUI$empty;
+
+var make = CardUI;
+
 var trump = CardUI$trump;
 
 var deck = CardUI$deck;
@@ -153,7 +204,9 @@ var table = CardUI$table;
 
 export {
   suitToColor ,
+  CardUIBase ,
   CardUILocal ,
+  empty ,
   make ,
   trump ,
   deck ,

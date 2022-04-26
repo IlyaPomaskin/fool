@@ -4,8 +4,10 @@ import * as Game from "./fool/Game.mjs";
 import * as Curry from "rescript/lib/es6/curry.js";
 import * as Utils from "./Utils.mjs";
 import * as React from "react";
+import * as CardUI from "./components/CardUI.mjs";
 import * as GameUI from "./components/GameUI.mjs";
 import * as Player from "./fool/Player.mjs";
+import * as ClientUI from "./components/ClientUI.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Belt_Result from "rescript/lib/es6/belt_Result.js";
 
@@ -68,14 +70,23 @@ function $$default(p) {
   };
   if (game.TAG === /* InLobby */0) {
     return React.createElement("div", undefined, Utils.uiStr("In lobby"));
-  } else {
-    return React.createElement("div", undefined, React.createElement(GameUI.InProgressUI.make, {
-                    game: game._0,
-                    onMove: handleMove
-                  }), React.createElement("div", undefined, Belt_Option.getWithDefault(Belt_Option.map(match$1[0], (function (err) {
-                              return Utils.uiStr("Error: " + err);
-                            })), Utils.uiStr("No errors"))));
   }
+  var game$1 = game._0;
+  return React.createElement("div", undefined, React.createElement(GameUI.InProgressUI.make, {
+                  game: game$1
+                }), React.createElement(CardUI.empty, {}), React.createElement("div", {
+                  className: "flex flex-wrap"
+                }, Utils.uiList(game$1.players, (function (player) {
+                        return React.createElement(ClientUI.make, {
+                                    className: "m-1 flex-initial w-96",
+                                    player: player,
+                                    game: game$1,
+                                    onMove: handleMove,
+                                    key: player.id
+                                  });
+                      }))), React.createElement("div", undefined, Belt_Option.getWithDefault(Belt_Option.map(match$1[0], (function (err) {
+                            return Utils.uiStr("Error: " + err);
+                          })), Utils.uiStr("No errors"))));
 }
 
 function getServerSideProps(_ctx) {

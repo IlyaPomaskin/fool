@@ -36,9 +36,17 @@ let default = (p: props) => {
   }
 
   switch game {
-  | InProgress(g) =>
+  | InProgress(game) =>
     <div>
-      <GameUI.InProgressUI game={g} onMove={handleMove} />
+      <GameUI.InProgressUI game={game} />
+      <CardUI.empty />
+      <div className="flex flex-wrap">
+        {game.players->uiList(player =>
+          <ClientUI
+            key={player.id} className="m-1 flex-initial w-96" player game onMove={handleMove}
+          />
+        )}
+      </div>
       <div>
         {error
         ->Option.map(err => uiStr("Error: " ++ err))

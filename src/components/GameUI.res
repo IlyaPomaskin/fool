@@ -20,33 +20,30 @@ module InLobbyUI = {
 
 module InProgressUI = {
   @react.component
-  let make = (~game: inProgress, ~onMove: move => unit) =>
+  let make = (~game: inProgress) =>
     <div>
-      <div>
-        {uiStr("Attacker: ")} <PlayerUI.Short className="inline-block" player={game.attacker} />
-      </div>
-      <div>
-        {uiStr("Defender: ")} <PlayerUI.Short className="inline-block" player={game.defender} />
-      </div>
-      <div>
+      <div className="my-2">
         {game.players->uiList(p =>
-          <div key={p.id} className="inline-block mr-3">
-            <PlayerUI.Short className="inline-block" player={p} />
-            {uiStr(" (" ++ p.cards->List.length->string_of_int ++ ")")}
-            {uiStr(GameUtils.isPassed(game, p) ? " (pass) " : "")}
-            {uiStr(GameUtils.isAttacker(game, p) ? " (ATT) " : "")}
-            {uiStr(GameUtils.isDefender(game, p) ? " (DEF) " : "")}
+          <div key={p.id} className="inline-block mr-4">
+            <div className="grid grid-flow-row gap-1">
+              <PlayerUI.Short className="inline-block" player={p} />
+              <div> {p.cards->List.length->Utils.numbersToEmoji->uiStr} </div>
+              {GameUtils.isPassed(game, p) ? <div> {uiStr(`⏩`)} </div> : React.null}
+              {GameUtils.isAttacker(game, p) ? <div> {uiStr(`🔪`)} </div> : React.null}
+              {GameUtils.isDefender(game, p) ? <div> {uiStr(`🛡️`)} </div> : React.null}
+            </div>
           </div>
         )}
       </div>
-      <div> {uiStr("Trump: ")} <CardUI.trump className="inline-block" suit={game.trump} /> </div>
-      <div> {uiStr("Deck: " ++ game.deck->List.length->string_of_int)} </div>
-      <div className="flex flex-wrap">
-        {game.players->uiList(p =>
-          <ClientUI
-            key={p.id} className="m-1 flex-initial w-96" player={p} game={game} onMove={onMove}
-          />
-        )}
+      <div className="my-2">
+        <div>
+          {uiStr("Deck: " ++ game.deck->List.length->numbersToEmoji)}
+          <span className="mx-1" />
+          {switch lastListItem(game.deck) {
+          | Some(card) => uiStr(Card.cardToString(card))
+          | None => <CardUI.trump className="inline-block" suit={game.trump} />
+          }}
+        </div>
       </div>
     </div>
 }
