@@ -104,21 +104,27 @@ module ClientUI = {
       | Done => uiStr("Done")
       | Lose => uiStr("Lose")
       | Draw => uiStr("Draw")
-      | Playing =>
-        <CardUI.deck
-          disabled={isDef
-            ? !GameUtils.isTableHasCards(game)
-            : !GameUtils.isPlayerCanMove(game, player)}
-          isCardSelected={card =>
-            beatBy->Option.map(Utils.equals(card))->Option.getWithDefault(false)}
-          isCardDisabled={by =>
-            switch toBeat {
-            | Some(to) => !Card.isValidTableBeat(to, by, game.trump)
-            | _ => false
-            }}
-          deck={player.cards}
-          onCardClick={isDef ? handleSelectToBeat(false) : handleMove}
-        />
+      | Playing => {
+          let disabled = isDef
+            ? !Table.hasCards(game.table)
+            : !GameUtils.isPlayerCanMove(game, player)
+
+          let isCardSelected = card =>
+            beatBy->Option.map(Utils.equals(card))->Option.getWithDefault(false)
+
+          let isCardDisabled = by =>
+            toBeat
+            ->Option.map(to => !Card.isValidTableBeat(to, by, game.trump))
+            ->Option.getWithDefault(false)
+
+          <CardUI.deck
+            disabled
+            isCardSelected
+            isCardDisabled
+            deck={player.cards}
+            onCardClick={isDef ? handleSelectToBeat(false) : handleMove}
+          />
+        }
       }}
       <div className="grid grid-flow-col gap-1">
         <Button
@@ -137,19 +143,23 @@ module ClientUI = {
       </div>
       <div className="mt-1">
         {switch isDef {
-        | true =>
-          <CardUI.table
-            isCardSelected={card =>
-              toBeat->Option.map(Utils.equals(card))->Option.getWithDefault(false)}
-            isCardDisabled={to =>
-              switch beatBy {
-              | Some(by) => !Card.isValidTableBeat(to, by, game.trump)
-              | _ => false
-              }}
-            className="my-1"
-            table={game.table}
-            onCardClick={handleSelectToBeat(true)}
-          />
+        | true => {
+            let isCardSelected = card =>
+              toBeat->Option.map(Utils.equals(card))->Option.getWithDefault(false)
+
+            let isCardDisabled = to =>
+              beatBy
+              ->Option.map(by => !Card.isValidTableBeat(to, by, game.trump))
+              ->Option.getWithDefault(false)
+
+            <CardUI.table
+              isCardSelected
+              isCardDisabled
+              className="my-1"
+              table={game.table}
+              onCardClick={handleSelectToBeat(true)}
+            />
+          }
         | false => React.null
         }}
       </div>

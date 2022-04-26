@@ -2,6 +2,7 @@
 
 import * as Card from "../fool/Card.mjs";
 import * as Curry from "rescript/lib/es6/curry.js";
+import * as Table from "../fool/Table.mjs";
 import * as Utils from "../fool/Utils.mjs";
 import * as React from "react";
 import * as CardUI from "./CardUI.mjs";
@@ -161,21 +162,22 @@ function GameUI$ClientUI(Props) {
   var tmp;
   switch (match$3) {
     case /* Playing */0 :
+        var disabled = isDef ? !Table.hasCards(game.table) : !GameUtils.isPlayerCanMove(game, player);
+        var isCardSelected = function (card) {
+          return Belt_Option.getWithDefault(Belt_Option.map(beatBy, (function (param) {
+                            return Utils.equals(card, param);
+                          })), false);
+        };
+        var isCardDisabled = function (by) {
+          return Belt_Option.getWithDefault(Belt_Option.map(toBeat, (function (to) {
+                            return !Card.isValidTableBeat(to, by, game.trump);
+                          })), false);
+        };
         tmp = React.createElement(CardUI.deck, {
               deck: player.cards,
-              disabled: isDef ? !GameUtils.isTableHasCards(game) : !GameUtils.isPlayerCanMove(game, player),
-              isCardSelected: (function (card) {
-                  return Belt_Option.getWithDefault(Belt_Option.map(beatBy, (function (param) {
-                                    return Utils.equals(card, param);
-                                  })), false);
-                }),
-              isCardDisabled: (function (by) {
-                  if (toBeat !== undefined) {
-                    return !Card.isValidTableBeat(toBeat, by, game.trump);
-                  } else {
-                    return false;
-                  }
-                }),
+              disabled: disabled,
+              isCardSelected: isCardSelected,
+              isCardDisabled: isCardDisabled,
               onCardClick: isDef ? (function (param) {
                     return handleSelectToBeat(false, param);
                   }) : handleMove
@@ -191,6 +193,30 @@ function GameUI$ClientUI(Props) {
         tmp = UiUtils.uiStr("Draw");
         break;
     
+  }
+  var tmp$1;
+  if (isDef) {
+    var isCardSelected$1 = function (card) {
+      return Belt_Option.getWithDefault(Belt_Option.map(toBeat, (function (param) {
+                        return Utils.equals(card, param);
+                      })), false);
+    };
+    var isCardDisabled$1 = function (to) {
+      return Belt_Option.getWithDefault(Belt_Option.map(beatBy, (function (by) {
+                        return !Card.isValidTableBeat(to, by, game.trump);
+                      })), false);
+    };
+    tmp$1 = React.createElement(CardUI.table, {
+          className: "my-1",
+          isCardSelected: isCardSelected$1,
+          isCardDisabled: isCardDisabled$1,
+          table: game.table,
+          onCardClick: (function (param) {
+              return handleSelectToBeat(true, param);
+            })
+        });
+  } else {
+    tmp$1 = null;
   }
   return React.createElement("div", {
               className: UiUtils.cx([
@@ -226,25 +252,7 @@ function GameUI$ClientUI(Props) {
                       children: UiUtils.uiStr("beat")
                     })), React.createElement("div", {
                   className: "mt-1"
-                }, isDef ? React.createElement(CardUI.table, {
-                        className: "my-1",
-                        isCardSelected: (function (card) {
-                            return Belt_Option.getWithDefault(Belt_Option.map(toBeat, (function (param) {
-                                              return Utils.equals(card, param);
-                                            })), false);
-                          }),
-                        isCardDisabled: (function (to) {
-                            if (beatBy !== undefined) {
-                              return !Card.isValidTableBeat(to, beatBy, game.trump);
-                            } else {
-                              return false;
-                            }
-                          }),
-                        table: game.table,
-                        onCardClick: (function (param) {
-                            return handleSelectToBeat(true, param);
-                          })
-                      }) : null), React.createElement("div", undefined, UiUtils.uiStr("to: " + Belt_Option.getWithDefault(Belt_Option.map(toBeat, Card.cardToString), "None")), UiUtils.uiStr(" by: " + Belt_Option.getWithDefault(Belt_Option.map(beatBy, Card.cardToString), "None"))));
+                }, tmp$1), React.createElement("div", undefined, UiUtils.uiStr("to: " + Belt_Option.getWithDefault(Belt_Option.map(toBeat, Card.cardToString), "None")), UiUtils.uiStr(" by: " + Belt_Option.getWithDefault(Belt_Option.map(beatBy, Card.cardToString), "None"))));
 }
 
 var ClientUI = {

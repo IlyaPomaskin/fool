@@ -9,3 +9,7 @@ let toggleArrayItem = (list: list<'a>, item: 'a): list<'a> => {
     List.add(list, item)
   }
 }
+
+let lastListItem = (list: list<'a>) => list->List.get(List.size(list) - 1)
+
+let identity = (a: 'a) => a

@@ -13,15 +13,11 @@ let isPlayerHasCard = (player: player, card: card) => {
 }
 
 let isCorrectAdditionalCard = (game: inProgress, card: card) => {
-  game.table->Card.getFlatTableCards->List.has(card, Card.isCardEqualsByRank)
-}
-
-let isTableHasCards = (game: inProgress) => {
-  List.length(game.table) > 0
+  game.table->Table.getFlatCards->List.has(card, Card.isCardEqualsByRank)
 }
 
 let isPlayerCanMove = (game: inProgress, player: player) => {
-  if !isTableHasCards(game) {
+  if !Table.hasCards(game.table) {
     isAttacker(game, player)
   } else if isDefender(game, player) {
     false
@@ -35,23 +31,15 @@ let toggleReady = (game: inLobby, player: player) => InLobby({
   players: Utils.toggleArrayItem(game.players, player),
 })
 
-let lastListItem = (list: list<'a>) => List.get(list, List.size(list) - 1)
-
 let getTrump = (deck: deck, players: list<player>) => {
-  let lastCard = lastListItem(deck)
-  let lastPlayer = lastListItem(players->List.keep(p => List.length(p.cards) != 0))
+  let lastCard = Utils.lastListItem(deck)
+  let lastPlayer = players->List.keep(p => List.length(p.cards) != 0)->Utils.lastListItem
 
   switch (lastCard, lastPlayer) {
   | (Some(card), _) => Some(fst(card))
-  | (None, Some(player)) => Option.map(lastListItem(player.cards), fst)
+  | (None, Some(player)) => player.cards->Utils.lastListItem->Option.map(fst)
   | (None, None) => None
   }
-}
-
-let isAllTableBeaten = (game: inProgress) => {
-  let isBeaten = game.table->List.every(((_, by)) => Option.isSome(by))
-
-  isTableHasCards(game) && isBeaten
 }
 
 let isPlayerDone = (game: inProgress, player: player) => {
@@ -67,11 +55,11 @@ let isPlayerLose = (game: inProgress, player: player) => {
 }
 
 let isCanTake = (game: inProgress, player: player) => {
-  isDefender(game, player) && isTableHasCards(game) && !isAllTableBeaten(game)
+  isDefender(game, player) && Table.hasCards(game.table) && !Table.isAllBeaten(game.table)
 }
 
 let isCanPass = (game: inProgress, player: player) => {
-  isTableHasCards(game) && !isDefender(game, player)
+  Table.hasCards(game.table) && !isDefender(game, player)
 }
 
 let isPassed = (game: inProgress, player: player) => {
@@ -83,10 +71,6 @@ let isPassed = (game: inProgress, player: player) => {
 
 let isAllPassed = (game: inProgress) => {
   game.players->List.keep(p => !isDefender(game, p))->List.every(isPassed(game))
-}
-
-let isMaximumTableCards = (game: inProgress) => {
-  game.table->List.length === 6
 }
 
 let getPlayerGameState = (game: inProgress, player: player) => {

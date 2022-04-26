@@ -86,13 +86,6 @@ let isValidTableBeat = (to: card, by: card, trump: suit) => {
   }
 }
 
-let getFlatTableCards = (table: table) => {
-  table
-  ->List.map(((firstCard, secondCard)) => list{Some(firstCard), secondCard})
-  ->List.flatten
-  ->List.keepMap(c => c)
-}
-
 let suitToString = (suit: suit) => {
   switch suit {
   | Spades => `♠`

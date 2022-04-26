@@ -193,20 +193,6 @@ function isValidTableBeat(to, by, trump) {
   }
 }
 
-function getFlatTableCards(table) {
-  return Belt_List.keepMap(Belt_List.flatten(Belt_List.map(table, (function (param) {
-                        return {
-                                hd: param[0],
-                                tl: {
-                                  hd: param[1],
-                                  tl: /* [] */0
-                                }
-                              };
-                      }))), (function (c) {
-                return c;
-              }));
-}
-
 function suitToString(suit) {
   switch (suit) {
     case /* Spades */0 :
@@ -271,7 +257,6 @@ export {
   getSmallestValuableCard ,
   isBeatByTrump ,
   isValidTableBeat ,
-  getFlatTableCards ,
   suitToString ,
   rankToString ,
   cardToString ,

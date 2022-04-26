@@ -44,13 +44,13 @@ let startGame = (game: inLobby): result<state, string> => {
 let isValidMove = (game: inProgress, player: player, card: card) => {
   if isDefender(game, player) {
     Error("Defender can't make move")
-  } else if !isTableHasCards(game) && !isAttacker(game, player) {
+  } else if !Table.hasCards(game.table) && !isAttacker(game, player) {
     Error("First move made not by attacker")
   } else if !isPlayerHasCard(player, card) {
     Error("Player don't have card")
-  } else if isMaximumTableCards(game) {
+  } else if Table.isMaximumCards(game.table) {
     Error("Maximum cards on table")
-  } else if isTableHasCards(game) && !isCorrectAdditionalCard(game, card) {
+  } else if Table.hasCards(game.table) && !isCorrectAdditionalCard(game, card) {
     Error("Incorrect card")
   } else {
     Ok(InProgress(game))
@@ -112,7 +112,7 @@ let pass = (game: inProgress, player: player) => {
 
   if Result.isError(isValid) {
     isValid
-  } else if isAllPassed(nextGameWithPassed) && isAllTableBeaten(game) {
+  } else if isAllPassed(nextGameWithPassed) && Table.isAllBeaten(game.table) {
     finishRound(nextGameWithPassed)
   } else {
     Ok(InProgress(nextGameWithPassed))
@@ -159,7 +159,7 @@ let beat = (game: inProgress, to: card, by: card, player: player) => {
 let isValidTake = (game: inProgress, player: player) => {
   if !isDefender(game, player) {
     Error("Player is not defender")
-  } else if !isTableHasCards(game) {
+  } else if !Table.hasCards(game.table) {
     Error("Table is empty")
   } else {
     Ok(InProgress(game))
@@ -188,7 +188,7 @@ let take = (game: inProgress, player: player) => {
             if isDefender(game, p) {
               {
                 ...p,
-                cards: List.concat(p.cards, Card.getFlatTableCards(game.table)),
+                cards: List.concat(p.cards, Table.getFlatCards(game.table)),
               }
             } else {
               p

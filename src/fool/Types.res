@@ -17,6 +17,10 @@ type rank =
 
 type card = (suit, rank)
 
+type clientCard =
+  | Visible(card)
+  | Hidden
+
 type deck = list<card>
 
 type tableCards = (card, option<card>)

@@ -16,9 +16,19 @@ function toggleArrayItem(list, item) {
   }
 }
 
+function lastListItem(list) {
+  return Belt_List.get(list, Belt_List.size(list) - 1 | 0);
+}
+
+function identity(a) {
+  return a;
+}
+
 export {
   equals ,
   toggleArrayItem ,
+  lastListItem ,
+  identity ,
   
 }
 /* No side effect */
