@@ -1,9 +1,14 @@
 open Types
 open Utils
 
-let players = list{Player.make("aaa"), Player.make("bbb"), Player.make("ccc")}
+let author = Player.make("author")
 
-type props = {inProgress: inProgress}
+let players = list{author, Player.make("bbb"), Player.make("ccc")}
+
+type props = {
+  inProgress: inProgress,
+  player: player,
+}
 
 module GameServer = {
   let make = () => {
@@ -25,19 +30,19 @@ module GameServer = {
     pass: game.pass->List.map(Player.mask(player)),
   }
 
-  let dispatch = (game: inProgress, action) => {
+  let dispatch = (action, game: inProgress, player) => {
     switch action {
-    | Take(player) => Game.take(game, player)->Result.map(maskForPlayer(player))
-    | Beat(player, to, by) => Game.beat(game, to, by, player)
-    | Pass(player) => Game.pass(game, player)
-    | Move(player, card) => Game.move(game, player, card)
-    }
+    | Take => Game.take(game, player)
+    | Beat(to, by) => Game.beat(game, to, by, player)
+    | Pass => Game.pass(game, player)
+    | Move(card) => Game.move(game, player, card)
+    }->Result.map(maskForPlayer(player))
   }
 }
 
 let game = GameServer.make()
 
-let default = _ => {
+let default = ({player}: props) => {
   let (game, nextGame) = React.useState(() => game)
   let (error, setError) = React.useState(() => None)
 
@@ -51,9 +56,7 @@ let default = _ => {
     }
   }
 
-  let handleMove = move => {
-    handleGameChange(GameServer.dispatch(game, move))
-  }
+  let handleMove = move => move->GameServer.dispatch(game, player)->handleGameChange
 
   <div>
     <GameUI.InProgressUI game={game} />
@@ -73,12 +76,8 @@ let default = _ => {
 let getServerSideProps = _ctx => {
   Js.Promise.resolve({
     "props": {
-      inProgress: Result.getExn(
-        Game.startGame({
-          players: players,
-          ready: players,
-        }),
-      ),
+      inProgress: Result.getExn(Game.startGame({players: players, ready: players})),
+      player: author,
     },
   })
 }

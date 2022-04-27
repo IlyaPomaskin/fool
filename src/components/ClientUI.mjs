@@ -170,19 +170,17 @@ function ClientUI(Props) {
                     ];
             }));
       return Curry._1(onMove, {
-                  TAG: /* Beat */1,
-                  _0: player,
-                  _1: toBeat,
-                  _2: beatBy
+                  TAG: /* Beat */0,
+                  _0: toBeat,
+                  _1: beatBy
                 });
     }
     
   };
   var handleMove = function (card) {
     return Curry._1(onMove, {
-                TAG: /* Move */3,
-                _0: player,
-                _1: card
+                TAG: /* Move */1,
+                _0: card
               });
   };
   var handleTake = function (param) {
@@ -192,10 +190,7 @@ function ClientUI(Props) {
                     undefined
                   ];
           }));
-    return Curry._1(onMove, {
-                TAG: /* Take */0,
-                _0: player
-              });
+    return Curry._1(onMove, /* Take */0);
   };
   var isDefender = GameUtils.isDefender(game, player);
   React.useEffect((function () {
@@ -254,10 +249,7 @@ function ClientUI(Props) {
                     beatBy
                   ],
                   onPass: (function (param) {
-                      return Curry._1(onMove, {
-                                  TAG: /* Pass */2,
-                                  _0: player
-                                });
+                      return Curry._1(onMove, /* Pass */1);
                     }),
                   onTake: handleTake,
                   onBeat: handleBeat

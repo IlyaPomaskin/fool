@@ -101,19 +101,19 @@ let make = (~className: string="", ~player: player, ~game: inProgress, ~onMove: 
     switch (toBeat, beatBy) {
     | (Some(to), Some(by)) => {
         setBeat(_ => (None, None))
-        onMove(Beat(player, to, by))
+        onMove(Beat(to, by))
       }
     | _ => ()
     }
   }
 
   let handleMove = (card: card) => {
-    onMove(Move(player, card))
+    onMove(Move(card))
   }
 
   let handleTake = _ => {
     setBeat(_ => (None, None))
-    onMove(Take(player))
+    onMove(Take)
   }
 
   let isDefender = GameUtils.isDefender(game, player)
@@ -149,7 +149,7 @@ let make = (~className: string="", ~player: player, ~game: inProgress, ~onMove: 
       game
       player
       beat={(toBeat, beatBy)}
-      onPass={_ => onMove(Pass(player))}
+      onPass={_ => onMove(Pass)}
       onTake={handleTake}
       onBeat={handleBeat}
     />

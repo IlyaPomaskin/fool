@@ -12,7 +12,7 @@ import * as Belt_List from "rescript/lib/es6/belt_List.js";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Belt_Result from "rescript/lib/es6/belt_Result.js";
 
-var players_0 = Player.make("aaa");
+var author = Player.make("author");
 
 var players_1 = {
   hd: Player.make("bbb"),
@@ -23,7 +23,7 @@ var players_1 = {
 };
 
 var players = {
-  hd: players_0,
+  hd: author,
   tl: players_1
 };
 
@@ -34,38 +34,34 @@ function make(param) {
                 }));
 }
 
-function dispatch(game, action) {
-  switch (action.TAG | 0) {
-    case /* Take */0 :
-        var player = action._0;
-        return Belt_Result.map(Game.take(game, player), (function (param) {
-                      return {
-                              attacker: Player.mask(player, param.attacker),
-                              defender: Player.mask(player, param.defender),
-                              players: Belt_List.map(param.players, (function (param) {
-                                      return Player.mask(player, param);
-                                    })),
-                              trump: param.trump,
-                              deck: Deck.mask(param.deck),
-                              table: param.table,
-                              pass: Belt_List.map(param.pass, (function (param) {
-                                      return Player.mask(player, param);
-                                    }))
-                            };
-                    }));
-    case /* Beat */1 :
-        return Game.beat(game, action._1, action._2, action._0);
-    case /* Pass */2 :
-        return Game.pass(game, action._0);
-    case /* Move */3 :
-        return Game.move(game, action._0, action._1);
-    
-  }
+function dispatch(action, game, player) {
+  var tmp;
+  tmp = typeof action === "number" ? (
+      action === /* Take */0 ? Game.take(game, player) : Game.pass(game, player)
+    ) : (
+      action.TAG === /* Beat */0 ? Game.beat(game, action._0, action._1, player) : Game.move(game, player, action._0)
+    );
+  return Belt_Result.map(tmp, (function (param) {
+                return {
+                        attacker: Player.mask(player, param.attacker),
+                        defender: Player.mask(player, param.defender),
+                        players: Belt_List.map(param.players, (function (param) {
+                                return Player.mask(player, param);
+                              })),
+                        trump: param.trump,
+                        deck: Deck.mask(param.deck),
+                        table: param.table,
+                        pass: Belt_List.map(param.pass, (function (param) {
+                                return Player.mask(player, param);
+                              }))
+                      };
+              }));
 }
 
 var game = make(undefined);
 
 function $$default(param) {
+  var player = param.player;
   var match = React.useState(function () {
         return game;
       });
@@ -76,7 +72,7 @@ function $$default(param) {
       });
   var setError = match$1[1];
   var handleMove = function (move) {
-    var game$2 = dispatch(game$1, move);
+    var game$2 = dispatch(move, game$1, player);
     if (game$2.TAG === /* Ok */0) {
       var game$3 = game$2._0;
       Curry._1(nextGame, (function (param) {
@@ -114,7 +110,8 @@ function getServerSideProps(_ctx) {
                 inProgress: Belt_Result.getExn(Game.startGame({
                           players: players,
                           ready: players
-                        }))
+                        })),
+                player: author
               }
             });
 }
@@ -125,4 +122,4 @@ export {
   getServerSideProps ,
   
 }
-/* players Not a pure module */
+/* author Not a pure module */

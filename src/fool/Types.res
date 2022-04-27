@@ -57,10 +57,10 @@ type state =
   | InProgress(inProgress)
 
 type move =
-  | Take(player)
-  | Beat(player, card, card)
-  | Pass(player)
-  | Move(player, card)
+  | Take
+  | Beat(card, card)
+  | Pass
+  | Move(card)
 
 type playerWinState =
   | Playing
