@@ -101,6 +101,12 @@ function isEmpty(deck) {
   return Belt_List.length(deck) === 0;
 }
 
+function mask(deck) {
+  return Belt_List.map(deck, (function (param) {
+                return /* Hidden */0;
+              }));
+}
+
 export {
   suitsList ,
   ranksList ,
@@ -109,6 +115,7 @@ export {
   removeCard ,
   getSmallestValuableCard ,
   isEmpty ,
+  mask ,
   
 }
 /* No side effect */

@@ -1,58 +1,57 @@
 open Types
 
-let isEqualsBySuit = (card1: card, card2: card) =>
+let isEqualsBySuit = (card1, card2) =>
   switch (card1, card2) {
   | (Visible((suit1, _)), Visible(suit2, _)) => suit1 === suit2
   | _ => false
   }
 
-let isEqualsByRank = (card1: card, card2: card) =>
+let isEqualsByRank = (card1, card2) =>
   switch (card1, card2) {
   | (Visible((_, rank1)), Visible(_, rank2)) => rank1 === rank2
   | _ => false
   }
 
-let isEquals = (first: card, second: card) =>
-  isEqualsBySuit(first, second) && isEqualsByRank(first, second)
+let isEquals = (card1, card2) => isEqualsBySuit(card1, card2) && isEqualsByRank(card1, card2)
 
-let ltByRank = (card1: card, card2: card) =>
+let ltByRank = (card1, card2) =>
   switch (card1, card2) {
   | (Visible((_, rank1)), Visible(_, rank2)) => rank1 < rank2
   | _ => false
   }
 
-let gtByRank = (c1: card, c2: card) => !ltByRank(c1, c2)
+let gtByRank = (card1, card2) => !ltByRank(card1, card2)
 
-let sortByRank = (first: card, second: card) => ltByRank(first, second) ? -1 : 1
+let sortByRank = (card1, card2) => ltByRank(card1, card2) ? -1 : 1
 
-let isTrump = (trump: suit, card: card) =>
+let isTrump = (trump, card) =>
   switch card {
   | Visible((suit, _)) => suit === trump
   | _ => false
   }
 
-let getSmallest = (trump: suit, first: option<card>, second: option<card>) => {
-  switch (first, second) {
+let getSmallest = (trump, card1, card2) => {
+  switch (card1, card2) {
   | (None, None) => None
-  | (None, Some(_)) => second
-  | (Some(_), None) => first
+  | (None, Some(_)) => card2
+  | (Some(_), None) => card1
   | (Some(fst), Some(snd)) =>
     let isFstTrump = isTrump(trump, fst)
     let isSndTrump = isTrump(trump, snd)
 
     switch (isFstTrump, isSndTrump) {
-    | (true, false) => first
-    | (false, true) => second
-    | _ => ltByRank(fst, snd) ? first : second
+    | (true, false) => card1
+    | (false, true) => card2
+    | _ => ltByRank(fst, snd) ? card1 : card2
     }
   }
 }
 
-let isBeatByTrump = (to: card, by: card, trump: suit) => {
+let isBeatByTrump = (to, by, trump) => {
   !isTrump(trump, to) && isTrump(trump, by)
 }
 
-let isValidBeat = (to: card, by: card, trump: suit) => {
+let isValidBeat = (to, by, trump) => {
   switch (isTrump(trump, to), isTrump(trump, by)) {
   | (false, true) => true
   | (true, false) => false
@@ -61,7 +60,7 @@ let isValidBeat = (to: card, by: card, trump: suit) => {
   }
 }
 
-let suitToString = (suit: suit) => {
+let suitToString = suit => {
   switch suit {
   | Spades => `♤`
   | Hearts => `♡`
@@ -70,7 +69,7 @@ let suitToString = (suit: suit) => {
   }
 }
 
-let rankToString = (rank: rank) => {
+let rankToString = rank => {
   switch rank {
   | Six => "6"
   | Seven => "7"
@@ -84,7 +83,7 @@ let rankToString = (rank: rank) => {
   }
 }
 
-let cardToString = (card: card) =>
+let cardToString = card =>
   switch card {
   | Visible((suit, rank)) => suitToString(suit) ++ " " ++ rankToString(rank)
   | Hidden => "hidden"

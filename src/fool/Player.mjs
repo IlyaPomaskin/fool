@@ -91,6 +91,20 @@ function isPlayerExists(players, player) {
   return Belt_List.has(players, player, Utils.equals);
 }
 
+function mask(targetPlayer, player) {
+  return {
+          id: player.id,
+          sessionId: undefined,
+          cards: Belt_List.map(player.cards, (function (card) {
+                  if (player === targetPlayer) {
+                    return card;
+                  } else {
+                    return /* Hidden */0;
+                  }
+                }))
+        };
+}
+
 export {
   make ,
   getNextPlayer ,
@@ -99,6 +113,7 @@ export {
   dealDeckToPlayers ,
   removeCard ,
   isPlayerExists ,
+  mask ,
   
 }
 /* No side effect */

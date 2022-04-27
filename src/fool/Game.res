@@ -1,22 +1,22 @@
 open Types
 open GameUtils
 
-let makeGameInLobby = (authorId: playerId) => InLobby({
+let makeGameInLobby = authorId => InLobby({
   players: list{Player.make(authorId)},
   ready: list{},
 })
 
-let logoutPlayer = (game: inLobby, player: player) => InLobby({
+let logoutPlayer = (game: inLobby, player) => InLobby({
   ...game,
   players: Belt.List.keep(game.players, item => item !== player),
 })
 
-let enterGame = (game: inLobby, player: player) => InLobby({
+let enterGame = (game: inLobby, player) => InLobby({
   ...game,
   players: List.add(game.players, player),
 })
 
-let startGame = (game: inLobby): result<state, string> => {
+let startGame = game => {
   let (players, deck) = Deck.makeShuffled()->Player.dealDeckToPlayers(game.players)
 
   let trump = getTrump(deck, players)
@@ -57,7 +57,7 @@ let isValidMove = (game, player, card) => {
   }
 }
 
-let move = (game: inProgress, player: player, card: card): result<state, string> => {
+let move = (game, player, card) => {
   let isValid = isValidMove(game, player, card)
 
   if Result.isError(isValid) {
@@ -76,7 +76,7 @@ let move = (game: inProgress, player: player, card: card): result<state, string>
   }
 }
 
-let isValidPass = (game: inProgress, player: player) => {
+let isValidPass = (game, player) => {
   if !GameUtils.isCanPass(game, player) {
     Error("Can't pass")
   } else {
@@ -84,7 +84,7 @@ let isValidPass = (game: inProgress, player: player) => {
   }
 }
 
-let finishRound = (game: inProgress) => {
+let finishRound = game => {
   let nextAttacker = Player.getNextPlayer(game.attacker, game.players)
   let nextDefender = nextAttacker->Option.flatMap(p => Player.getNextPlayer(p, game.players))
   let (nextPlayers, nextDeck) = Player.dealDeckToPlayers(game.deck, game.players)
@@ -106,7 +106,7 @@ let finishRound = (game: inProgress) => {
   }
 }
 
-let pass = (game: inProgress, player: player) => {
+let pass = (game, player) => {
   let isValid = isValidPass(game, player)
   let nextGameWithPassed = {...game, pass: Utils.toggleArrayItem(game.pass, player)}
 
@@ -119,7 +119,7 @@ let pass = (game: inProgress, player: player) => {
   }
 }
 
-let isValidBeat = (game: inProgress, to: card, by: card, player: player) => {
+let isValidBeat = (game, to, by, player) => {
   if !isDefender(game, player) {
     Error("Is not deffender")
   } else if !isPlayerHasCard(player, by) {
@@ -131,7 +131,7 @@ let isValidBeat = (game: inProgress, to: card, by: card, player: player) => {
   }
 }
 
-let beat = (game: inProgress, to: card, by: card, player: player) => {
+let beat = (game, to, by, player) => {
   let isValid = isValidBeat(game, to, by, player)
 
   if Result.isError(isValid) {
@@ -156,7 +156,7 @@ let beat = (game: inProgress, to: card, by: card, player: player) => {
   }
 }
 
-let isValidTake = (game: inProgress, player: player) => {
+let isValidTake = (game, player) => {
   if !isDefender(game, player) {
     Error("Player is not defender")
   } else if !Table.hasCards(game.table) {
@@ -166,7 +166,7 @@ let isValidTake = (game: inProgress, player: player) => {
   }
 }
 
-let take = (game: inProgress, player: player) => {
+let take = (game, player) => {
   let isValid = isValidTake(game, player)
 
   if Result.isError(isValid) {

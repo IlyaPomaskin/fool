@@ -3,6 +3,7 @@
 import * as Utils from "../Utils.mjs";
 import * as Belt_List from "rescript/lib/es6/belt_List.js";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
+import * as Caml_option from "rescript/lib/es6/caml_option.js";
 
 function hasCards(table) {
   return Belt_List.length(table) > 0;
@@ -26,7 +27,7 @@ function isMaximumCards(table) {
 function getFlatCards(table) {
   return Belt_List.keepMap(Belt_List.flatten(Belt_List.map(table, (function (param) {
                         return {
-                                hd: param[0],
+                                hd: Caml_option.some(param[0]),
                                 tl: {
                                   hd: param[1],
                                   tl: /* [] */0

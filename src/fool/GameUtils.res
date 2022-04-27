@@ -26,12 +26,12 @@ let isPlayerCanMove = (game, player) => {
   }
 }
 
-let toggleReady = (game: inLobby, player: player) => InLobby({
+let toggleReady = (game: inLobby, player) => InLobby({
   ...game,
   players: Utils.toggleArrayItem(game.players, player),
 })
 
-let getTrump = (deck: deck, players: list<player>) => {
+let getTrump = (deck, players) => {
   let lastCard = Utils.lastListItem(deck)
   let lastPlayer = players->List.keep(p => List.length(p.cards) != 0)->Utils.lastListItem
 
@@ -50,11 +50,11 @@ let getTrump = (deck: deck, players: list<player>) => {
   }
 }
 
-let isPlayerDone = (game: inProgress, player: player) => {
+let isPlayerDone = (game, player) => {
   Deck.isEmpty(game.deck) && Deck.isEmpty(player.cards)
 }
 
-let isPlayerLose = (game: inProgress, player: player) => {
+let isPlayerLose = (game, player) => {
   let playersWithCards = game.players->List.keep(p => p.cards->List.length > 0)
   let isOnlyOnePlayerLeft = playersWithCards->List.length === 1
   let isCurrentPlayerLeft = game.players->List.has(player, Utils.equals)
@@ -81,7 +81,7 @@ let isAllPassed = game => {
   game.players->List.keep(p => !isDefender(game, p))->List.every(isPassed(game))
 }
 
-let getPlayerGameState = (game: inProgress, player: player) => {
+let getPlayerGameState = (game, player) => {
   let isThereCardsInDeck = !Deck.isEmpty(game.deck)
   let isPlayerHasCards = !Deck.isEmpty(player.cards)
   let isOtherPlayersHasCards =
