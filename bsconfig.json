@@ -2,7 +2,7 @@
   "name": "rescript-nextjs-template",
   "namespace": false,
   "reason": { "react-jsx": 3 },
-  "bs-dependencies": ["@rescript/react"],
+  "bs-dependencies": ["@rescript/react", "@ryyppy/rescript-promise"],
   "bsc-flags": ["-open Belt"],
   "ppx-flags": [],
   "sources": [{ "dir": "src", "subdirs": true }],
