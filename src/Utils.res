@@ -1,6 +1,9 @@
 let cx = (names: array<string>) => names->Array.reduce("", (acc, c) => acc ++ " " ++ c)
 
-let uiList = (items: list<'a>, fn) => React.array(items->List.toArray->Array.map(fn))
+let uiList = (items: list<'a>, fn) => items->List.toArray->Array.map(fn)->React.array
+
+let uiListWithIndex = (items: list<'a>, fn) =>
+  items->List.toArray->Array.mapWithIndex(fn)->React.array
 
 let uiStr = (text: string) => React.string(text)
 

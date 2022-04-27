@@ -14,6 +14,10 @@ function uiList(items, fn) {
   return Belt_Array.map(Belt_List.toArray(items), fn);
 }
 
+function uiListWithIndex(items, fn) {
+  return Belt_Array.mapWithIndex(Belt_List.toArray(items), fn);
+}
+
 function uiStr(text) {
   return text;
 }
@@ -81,6 +85,7 @@ var unselected = "";
 export {
   cx ,
   uiList ,
+  uiListWithIndex ,
   uiStr ,
   noop ,
   noop2 ,
