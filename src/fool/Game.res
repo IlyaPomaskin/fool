@@ -16,7 +16,7 @@ let enterGame = (game: inLobby, player) => InLobby({
   players: List.add(game.players, player),
 })
 
-let startGame = game => {
+let startGame = (game: inLobby) => {
   let (players, deck) = Deck.makeShuffled()->Player.dealDeckToPlayers(game.players)
 
   let trump = getTrump(deck, players)
@@ -25,17 +25,15 @@ let startGame = game => {
 
   switch (trump, attacker, defender) {
   | (Some(trump), Some(a), Some(d)) =>
-    Ok(
-      InProgress({
-        attacker: a,
-        defender: d,
-        table: list{},
-        trump: trump,
-        pass: list{},
-        players: players,
-        deck: deck,
-      }),
-    )
+    Ok({
+      attacker: a,
+      defender: d,
+      table: list{},
+      trump: trump,
+      pass: list{},
+      players: players,
+      deck: deck,
+    })
   | (None, _, _) => Error("Can't find trump")
   | _ => Error("Can't find next attacker/defender")
   }
@@ -53,7 +51,7 @@ let isValidMove = (game, player, card) => {
   } else if Table.hasCards(game.table) && !isCorrectAdditionalCard(game, card) {
     Error("Incorrect card")
   } else {
-    Ok(InProgress(game))
+    Ok(game)
   }
 }
 
@@ -63,16 +61,14 @@ let move = (game, player, card) => {
   if Result.isError(isValid) {
     isValid
   } else {
-    Ok(
-      InProgress({
-        ...game,
-        players: List.map(game.players, p => {
-          ...p,
-          cards: Player.removeCard(p, card),
-        }),
-        table: game.table->List.add((card, None)),
+    Ok({
+      ...game,
+      players: List.map(game.players, p => {
+        ...p,
+        cards: Player.removeCard(p, card),
       }),
-    )
+      table: game.table->List.add((card, None)),
+    })
   }
 }
 
@@ -80,7 +76,7 @@ let isValidPass = (game, player) => {
   if !GameUtils.isCanPass(game, player) {
     Error("Can't pass")
   } else {
-    Ok(InProgress(game))
+    Ok(game)
   }
 }
 
@@ -91,17 +87,15 @@ let finishRound = game => {
 
   switch (nextAttacker, nextDefender) {
   | (Some(a), Some(d)) =>
-    Ok(
-      InProgress({
-        ...game,
-        table: list{},
-        pass: list{},
-        attacker: a,
-        defender: d,
-        players: nextPlayers,
-        deck: nextDeck,
-      }),
-    )
+    Ok({
+      ...game,
+      table: list{},
+      pass: list{},
+      attacker: a,
+      defender: d,
+      players: nextPlayers,
+      deck: nextDeck,
+    })
   | _ => Error("Can't find next attacker/defender")
   }
 }
@@ -115,7 +109,7 @@ let pass = (game, player) => {
   } else if isAllPassed(nextGameWithPassed) && Table.isAllBeaten(game.table) {
     finishRound(nextGameWithPassed)
   } else {
-    Ok(InProgress(nextGameWithPassed))
+    Ok(nextGameWithPassed)
   }
 }
 
@@ -127,7 +121,7 @@ let isValidBeat = (game, to, by, player) => {
   } else if !Card.isValidBeat(to, by, game.trump) {
     Error("Invalid card beat")
   } else {
-    Ok(InProgress(game))
+    Ok(game)
   }
 }
 
@@ -137,22 +131,20 @@ let beat = (game, to, by, player) => {
   if Result.isError(isValid) {
     isValid
   } else {
-    Ok(
-      InProgress({
-        {
-          ...game,
-          pass: list{},
-          table: game.table->List.map(((firstCard, secondCard)) => {
-            if Card.isEquals(firstCard, to) {
-              (firstCard, Some(by))
-            } else {
-              (firstCard, secondCard)
-            }
-          }),
-          players: List.map(game.players, p => {...p, cards: Player.removeCard(p, by)}),
-        }
-      }),
-    )
+    Ok({
+      {
+        ...game,
+        pass: list{},
+        table: game.table->List.map(((firstCard, secondCard)) => {
+          if Card.isEquals(firstCard, to) {
+            (firstCard, Some(by))
+          } else {
+            (firstCard, secondCard)
+          }
+        }),
+        players: List.map(game.players, p => {...p, cards: Player.removeCard(p, by)}),
+      }
+    })
   }
 }
 
@@ -162,7 +154,7 @@ let isValidTake = (game, player) => {
   } else if !Table.hasCards(game.table) {
     Error("Table is empty")
   } else {
-    Ok(InProgress(game))
+    Ok(game)
   }
 }
 
@@ -177,25 +169,23 @@ let take = (game, player) => {
 
     switch (nextAttacker, nextDefender) {
     | (Some(a), Some(d)) =>
-      Ok(
-        InProgress({
-          ...game,
-          pass: list{},
-          table: list{},
-          attacker: a,
-          defender: d,
-          players: List.map(game.players, p =>
-            if isDefender(game, p) {
-              {
-                ...p,
-                cards: List.concat(p.cards, Table.getFlatCards(game.table)),
-              }
-            } else {
-              p
+      Ok({
+        ...game,
+        pass: list{},
+        table: list{},
+        attacker: a,
+        defender: d,
+        players: List.map(game.players, p =>
+          if isDefender(game, p) {
+            {
+              ...p,
+              cards: List.concat(p.cards, Table.getFlatCards(game.table)),
             }
-          ),
-        }),
-      )
+          } else {
+            p
+          }
+        ),
+      })
     | _ => Error("Can't find next attacker/defender")
     }
   }
