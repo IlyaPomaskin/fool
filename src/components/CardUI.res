@@ -16,7 +16,7 @@ module Base = {
     ~disabled: bool=false,
     ~selected: bool=false,
     ~onClick: _ => unit=noop,
-    ~children: React.element,
+    ~children: option<React.element>=?,
     (),
   ) => {
     <div
@@ -29,21 +29,55 @@ module Base = {
         selected ? Utils.selected : Utils.unselected,
         className,
       ])}>
-      children
+      {switch children {
+      | Some(children) => children
+      | None => React.null
+      }}
     </div>
   }
 }
 
-module Local = {
-  @react.component
-  let make = (
+type cardProps = {
+  "card": Types.card,
+  "className": option<string>,
+  "disabled": option<bool>,
+  "onClick": option<Types.card => unit>,
+  "selected": option<bool>,
+}
+
+type eCardProps = {
+  "className": string,
+  "disabled": bool,
+  "selected": bool,
+  "card": plainCard,
+  "onClick": card => unit,
+}
+
+module VisibleCard = {
+  let makeProps = (
+    ~card: plainCard,
     ~className: string="",
     ~disabled: bool=false,
     ~selected: bool=false,
-    ~card: card,
     ~onClick: card => unit=noop,
+    ~key as _: option<string>=?,
     (),
-  ) => {
+  ) =>
+    {
+      "className": className,
+      "disabled": disabled,
+      "selected": selected,
+      "card": card,
+      "onClick": onClick,
+    }
+
+  let make = (props: eCardProps) => {
+    let className = props["className"]
+    let disabled = props["disabled"]
+    let selected = props["selected"]
+    let card = props["card"]
+    let onClick = props["onClick"]
+
     <Base
       disabled
       selected
@@ -52,7 +86,7 @@ module Local = {
         disabled ? "text-slate-400" : suitToColor(fst(card)),
         "overflow-hidden",
       ])}
-      onClick={_ => onClick(card)}>
+      onClick={_ => onClick(Visible(card))}>
       <div className="absolute w-full h-full bg-gradient-to-tl from-purple-200 to-pink-200 " />
       <div className="absolute text-[18px] leading-[18px] inset-1">
         {uiStr(Card.suitToString(fst(card)))}
@@ -66,7 +100,7 @@ module Local = {
   }
 }
 
-module Empty = {
+module HiddenCard = {
   @react.component
   let make = (~className: string="", ~onClick: card => unit=noop) => {
     <Base className={cx([className, "overflow-hidden"])} onClick>
@@ -77,10 +111,30 @@ module Empty = {
   }
 }
 
-@react.component
-let make = (~className: string="", ~card: card, ~onClick: card => unit=noop) => {
-  <Local className onClick card />
+module EmptyCard = {
+  @react.component
+  let make = (~className: string="", ~onClick: card => unit=noop) => {
+    <Base className={cx([className, "overflow-hidden"])} onClick />
+  }
 }
+
+module Local = {
+  @react.component
+  let make = (
+    ~card: card,
+    ~className: string="",
+    ~disabled: bool=false,
+    ~selected: bool=false,
+    ~onClick: card => unit=noop,
+  ) => {
+    switch card {
+    | Visible(card) => <VisibleCard card className disabled selected onClick />
+    | Hidden => <HiddenCard className onClick />
+    }
+  }
+}
+
+include Local
 
 @react.component
 let trump = (~suit: suit, ~className: string="", ()) =>
@@ -100,16 +154,17 @@ let deck = (
   | list{} => <div className> {uiStr("No cards in deck")} </div>
   | _ =>
     <div className={cx([className, "leading"])}>
-      {deck->uiList(card =>
+      {deck->uiListWithIndex((index, card) => {
+        Js.log2(index, card)
         <Local
-          key={Card.cardToString(card)}
+          key={Card.cardToString(card) ++ index->string_of_int}
           selected={isCardSelected(card)}
           className="inline-block mx-1"
           card
           disabled={disabled || isCardDisabled(card)}
           onClick={onCardClick}
         />
-      )}
+      })}
     </div>
   }
 
@@ -139,7 +194,7 @@ let table = (
           />
           {switch by {
           | Some(byCard) => <Local disabled={Option.isSome(by)} card={byCard} />
-          | None => <Empty />
+          | None => <EmptyCard />
           }}
         </div>
       )

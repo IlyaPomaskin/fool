@@ -2,7 +2,7 @@ open Types
 
 let make = (login: playerId) => {
   id: login,
-  sessionId: "session:" ++ string_of_int(Js.Math.random_int(0, 10000000)),
+  sessionId: Some("session:" ++ string_of_int(Js.Math.random_int(0, 10000000))),
   cards: list{},
 }
 

@@ -15,10 +15,10 @@ type rank =
   | King
   | Ace
 
-type card = (suit, rank)
+type plainCard = (suit, rank)
 
-type clientCard =
-  | Visible(card)
+type card =
+  | Visible(plainCard)
   | Hidden
 
 type deck = list<card>
@@ -29,7 +29,7 @@ type table = list<tableCards>
 
 type playerId = string
 
-type sessionId = string
+type sessionId = option<string>
 
 type player = {
   id: playerId,

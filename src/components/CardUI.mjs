@@ -5,6 +5,7 @@ import * as Curry from "rescript/lib/es6/curry.js";
 import * as Utils from "../Utils.mjs";
 import * as React from "react";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
+import * as Caml_option from "rescript/lib/es6/caml_option.js";
 
 function suitToColor(suit) {
   switch (suit) {
@@ -38,23 +39,33 @@ function CardUI$Base(Props) {
                     className
                   ]),
               onClick: disabled ? Utils.noop : onClick
-            }, children);
+            }, children !== undefined ? Caml_option.valFromOption(children) : null);
 }
 
 var Base = {
   make: CardUI$Base
 };
 
-function CardUI$Local(Props) {
-  var classNameOpt = Props.className;
-  var disabledOpt = Props.disabled;
-  var selectedOpt = Props.selected;
-  var card = Props.card;
-  var onClickOpt = Props.onClick;
+function makeProps(card, classNameOpt, disabledOpt, selectedOpt, onClickOpt, param, param$1) {
   var className = classNameOpt !== undefined ? classNameOpt : "";
   var disabled = disabledOpt !== undefined ? disabledOpt : false;
   var selected = selectedOpt !== undefined ? selectedOpt : false;
   var onClick = onClickOpt !== undefined ? onClickOpt : Utils.noop;
+  return {
+          className: className,
+          disabled: disabled,
+          selected: selected,
+          card: card,
+          onClick: onClick
+        };
+}
+
+function make(props) {
+  var className = props.className;
+  var disabled = props.disabled;
+  var selected = props.selected;
+  var card = props.card;
+  var onClick = props.onClick;
   return React.createElement(CardUI$Base, {
               className: Utils.cx([
                     className,
@@ -64,7 +75,9 @@ function CardUI$Local(Props) {
               disabled: disabled,
               selected: selected,
               onClick: (function (param) {
-                  return Curry._1(onClick, card);
+                  return Curry._1(onClick, /* Visible */{
+                              _0: card
+                            });
                 }),
               children: null
             }, React.createElement("div", {
@@ -76,11 +89,12 @@ function CardUI$Local(Props) {
                 }, Utils.uiStr(Card.rankToString(card[1]))));
 }
 
-var Local = {
-  make: CardUI$Local
+var VisibleCard = {
+  makeProps: makeProps,
+  make: make
 };
 
-function CardUI$Empty(Props) {
+function CardUI$HiddenCard(Props) {
   var classNameOpt = Props.className;
   var onClickOpt = Props.onClick;
   var className = classNameOpt !== undefined ? classNameOpt : "";
@@ -97,22 +111,51 @@ function CardUI$Empty(Props) {
             });
 }
 
-var Empty = {
-  make: CardUI$Empty
+var HiddenCard = {
+  make: CardUI$HiddenCard
 };
 
-function CardUI(Props) {
+function CardUI$EmptyCard(Props) {
   var classNameOpt = Props.className;
-  var card = Props.card;
   var onClickOpt = Props.onClick;
   var className = classNameOpt !== undefined ? classNameOpt : "";
   var onClick = onClickOpt !== undefined ? onClickOpt : Utils.noop;
-  return React.createElement(CardUI$Local, {
-              className: className,
-              card: card,
+  return React.createElement(CardUI$Base, {
+              className: Utils.cx([
+                    className,
+                    "overflow-hidden"
+                  ]),
               onClick: onClick
             });
 }
+
+var EmptyCard = {
+  make: CardUI$EmptyCard
+};
+
+function CardUI$Local(Props) {
+  var card = Props.card;
+  var classNameOpt = Props.className;
+  var disabledOpt = Props.disabled;
+  var selectedOpt = Props.selected;
+  var onClickOpt = Props.onClick;
+  var className = classNameOpt !== undefined ? classNameOpt : "";
+  var disabled = disabledOpt !== undefined ? disabledOpt : false;
+  var selected = selectedOpt !== undefined ? selectedOpt : false;
+  var onClick = onClickOpt !== undefined ? onClickOpt : Utils.noop;
+  if (card) {
+    return React.createElement(make, makeProps(card._0, className, disabled, selected, onClick, undefined, undefined));
+  } else {
+    return React.createElement(CardUI$HiddenCard, {
+                className: className,
+                onClick: onClick
+              });
+  }
+}
+
+var Local = {
+  make: CardUI$Local
+};
 
 function CardUI$trump(Props) {
   var suit = Props.suit;
@@ -148,14 +191,15 @@ function CardUI$deck(Props) {
                       className,
                       "leading"
                     ])
-              }, Utils.uiList(deck, (function (card) {
+              }, Utils.uiListWithIndex(deck, (function (index, card) {
+                      console.log(index, card);
                       return React.createElement(CardUI$Local, {
+                                  card: card,
                                   className: "inline-block mx-1",
                                   disabled: disabled || Curry._1(isCardDisabled, card),
                                   selected: Curry._1(isCardSelected, card),
-                                  card: card,
                                   onClick: onCardClick,
-                                  key: Card.cardToString(card)
+                                  key: Card.cardToString(card) + String(index)
                                 });
                     })));
   } else {
@@ -188,19 +232,19 @@ function CardUI$table(Props) {
                                   key: Card.cardToString(to) + Belt_Option.getWithDefault(Belt_Option.map(by, Card.cardToString), ""),
                                   className: "inline-block mx-1"
                                 }, React.createElement(CardUI$Local, {
+                                      card: to,
                                       className: "mb-1",
                                       disabled: Belt_Option.isSome(by) || Curry._1(isCardDisabled, to),
                                       selected: Curry._1(isCardSelected, to),
-                                      card: to,
                                       onClick: onCardClick
                                     }), by !== undefined ? React.createElement(CardUI$Local, {
-                                        disabled: Belt_Option.isSome(by),
-                                        card: by
-                                      }) : React.createElement(CardUI$Empty, {}));
+                                        card: by,
+                                        disabled: Belt_Option.isSome(by)
+                                      }) : React.createElement(CardUI$EmptyCard, {}));
                     })) : Utils.uiStr("Table empty"));
 }
 
-var make = CardUI;
+var make$1 = CardUI$Local;
 
 var trump = CardUI$trump;
 
@@ -211,9 +255,11 @@ var table = CardUI$table;
 export {
   suitToColor ,
   Base ,
+  VisibleCard ,
+  HiddenCard ,
+  EmptyCard ,
   Local ,
-  Empty ,
-  make ,
+  make$1 as make,
   trump ,
   deck ,
   table ,

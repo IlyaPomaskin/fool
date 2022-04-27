@@ -8,7 +8,9 @@ let makeShuffled = (): deck => {
   let suits = suitsList->List.make(9, _)->List.flatten
   let ranks = ranksList->List.make(4, _)->List.flatten
 
-  List.shuffle(List.reduce2(suits, ranks, list{}, (acc, suit, rank) => List.add(acc, (suit, rank))))
+  List.shuffle(
+    List.reduce2(suits, ranks, list{}, (acc, suit, rank) => List.add(acc, Visible(suit, rank))),
+  )
 }
 
 let dealCards = (amount: int, deck: deck) => {
@@ -34,4 +36,4 @@ let getSmallestValuableCard = (trump: suit, deck: deck) =>
     }
   })
 
-let isEmpty = (deck: deck) => List.length(deck) == 0
+let isEmpty = deck => List.length(deck) == 0

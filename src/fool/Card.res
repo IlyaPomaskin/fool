@@ -1,18 +1,35 @@
 open Types
 
-let isEqualsBySuit = ((s1, _): card, (s2, _): card) => s1 === s2
+let isEqualsBySuit = (card1: card, card2: card) =>
+  switch (card1, card2) {
+  | (Visible((suit1, _)), Visible(suit2, _)) => suit1 === suit2
+  | _ => false
+  }
 
-let isEqualsByRank = ((_, r1): card, (_, r2): card) => r1 === r2
+let isEqualsByRank = (card1: card, card2: card) =>
+  switch (card1, card2) {
+  | (Visible((_, rank1)), Visible(_, rank2)) => rank1 === rank2
+  | _ => false
+  }
 
 let isEquals = (first: card, second: card) =>
   isEqualsBySuit(first, second) && isEqualsByRank(first, second)
 
-let ltByRank = ((_, r1): card, (_, r2): card) => r1 < r2
+let ltByRank = (card1: card, card2: card) =>
+  switch (card1, card2) {
+  | (Visible((_, rank1)), Visible(_, rank2)) => rank1 < rank2
+  | _ => false
+  }
+
 let gtByRank = (c1: card, c2: card) => !ltByRank(c1, c2)
 
 let sortByRank = (first: card, second: card) => ltByRank(first, second) ? -1 : 1
 
-let isTrump = (trump: suit, (suit, _): card) => trump === suit
+let isTrump = (trump: suit, card: card) =>
+  switch card {
+  | Visible((suit, _)) => suit === trump
+  | _ => false
+  }
 
 let getSmallest = (trump: suit, first: option<card>, second: option<card>) => {
   switch (first, second) {
@@ -32,7 +49,7 @@ let getSmallest = (trump: suit, first: option<card>, second: option<card>) => {
 }
 
 let isBeatByTrump = (to: card, by: card, trump: suit) => {
-  fst(to) != trump && fst(by) == trump
+  !isTrump(trump, to) && isTrump(trump, by)
 }
 
 let isValidBeat = (to: card, by: card, trump: suit) => {
@@ -67,4 +84,8 @@ let rankToString = (rank: rank) => {
   }
 }
 
-let cardToString = ((s, r): card) => suitToString(s) ++ " " ++ rankToString(r)
+let cardToString = (card: card) =>
+  switch card {
+  | Visible((suit, rank)) => suitToString(suit) ++ " " ++ rankToString(rank)
+  | Hidden => "hidden"
+  }

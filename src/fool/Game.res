@@ -41,7 +41,7 @@ let startGame = (game: inLobby): result<state, string> => {
   }
 }
 
-let isValidMove = (game: inProgress, player: player, card: card) => {
+let isValidMove = (game, player, card) => {
   if isDefender(game, player) {
     Error("Defender can't make move")
   } else if !Table.hasCards(game.table) && !isAttacker(game, player) {

@@ -51,10 +51,17 @@ function getTrump(deck, players) {
               return Belt_List.length(p.cards) !== 0;
             })));
   if (lastCard !== undefined) {
-    return lastCard[0];
+    if (lastCard) {
+      return lastCard._0[0];
+    } else {
+      return ;
+    }
   } else if (lastPlayer !== undefined) {
-    return Belt_Option.map(Utils.lastListItem(lastPlayer.cards), (function (prim) {
-                  return prim[0];
+    return Belt_Option.flatMap(Utils.lastListItem(lastPlayer.cards), (function (card) {
+                  if (card) {
+                    return card._0[0];
+                  }
+                  
                 }));
   } else {
     return ;

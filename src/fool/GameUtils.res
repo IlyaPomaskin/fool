@@ -1,22 +1,22 @@
 open Types
 
-let isDefender = (game: inProgress, player: player) => {
+let isDefender = (game, player) => {
   game.defender.id === player.id
 }
 
-let isAttacker = (game: inProgress, player: player) => {
+let isAttacker = (game, player) => {
   game.attacker.id === player.id
 }
 
-let isPlayerHasCard = (player: player, card: card) => {
+let isPlayerHasCard = (player, card) => {
   List.has(player.cards, card, Utils.equals)
 }
 
-let isCorrectAdditionalCard = (game: inProgress, card: card) => {
+let isCorrectAdditionalCard = (game, card) => {
   game.table->Table.getFlatCards->List.has(card, Card.isEqualsByRank)
 }
 
-let isPlayerCanMove = (game: inProgress, player: player) => {
+let isPlayerCanMove = (game, player) => {
   if !Table.hasCards(game.table) {
     isAttacker(game, player)
   } else if isDefender(game, player) {
@@ -36,9 +36,17 @@ let getTrump = (deck: deck, players: list<player>) => {
   let lastPlayer = players->List.keep(p => List.length(p.cards) != 0)->Utils.lastListItem
 
   switch (lastCard, lastPlayer) {
-  | (Some(card), _) => Some(fst(card))
-  | (None, Some(player)) => player.cards->Utils.lastListItem->Option.map(fst)
-  | (None, None) => None
+  | (Some(Visible(card)), _) => Some(fst(card))
+  | (None, Some(player)) =>
+    player.cards
+    ->Utils.lastListItem
+    ->Option.flatMap(card =>
+      switch card {
+      | Visible((suit, _)) => Some(suit)
+      | Hidden => None
+      }
+    )
+  | _ => None
   }
 }
 
@@ -54,22 +62,22 @@ let isPlayerLose = (game: inProgress, player: player) => {
   isOnlyOnePlayerLeft && isCurrentPlayerLeft
 }
 
-let isCanTake = (game: inProgress, player: player) => {
+let isCanTake = (game, player) => {
   isDefender(game, player) && Table.hasCards(game.table) && !Table.isAllBeaten(game.table)
 }
 
-let isCanPass = (game: inProgress, player: player) => {
+let isCanPass = (game, player) => {
   Table.hasCards(game.table) && !isDefender(game, player)
 }
 
-let isPassed = (game: inProgress, player: player) => {
+let isPassed = (game, player) => {
   let inPassedList = game.pass->List.has(player, Utils.equals)
   let hasCards = !Deck.isEmpty(player.cards)
 
   hasCards ? inPassedList : true
 }
 
-let isAllPassed = (game: inProgress) => {
+let isAllPassed = game => {
   game.players->List.keep(p => !isDefender(game, p))->List.every(isPassed(game))
 }
 
