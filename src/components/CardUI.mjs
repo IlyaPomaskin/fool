@@ -58,7 +58,7 @@ function CardUI$Local(Props) {
   return React.createElement(CardUI$Base, {
               className: Utils.cx([
                     className,
-                    disabled ? "text-slate-300" : suitToColor(card[0]),
+                    disabled ? "text-slate-400" : suitToColor(card[0]),
                     "overflow-hidden"
                   ]),
               disabled: disabled,

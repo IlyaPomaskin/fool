@@ -17,7 +17,7 @@ let enterGame = (game: inLobby, player: player) => InLobby({
 })
 
 let startGame = (game: inLobby): result<state, string> => {
-  let (players, deck) = Player.dealDeckToPlayers(Deck.makeShuffled(), game.players)
+  let (players, deck) = Deck.makeShuffled()->Player.dealDeckToPlayers(game.players)
 
   let trump = getTrump(deck, players)
   let attacker = trump->Option.flatMap(tr => Player.findFirstAttacker(tr, players))

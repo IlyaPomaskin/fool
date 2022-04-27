@@ -49,7 +49,7 @@ module Local = {
       selected
       className={cx([
         className,
-        disabled ? "text-slate-300" : suitToColor(fst(card)),
+        disabled ? "text-slate-400" : suitToColor(fst(card)),
         "overflow-hidden",
       ])}
       onClick={_ => onClick(card)}>

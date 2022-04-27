@@ -2,10 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-html {
-  @apply dark:invert;
-}
-
 body {
   @apply bg-slate-200 font-sans;
 }
