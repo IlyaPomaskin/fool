@@ -115,7 +115,7 @@ let pass = (game, player) => {
   }
 }
 
-let isValidBeat = (game, to, by, player) => {
+let isValidBeat = (game, player, to, by) => {
   if !isDefender(game, player) {
     Error("Is not deffender")
   } else if !isPlayerHasCard(player, by) {
@@ -127,8 +127,8 @@ let isValidBeat = (game, to, by, player) => {
   }
 }
 
-let beat = (game, to, by, player) => {
-  let isValid = isValidBeat(game, to, by, player)
+let beat = (game, player, to, by) => {
+  let isValid = isValidBeat(game, player, to, by)
 
   if Result.isError(isValid) {
     isValid
@@ -190,6 +190,15 @@ let take = (game, player) => {
       })
     | _ => Error("Can't find next attacker/defender")
     }
+  }
+}
+
+let dispatch = (game, player, action) => {
+  switch action {
+  | Take => take(game, player)
+  | Beat(to, by) => beat(game, player, to, by)
+  | Pass => pass(game, player)
+  | Move(card) => move(game, player, card)
   }
 }
 

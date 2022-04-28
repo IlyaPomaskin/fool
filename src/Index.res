@@ -8,31 +8,20 @@ type props = {
 
 module Client = {
   @react.component
-  let make = (~game, ~player) => {
-    let (game, nextGame) = React.useState(() => game)
+  let make = (~game, ~player, ~onAction) => {
     let (error, setError) = React.useState(() => None)
 
-    let handleGameChange = game => {
-      switch game {
-      | Ok(game) => {
-          nextGame(_ => game)
+    let handleMove = move => {
+      let nextGame = Game.dispatch(game, player, move)
+
+      switch nextGame {
+      | Ok(_) => {
+          onAction(move)
           setError(_ => None)
         }
       | Error(err) => setError(_ => Some(err))
       }
     }
-
-    let handleMove = move => {
-      // Promise.make((resolve, reject) => {
-      //   let timeoutId = Js.Global.setTimeout(
-      //     () => resolve(. move->GameServer.dispatch(game, player)),
-      //     100,
-      //   )
-      // })->Promise.thenResolve(handleGameChange)
-      ()
-    }
-
-    Js.log2("render", Game.toObject(game))
 
     <div>
       <GameUI.InProgressUI game={game} />
@@ -44,25 +33,30 @@ module Client = {
         )}
       </div>
       <div>
-        {error
-        ->Option.map(err => uiStr("Error: " ++ err))
-        ->Option.getWithDefault(uiStr("No errors"))}
+        {error->Option.map(err => "Error: " ++ err)->Option.getWithDefault("No errors")->uiStr}
       </div>
     </div>
   }
 }
 
 let default = ({authorGame, clientGame}: props) => {
+  let handleAction = (game, player, action) => {
+    Socket.SClient.send(game.gameId, player.id, action)
+    ()
+  }
+
   <div>
     <div className="my-2 border rounded-md border-solid border-slate-500">
       {switch authorGame {
-      | Ok(game) => <Client game={game} player={Server.author} />
+      | Ok(game) =>
+        <Client onAction={handleAction(game, Server.author)} game={game} player={Server.author} />
       | Error(e) => uiStr(e)
       }}
     </div>
     <div className="my-2 border rounded-md border-solid border-slate-500">
       {switch clientGame {
-      | Ok(game) => <Client game={game} player={Server.client} />
+      | Ok(game) =>
+        <Client onAction={handleAction(game, Server.client)} game={game} player={Server.client} />
       | Error(e) => uiStr(e)
       }}
     </div>

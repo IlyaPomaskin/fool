@@ -220,7 +220,7 @@ function pass(game, player) {
   }
 }
 
-function isValidBeat(game, to, by, player) {
+function isValidBeat(game, player, to, by) {
   if (GameUtils.isDefender(game, player)) {
     if (GameUtils.isPlayerHasCard(player, by)) {
       if (Card.isValidBeat(to, by, game.trump)) {
@@ -248,8 +248,8 @@ function isValidBeat(game, to, by, player) {
   }
 }
 
-function beat(game, to, by, player) {
-  var isValid = isValidBeat(game, to, by, player);
+function beat(game, player, to, by) {
+  var isValid = isValidBeat(game, player, to, by);
   if (Belt_Result.isError(isValid)) {
     return isValid;
   } else {
@@ -350,6 +350,20 @@ function take(game, player) {
   }
 }
 
+function dispatch(game, player, action) {
+  if (typeof action === "number") {
+    if (action === /* Take */0) {
+      return take(game, player);
+    } else {
+      return pass(game, player);
+    }
+  } else if (action.TAG === /* Beat */0) {
+    return beat(game, player, action._0, action._1);
+  } else {
+    return move(game, player, action._0);
+  }
+}
+
 function maskGameDeck(deck) {
   var lastCardIndex = Belt_List.length(deck) - 1 | 0;
   return Belt_List.mapWithIndex(deck, (function (index, card) {
@@ -405,6 +419,7 @@ export {
   beat ,
   isValidTake ,
   take ,
+  dispatch ,
   maskGameDeck ,
   maskForPlayer ,
   toObject ,

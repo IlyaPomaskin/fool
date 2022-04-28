@@ -45,14 +45,14 @@ let startGame = (gameId: gameId): unit => {
       MutableMap.set(gamesInProgress, gameId, game)
 
       game.players->List.forEach(player =>
-        Socket.Server.send(player, Game.maskForPlayer(player, game)->Game.toObject)
+        Socket.SServer.send(player, Game.maskForPlayer(player, game)->Game.toObject)
       )
     }
-  | Error(err) => Socket.Server.broadcast(gameId, {"error": err})
+  | Error(err) => Socket.SServer.broadcast(gameId, {"error": err})
   }
 }
 
-let dispatch = (action, gameId, playerId) => {
+let dispatch = (gameId, playerId, action) => {
   let game = gamesInProgress->ProgressGameMap.get(gameId)
   let player =
     game->Result.flatMap(game =>
@@ -61,12 +61,7 @@ let dispatch = (action, gameId, playerId) => {
 
   switch (game, player) {
   | (Ok(game), Ok(player)) =>
-    switch action {
-    | Take => Game.take(game, player)
-    | Beat(to, by) => Game.beat(game, to, by, player)
-    | Pass => Game.pass(game, player)
-    | Move(card) => Game.move(game, player, card)
-    }->Result.map(Game.maskForPlayer(player))
+    Game.dispatch(game, player, action)->Result.map(Game.maskForPlayer(player))
   | (Error(err), _) => Error(err)
   | (_, Error(err)) => Error(err)
   }

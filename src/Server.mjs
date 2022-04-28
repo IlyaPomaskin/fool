@@ -78,18 +78,18 @@ Belt_MutableMap.set(gamesInLobby, "GAME_ID", {
 function startGame(gameId) {
   var nextGame = Belt_Result.flatMap(get(gamesInLobby, gameId), Game.startGame);
   if (nextGame.TAG !== /* Ok */0) {
-    return Socket.Server.broadcast(gameId, {
+    return Socket.SServer.broadcast(gameId, {
                 error: nextGame._0
               });
   }
   var game = nextGame._0;
   Belt_MutableMap.set(gamesInProgress, gameId, game);
   return Belt_List.forEach(game.players, (function (player) {
-                return Socket.Server.send(player, Game.toObject(Game.maskForPlayer(player, game)));
+                return Socket.SServer.send(player, Game.toObject(Game.maskForPlayer(player, game)));
               }));
 }
 
-function dispatch(action, gameId, playerId) {
+function dispatch(gameId, playerId, action) {
   var game = get$1(gamesInProgress, gameId);
   var player = Belt_Result.flatMap(game, (function (game) {
           return Utils.toResult(GameUtils.findPlayerById(game, playerId), "Player " + playerId + " not found");
@@ -100,7 +100,6 @@ function dispatch(action, gameId, playerId) {
             _0: game._0
           };
   }
-  var game$1 = game._0;
   if (player.TAG !== /* Ok */0) {
     return {
             TAG: /* Error */1,
@@ -108,13 +107,7 @@ function dispatch(action, gameId, playerId) {
           };
   }
   var player$1 = player._0;
-  var tmp;
-  tmp = typeof action === "number" ? (
-      action === /* Take */0 ? Game.take(game$1, player$1) : Game.pass(game$1, player$1)
-    ) : (
-      action.TAG === /* Beat */0 ? Game.beat(game$1, action._0, action._1, player$1) : Game.move(game$1, player$1, action._0)
-    );
-  return Belt_Result.map(tmp, (function (param) {
+  return Belt_Result.map(Game.dispatch(game._0, player$1, action), (function (param) {
                 return Game.maskForPlayer(player$1, param);
               }));
 }

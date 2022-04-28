@@ -18,7 +18,7 @@ function send(player, payload) {
   
 }
 
-var Server = {
+var SServer = {
   broadcast: broadcast,
   send: send
 };
@@ -31,13 +31,13 @@ function send$1(gameId, playerId, payload) {
   
 }
 
-var Client = {
+var SClient = {
   send: send$1
 };
 
 export {
-  Server ,
-  Client ,
+  SServer ,
+  SClient ,
   
 }
 /* No side effect */
