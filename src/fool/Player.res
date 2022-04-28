@@ -59,7 +59,7 @@ let dealDeckToPlayers = (deck, players) => {
 }
 
 let removeCard = (player, card) => {
-  List.keep(player.cards, c => c !== card)
+  List.keep(player.cards, c => !Card.isEquals(card, c))
 }
 
 let isPlayerExists = (players, player) => {
@@ -68,6 +68,19 @@ let isPlayerExists = (players, player) => {
 
 let mask = (targetPlayer, player) => {
   ...player,
-  sessionId: None,
-  cards: player.cards->List.map(card => player === targetPlayer ? card : Hidden),
+  sessionId: Some("masked"),
+  cards: player.cards->List.map(card => player.id == targetPlayer.id ? card : Hidden),
 }
+
+let toObject = player =>
+  {
+    "id": player.id,
+    "sessionId": player.sessionId,
+    "cards": player.cards->List.map(Card.cardToString)->List.toArray,
+  }
+
+let toStringShort = player =>
+  {
+    "id": player.id,
+    "sessionId": player.sessionId,
+  }

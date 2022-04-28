@@ -107,6 +107,10 @@ function mask(deck) {
               }));
 }
 
+function toObject(deck) {
+  return Belt_List.toArray(Belt_List.map(deck, Card.cardToString));
+}
+
 export {
   suitsList ,
   ranksList ,
@@ -116,6 +120,7 @@ export {
   getSmallestValuableCard ,
   isEmpty ,
   mask ,
+  toObject ,
   
 }
 /* No side effect */

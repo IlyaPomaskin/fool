@@ -97,3 +97,5 @@ let getPlayerGameState = (game, player) => {
   | _ => Playing
   }
 }
+
+let findPlayerById = (game, playerId) => game.players->List.getBy(p => p.id === playerId)

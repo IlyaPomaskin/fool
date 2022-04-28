@@ -105,25 +105,3 @@ module Codecs = {
     Jzon.field("payload", Jzon.json)->Jzon.optional,
   )
 }
-
-// module Channel = {
-//   let make = () => nan
-
-//   let send = (gameId, playerId, msg) =>
-//     Promise.make((resolve, reject) => {
-//       let timeoutId = Js.Global.setTimeout(() => {
-//         let response = GameServer.dispatch(gameId)
-
-//         resolve(. 0)
-//       }, 100)
-//     })
-// }
-
-// let sendMove = (move, gameId, playerId) => {
-//   Promise.make((resolve, reject) => {
-//     let timeoutId = Js.Global.setTimeout(
-//       () => resolve(. move->GameServer.dispatch(game, playerId)),
-//       100,
-//     )
-//   })
-// }

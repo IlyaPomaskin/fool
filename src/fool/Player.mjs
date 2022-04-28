@@ -83,7 +83,7 @@ function dealDeckToPlayers(deck, players) {
 
 function removeCard(player, card) {
   return Belt_List.keep(player.cards, (function (c) {
-                return c !== card;
+                return !Card.isEquals(card, c);
               }));
 }
 
@@ -94,14 +94,29 @@ function isPlayerExists(players, player) {
 function mask(targetPlayer, player) {
   return {
           id: player.id,
-          sessionId: undefined,
+          sessionId: "masked",
           cards: Belt_List.map(player.cards, (function (card) {
-                  if (player === targetPlayer) {
+                  if (player.id === targetPlayer.id) {
                     return card;
                   } else {
                     return /* Hidden */0;
                   }
                 }))
+        };
+}
+
+function toObject(player) {
+  return {
+          id: player.id,
+          sessionId: player.sessionId,
+          cards: Belt_List.toArray(Belt_List.map(player.cards, Card.cardToString))
+        };
+}
+
+function toStringShort(player) {
+  return {
+          id: player.id,
+          sessionId: player.sessionId
         };
 }
 
@@ -114,6 +129,8 @@ export {
   removeCard ,
   isPlayerExists ,
   mask ,
+  toObject ,
+  toStringShort ,
   
 }
 /* No side effect */

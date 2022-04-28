@@ -38,3 +38,5 @@ let getSmallestValuableCard = (trump, deck) =>
 let isEmpty = deck => List.length(deck) == 0
 
 let mask = deck => deck->List.map(_ => Hidden)
+
+let toObject = deck => deck->List.map(Card.cardToString)->List.toArray

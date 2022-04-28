@@ -39,6 +39,7 @@ function toggleReady(game, player) {
   return {
           TAG: /* InLobby */0,
           _0: {
+            gameId: game.gameId,
             players: Utils.toggleArrayItem(game.players, player),
             ready: game.ready
           }
@@ -146,6 +147,12 @@ function getPlayerGameState(game, player) {
   }
 }
 
+function findPlayerById(game, playerId) {
+  return Belt_List.getBy(game.players, (function (p) {
+                return p.id === playerId;
+              }));
+}
+
 export {
   isDefender ,
   isAttacker ,
@@ -161,6 +168,7 @@ export {
   isPassed ,
   isAllPassed ,
   getPlayerGameState ,
+  findPlayerById ,
   
 }
 /* No side effect */

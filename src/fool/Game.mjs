@@ -13,39 +13,30 @@ import * as Belt_Result from "rescript/lib/es6/belt_Result.js";
 
 function makeGameInLobby(authorId) {
   return {
-          TAG: /* InLobby */0,
-          _0: {
-            gameId: "session:" + String(Js_math.random_int(0, 10000000)),
-            players: {
-              hd: Player.make(authorId),
-              tl: /* [] */0
-            },
-            ready: /* [] */0
-          }
+          gameId: "session:" + String(Js_math.random_int(0, 10000000)),
+          players: {
+            hd: Player.make(authorId),
+            tl: /* [] */0
+          },
+          ready: /* [] */0
         };
 }
 
 function logoutPlayer(game, player) {
   return {
-          TAG: /* InLobby */0,
-          _0: {
-            gameId: game.gameId,
-            players: Belt_List.keep(game.players, (function (item) {
-                    return item !== player;
-                  })),
-            ready: game.ready
-          }
+          gameId: game.gameId,
+          players: Belt_List.keep(game.players, (function (item) {
+                  return item !== player;
+                })),
+          ready: game.ready
         };
 }
 
 function enterGame(game, player) {
   return {
-          TAG: /* InLobby */0,
-          _0: {
-            gameId: game.gameId,
-            players: Belt_List.add(game.players, player),
-            ready: game.ready
-          }
+          gameId: game.gameId,
+          players: Belt_List.add(game.players, player),
+          ready: game.ready
         };
 }
 
@@ -359,6 +350,47 @@ function take(game, player) {
   }
 }
 
+function maskGameDeck(deck) {
+  var lastCardIndex = Belt_List.length(deck) - 1 | 0;
+  return Belt_List.mapWithIndex(deck, (function (index, card) {
+                if (index === lastCardIndex) {
+                  return card;
+                } else {
+                  return /* Hidden */0;
+                }
+              }));
+}
+
+function maskForPlayer(player, game) {
+  return {
+          gameId: game.gameId,
+          attacker: Player.mask(player, game.attacker),
+          defender: Player.mask(player, game.defender),
+          players: Belt_List.map(game.players, (function (param) {
+                  return Player.mask(player, param);
+                })),
+          trump: game.trump,
+          deck: maskGameDeck(game.deck),
+          table: game.table,
+          pass: Belt_List.map(game.pass, (function (param) {
+                  return Player.mask(player, param);
+                }))
+        };
+}
+
+function toObject(game) {
+  return {
+          gameId: game.gameId,
+          table: Table.toObject(game.table),
+          trump: Card.suitToString(game.trump),
+          attacker: Player.toStringShort(game.attacker),
+          defender: Player.toStringShort(game.defender),
+          players: Belt_List.toArray(Belt_List.map(game.players, Player.toObject)),
+          deck: Deck.toObject(game.deck),
+          pass: Belt_List.toArray(Belt_List.map(game.pass, Player.toStringShort))
+        };
+}
+
 export {
   makeGameInLobby ,
   logoutPlayer ,
@@ -373,6 +405,9 @@ export {
   beat ,
   isValidTake ,
   take ,
+  maskGameDeck ,
+  maskForPlayer ,
+  toObject ,
   
 }
 /* No side effect */

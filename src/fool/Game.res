@@ -1,21 +1,21 @@
 open Types
 open GameUtils
 
-let makeGameInLobby = authorId => InLobby({
+let makeGameInLobby = authorId => {
   gameId: "session:" ++ string_of_int(Js.Math.random_int(0, 10000000)),
   players: list{Player.make(authorId)},
   ready: list{},
-})
+}
 
-let logoutPlayer = (game: inLobby, player) => InLobby({
+let logoutPlayer = (game: inLobby, player) => {
   ...game,
   players: Belt.List.keep(game.players, item => item !== player),
-})
+}
 
-let enterGame = (game: inLobby, player) => InLobby({
+let enterGame = (game: inLobby, player) => {
   ...game,
   players: List.add(game.players, player),
-})
+}
 
 let startGame = (game: inLobby) => {
   let (players, deck) = Deck.makeShuffled()->Player.dealDeckToPlayers(game.players)
@@ -192,3 +192,35 @@ let take = (game, player) => {
     }
   }
 }
+
+let maskGameDeck = deck => {
+  let lastCardIndex = List.length(deck) - 1
+
+  List.mapWithIndex(deck, (index, card) =>
+    switch index == lastCardIndex {
+    | true => card
+    | false => Hidden
+    }
+  )
+}
+
+let maskForPlayer = (player, game) => {
+  ...game,
+  attacker: player->Player.mask(game.attacker),
+  defender: player->Player.mask(game.defender),
+  players: game.players->List.map(Player.mask(player)),
+  deck: game.deck->maskGameDeck,
+  pass: game.pass->List.map(Player.mask(player)),
+}
+
+let toObject = game =>
+  {
+    "gameId": game.gameId,
+    "table": Table.toObject(game.table),
+    "trump": Card.suitToString(game.trump),
+    "attacker": Player.toStringShort(game.attacker),
+    "defender": Player.toStringShort(game.defender),
+    "players": game.players->List.map(Player.toObject)->List.toArray,
+    "deck": Deck.toObject(game.deck),
+    "pass": game.pass->List.map(Player.toStringShort)->List.toArray,
+  }

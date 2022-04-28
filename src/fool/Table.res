@@ -15,3 +15,11 @@ let getFlatCards = table => {
   // remove keepMap?
   ->List.keepMap(Utils.identity)
 }
+
+let toObject = table =>
+  table
+  ->List.map(((to, by)) => [
+    Card.cardToString(to),
+    by->Option.map(Card.cardToString)->Option.getWithDefault("None"),
+  ])
+  ->List.toArray
