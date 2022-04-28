@@ -5,6 +5,7 @@ import * as Deck from "./Deck.mjs";
 import * as Table from "./Table.mjs";
 import * as Utils from "../Utils.mjs";
 import * as Player from "./Player.mjs";
+import * as Js_math from "rescript/lib/es6/js_math.js";
 import * as Belt_List from "rescript/lib/es6/belt_List.js";
 import * as GameUtils from "./GameUtils.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
@@ -14,6 +15,7 @@ function makeGameInLobby(authorId) {
   return {
           TAG: /* InLobby */0,
           _0: {
+            gameId: "session:" + String(Js_math.random_int(0, 10000000)),
             players: {
               hd: Player.make(authorId),
               tl: /* [] */0
@@ -27,6 +29,7 @@ function logoutPlayer(game, player) {
   return {
           TAG: /* InLobby */0,
           _0: {
+            gameId: game.gameId,
             players: Belt_List.keep(game.players, (function (item) {
                     return item !== player;
                   })),
@@ -39,6 +42,7 @@ function enterGame(game, player) {
   return {
           TAG: /* InLobby */0,
           _0: {
+            gameId: game.gameId,
             players: Belt_List.add(game.players, player),
             ready: game.ready
           }
@@ -61,6 +65,7 @@ function startGame(game) {
       return {
               TAG: /* Ok */0,
               _0: {
+                gameId: game.gameId,
                 attacker: attacker,
                 defender: defender,
                 players: players,
@@ -128,6 +133,7 @@ function move(game, player, card) {
     return {
             TAG: /* Ok */0,
             _0: {
+              gameId: game.gameId,
               attacker: game.attacker,
               defender: game.defender,
               players: Belt_List.map(game.players, (function (p) {
@@ -173,6 +179,7 @@ function finishRound(game) {
     return {
             TAG: /* Ok */0,
             _0: {
+              gameId: game.gameId,
               attacker: nextAttacker,
               defender: nextDefender,
               players: match[0],
@@ -192,6 +199,7 @@ function finishRound(game) {
 
 function pass(game, player) {
   var isValid = isValidPass(game, player);
+  var nextGameWithPassed_gameId = game.gameId;
   var nextGameWithPassed_attacker = game.attacker;
   var nextGameWithPassed_defender = game.defender;
   var nextGameWithPassed_players = game.players;
@@ -200,6 +208,7 @@ function pass(game, player) {
   var nextGameWithPassed_table = game.table;
   var nextGameWithPassed_pass = Utils.toggleArrayItem(game.pass, player);
   var nextGameWithPassed = {
+    gameId: nextGameWithPassed_gameId,
     attacker: nextGameWithPassed_attacker,
     defender: nextGameWithPassed_defender,
     players: nextGameWithPassed_players,
@@ -256,6 +265,7 @@ function beat(game, to, by, player) {
     return {
             TAG: /* Ok */0,
             _0: {
+              gameId: game.gameId,
               attacker: game.attacker,
               defender: game.defender,
               players: Belt_List.map(game.players, (function (p) {
@@ -321,6 +331,7 @@ function take(game, player) {
     return {
             TAG: /* Ok */0,
             _0: {
+              gameId: game.gameId,
               attacker: nextAttacker,
               defender: nextDefender,
               players: Belt_List.map(game.players, (function (p) {

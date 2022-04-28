@@ -29,6 +29,7 @@ var players = {
 
 function make(param) {
   return Belt_Result.getExn(Game.startGame({
+                  gameId: "123",
                   players: players,
                   ready: players
                 }));

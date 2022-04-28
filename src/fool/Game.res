@@ -2,6 +2,7 @@ open Types
 open GameUtils
 
 let makeGameInLobby = authorId => InLobby({
+  gameId: "session:" ++ string_of_int(Js.Math.random_int(0, 10000000)),
   players: list{Player.make(authorId)},
   ready: list{},
 })
@@ -26,6 +27,7 @@ let startGame = (game: inLobby) => {
   switch (trump, attacker, defender) {
   | (Some(trump), Some(a), Some(d)) =>
     Ok({
+      gameId: game.gameId,
       attacker: a,
       defender: d,
       table: list{},

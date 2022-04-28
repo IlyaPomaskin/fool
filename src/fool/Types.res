@@ -37,12 +37,16 @@ type player = {
   cards: deck,
 }
 
+type gameId = string
+
 type inLobby = {
+  gameId: gameId,
   players: list<player>,
   ready: list<player>,
 }
 
 type inProgress = {
+  gameId: gameId,
   attacker: player,
   defender: player,
   players: list<player>,

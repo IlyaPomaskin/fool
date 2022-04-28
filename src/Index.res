@@ -14,6 +14,7 @@ module GameServer = {
   let make = () => {
     Result.getExn(
       Game.startGame({
+        gameId: "123",
         players: players,
         ready: players,
       }),
