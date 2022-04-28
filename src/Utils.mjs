@@ -3,6 +3,7 @@
 import * as Caml_obj from "rescript/lib/es6/caml_obj.js";
 import * as Belt_List from "rescript/lib/es6/belt_List.js";
 import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
+import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 
 function cx(names) {
   return Belt_Array.reduce(names, "", (function (acc, c) {
@@ -78,6 +79,20 @@ function numbersToEmoji(number) {
   }
 }
 
+function makeOk(a) {
+  return {
+          TAG: /* Ok */0,
+          _0: a
+        };
+}
+
+function toResult(a, error) {
+  return Belt_Option.getWithDefault(Belt_Option.map(a, makeOk), {
+              TAG: /* Error */1,
+              _0: error
+            });
+}
+
 var selected = "bg-slate-400";
 
 var unselected = "";
@@ -96,6 +111,8 @@ export {
   lastListItem ,
   identity ,
   numbersToEmoji ,
+  makeOk ,
+  toResult ,
   
 }
 /* No side effect */

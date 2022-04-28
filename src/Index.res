@@ -2,8 +2,8 @@ open Types
 open Utils
 
 type props = {
-  game: result<state, string>,
-  player: player,
+  authorGame: result<inProgress, string>,
+  clientGame: result<inProgress, string>,
 }
 
 module Client = {
@@ -52,26 +52,32 @@ module Client = {
   }
 }
 
-let default = ({game, player}: props) => {
-  switch game {
-  | Ok(InProgress(game)) => <Client game={game} player />
-  | Ok(_) => uiStr("lobby?")
-  | Error(e) => uiStr(e)
-  }
+let default = ({authorGame, clientGame}: props) => {
+  <div>
+    <div className="my-2 border rounded-md border-solid border-slate-500">
+      {switch authorGame {
+      | Ok(game) => <Client game={game} player={Server.author} />
+      | Error(e) => uiStr(e)
+      }}
+    </div>
+    <div className="my-2 border rounded-md border-solid border-slate-500">
+      {switch clientGame {
+      | Ok(game) => <Client game={game} player={Server.client} />
+      | Error(e) => uiStr(e)
+      }}
+    </div>
+  </div>
 }
 
 let getServerSideProps = _ctx => {
-  let player = Server.author
-
   Js.Promise.resolve({
     "props": {
-      game: Server.getGame("GAME_ID")->Result.map(game =>
-        switch game {
-        | InProgress(game) => InProgress(Game.maskForPlayer(player, game))
-        | InLobby(g) => InLobby(g)
-        }
-      ),
-      player: player,
+      authorGame: Server.gamesInProgress
+      ->Server.ProgressGameMap.get("GAME_ID")
+      ->Result.map(Game.maskForPlayer(Server.author)),
+      clientGame: Server.gamesInProgress
+      ->Server.ProgressGameMap.get("GAME_ID")
+      ->Result.map(Game.maskForPlayer(Server.client)),
     },
   })
 }

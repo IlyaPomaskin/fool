@@ -45,3 +45,8 @@ let rec numbersToEmoji = (number: int) =>
   | 9 => `9️⃣`
   | _ => numbersToEmoji(number / 10) ++ numbersToEmoji(mod(number, 10))
   }
+
+let makeOk = (a: 'a) => Ok(a)
+
+let toResult = (a: option<'a>, error: 'b): result<'a, 'b> =>
+  a->Option.map(makeOk)->Option.getWithDefault(Error(error))

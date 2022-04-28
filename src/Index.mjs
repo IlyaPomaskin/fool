@@ -40,38 +40,34 @@ function Index$Client(Props) {
 }
 
 function $$default(param) {
-  var game = param.game;
-  if (game.TAG !== /* Ok */0) {
-    return Utils.uiStr(game._0);
-  }
-  var game$1 = game._0;
-  if (game$1.TAG === /* InLobby */0) {
-    return Utils.uiStr("lobby?");
-  } else {
-    return React.createElement(Index$Client, {
-                game: game$1._0,
-                player: param.player
-              });
-  }
+  var clientGame = param.clientGame;
+  var authorGame = param.authorGame;
+  var tmp;
+  tmp = authorGame.TAG === /* Ok */0 ? React.createElement(Index$Client, {
+          game: authorGame._0,
+          player: Server.author
+        }) : Utils.uiStr(authorGame._0);
+  var tmp$1;
+  tmp$1 = clientGame.TAG === /* Ok */0 ? React.createElement(Index$Client, {
+          game: clientGame._0,
+          player: Server.client
+        }) : Utils.uiStr(clientGame._0);
+  return React.createElement("div", undefined, React.createElement("div", {
+                  className: "my-2 border rounded-md border-solid border-slate-500"
+                }, tmp), React.createElement("div", {
+                  className: "my-2 border rounded-md border-solid border-slate-500"
+                }, tmp$1));
 }
 
 function getServerSideProps(_ctx) {
   return Promise.resolve({
               props: {
-                game: Belt_Result.map(Server.getGame("GAME_ID"), (function (game) {
-                        if (game.TAG === /* InLobby */0) {
-                          return {
-                                  TAG: /* InLobby */0,
-                                  _0: game._0
-                                };
-                        } else {
-                          return {
-                                  TAG: /* InProgress */1,
-                                  _0: Game.maskForPlayer(Server.author, game._0)
-                                };
-                        }
+                authorGame: Belt_Result.map(Server.ProgressGameMap.get(Server.gamesInProgress, "GAME_ID"), (function (param) {
+                        return Game.maskForPlayer(Server.author, param);
                       })),
-                player: Server.author
+                clientGame: Belt_Result.map(Server.ProgressGameMap.get(Server.gamesInProgress, "GAME_ID"), (function (param) {
+                        return Game.maskForPlayer(Server.client, param);
+                      }))
               }
             });
 }

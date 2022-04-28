@@ -2,11 +2,12 @@
 
 import * as Caml from "rescript/lib/es6/caml.js";
 import * as Game from "./fool/Game.mjs";
+import * as Utils from "./Utils.mjs";
 import * as Player from "./fool/Player.mjs";
 import * as Socket from "./Socket.mjs";
 import * as Belt_Id from "rescript/lib/es6/belt_Id.js";
 import * as Belt_List from "rescript/lib/es6/belt_List.js";
-import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
+import * as GameUtils from "./fool/GameUtils.mjs";
 import * as Belt_Result from "rescript/lib/es6/belt_Result.js";
 import * as Belt_MutableMap from "rescript/lib/es6/belt_MutableMap.js";
 
@@ -20,61 +21,39 @@ function empty(param) {
   return Belt_MutableMap.make(GameId);
 }
 
-var GameMap = {
+function get(map, gameId) {
+  return Utils.toResult(Belt_MutableMap.get(map, gameId), "Game in lobby " + gameId + " not found");
+}
+
+var LobbyGameMap = {
   GameId: GameId,
-  empty: empty
+  empty: empty,
+  get: get
 };
 
-var games = Belt_MutableMap.make(GameId);
+var cmp$1 = Caml.caml_string_compare;
 
-function startGame(gameId) {
-  var nextGame = Belt_Result.flatMap(Belt_Result.flatMap(Belt_Option.getWithDefault(Belt_Option.map(Belt_MutableMap.get(games, gameId), (function (game) {
-                      return {
-                              TAG: /* Ok */0,
-                              _0: game
-                            };
-                    })), {
-                TAG: /* Error */1,
-                _0: "game " + gameId + "not found"
-              }), (function (game) {
-              if (game.TAG === /* InLobby */0) {
-                return {
-                        TAG: /* Ok */0,
-                        _0: game._0
-                      };
-              } else {
-                return {
-                        TAG: /* Error */1,
-                        _0: "game already started"
-                      };
-              }
-            })), Game.startGame);
-  if (nextGame.TAG !== /* Ok */0) {
-    return Socket.Server.broadcast(gameId, {
-                error: nextGame._0
-              });
-  }
-  var game = nextGame._0;
-  Belt_MutableMap.set(games, gameId, {
-        TAG: /* InProgress */1,
-        _0: game
-      });
-  return Belt_List.forEach(game.players, (function (player) {
-                return Socket.Server.send(player, Game.toObject(Game.maskForPlayer(player, game)));
-              }));
+var GameId$1 = Belt_Id.MakeComparable({
+      cmp: cmp$1
+    });
+
+function empty$1(param) {
+  return Belt_MutableMap.make(GameId$1);
 }
 
-function getGame(gameId) {
-  return Belt_Option.getWithDefault(Belt_Option.map(Belt_MutableMap.get(games, gameId), (function (game) {
-                    return {
-                            TAG: /* Ok */0,
-                            _0: game
-                          };
-                  })), {
-              TAG: /* Error */1,
-              _0: "Game " + gameId + " not found"
-            });
+function get$1(map, gameId) {
+  return Utils.toResult(Belt_MutableMap.get(map, gameId), "Game in lobby " + gameId + " not found");
 }
+
+var ProgressGameMap = {
+  GameId: GameId$1,
+  empty: empty$1,
+  get: get$1
+};
+
+var gamesInLobby = Belt_MutableMap.make(GameId);
+
+var gamesInProgress = Belt_MutableMap.make(GameId$1);
 
 var author = Player.make("author");
 
@@ -90,25 +69,68 @@ var players = {
   tl: players_1
 };
 
-Belt_MutableMap.set(games, "GAME_ID", {
-      TAG: /* InLobby */0,
-      _0: {
-        gameId: "GAME_ID",
-        players: players,
-        ready: players
-      }
+Belt_MutableMap.set(gamesInLobby, "GAME_ID", {
+      gameId: "GAME_ID",
+      players: players,
+      ready: players
     });
+
+function startGame(gameId) {
+  var nextGame = Belt_Result.flatMap(get(gamesInLobby, gameId), Game.startGame);
+  if (nextGame.TAG !== /* Ok */0) {
+    return Socket.Server.broadcast(gameId, {
+                error: nextGame._0
+              });
+  }
+  var game = nextGame._0;
+  Belt_MutableMap.set(gamesInProgress, gameId, game);
+  return Belt_List.forEach(game.players, (function (player) {
+                return Socket.Server.send(player, Game.toObject(Game.maskForPlayer(player, game)));
+              }));
+}
+
+function dispatch(action, gameId, playerId) {
+  var game = get$1(gamesInProgress, gameId);
+  var player = Belt_Result.flatMap(game, (function (game) {
+          return Utils.toResult(GameUtils.findPlayerById(game, playerId), "Player " + playerId + " not found");
+        }));
+  if (game.TAG !== /* Ok */0) {
+    return {
+            TAG: /* Error */1,
+            _0: game._0
+          };
+  }
+  var game$1 = game._0;
+  if (player.TAG !== /* Ok */0) {
+    return {
+            TAG: /* Error */1,
+            _0: player._0
+          };
+  }
+  var player$1 = player._0;
+  var tmp;
+  tmp = typeof action === "number" ? (
+      action === /* Take */0 ? Game.take(game$1, player$1) : Game.pass(game$1, player$1)
+    ) : (
+      action.TAG === /* Beat */0 ? Game.beat(game$1, action._0, action._1, player$1) : Game.move(game$1, player$1, action._0)
+    );
+  return Belt_Result.map(tmp, (function (param) {
+                return Game.maskForPlayer(player$1, param);
+              }));
+}
 
 startGame("GAME_ID");
 
 export {
-  GameMap ,
-  games ,
-  startGame ,
-  getGame ,
+  LobbyGameMap ,
+  ProgressGameMap ,
+  gamesInLobby ,
+  gamesInProgress ,
   author ,
   client ,
   players ,
+  startGame ,
+  dispatch ,
   
 }
 /* GameId Not a pure module */
