@@ -192,7 +192,6 @@ function CardUI$deck(Props) {
                       "leading"
                     ])
               }, Utils.uiListWithIndex(deck, (function (index, card) {
-                      console.log(index, card);
                       return React.createElement(CardUI$Local, {
                                   card: card,
                                   className: "inline-block mx-1",

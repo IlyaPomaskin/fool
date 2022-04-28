@@ -155,7 +155,6 @@ let deck = (
   | _ =>
     <div className={cx([className, "leading"])}>
       {deck->uiListWithIndex((index, card) => {
-        Js.log2(index, card)
         <Local
           key={Card.cardToString(card) ++ index->string_of_int}
           selected={isCardSelected(card)}
