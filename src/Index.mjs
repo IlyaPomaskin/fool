@@ -5,11 +5,10 @@ import * as Curry from "rescript/lib/es6/curry.js";
 import * as Utils from "./Utils.mjs";
 import * as React from "react";
 import * as GameUI from "./components/GameUI.mjs";
-import * as Server from "./Server.mjs";
+import * as Player from "./fool/Player.mjs";
 import * as Socket from "./Socket.mjs";
 import * as ClientUI from "./components/ClientUI.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
-import * as Belt_Result from "rescript/lib/es6/belt_Result.js";
 
 function Index$Client(Props) {
   var game = Props.game;
@@ -50,37 +49,59 @@ function Index$Client(Props) {
 }
 
 function $$default(param) {
-  var clientGame = param.clientGame;
-  var authorGame = param.authorGame;
   var handleAction = function (game, player, action) {
     Socket.SClient.send(game.gameId, player.id, action);
     
   };
+  var state = React.useMemo(function () {
+        var author = Player.make("owner");
+        var client = Player.make("user2");
+        var players_1 = {
+          hd: client,
+          tl: /* [] */0
+        };
+        var players = {
+          hd: author,
+          tl: players_1
+        };
+        return {
+                game: Game.startGame({
+                      gameId: "GAME_ID",
+                      players: players,
+                      ready: players
+                    }),
+                author: author,
+                client: client
+              };
+      });
+  var game = state.game;
+  var author = state.author;
+  var client = state.client;
   var tmp;
-  if (authorGame.TAG === /* Ok */0) {
-    var game = authorGame._0;
+  if (game.TAG === /* Ok */0) {
+    var game$1 = game._0;
     tmp = React.createElement(Index$Client, {
-          game: game,
-          player: Server.author,
+          game: game$1,
+          player: author,
           onAction: (function (param) {
-              return handleAction(game, Server.author, param);
+              return handleAction(game$1, author, param);
             })
         });
   } else {
-    tmp = Utils.uiStr(authorGame._0);
+    tmp = Utils.uiStr(game._0);
   }
   var tmp$1;
-  if (clientGame.TAG === /* Ok */0) {
-    var game$1 = clientGame._0;
+  if (game.TAG === /* Ok */0) {
+    var game$2 = game._0;
     tmp$1 = React.createElement(Index$Client, {
-          game: game$1,
-          player: Server.client,
+          game: game$2,
+          player: client,
           onAction: (function (param) {
-              return handleAction(game$1, Server.client, param);
+              return handleAction(game$2, client, param);
             })
         });
   } else {
-    tmp$1 = Utils.uiStr(clientGame._0);
+    tmp$1 = Utils.uiStr(game._0);
   }
   return React.createElement("div", undefined, React.createElement("div", {
                   className: "my-2 border rounded-md border-solid border-slate-500"
@@ -92,12 +113,7 @@ function $$default(param) {
 function getServerSideProps(_ctx) {
   return Promise.resolve({
               props: {
-                authorGame: Belt_Result.map(Server.ProgressGameMap.get(Server.gamesInProgress, "GAME_ID"), (function (param) {
-                        return Game.maskForPlayer(Server.author, param);
-                      })),
-                clientGame: Belt_Result.map(Server.ProgressGameMap.get(Server.gamesInProgress, "GAME_ID"), (function (param) {
-                        return Game.maskForPlayer(Server.client, param);
-                      }))
+                game: 123
               }
             });
 }

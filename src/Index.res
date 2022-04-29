@@ -1,10 +1,7 @@
 open Types
 open Utils
 
-type props = {
-  authorGame: result<inProgress, string>,
-  clientGame: result<inProgress, string>,
-}
+type props = {game: int}
 
 module Client = {
   @react.component
@@ -39,24 +36,38 @@ module Client = {
   }
 }
 
-let default = ({authorGame, clientGame}: props) => {
+let default = (_: props) => {
   let handleAction = (game, player, action) => {
     Socket.SClient.send(game.gameId, player.id, action)
     ()
   }
 
+  let state = React.useMemo(() => {
+    let author = Player.make("owner")
+    let client = Player.make("user2")
+    let players = list{author, client}
+
+    {
+      "game": Game.startGame({gameId: "GAME_ID", players: players, ready: players}),
+      "author": author,
+      "client": client,
+    }
+  })
+
+  let game = state["game"]
+  let author = state["author"]
+  let client = state["client"]
+
   <div>
     <div className="my-2 border rounded-md border-solid border-slate-500">
-      {switch authorGame {
-      | Ok(game) =>
-        <Client onAction={handleAction(game, Server.author)} game={game} player={Server.author} />
+      {switch game {
+      | Ok(game) => <Client onAction={handleAction(game, author)} game={game} player={author} />
       | Error(e) => uiStr(e)
       }}
     </div>
     <div className="my-2 border rounded-md border-solid border-slate-500">
-      {switch clientGame {
-      | Ok(game) =>
-        <Client onAction={handleAction(game, Server.client)} game={game} player={Server.client} />
+      {switch game {
+      | Ok(game) => <Client onAction={handleAction(game, client)} game={game} player={client} />
       | Error(e) => uiStr(e)
       }}
     </div>
@@ -66,12 +77,7 @@ let default = ({authorGame, clientGame}: props) => {
 let getServerSideProps = _ctx => {
   Js.Promise.resolve({
     "props": {
-      authorGame: Server.gamesInProgress
-      ->Server.ProgressGameMap.get("GAME_ID")
-      ->Result.map(Game.maskForPlayer(Server.author)),
-      clientGame: Server.gamesInProgress
-      ->Server.ProgressGameMap.get("GAME_ID")
-      ->Result.map(Game.maskForPlayer(Server.client)),
+      game: 123,
     },
   })
 }
