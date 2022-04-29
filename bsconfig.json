@@ -5,7 +5,9 @@
   "bs-dependencies": [
     "@rescript/react",
     "@ryyppy/rescript-promise",
-    "rescript-jzon"
+    "rescript-jzon",
+    "rescript-webapi",
+    "rescript-nodejs"
   ],
   "bsc-flags": ["-open Belt"],
   "ppx-flags": [],
