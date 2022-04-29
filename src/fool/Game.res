@@ -233,3 +233,11 @@ let toObject = game =>
     "deck": Deck.toObject(game.deck),
     "pass": game.pass->List.map(Player.toStringShort)->List.toArray,
   }
+
+let actionToObject = action =>
+  switch action {
+  | Take => "take"
+  | Beat(to, by) => `beat to:${to->Card.cardToString} by:${by->Card.cardToString}`
+  | Pass => "pass"
+  | Move(card) => `move ${card->Card.cardToString}`
+  }

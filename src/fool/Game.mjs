@@ -405,6 +405,20 @@ function toObject(game) {
         };
 }
 
+function actionToObject(action) {
+  if (typeof action === "number") {
+    if (action === /* Take */0) {
+      return "take";
+    } else {
+      return "pass";
+    }
+  } else if (action.TAG === /* Beat */0) {
+    return "beat to:" + Card.cardToString(action._0) + " by:" + Card.cardToString(action._1);
+  } else {
+    return "move " + Card.cardToString(action._0);
+  }
+}
+
 export {
   makeGameInLobby ,
   logoutPlayer ,
@@ -423,6 +437,7 @@ export {
   maskGameDeck ,
   maskForPlayer ,
   toObject ,
+  actionToObject ,
   
 }
 /* No side effect */
