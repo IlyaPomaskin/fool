@@ -7,7 +7,7 @@ var asdf = {
 
 asdf.contents = asdf.contents + 1 | 0;
 
-function $$default(req, res) {
+function $$default(param, res) {
   res.end(Buffer.from(String(asdf.contents)));
   
 }
