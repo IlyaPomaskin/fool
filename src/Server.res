@@ -1,32 +1,12 @@
 open Types
 
-module LobbyGameMap = {
-  module GameId = Belt.Id.MakeComparable({
-    type t = gameId
-    let cmp: (gameId, gameId) => int = Pervasives.compare
-  })
+module LobbyGameMap = GameMap.MakeGameMap({
+  type t = inLobby
+})
 
-  type t = Belt.MutableMap.t<GameId.t, inLobby, GameId.identity>
-
-  let empty = (): t => Belt.MutableMap.make(~id=module(GameId))
-
-  let get = (map: t, gameId: gameId): result<inLobby, string> =>
-    map->MutableMap.get(gameId)->Utils.toResult(`Game in lobby ${gameId} not found`)
-}
-
-module ProgressGameMap = {
-  module GameId = Belt.Id.MakeComparable({
-    type t = gameId
-    let cmp: (gameId, gameId) => int = Pervasives.compare
-  })
-
-  type t = Belt.MutableMap.t<GameId.t, inProgress, GameId.identity>
-
-  let empty = (): t => Belt.MutableMap.make(~id=module(GameId))
-
-  let get = (map: t, gameId: gameId): result<inProgress, string> =>
-    map->MutableMap.get(gameId)->Utils.toResult(`Game in lobby ${gameId} not found`)
-}
+module ProgressGameMap = GameMap.MakeGameMap({
+  type t = inProgress
+})
 
 let gamesInLobby = LobbyGameMap.empty()
 let gamesInProgress = ProgressGameMap.empty()
