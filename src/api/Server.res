@@ -1,9 +1,25 @@
-let asdf = ref(0)
+open NodeJs
 
-asdf := asdf.contents + 1
+let default = (_: Http.ClientRequest.t, res: Http.ServerResponse.t) => {
+  let wsServer = Ws.MakeWebSocketServer.make({
+    backlog: 100,
+    clientTracking: true,
+    maxPayload: 104857600,
+    path: "/ws",
+    noServer: false,
+    server: Ws.restartServer(),
+    skipUTF8Validation: true,
+  })
 
-let default = (_: NodeJs.Http.ClientRequest.t, res: NodeJs.Http.ServerResponse.t) => {
-  res->NodeJs.Http.ServerResponse.endWithData(
-    NodeJs.Buffer.fromString(asdf.contents->string_of_int),
-  )
+  wsServer
+  ->Ws.WebSocketServer.addListener(Ws.WebSocketServer.Events.connection, ws => {
+    ws
+    ->Ws.WebSocket.addListener(Ws.WebSocket.Events.message, msg => {
+      Js.log2("msg:", msg->Buffer.toString)
+    })
+    ->ignore
+  })
+  ->ignore
+
+  res->Http.ServerResponse.endWithData(Buffer.fromString("response"))
 }
