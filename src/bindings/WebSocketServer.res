@@ -1,32 +1,19 @@
-module WebSocket = {
-  open NodeJs
-  include EventEmitter.Make()
+open NodeJs
+include EventEmitter.Make()
 
-  module Events = {
-    let message: Event.t<NodeJs.Buffer.t => unit, t> = Event.fromString("message")
-  }
+type wss
+
+module Events = {
+  let connection: Event.t<WebSocket.t => unit, t> = Event.fromString("connection")
 }
 
-module WebSocketServer = {
-  open NodeJs
+@send
+external address: t => Js.Nullable.t<{"port": int, "family": string, "address": string}> = "address"
 
-  include EventEmitter.Make()
+@send
+external close: t => unit = "close"
 
-  module Events = {
-    let connection: Event.t<WebSocket.t => unit, t> = Event.fromString("connection")
-  }
-
-  @send
-  external address: t => Js.Nullable.t<{"port": int, "family": string, "address": string}> =
-    "address"
-
-  @send
-  external close: t => unit = "close"
-}
-
-module MakeWebSocketServer = {
-  type t
-
+module Make = {
   type options = {
     backlog: int, // The maximum length of the queue of pending connections
     clientTracking: bool, //Specifies whether or not to track clients.
@@ -42,7 +29,8 @@ module MakeWebSocketServer = {
     // verifyClient {Function} A function which can be used to validate incoming connections. See description below. (Usage is discouraged: see Issue #337)
   }
 
-  @module("ws") @new external make: options => WebSocketServer.t = "WebSocketServer"
+  @module("ws") @new external make: options => t = "WebSocketServer"
 }
 
-@val external restartServer: unit => NodeJs.Http.Server.t = "restartServer"
+// DEBUG
+@val external restartServer: unit => Http.Server.t = "restartServer"

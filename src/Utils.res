@@ -50,3 +50,15 @@ let makeOk = (a: 'a) => Ok(a)
 
 let toResult = (a: option<'a>, error: 'b): result<'a, 'b> =>
   a->Option.map(makeOk)->Option.getWithDefault(Error(error))
+
+module Classify = {
+  type unknownType
+
+  let constructorName: unknownType => string = %raw(`x => {
+        if (x && 'constructor' in x && x.constructor.name) {
+          return x.constructor.name;
+        } 
+
+        return "";
+    }`)
+}

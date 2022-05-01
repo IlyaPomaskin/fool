@@ -93,6 +93,18 @@ function toResult(a, error) {
             });
 }
 
+var constructorName = (x => {
+        if (x && 'constructor' in x && x.constructor.name) {
+          return x.constructor.name;
+        } 
+
+        return "";
+    });
+
+var Classify = {
+  constructorName: constructorName
+};
+
 var selected = "bg-slate-400";
 
 var unselected = "";
@@ -113,6 +125,7 @@ export {
   numbersToEmoji ,
   makeOk ,
   toResult ,
+  Classify ,
   
 }
 /* No side effect */
