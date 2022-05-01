@@ -14,11 +14,9 @@ function $$default(param, res) {
         server: restartServer(),
         skipUTF8Validation: true
       });
-  wsServer.addListener(WebSocketServer.Events.connection, (function (ws) {
-          ws.on($$WebSocket.Events.message, (function (msg, isBinary) {
-                  var $$this = this ;
-                  console.log("THIS", $$this);
-                  console.log("MSG", msg);
+  wsServer.on(WebSocketServer.ServerEvents.connection, (function (ws, param) {
+          ws.on($$WebSocket.ClientEvents.message, (function (msg, isBinary) {
+                  console.log("msg", msg);
                   console.log("isBinary", isBinary);
                   var b = $$WebSocket.RawData.classify(msg);
                   if (typeof b === "number") {

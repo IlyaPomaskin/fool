@@ -1,17 +1,7 @@
 open NodeJs
-include EventEmitter.Make()
+include WebSocket
 
 type wss
-
-module Events = {
-  let connection: Event.t<WebSocket.t => unit, t> = Event.fromString("connection")
-}
-
-@send
-external address: t => Js.Nullable.t<{"port": int, "family": string, "address": string}> = "address"
-
-@send
-external close: t => unit = "close"
 
 module Make = {
   type options = {
@@ -32,5 +22,40 @@ module Make = {
   @module("ws") @new external make: options => t = "WebSocketServer"
 }
 
-// DEBUG
+@val external options: Make.options = "options"
+@val external path: string = "path"
+// FIXME add Set typings
+// @val external clients: Set.t<WebSocket.t> = "clients"
+
+module ServerEvents = {
+  let connection: EventWithThis.t<
+    @this (wss, WebSocket.t, Http.IncomingMessage.t) => unit,
+    t,
+  > = EventWithThis.fromString2("connection")
+  let error: EventWithThis.t<@this (wss, Errors.Error.t) => unit, t> = EventWithThis.fromString1(
+    "error",
+  )
+  let headers: EventWithThis.t<
+    @this (wss, array<string>, Http.IncomingMessage.t) => unit,
+    t,
+  > = EventWithThis.fromString2("headers")
+  let close: EventWithThis.t<@this (wss => unit), t> = EventWithThis.fromString0("close")
+  let listening: EventWithThis.t<@this (wss => unit), t> = EventWithThis.fromString0("listening")
+}
+
+@send
+external address: t => Js.Nullable.t<{"port": int, "family": string, "address": string}> = "address"
+@send
+external close: t => unit = "close"
+@send
+external handleUpgrade: (
+  Http.IncomingMessage.t,
+  Net.Socket.t,
+  Buffer.t,
+  (WebSocket.t, Http.IncomingMessage.t) => unit,
+) => unit = "handleUpgrade"
+@send
+external shouldHandle: Http.IncomingMessage.t => bool = "shouldHandle"
+
+// FIXME Remove debug fn
 @val external restartServer: unit => Http.Server.t = "restartServer"

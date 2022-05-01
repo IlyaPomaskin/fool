@@ -12,11 +12,10 @@ let default = (_: Http.ClientRequest.t, res: Http.ServerResponse.t) => {
   })
 
   wsServer
-  ->WebSocketServer.addListener(WebSocketServer.Events.connection, ws => {
+  ->WebSocketServer.on(WebSocketServer.ServerEvents.connection, @this (_, ws, _) => {
     ws
-    ->WebSocket.on(WebSocket.Events.message, @this (this, msg, isBinary) => {
-      Js.log2("THIS", this)
-      Js.log2("MSG", msg)
+    ->WebSocket.on(WebSocket.ClientEvents.message, @this (_, msg, isBinary) => {
+      Js.log2("msg", msg)
       Js.log2("isBinary", isBinary)
       switch msg->WebSocket.RawData.classify {
       | Buffer(b) => Js.log2("b", b)

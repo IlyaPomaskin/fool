@@ -47,7 +47,7 @@ var RawData = {
 
 var EventWithThis = {};
 
-var Events = {
+var ClientEvents = {
   close: "close",
   error: "error",
   upgrade: "upgrade",
@@ -91,7 +91,7 @@ export {
   binaryTypeToString ,
   RawData ,
   EventWithThis ,
-  Events ,
+  ClientEvents ,
   makeSendOptions ,
   makeOptions ,
   

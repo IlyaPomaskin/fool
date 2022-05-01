@@ -55,7 +55,7 @@ module EventWithThis = {
   external fromStringTest: string => t<@this ('a, 'a1, 'a2) => 'b, 'ty> = "%identity"
 }
 
-module Events = {
+module ClientEvents = {
   let close: EventWithThis.t<@this (t, int, Buffer.t) => unit, t> = EventWithThis.fromString2(
     "close",
   )
