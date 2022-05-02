@@ -73,11 +73,3 @@ let default = (_: props) => {
     </div>
   </div>
 }
-
-let getServerSideProps = _ctx => {
-  Js.Promise.resolve({
-    "props": {
-      game: 123,
-    },
-  })
-}

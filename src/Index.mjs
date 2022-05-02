@@ -110,18 +110,9 @@ function $$default(param) {
                 }, tmp$1));
 }
 
-function getServerSideProps(_ctx) {
-  return Promise.resolve({
-              props: {
-                game: 123
-              }
-            });
-}
-
 export {
   $$default ,
   $$default as default,
-  getServerSideProps ,
   
 }
 /* react Not a pure module */
