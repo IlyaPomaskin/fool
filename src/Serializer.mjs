@@ -148,7 +148,102 @@ var card = Jzon.custom(cardToString, (function (json) {
         return stringToCard(Belt_Option.getWithDefault(Js_json.decodeString(json), ""));
       }));
 
-var beat = Jzon.object2((function (param) {
+var playerMsg = Jzon.object1((function (kind) {
+        switch (kind) {
+          case /* Connect */0 :
+              return "connect";
+          case /* Disconnect */1 :
+              return "disconnect";
+          case /* Ping */2 :
+              return "ping";
+          case /* Pong */3 :
+              return "pong";
+          
+        }
+      }), (function (kind) {
+        switch (kind) {
+          case "Pong" :
+              return {
+                      TAG: /* Ok */0,
+                      _0: /* Pong */3
+                    };
+          case "connect" :
+              return {
+                      TAG: /* Ok */0,
+                      _0: /* Connect */0
+                    };
+          case "disconnect" :
+              return {
+                      TAG: /* Ok */0,
+                      _0: /* Disconnect */1
+                    };
+          case "ping" :
+              return {
+                      TAG: /* Ok */0,
+                      _0: /* Ping */2
+                    };
+          default:
+            return {
+                    TAG: /* Error */1,
+                    _0: {
+                      NAME: "UnexpectedJsonValue",
+                      VAL: [
+                        [{
+                            TAG: /* Field */0,
+                            _0: "kind"
+                          }],
+                        kind
+                      ]
+                    }
+                  };
+        }
+      }), Jzon.field("kind", Jzon.string));
+
+var lobbyMsg = Jzon.object1((function (kind) {
+        switch (kind) {
+          case /* Enter */0 :
+              return "enter";
+          case /* Ready */1 :
+              return "ready";
+          case /* Start */2 :
+              return "start";
+          
+        }
+      }), (function (kind) {
+        switch (kind) {
+          case "enter" :
+              return {
+                      TAG: /* Ok */0,
+                      _0: /* Enter */0
+                    };
+          case "ready" :
+              return {
+                      TAG: /* Ok */0,
+                      _0: /* Ready */1
+                    };
+          case "start" :
+              return {
+                      TAG: /* Ok */0,
+                      _0: /* Start */2
+                    };
+          default:
+            return {
+                    TAG: /* Error */1,
+                    _0: {
+                      NAME: "UnexpectedJsonValue",
+                      VAL: [
+                        [{
+                            TAG: /* Field */0,
+                            _0: "kind"
+                          }],
+                        kind
+                      ]
+                    }
+                  };
+        }
+      }), Jzon.field("kind", Jzon.string));
+
+var beatPayload = Jzon.object2((function (param) {
         return [
                 param.to,
                 param.by
@@ -163,7 +258,7 @@ var beat = Jzon.object2((function (param) {
               };
       }), Jzon.field("to", card), Jzon.field("by", card));
 
-var move = Jzon.object1((function (param) {
+var movePayload = Jzon.object1((function (param) {
         return param.card;
       }), (function (card) {
         return {
@@ -174,33 +269,28 @@ var move = Jzon.object1((function (param) {
               };
       }), Jzon.field("card", card));
 
-var msg = Jzon.object2((function (kind) {
+var progressMsg = Jzon.object2((function (kind) {
         if (typeof kind === "number") {
-          if (kind === /* Take */0) {
+          if (kind === /* Pass */0) {
             return [
-                    "take",
+                    "pass",
                     undefined
                   ];
           } else {
             return [
-                    "pass",
+                    "take",
                     undefined
                   ];
           }
         } else if (kind.TAG === /* Beat */0) {
           return [
                   "beat",
-                  Caml_option.some(Jzon.encodeWith({
-                            to: kind._0,
-                            by: kind._1
-                          }, beat))
+                  Caml_option.some(Jzon.encodeWith(kind._0, beatPayload))
                 ];
         } else {
           return [
                   "move",
-                  Caml_option.some(Jzon.encodeWith({
-                            card: kind._0
-                          }, move))
+                  Caml_option.some(Jzon.encodeWith(kind._0, movePayload))
                 ];
         }
       }), (function (param) {
@@ -209,21 +299,25 @@ var msg = Jzon.object2((function (kind) {
         switch (kind) {
           case "beat" :
               if (payload !== undefined) {
-                return Belt_Result.map(Jzon.decodeWith(Caml_option.valFromOption(payload), beat), (function (param) {
+                return Belt_Result.map(Jzon.decodeWith(Caml_option.valFromOption(payload), beatPayload), (function (param) {
                               return {
                                       TAG: /* Beat */0,
-                                      _0: param.to,
-                                      _1: param.by
+                                      _0: {
+                                        to: param.to,
+                                        by: param.by
+                                      }
                                     };
                             }));
               }
               break;
           case "move" :
               if (payload !== undefined) {
-                return Belt_Result.map(Jzon.decodeWith(Caml_option.valFromOption(payload), move), (function (param) {
+                return Belt_Result.map(Jzon.decodeWith(Caml_option.valFromOption(payload), movePayload), (function (param) {
                               return {
                                       TAG: /* Move */1,
-                                      _0: param.card
+                                      _0: {
+                                        card: param.card
+                                      }
                                     };
                             }));
               }
@@ -231,12 +325,12 @@ var msg = Jzon.object2((function (kind) {
           case "pass" :
               return {
                       TAG: /* Ok */0,
-                      _0: /* Pass */1
+                      _0: /* Pass */0
                     };
           case "take" :
               return {
                       TAG: /* Ok */0,
-                      _0: /* Take */0
+                      _0: /* Take */1
                     };
           default:
             
@@ -256,6 +350,87 @@ var msg = Jzon.object2((function (kind) {
               };
       }), Jzon.field("kind", Jzon.string), Jzon.optional(Jzon.field("payload", Jzon.json)));
 
+var gameMsg = Jzon.object4((function (kind) {
+        switch (kind.TAG | 0) {
+          case /* Player */0 :
+              return [
+                      "player",
+                      Jzon.encodeWith(kind._0, playerMsg),
+                      kind._1,
+                      undefined
+                    ];
+          case /* Lobby */1 :
+              return [
+                      "lobby",
+                      Jzon.encodeWith(kind._0, lobbyMsg),
+                      kind._1,
+                      kind._2
+                    ];
+          case /* Progress */2 :
+              return [
+                      "progress",
+                      Jzon.encodeWith(kind._0, progressMsg),
+                      kind._1,
+                      kind._2
+                    ];
+          
+        }
+      }), (function (param) {
+        var gameId = param[3];
+        var playerId = param[2];
+        var msg = param[1];
+        var kind = param[0];
+        switch (kind) {
+          case "lobby" :
+              if (gameId !== undefined) {
+                return Belt_Result.map(Jzon.decodeWith(msg, lobbyMsg), (function (msg) {
+                              return {
+                                      TAG: /* Lobby */1,
+                                      _0: msg,
+                                      _1: playerId,
+                                      _2: gameId
+                                    };
+                            }));
+              }
+              break;
+          case "player" :
+              return Belt_Result.map(Jzon.decodeWith(msg, playerMsg), (function (msg) {
+                            return {
+                                    TAG: /* Player */0,
+                                    _0: msg,
+                                    _1: playerId
+                                  };
+                          }));
+          case "progress" :
+              if (gameId !== undefined) {
+                return Belt_Result.map(Jzon.decodeWith(msg, progressMsg), (function (msg) {
+                              return {
+                                      TAG: /* Progress */2,
+                                      _0: msg,
+                                      _1: playerId,
+                                      _2: gameId
+                                    };
+                            }));
+              }
+              break;
+          default:
+            
+        }
+        return {
+                TAG: /* Error */1,
+                _0: {
+                  NAME: "UnexpectedJsonValue",
+                  VAL: [
+                    [{
+                        TAG: /* Field */0,
+                        _0: "kind"
+                      }],
+                    kind
+                  ]
+                }
+              };
+      }), Jzon.field("kind", Jzon.string), Jzon.field("payload", Jzon.json), Jzon.field("playerId", Jzon.string), Jzon.optional(Jzon.field("gameId", Jzon.string)));
+
 var Codecs = {
   suitToString: suitToString,
   stringToSuit: stringToSuit,
@@ -264,9 +439,12 @@ var Codecs = {
   cardToString: cardToString,
   stringToCard: stringToCard,
   card: card,
-  beat: beat,
-  move: move,
-  msg: msg
+  playerMsg: playerMsg,
+  lobbyMsg: lobbyMsg,
+  beatPayload: beatPayload,
+  movePayload: movePayload,
+  progressMsg: progressMsg,
+  gameMsg: gameMsg
 };
 
 export {

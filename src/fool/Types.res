@@ -71,3 +71,32 @@ type playerWinState =
   | Done
   | Lose
   | Draw
+
+type playerMessage =
+  | Connect
+  | Disconnect
+  | Ping
+  | Pong
+
+type lobbyMessage =
+  | Enter
+  | Ready
+  | Start
+
+type beatPayload = {
+  to: card,
+  by: card,
+}
+
+type movePayload = {card: card}
+
+type progressMessage =
+  | Pass
+  | Take
+  | Beat(beatPayload)
+  | Move(movePayload)
+
+type gameMessage =
+  | Player(playerMessage, playerId)
+  | Lobby(lobbyMessage, playerId, gameId)
+  | Progress(progressMessage, playerId, gameId)

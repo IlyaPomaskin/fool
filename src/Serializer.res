@@ -1,9 +1,6 @@
 open Types
 
 module Codecs = {
-  type mBeatData = {to: card, by: card}
-  type mMoveData = {card: card}
-
   let suitToString = suit =>
     switch suit {
     | Spades => "S"
@@ -74,34 +71,107 @@ module Codecs = {
     json => json->Js.Json.decodeString->Option.getWithDefault("")->stringToCard,
   )
 
-  let beat = Jzon.object2(
+  let playerMsg = Jzon.object1(
+    kind =>
+      switch kind {
+      | Connect => "connect"
+      | Disconnect => "disconnect"
+      | Ping => "ping"
+      | Pong => "pong"
+      },
+    kind =>
+      switch kind {
+      | "connect" => Ok(Connect)
+      | "disconnect" => Ok(Disconnect)
+      | "ping" => Ok(Ping)
+      | "Pong" => Ok(Pong)
+      | x => Error(#UnexpectedJsonValue([Field("kind")], x))
+      },
+    Jzon.field("kind", Jzon.string),
+  )
+
+  let lobbyMsg = Jzon.object1(
+    kind =>
+      switch kind {
+      | Enter => "enter"
+      | Ready => "ready"
+      | Start => "start"
+      },
+    kind =>
+      switch kind {
+      | "enter" => Ok(Enter)
+      | "ready" => Ok(Ready)
+      | "start" => Ok(Start)
+      | x => Error(#UnexpectedJsonValue([Field("kind")], x))
+      },
+    Jzon.field("kind", Jzon.string),
+  )
+
+  let beatPayload = Jzon.object2(
     ({to, by}) => (to, by),
     ((to, by)) => {to: to, by: by}->Ok,
     Jzon.field("to", card),
     Jzon.field("by", card),
   )
 
-  let move = Jzon.object1(({card}) => card, card => {card: card}->Ok, Jzon.field("card", card))
+  let movePayload = Jzon.object1(
+    ({card}) => card,
+    card => {card: card}->Ok,
+    Jzon.field("card", card),
+  )
 
-  let msg = Jzon.object2(
+  let progressMsg = Jzon.object2(
     kind =>
       switch kind {
-      | Take => ("take", None)
-      | Beat(to, by) => ("beat", Some(Jzon.encodeWith({to: to, by: by}, beat)))
       | Pass => ("pass", None)
-      | Move(card) => ("move", Some(Jzon.encodeWith({card: card}, move)))
+      | Take => ("take", None)
+      | Beat(payload) => ("beat", Some(Jzon.encodeWith(payload, beatPayload)))
+      | Move(payload) => ("move", Some(Jzon.encodeWith(payload, movePayload)))
       },
     ((kind, payload)) =>
       switch (kind, payload) {
+      | ("pass", _) => Ok(Pass)
       | ("take", _) => Ok(Take)
       | ("beat", Some(payload)) =>
-        payload->Jzon.decodeWith(beat)->Result.map(({to, by}) => Beat(to, by))
-      | ("pass", _) => Ok(Pass)
+        payload->Jzon.decodeWith(beatPayload)->Result.map(({to, by}) => Beat({to: to, by: by}))
       | ("move", Some(payload)) =>
-        payload->Jzon.decodeWith(move)->Result.map(({card}) => Move(card))
+        payload->Jzon.decodeWith(movePayload)->Result.map(({card}) => Move({card: card}))
       | (x, _) => Error(#UnexpectedJsonValue([Field("kind")], x))
       },
     Jzon.field("kind", Jzon.string),
     Jzon.field("payload", Jzon.json)->Jzon.optional,
+  )
+
+  let gameMsg = Jzon.object4(
+    kind =>
+      switch kind {
+      | Player(msg, playerId) => ("player", Jzon.encodeWith(msg, playerMsg), playerId, None)
+      | Lobby(msg, playerId, gameId) => (
+          "lobby",
+          Jzon.encodeWith(msg, lobbyMsg),
+          playerId,
+          Some(gameId),
+        )
+      | Progress(msg, playerId, gameId) => (
+          "progress",
+          Jzon.encodeWith(msg, progressMsg),
+          playerId,
+          Some(gameId),
+        )
+      },
+    ((kind, msg, playerId, gameId)) => {
+      switch (kind, gameId) {
+      | ("player", _) => Jzon.decodeWith(msg, playerMsg)->Result.map(msg => Player(msg, playerId))
+      | ("lobby", Some(gameId)) =>
+        Jzon.decodeWith(msg, lobbyMsg)->Result.map(msg => Lobby(msg, playerId, gameId))
+      | ("progress", Some(gameId)) =>
+        Jzon.decodeWith(msg, progressMsg)->Result.map(msg => Progress(msg, playerId, gameId))
+      | (x, _) => Error(#UnexpectedJsonValue([Field("kind")], x))
+      }
+    },
+    Jzon.field("kind", Jzon.string),
+    Jzon.field("payload", Jzon.json),
+    Jzon.field("playerId", Jzon.string),
+    Jzon.field("gameId", Jzon.string)->Jzon.optional,
   )
 }
