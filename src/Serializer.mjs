@@ -201,30 +201,37 @@ var playerMsg = Jzon.object1((function (kind) {
 
 var lobbyMsg = Jzon.object1((function (kind) {
         switch (kind) {
-          case /* Enter */0 :
+          case /* Create */0 :
+              return "create";
+          case /* Enter */1 :
               return "enter";
-          case /* Ready */1 :
+          case /* Ready */2 :
               return "ready";
-          case /* Start */2 :
+          case /* Start */3 :
               return "start";
           
         }
       }), (function (kind) {
         switch (kind) {
+          case "create" :
+              return {
+                      TAG: /* Ok */0,
+                      _0: /* Create */0
+                    };
           case "enter" :
               return {
                       TAG: /* Ok */0,
-                      _0: /* Enter */0
+                      _0: /* Enter */1
                     };
           case "ready" :
               return {
                       TAG: /* Ok */0,
-                      _0: /* Ready */1
+                      _0: /* Ready */2
                     };
           case "start" :
               return {
                       TAG: /* Ok */0,
-                      _0: /* Start */2
+                      _0: /* Start */3
                     };
           default:
             return {

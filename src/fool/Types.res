@@ -79,6 +79,7 @@ type playerMessage =
   | Pong
 
 type lobbyMessage =
+  | Create
   | Enter
   | Ready
   | Start

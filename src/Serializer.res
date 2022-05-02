@@ -93,12 +93,14 @@ module Codecs = {
   let lobbyMsg = Jzon.object1(
     kind =>
       switch kind {
+      | Create => "create"
       | Enter => "enter"
       | Ready => "ready"
       | Start => "start"
       },
     kind =>
       switch kind {
+      | "create" => Ok(Create)
       | "enter" => Ok(Enter)
       | "ready" => Ok(Ready)
       | "start" => Ok(Start)
