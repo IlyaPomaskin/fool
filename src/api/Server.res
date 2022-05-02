@@ -1,32 +1,37 @@
 open NodeJs
 
-let default = (_: Http.ClientRequest.t, res: Http.ServerResponse.t) => {
-  let wsServer = WebSocketServer.Make.make({
-    backlog: 101,
-    clientTracking: true,
-    maxPayload: 104857600,
-    path: "/ws",
-    noServer: false,
-    server: WebSocketServer.restartServer(),
-    skipUTF8Validation: true,
-  })
+let wsServer = WsWebSocketServer.Make.make({
+  backlog: 101,
+  clientTracking: true,
+  maxPayload: 104857600,
+  path: "/ws",
+  noServer: false,
+  server: WsWebSocketServer.restartServer(),
+  skipUTF8Validation: true,
+})
 
-  wsServer
-  ->WebSocketServer.on(WebSocketServer.ServerEvents.connection, @this (_, ws, _) => {
-    ws
-    ->WebSocket.on(WebSocket.ClientEvents.message, @this (_, msg, isBinary) => {
-      Js.log2("msg", msg)
-      Js.log2("isBinary", isBinary)
-      switch msg->WebSocket.RawData.classify {
-      | Buffer(b) => Js.log2("b", b)
-      | ArrayBuffer(ab) => Js.log2("ab", ab)
-      | ArrayOfBuffers(aob) => Js.log2("aob", aob)
-      | Unknown => Js.log("unknown")
-      }
-    })
-    ->ignore
+wsServer
+->WsWebSocketServer.on(WsWebSocketServer.ServerEvents.connection, @this (_, ws, _) => {
+  ws
+  ->WsWebSocket.on(WsWebSocket.ClientEvents.open_, @this client => {
+    Js.log("connection open")
+    client->WsWebSocket.send("connected")
+  })
+  ->WsWebSocket.on(WsWebSocket.ClientEvents.message, @this (_, msg, _) => {
+    switch msg->WsWebSocket.RawData.classify {
+    | Buffer(b) => Js.log2("msg", Buffer.toString(b))
+    | ArrayBuffer(ab) => Js.log2("ab", ab)
+    | ArrayOfBuffers(aob) => Js.log2("aob", aob)
+    | Unknown => Js.log("unknown")
+    }
+  })
+  ->WsWebSocket.on(WsWebSocket.ClientEvents.close, @this (_, _, _) => {
+    Js.log("connection close")
   })
   ->ignore
+})
+->ignore
 
+let default = (_: Http.ClientRequest.t, res: Http.ServerResponse.t) => {
   res->Http.ServerResponse.endWithData(Buffer.fromString("response"))
 }

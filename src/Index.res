@@ -1,7 +1,6 @@
 open Types
 open Utils
-
-type props = {game: int}
+open Webapi
 
 module Client = {
   @react.component
@@ -36,7 +35,30 @@ module Client = {
   }
 }
 
-let default = (_: props) => {
+let default = () => {
+  React.useEffect(() => {
+    let ws = WebSocket.make("ws://localhost:3001/ws")
+
+    ws->WebSocket.addOpenListener(_ => {
+      Js.log("open")
+      ws->WebSocket.sendText("Connection open")
+    })
+
+    ws->WebSocket.addMessageListener(event => {
+      Js.log2("message", WebSocket.messageAsText(event))
+    })
+
+    ws->WebSocket.addCloseListener(_ => {
+      Js.log("close")
+    })
+
+    Some(
+      () => {
+        WebSocket.close(ws)
+      },
+    )
+  })
+
   let handleAction = (game, player, action) => {
     Socket.SClient.send(game.gameId, player.id, action)
     ()

@@ -9,6 +9,7 @@ import * as Player from "./fool/Player.mjs";
 import * as Socket from "./Socket.mjs";
 import * as ClientUI from "./components/ClientUI.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
+import * as Webapi__WebSocket from "rescript-webapi/src/Webapi/Webapi__WebSocket.mjs";
 
 function Index$Client(Props) {
   var game = Props.game;
@@ -49,6 +50,26 @@ function Index$Client(Props) {
 }
 
 function $$default(param) {
+  React.useEffect(function () {
+        var ws = new WebSocket("ws://localhost:3001/ws");
+        ws.addEventListener("open", (function (param) {
+                console.log("open");
+                ws.send("Connection open");
+                
+              }));
+        ws.addEventListener("message", (function ($$event) {
+                console.log("message", Webapi__WebSocket.messageAsText($$event));
+                
+              }));
+        ws.addEventListener("close", (function (param) {
+                console.log("close");
+                
+              }));
+        return (function (param) {
+                  ws.close();
+                  
+                });
+      });
   var handleAction = function (game, player, action) {
     Socket.SClient.send(game.gameId, player.id, action);
     
