@@ -4,21 +4,43 @@ open Webapi
 
 module Client = {
   @react.component
-  let make = (~game, ~player) => {
+  let make = (~game: inProgress, ~playerId) => {
     let ws = React.useMemo(_ => WebSocket.make("ws://localhost:3001/ws"))
+
+    let (player, setPlayer) = React.useState(_ => None)
 
     React.useEffect(() => {
       ws->WebSocket.addOpenListener(_ => {
         Js.log("open")
-        ws->WebSocket.sendText("Connection open")
+        ws->WebSocket.sendText(Serializer.serializeClientMessage(Player(Connect, playerId)))
       })
 
       ws->WebSocket.addMessageListener(event => {
-        Js.log2("message", WebSocket.messageAsText(event))
+        Js.log2("message", event)
+        let msg = switch WebSocket.messageAsText(event) {
+        | Some(msg) => Serializer.deserializeServerMessage(msg)
+        | None => Error(#SyntaxError("Message can't be parsed as json"))
+        }
+
+        Js.log2("received msg:", msg)
+
+        switch msg {
+        | Ok(gMsg) =>
+          switch gMsg {
+          | Connected(playerId) => ""
+          | _ => "unhandled gMsg"
+          }
+        | Error(err) => "received msg error: " ++ Jzon.DecodingError.toString(err)
+        } |> Js.log2("received msg dispatch:")
       })
 
       ws->WebSocket.addCloseListener(_ => {
         Js.log("close")
+        ws->WebSocket.sendText(Serializer.serializeClientMessage(Player(Disconnect, playerId)))
+      })
+
+      ws->WebSocket.addErrorListener(event => {
+        Js.log2("error", event)
       })
 
       Some(
@@ -28,18 +50,19 @@ module Client = {
       )
     })
 
-    let onAction = action => {
-      Js.log2("action", @unbox action)
-    }
-
     let (error, setError) = React.useState(() => None)
 
     let handleMove = move => {
-      let nextGame = Game.dispatch(game, player, move)
+      let nextGame =
+        player->Utils.toResult("No player")->Result.map(player => Game.dispatch(game, player, move))
 
       switch nextGame {
       | Ok(_) => {
-          onAction(move)
+          setError(_ => None)
+          // WebSocket.sendText(
+          //   ws,
+          //   Serializer.serializeClientMessage(Progress(action, playerId, game.gameId)),
+          // )
           setError(_ => None)
         }
       | Error(err) => setError(_ => Some(err))
@@ -82,13 +105,13 @@ let default = () => {
   <div>
     <div className="my-2 border rounded-md border-solid border-slate-500">
       {switch game {
-      | Ok(game) => <Client game={game} player={author} />
+      | Ok(game) => <Client game={game} playerId="alice" />
       | Error(e) => uiStr(e)
       }}
     </div>
     <div className="my-2 border rounded-md border-solid border-slate-500">
       {switch game {
-      | Ok(game) => <Client game={game} player={client} />
+      | Ok(game) => <Client game={game} playerId="bob" />
       | Error(e) => uiStr(e)
       }}
     </div>

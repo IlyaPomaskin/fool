@@ -72,13 +72,13 @@ type playerWinState =
   | Lose
   | Draw
 
-type playerMessage =
+type clientPlayerMessage =
   | Connect
   | Disconnect
   | Ping
   | Pong
 
-type lobbyMessage =
+type clientLobbyMessage =
   | Create
   | Enter
   | Ready
@@ -91,13 +91,20 @@ type beatPayload = {
 
 type movePayload = {card: card}
 
-type progressMessage =
+type clientProgressMessage =
   | Pass
   | Take
   | Beat(beatPayload)
   | Move(movePayload)
 
-type gameMessage =
-  | Player(playerMessage, playerId)
-  | Lobby(lobbyMessage, playerId, gameId)
-  | Progress(progressMessage, playerId, gameId)
+type gameMessageFromClient =
+  | Player(clientPlayerMessage, playerId)
+  | Lobby(clientLobbyMessage, playerId, gameId)
+  | Progress(clientProgressMessage, playerId, gameId)
+
+type gameMessageFromServer =
+  | Connected(player)
+  | LobbyCreated(inLobby)
+  | LobbyUpdated(inLobby)
+  | ProgressCreated(inProgress)
+  | ProgressUpdated(inProgress)

@@ -2,6 +2,7 @@
 
 import * as Jzon from "rescript-jzon/src/Jzon.mjs";
 import * as Js_json from "rescript/lib/es6/js_json.js";
+import * as Belt_List from "rescript/lib/es6/belt_List.js";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Belt_Result from "rescript/lib/es6/belt_Result.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
@@ -147,6 +148,45 @@ function stringToCard(str) {
 var card = Jzon.custom(cardToString, (function (json) {
         return stringToCard(Belt_Option.getWithDefault(Js_json.decodeString(json), ""));
       }));
+
+var suit = Jzon.custom(suitToString, (function (json) {
+        var suit = Belt_Option.flatMap(Js_json.decodeString(json), stringToSuit);
+        if (suit !== undefined) {
+          return {
+                  TAG: /* Ok */0,
+                  _0: suit
+                };
+        } else {
+          return {
+                  TAG: /* Error */1,
+                  _0: {
+                    NAME: "UnexpectedJsonValue",
+                    VAL: [
+                      [{
+                          TAG: /* Field */0,
+                          _0: "suit"
+                        }],
+                      "s"
+                    ]
+                  }
+                };
+        }
+      }));
+
+var tablePair = Jzon.object2((function (param) {
+        return [
+                param[0],
+                param[1]
+              ];
+      }), (function (param) {
+        return {
+                TAG: /* Ok */0,
+                _0: [
+                  param[0],
+                  param[1]
+                ]
+              };
+      }), Jzon.field("to", card), Jzon.optional(Jzon.field("by", card)));
 
 var playerMsg = Jzon.object1((function (kind) {
         switch (kind) {
@@ -438,24 +478,203 @@ var gameMsg = Jzon.object4((function (kind) {
               };
       }), Jzon.field("kind", Jzon.string), Jzon.field("payload", Jzon.json), Jzon.field("playerId", Jzon.string), Jzon.optional(Jzon.field("gameId", Jzon.string)));
 
-var Codecs = {
-  suitToString: suitToString,
-  stringToSuit: stringToSuit,
-  rankToString: rankToString,
-  stringToRank: stringToRank,
-  cardToString: cardToString,
-  stringToCard: stringToCard,
-  card: card,
-  playerMsg: playerMsg,
-  lobbyMsg: lobbyMsg,
-  beatPayload: beatPayload,
-  movePayload: movePayload,
-  progressMsg: progressMsg,
-  gameMsg: gameMsg
-};
+function serializeClientMessage(msg) {
+  return Jzon.encodeStringWith(msg, gameMsg);
+}
+
+function deserializeClientMessage(msg) {
+  return Jzon.decodeStringWith(msg, gameMsg);
+}
+
+function listViaArray(elementCodec) {
+  return Jzon.custom((function (list) {
+                return Jzon.encodeWith(Belt_List.toArray(list), Jzon.array(elementCodec));
+              }), (function (json) {
+                return Belt_Result.map(Jzon.decodeWith(json, Jzon.array(elementCodec)), Belt_List.fromArray);
+              }));
+}
+
+var playerMsg$1 = Jzon.object3((function (param) {
+        return [
+                param.id,
+                param.sessionId,
+                param.cards
+              ];
+      }), (function (param) {
+        return {
+                TAG: /* Ok */0,
+                _0: {
+                  id: param[0],
+                  sessionId: param[1],
+                  cards: param[2]
+                }
+              };
+      }), Jzon.field("id", Jzon.string), Jzon.optional(Jzon.field("sessionId", Jzon.string)), Jzon.field("cards", listViaArray(card)));
+
+var inLobbyMsg = Jzon.object3((function (param) {
+        return [
+                param.gameId,
+                param.players,
+                param.ready
+              ];
+      }), (function (param) {
+        return {
+                TAG: /* Ok */0,
+                _0: {
+                  gameId: param[0],
+                  players: param[1],
+                  ready: param[2]
+                }
+              };
+      }), Jzon.field("gameId", Jzon.string), Jzon.field("players", listViaArray(playerMsg$1)), Jzon.field("ready", listViaArray(playerMsg$1)));
+
+var tableCards = listViaArray(tablePair);
+
+var inProgressMsg = Jzon.object8((function (param) {
+        return [
+                param.gameId,
+                param.attacker,
+                param.defender,
+                param.players,
+                param.trump,
+                param.deck,
+                param.table,
+                param.pass
+              ];
+      }), (function (param) {
+        return {
+                TAG: /* Ok */0,
+                _0: {
+                  gameId: param[0],
+                  attacker: param[1],
+                  defender: param[2],
+                  players: param[3],
+                  trump: param[4],
+                  deck: param[5],
+                  table: param[6],
+                  pass: param[7]
+                }
+              };
+      }), Jzon.field("gameId", Jzon.string), Jzon.field("attacker", playerMsg$1), Jzon.field("defender", playerMsg$1), Jzon.field("players", listViaArray(playerMsg$1)), Jzon.field("trump", suit), Jzon.field("deck", listViaArray(card)), Jzon.field("table", tableCards), Jzon.field("pass", listViaArray(playerMsg$1)));
+
+var serverGameMsg = Jzon.object2((function (kind) {
+        switch (kind.TAG | 0) {
+          case /* Connected */0 :
+              return [
+                      "connected",
+                      Jzon.encodeWith(kind._0, playerMsg$1)
+                    ];
+          case /* LobbyCreated */1 :
+              return [
+                      "lobbyCreated",
+                      Jzon.encodeWith(kind._0, inLobbyMsg)
+                    ];
+          case /* LobbyUpdated */2 :
+              return [
+                      "lobbyUpdated",
+                      Jzon.encodeWith(kind._0, inLobbyMsg)
+                    ];
+          case /* ProgressCreated */3 :
+              return [
+                      "progressCreated",
+                      Jzon.encodeWith(kind._0, inProgressMsg)
+                    ];
+          case /* ProgressUpdated */4 :
+              return [
+                      "progressUpdated",
+                      Jzon.encodeWith(kind._0, inProgressMsg)
+                    ];
+          
+        }
+      }), (function (param) {
+        var payload = param[1];
+        var kind = param[0];
+        switch (kind) {
+          case "connected" :
+              return Belt_Result.map(Jzon.decodeWith(payload, playerMsg$1), (function (player) {
+                            return {
+                                    TAG: /* Connected */0,
+                                    _0: player
+                                  };
+                          }));
+          case "lobbyCreated" :
+              return Belt_Result.map(Jzon.decodeWith(payload, inLobbyMsg), (function (game) {
+                            return {
+                                    TAG: /* LobbyCreated */1,
+                                    _0: game
+                                  };
+                          }));
+          case "lobbyUpdated" :
+              return Belt_Result.map(Jzon.decodeWith(payload, inLobbyMsg), (function (game) {
+                            return {
+                                    TAG: /* LobbyUpdated */2,
+                                    _0: game
+                                  };
+                          }));
+          case "progressCreated" :
+              return Belt_Result.map(Jzon.decodeWith(payload, inProgressMsg), (function (game) {
+                            return {
+                                    TAG: /* ProgressCreated */3,
+                                    _0: game
+                                  };
+                          }));
+          case "progressUpdated" :
+              return Belt_Result.map(Jzon.decodeWith(payload, inProgressMsg), (function (game) {
+                            return {
+                                    TAG: /* ProgressUpdated */4,
+                                    _0: game
+                                  };
+                          }));
+          default:
+            return {
+                    TAG: /* Error */1,
+                    _0: {
+                      NAME: "UnexpectedJsonValue",
+                      VAL: [
+                        [{
+                            TAG: /* Field */0,
+                            _0: "kind"
+                          }],
+                        kind
+                      ]
+                    }
+                  };
+        }
+      }), Jzon.field("kind", Jzon.string), Jzon.field("payload", Jzon.json));
+
+function serializeServerMessage(msg) {
+  return Jzon.encodeStringWith(msg, serverGameMsg);
+}
+
+function deserializeServerMessage(msg) {
+  return Jzon.decodeStringWith(msg, serverGameMsg);
+}
 
 export {
-  Codecs ,
+  suitToString ,
+  stringToSuit ,
+  rankToString ,
+  stringToRank ,
+  cardToString ,
+  stringToCard ,
+  card ,
+  suit ,
+  tablePair ,
+  lobbyMsg ,
+  beatPayload ,
+  movePayload ,
+  progressMsg ,
+  gameMsg ,
+  serializeClientMessage ,
+  deserializeClientMessage ,
+  listViaArray ,
+  playerMsg$1 as playerMsg,
+  inLobbyMsg ,
+  tableCards ,
+  inProgressMsg ,
+  serverGameMsg ,
+  serializeServerMessage ,
+  deserializeServerMessage ,
   
 }
 /* card Not a pure module */
