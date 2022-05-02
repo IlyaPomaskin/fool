@@ -4,7 +4,34 @@ open Webapi
 
 module Client = {
   @react.component
-  let make = (~game, ~player, ~onAction) => {
+  let make = (~game, ~player) => {
+    let ws = React.useMemo(_ => WebSocket.make("ws://localhost:3001/ws"))
+
+    React.useEffect(() => {
+      ws->WebSocket.addOpenListener(_ => {
+        Js.log("open")
+        ws->WebSocket.sendText("Connection open")
+      })
+
+      ws->WebSocket.addMessageListener(event => {
+        Js.log2("message", WebSocket.messageAsText(event))
+      })
+
+      ws->WebSocket.addCloseListener(_ => {
+        Js.log("close")
+      })
+
+      Some(
+        () => {
+          WebSocket.close(ws)
+        },
+      )
+    })
+
+    let onAction = action => {
+      Js.log2("action", @unbox action)
+    }
+
     let (error, setError) = React.useState(() => None)
 
     let handleMove = move => {
@@ -36,34 +63,6 @@ module Client = {
 }
 
 let default = () => {
-  React.useEffect(() => {
-    let ws = WebSocket.make("ws://localhost:3001/ws")
-
-    ws->WebSocket.addOpenListener(_ => {
-      Js.log("open")
-      ws->WebSocket.sendText("Connection open")
-    })
-
-    ws->WebSocket.addMessageListener(event => {
-      Js.log2("message", WebSocket.messageAsText(event))
-    })
-
-    ws->WebSocket.addCloseListener(_ => {
-      Js.log("close")
-    })
-
-    Some(
-      () => {
-        WebSocket.close(ws)
-      },
-    )
-  })
-
-  let handleAction = (game, player, action) => {
-    Socket.SClient.send(game.gameId, player.id, action)
-    ()
-  }
-
   let state = React.useMemo(() => {
     let author = Player.make("owner")
     let client = Player.make("user2")
@@ -83,13 +82,13 @@ let default = () => {
   <div>
     <div className="my-2 border rounded-md border-solid border-slate-500">
       {switch game {
-      | Ok(game) => <Client onAction={handleAction(game, author)} game={game} player={author} />
+      | Ok(game) => <Client game={game} player={author} />
       | Error(e) => uiStr(e)
       }}
     </div>
     <div className="my-2 border rounded-md border-solid border-slate-500">
       {switch game {
-      | Ok(game) => <Client onAction={handleAction(game, client)} game={game} player={client} />
+      | Ok(game) => <Client game={game} player={client} />
       | Error(e) => uiStr(e)
       }}
     </div>

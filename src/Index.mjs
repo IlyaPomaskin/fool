@@ -6,7 +6,6 @@ import * as Utils from "./Utils.mjs";
 import * as React from "react";
 import * as GameUI from "./components/GameUI.mjs";
 import * as Player from "./fool/Player.mjs";
-import * as Socket from "./Socket.mjs";
 import * as ClientUI from "./components/ClientUI.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Webapi__WebSocket from "rescript-webapi/src/Webapi/Webapi__WebSocket.mjs";
@@ -14,7 +13,28 @@ import * as Webapi__WebSocket from "rescript-webapi/src/Webapi/Webapi__WebSocket
 function Index$Client(Props) {
   var game = Props.game;
   var player = Props.player;
-  var onAction = Props.onAction;
+  var ws = React.useMemo(function () {
+        return new WebSocket("ws://localhost:3001/ws");
+      });
+  React.useEffect(function () {
+        ws.addEventListener("open", (function (param) {
+                console.log("open");
+                ws.send("Connection open");
+                
+              }));
+        ws.addEventListener("message", (function ($$event) {
+                console.log("message", Webapi__WebSocket.messageAsText($$event));
+                
+              }));
+        ws.addEventListener("close", (function (param) {
+                console.log("close");
+                
+              }));
+        return (function (param) {
+                  ws.close();
+                  
+                });
+      });
   var match = React.useState(function () {
         
       });
@@ -22,7 +42,7 @@ function Index$Client(Props) {
   var handleMove = function (move) {
     var nextGame = Game.dispatch(game, player, move);
     if (nextGame.TAG === /* Ok */0) {
-      Curry._1(onAction, move);
+      console.log("action", move);
       return Curry._1(setError, (function (param) {
                     
                   }));
@@ -50,30 +70,6 @@ function Index$Client(Props) {
 }
 
 function $$default(param) {
-  React.useEffect(function () {
-        var ws = new WebSocket("ws://localhost:3001/ws");
-        ws.addEventListener("open", (function (param) {
-                console.log("open");
-                ws.send("Connection open");
-                
-              }));
-        ws.addEventListener("message", (function ($$event) {
-                console.log("message", Webapi__WebSocket.messageAsText($$event));
-                
-              }));
-        ws.addEventListener("close", (function (param) {
-                console.log("close");
-                
-              }));
-        return (function (param) {
-                  ws.close();
-                  
-                });
-      });
-  var handleAction = function (game, player, action) {
-    Socket.SClient.send(game.gameId, player.id, action);
-    
-  };
   var state = React.useMemo(function () {
         var author = Player.make("owner");
         var client = Player.make("user2");
@@ -99,31 +95,15 @@ function $$default(param) {
   var author = state.author;
   var client = state.client;
   var tmp;
-  if (game.TAG === /* Ok */0) {
-    var game$1 = game._0;
-    tmp = React.createElement(Index$Client, {
-          game: game$1,
-          player: author,
-          onAction: (function (param) {
-              return handleAction(game$1, author, param);
-            })
-        });
-  } else {
-    tmp = Utils.uiStr(game._0);
-  }
+  tmp = game.TAG === /* Ok */0 ? React.createElement(Index$Client, {
+          game: game._0,
+          player: author
+        }) : Utils.uiStr(game._0);
   var tmp$1;
-  if (game.TAG === /* Ok */0) {
-    var game$2 = game._0;
-    tmp$1 = React.createElement(Index$Client, {
-          game: game$2,
-          player: client,
-          onAction: (function (param) {
-              return handleAction(game$2, client, param);
-            })
-        });
-  } else {
-    tmp$1 = Utils.uiStr(game._0);
-  }
+  tmp$1 = game.TAG === /* Ok */0 ? React.createElement(Index$Client, {
+          game: game._0,
+          player: client
+        }) : Utils.uiStr(game._0);
   return React.createElement("div", undefined, React.createElement("div", {
                   className: "my-2 border rounded-md border-solid border-slate-500"
                 }, tmp), React.createElement("div", {
