@@ -22,23 +22,8 @@ wsServer.on(WsWebSocketServer.ServerEvents.connection, (function (ws, param) {
                     client.send("connected");
                     
                   })).on(WsWebSocket.ClientEvents.message, (function (msg, param) {
-                  var b = WsWebSocket.RawData.classify(msg);
-                  if (typeof b === "number") {
-                    console.log("unknown");
-                    return ;
-                  }
-                  switch (b.TAG | 0) {
-                    case /* Buffer */0 :
-                        console.log("msg", b._0.toString());
-                        return ;
-                    case /* ArrayBuffer */1 :
-                        console.log("ab", b._0);
-                        return ;
-                    case /* ArrayOfBuffers */2 :
-                        console.log("aob", b._0);
-                        return ;
-                    
-                  }
+                  console.log("msg:", WsWebSocket.RawData.toString(msg));
+                  
                 })).on(WsWebSocket.ClientEvents.close, (function (param, param$1) {
                 console.log("connection close");
                 

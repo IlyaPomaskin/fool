@@ -44,6 +44,14 @@ module RawData = {
     | "Array" => ArrayOfBuffers(Obj.magic(x))
     | _ => Unknown
     }
+
+  let toString = rawData =>
+    switch classify(rawData) {
+    | Buffer(buf) => Some(buf->Buffer.toString)
+    | ArrayBuffer(arrayBuf) => Some(arrayBuf->Buffer.fromArrayBuffer->Buffer.toString)
+    | ArrayOfBuffers(arrayOfBuf) => Some(arrayOfBuf->Belt.Array.joinWith("", Buffer.toString))
+    | Unknown => None
+    }
 }
 
 module EventWithThis = {

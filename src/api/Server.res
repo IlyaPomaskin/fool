@@ -18,12 +18,7 @@ wsServer
     client->WsWebSocket.send("connected")
   })
   ->WsWebSocket.on(WsWebSocket.ClientEvents.message, @this (_, msg, _) => {
-    switch msg->WsWebSocket.RawData.classify {
-    | Buffer(b) => Js.log2("msg", Buffer.toString(b))
-    | ArrayBuffer(ab) => Js.log2("ab", ab)
-    | ArrayOfBuffers(aob) => Js.log2("aob", aob)
-    | Unknown => Js.log("unknown")
-    }
+    Js.log2("msg:", WsWebSocket.RawData.toString(msg))
   })
   ->WsWebSocket.on(WsWebSocket.ClientEvents.close, @this (_, _, _) => {
     Js.log("connection close")
