@@ -1,5 +1,5 @@
 open NodeJs
-include WebSocket
+include WsWebSocket
 
 type wss
 
@@ -25,11 +25,11 @@ module Make = {
 @val external options: Make.options = "options"
 @val external path: string = "path"
 // FIXME add Set typings
-// @val external clients: Set.t<WebSocket.t> = "clients"
+// @val external clients: Set.t<WsWebSocket.t> = "clients"
 
 module ServerEvents = {
   let connection: EventWithThis.t<
-    @this (wss, WebSocket.t, Http.IncomingMessage.t) => unit,
+    @this (wss, WsWebSocket.t, Http.IncomingMessage.t) => unit,
     t,
   > = EventWithThis.fromString2("connection")
   let error: EventWithThis.t<@this (wss, Errors.Error.t) => unit, t> = EventWithThis.fromString1(
@@ -52,7 +52,7 @@ external handleUpgrade: (
   Http.IncomingMessage.t,
   Net.Socket.t,
   Buffer.t,
-  (WebSocket.t, Http.IncomingMessage.t) => unit,
+  (WsWebSocket.t, Http.IncomingMessage.t) => unit,
 ) => unit = "handleUpgrade"
 @send
 external shouldHandle: Http.IncomingMessage.t => bool = "shouldHandle"

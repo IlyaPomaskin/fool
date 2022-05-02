@@ -197,4 +197,12 @@ let makeOptions = (
 }
 
 @module("ws") @new
-external make: (Js.Nullable.t<string>, options) => t = "WebSocketServer"
+external make: string => t = "WebSocket"
+@module("ws") @new
+external makeWithOptions: (string, options) => t = "WebSocket"
+@module("ws") @new
+external makeWithoutAddress: unit => t = "WebSocket"
+@module("ws") @new
+external makeWithAddressProtocolAndOptions: (string, string, options) => t = "WebSocket"
+@module("ws") @new
+external makeWithAddressProtocolsAndOptions: (string, array<string>, options) => t = "WebSocket"
