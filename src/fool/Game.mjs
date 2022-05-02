@@ -374,12 +374,11 @@ function dispatch(game, player, action) {
     } else {
       return pass(game, player);
     }
-  }
-  if (action.TAG !== /* Beat */0) {
+  } else if (action.TAG === /* Beat */0) {
+    return beat(game, player, action._0, action._1);
+  } else {
     return move(game, player, action._0);
   }
-  var match = action._0;
-  return beat(game, player, match[0], match[1]);
 }
 
 function maskGameDeck(deck) {
@@ -430,12 +429,11 @@ function actionToObject(action) {
     } else {
       return "pass";
     }
-  }
-  if (action.TAG !== /* Beat */0) {
+  } else if (action.TAG === /* Beat */0) {
+    return "beat to:" + Card.cardToString(action._0) + " by:" + Card.cardToString(action._1);
+  } else {
     return "move " + Card.cardToString(action._0);
   }
-  var match = action._0;
-  return "beat to:" + Card.cardToString(match[0]) + " by:" + Card.cardToString(match[1]);
 }
 
 export {

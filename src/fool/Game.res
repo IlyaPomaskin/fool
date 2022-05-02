@@ -198,7 +198,7 @@ let take = (game, player) => {
   }
 }
 
-let dispatch = (game, player, action) => {
+let dispatch = (game, player, action: move) => {
   switch action {
   | Take => take(game, player)
   | Beat(to, by) => beat(game, player, to, by)
@@ -239,7 +239,7 @@ let toObject = game =>
     "pass": game.pass->List.map(Player.toStringShort)->List.toArray,
   }
 
-let actionToObject = action =>
+let actionToObject = (action: move) =>
   switch action {
   | Take => "take"
   | Beat(to, by) => `beat to:${to->Card.cardToString} by:${by->Card.cardToString}`
