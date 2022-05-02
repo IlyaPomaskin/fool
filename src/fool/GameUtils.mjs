@@ -35,17 +35,6 @@ function isPlayerCanMove(game, player) {
   }
 }
 
-function toggleReady(game, player) {
-  return {
-          TAG: /* InLobby */0,
-          _0: {
-            gameId: game.gameId,
-            players: Utils.toggleArrayItem(game.players, player),
-            ready: game.ready
-          }
-        };
-}
-
 function getTrump(deck, players) {
   var lastCard = Utils.lastListItem(deck);
   var lastPlayer = Utils.lastListItem(Belt_List.keep(players, (function (p) {
@@ -159,7 +148,6 @@ export {
   isPlayerHasCard ,
   isCorrectAdditionalCard ,
   isPlayerCanMove ,
-  toggleReady ,
   getTrump ,
   isPlayerDone ,
   isPlayerLose ,

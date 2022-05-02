@@ -2,6 +2,7 @@
 
 import * as Ws from "ws";
 import * as WsWebSocket from "../bindings/WsWebSocket.mjs";
+import * as GameInstance from "./GameInstance.mjs";
 import * as WsWebSocketServer from "../bindings/WsWebSocketServer.mjs";
 
 var wsServer = new Ws.WebSocketServer({
@@ -46,6 +47,7 @@ wsServer.on(WsWebSocketServer.ServerEvents.connection, (function (ws, param) {
       }));
 
 function $$default(param, res) {
+  GameInstance.initiateGame(undefined);
   res.end(Buffer.from("response"));
   
 }

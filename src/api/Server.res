@@ -33,5 +33,6 @@ wsServer
 ->ignore
 
 let default = (_: Http.ClientRequest.t, res: Http.ServerResponse.t) => {
+  GameInstance.initiateGame()
   res->Http.ServerResponse.endWithData(Buffer.fromString("response"))
 }

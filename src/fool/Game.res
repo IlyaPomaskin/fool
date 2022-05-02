@@ -1,21 +1,26 @@
 open Types
 open GameUtils
 
-let makeGameInLobby = authorId => {
+let makeGameInLobby = player => Ok({
   gameId: "session:" ++ string_of_int(Js.Math.random_int(0, 10000000)),
-  players: list{Player.make(authorId)},
+  players: list{player},
   ready: list{},
-}
+})
 
 let logoutPlayer = (game: inLobby, player) => {
   ...game,
   players: Belt.List.keep(game.players, item => item !== player),
 }
 
-let enterGame = (game: inLobby, player) => {
+let enterGame = (game: inLobby, player) => Ok({
   ...game,
   players: List.add(game.players, player),
-}
+})
+
+let toggleReady = (game: inLobby, player) => Ok({
+  ...game,
+  ready: Utils.toggleArrayItem(game.players, player),
+})
 
 let startGame = (game: inLobby) => {
   let (players, deck) = Deck.makeShuffled()->Player.dealDeckToPlayers(game.players)

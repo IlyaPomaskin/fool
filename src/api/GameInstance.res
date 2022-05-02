@@ -1,21 +1,34 @@
 open Types
-
-module LobbyGameMap = GameMap.MakeGameMap({
-  type t = inLobby
-})
-
-module ProgressGameMap = GameMap.MakeGameMap({
-  type t = inProgress
-})
+open Storage
 
 let gamesInLobby = LobbyGameMap.empty()
 let gamesInProgress = ProgressGameMap.empty()
+let players = PlayersMap.empty()
 
-let author = Player.make("owner")
-let client = Player.make("user2")
-let players = list{author, client}
+let initiateGame = () =>
+  {
+    let alicePlayer = players->PlayersMap.create("alice")
+    let bobPlayer = players->PlayersMap.create("bob")
 
-gamesInLobby->LobbyGameMap.set("GAME_ID", {gameId: "GAME_ID", players: players, ready: players})
+    switch (alicePlayer, bobPlayer) {
+    | (Ok(alice), Ok(bob)) =>
+      gamesInLobby
+      ->LobbyGameMap.create(alice)
+      ->Result.flatMap(game => Game.enterGame(game, bob))
+      ->Result.flatMap(game => Game.toggleReady(game, alice))
+      ->Result.flatMap(game => Game.toggleReady(game, bob))
+      ->Result.flatMap(game => {
+        LobbyGameMap.set(gamesInLobby, game.gameId, game)
+        Ok(game)
+      })
+      ->Result.flatMap(game => ProgressGameMap.create(gamesInProgress, game))
+      ->Result.flatMap(game => {
+        LobbyGameMap.remove(gamesInLobby, game.gameId)
+        Ok(game)
+      })
+    | _ => Error("Can't create alice or bob")
+    }
+  }->Js.log2("game created")
 
 let startGame = (gameId: gameId): unit => {
   let nextGame = gamesInLobby->LobbyGameMap.get(gameId)->Result.flatMap(Game.startGame)
@@ -64,5 +77,3 @@ let dispatch = (gameId, playerId, action) => {
   | Error(err) => Js.log2("[dispatch] error ", err)
   }
 }
-
-startGame("GAME_ID")

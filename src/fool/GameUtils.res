@@ -26,11 +26,6 @@ let isPlayerCanMove = (game, player) => {
   }
 }
 
-let toggleReady = (game: inLobby, player) => InLobby({
-  ...game,
-  players: Utils.toggleArrayItem(game.players, player),
-})
-
 let getTrump = (deck, players) => {
   let lastCard = Utils.lastListItem(deck)
   let lastPlayer = players->List.keep(p => List.length(p.cards) != 0)->Utils.lastListItem

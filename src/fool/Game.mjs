@@ -11,14 +11,17 @@ import * as GameUtils from "./GameUtils.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Belt_Result from "rescript/lib/es6/belt_Result.js";
 
-function makeGameInLobby(authorId) {
+function makeGameInLobby(player) {
   return {
-          gameId: "session:" + String(Js_math.random_int(0, 10000000)),
-          players: {
-            hd: Player.make(authorId),
-            tl: /* [] */0
-          },
-          ready: /* [] */0
+          TAG: /* Ok */0,
+          _0: {
+            gameId: "session:" + String(Js_math.random_int(0, 10000000)),
+            players: {
+              hd: player,
+              tl: /* [] */0
+            },
+            ready: /* [] */0
+          }
         };
 }
 
@@ -34,9 +37,23 @@ function logoutPlayer(game, player) {
 
 function enterGame(game, player) {
   return {
-          gameId: game.gameId,
-          players: Belt_List.add(game.players, player),
-          ready: game.ready
+          TAG: /* Ok */0,
+          _0: {
+            gameId: game.gameId,
+            players: Belt_List.add(game.players, player),
+            ready: game.ready
+          }
+        };
+}
+
+function toggleReady(game, player) {
+  return {
+          TAG: /* Ok */0,
+          _0: {
+            gameId: game.gameId,
+            players: game.players,
+            ready: Utils.toggleArrayItem(game.players, player)
+          }
         };
 }
 
@@ -423,6 +440,7 @@ export {
   makeGameInLobby ,
   logoutPlayer ,
   enterGame ,
+  toggleReady ,
   startGame ,
   isValidMove ,
   move ,
