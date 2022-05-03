@@ -90,13 +90,9 @@ let dispatch = (playerId, gameId, action): result<inProgress, string> => {
       Result.flatMap(game, game => Game.dispatch(game, player, action))
     )
 
-  let result = switch (nextGame, player) {
-  | (Ok(game), Ok(player)) =>
-    gamesInProgress
-    ->ProgressGameMap.set(game.gameId, game)
-    ->Result.map(game => Game.maskForPlayer(game, player))
-  | (Error(err), _) => Error(err)
-  | (_, Error(err)) => Error(err)
+  let result = switch nextGame {
+  | Ok(game) => gamesInProgress->ProgressGameMap.set(game.gameId, game)
+  | Error(err) => Error(err)
   }
 
   switch result {

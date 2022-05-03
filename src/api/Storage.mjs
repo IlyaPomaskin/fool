@@ -247,11 +247,39 @@ var PlayersMap = {
   create: create$2
 };
 
+var cmp$3 = Caml.caml_string_compare;
+
+var PlayerId$1 = Belt_Id.MakeComparable({
+      cmp: cmp$3
+    });
+
+function empty$3(param) {
+  return Belt_MutableMap.make(PlayerId$1);
+}
+
+function get$3(map, playerId) {
+  return Utils.toResult(Belt_MutableMap.get(map, playerId), "Player \"" + playerId + "\" socket not found");
+}
+
+function set$3(map, game) {
+  return function (param) {
+    return Belt_MutableMap.set(map, game, param);
+  };
+}
+
+var PlayersSocketMap = {
+  PlayerId: PlayerId$1,
+  empty: empty$3,
+  get: get$3,
+  set: set$3
+};
+
 export {
   MakeGameMap ,
   LobbyGameMap ,
   ProgressGameMap ,
   PlayersMap ,
+  PlayersSocketMap ,
   
 }
 /* GameId Not a pure module */

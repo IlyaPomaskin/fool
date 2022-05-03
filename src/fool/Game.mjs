@@ -84,7 +84,14 @@ function toggleReady(game, player) {
 }
 
 function startGame(game) {
+  var isEnoughPlayers = Belt_List.length(game.players) > 1;
   var isAllPlayersAreReady = Belt_List.length(game.players) === Belt_List.length(game.ready);
+  if (!isEnoughPlayers) {
+    return {
+            TAG: /* Error */1,
+            _0: "Not enough players"
+          };
+  }
   if (!isAllPlayersAreReady) {
     return {
             TAG: /* Error */1,
@@ -368,6 +375,18 @@ function take(game, player) {
   var nextDefender = Belt_Option.flatMap(nextAttacker, (function (p) {
           return Player.getNextPlayer(p, game.players);
         }));
+  var nextPlayers = Belt_List.map(game.players, (function (p) {
+          if (GameUtils.isDefender(game, p)) {
+            return {
+                    id: p.id,
+                    sessionId: p.sessionId,
+                    cards: Belt_List.concat(p.cards, Table.getFlatCards(game.table))
+                  };
+          } else {
+            return p;
+          }
+        }));
+  var match = Player.dealDeckToPlayers(game.deck, nextPlayers);
   if (nextAttacker !== undefined && nextDefender !== undefined) {
     return {
             TAG: /* Ok */0,
@@ -375,19 +394,9 @@ function take(game, player) {
               gameId: game.gameId,
               attacker: nextAttacker,
               defender: nextDefender,
-              players: Belt_List.map(game.players, (function (p) {
-                      if (GameUtils.isDefender(game, p)) {
-                        return {
-                                id: p.id,
-                                sessionId: p.sessionId,
-                                cards: Belt_List.concat(p.cards, Table.getFlatCards(game.table))
-                              };
-                      } else {
-                        return p;
-                      }
-                    })),
+              players: match[0],
               trump: game.trump,
-              deck: game.deck,
+              deck: match[1],
               table: /* [] */0,
               pass: /* [] */0
             }
@@ -425,19 +434,19 @@ function maskGameDeck(deck) {
               }));
 }
 
-function maskForPlayer(game, player) {
+function maskForPlayer(game, playerId) {
   return {
           gameId: game.gameId,
-          attacker: Player.mask(player, game.attacker),
-          defender: Player.mask(player, game.defender),
+          attacker: Player.mask(playerId, game.attacker),
+          defender: Player.mask(playerId, game.defender),
           players: Belt_List.map(game.players, (function (param) {
-                  return Player.mask(player, param);
+                  return Player.mask(playerId, param);
                 })),
           trump: game.trump,
           deck: maskGameDeck(game.deck),
           table: game.table,
           pass: Belt_List.map(game.pass, (function (param) {
-                  return Player.mask(player, param);
+                  return Player.mask(playerId, param);
                 }))
         };
 }

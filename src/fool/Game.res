@@ -45,9 +45,12 @@ let toggleReady = (game: inLobby, player) => {
 }
 
 let startGame = (game: inLobby) => {
+  let isEnoughPlayers = List.length(game.players) > 1
   let isAllPlayersAreReady = List.length(game.players) === List.length(game.ready)
 
-  if !isAllPlayersAreReady {
+  if !isEnoughPlayers {
+    Error("Not enough players")
+  } else if !isAllPlayersAreReady {
     Error("Not all players are ready")
   } else {
     let (players, deck) = Deck.makeShuffled()->Player.dealDeckToPlayers(game.players)
@@ -201,6 +204,14 @@ let take = (game, player) => {
   } else {
     let nextAttacker = Player.getNextPlayer(game.defender, game.players)
     let nextDefender = nextAttacker->Option.flatMap(p => Player.getNextPlayer(p, game.players))
+    let nextPlayers = List.map(game.players, p =>
+      if isDefender(game, p) {
+        {...p, cards: List.concat(p.cards, Table.getFlatCards(game.table))}
+      } else {
+        p
+      }
+    )
+    let (nextPlayers, nextDeck) = Player.dealDeckToPlayers(game.deck, nextPlayers)
 
     switch (nextAttacker, nextDefender) {
     | (Some(a), Some(d)) =>
@@ -210,16 +221,8 @@ let take = (game, player) => {
         table: list{},
         attacker: a,
         defender: d,
-        players: List.map(game.players, p =>
-          if isDefender(game, p) {
-            {
-              ...p,
-              cards: List.concat(p.cards, Table.getFlatCards(game.table)),
-            }
-          } else {
-            p
-          }
-        ),
+        players: nextPlayers,
+        deck: nextDeck,
       })
     | _ => Error("Can't find next attacker/defender")
     }
@@ -246,13 +249,13 @@ let maskGameDeck = deck => {
   )
 }
 
-let maskForPlayer = (game, player) => {
+let maskForPlayer = (game, playerId) => {
   ...game,
-  attacker: player->Player.mask(game.attacker),
-  defender: player->Player.mask(game.defender),
-  players: game.players->List.map(Player.mask(player)),
+  attacker: playerId->Player.mask(game.attacker),
+  defender: playerId->Player.mask(game.defender),
+  players: game.players->List.map(Player.mask(playerId)),
   deck: game.deck->maskGameDeck,
-  pass: game.pass->List.map(Player.mask(player)),
+  pass: game.pass->List.map(Player.mask(playerId)),
 }
 
 let toObject = game =>

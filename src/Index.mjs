@@ -8,6 +8,7 @@ import * as React from "react";
 import * as GameUI from "./components/GameUI.mjs";
 import * as ClientUI from "./components/ClientUI.mjs";
 import * as PlayerUI from "./components/PlayerUI.mjs";
+import * as Belt_List from "rescript/lib/es6/belt_List.js";
 import * as Serializer from "./Serializer.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Webapi__WebSocket from "rescript-webapi/src/Webapi/Webapi__WebSocket.mjs";
@@ -63,23 +64,22 @@ function Index$Client(Props) {
                     var player = msg$1._0;
                     switch (player.TAG | 0) {
                       case /* Connected */0 :
-                          var player$1 = player._0;
-                          tmp = "Connected: " + player$1.id + " " + Belt_Option.getWithDefault(player$1.sessionId, "no sesid");
+                          tmp = "Connected: " + playerId + " " + Belt_Option.getWithDefault(player._0.sessionId, "no sesid");
                           break;
                       case /* LobbyCreated */1 :
-                          tmp = "LobbyCreated: " + player._0.gameId;
+                          tmp = "LobbyCreated: " + playerId + " " + player._0.gameId;
                           break;
                       case /* LobbyUpdated */2 :
-                          tmp = "LobbyUpdated: " + player._0.gameId;
+                          tmp = "LobbyUpdated: " + playerId + " " + player._0.gameId;
                           break;
                       case /* ProgressCreated */3 :
-                          tmp = "ProgressCreated: " + player._0.gameId;
+                          tmp = "ProgressCreated: " + playerId + " " + player._0.gameId;
                           break;
                       case /* ProgressUpdated */4 :
-                          tmp = "ProgressUpdated: " + player._0.gameId;
+                          tmp = "ProgressUpdated: " + playerId + " " + player._0.gameId;
                           break;
                       case /* Err */5 :
-                          tmp = "Error: " + player._0;
+                          tmp = "Error: " + playerId + " " + player._0;
                           break;
                       
                     }
@@ -92,9 +92,9 @@ function Index$Client(Props) {
                     var exit = 0;
                     switch (gMsg.TAG | 0) {
                       case /* Connected */0 :
-                          var player$2 = gMsg._0;
+                          var player$1 = gMsg._0;
                           return Curry._1(setPlayer, (function (param) {
-                                        return player$2;
+                                        return player$1;
                                       }));
                       case /* LobbyCreated */1 :
                       case /* LobbyUpdated */2 :
@@ -195,6 +195,9 @@ function Index$Client(Props) {
                         }),
                       children: Utils.uiStr("lobby connect")
                     }), inLobby !== undefined ? React.createElement("div", undefined, React.createElement(Base.Button.make, {
+                            pressed: Belt_List.has(Belt_List.map(inLobby.ready, (function (a) {
+                                        return a;
+                                      })), player, Utils.equals),
                             onClick: (function (param) {
                                 ws.send(Serializer.serializeClientMessage({
                                           TAG: /* Lobby */1,

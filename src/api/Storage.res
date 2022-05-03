@@ -90,3 +90,19 @@ module PlayersMap = {
       }
     }
 }
+
+module PlayersSocketMap = {
+  module PlayerId = Id.MakeComparable({
+    type t = playerId
+    let cmp: (playerId, playerId) => int = Pervasives.compare
+  })
+
+  type t = Belt.MutableMap.t<PlayerId.t, WsWebSocket.t, PlayerId.identity>
+
+  let empty = (): t => Belt.MutableMap.make(~id=module(PlayerId))
+
+  let get = (map, playerId) =>
+    map->MutableMap.get(playerId)->Utils.toResult(`Player "${playerId}" socket not found`)
+
+  let set = (map, game) => map->MutableMap.set(game)
+}

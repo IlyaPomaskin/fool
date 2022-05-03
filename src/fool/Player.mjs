@@ -91,12 +91,12 @@ function isPlayerExists(players, player) {
   return Belt_List.has(players, player, Utils.equals);
 }
 
-function mask(targetPlayer, player) {
+function mask(playerId, player) {
   return {
           id: player.id,
           sessionId: "masked",
           cards: Belt_List.map(player.cards, (function (card) {
-                  if (player.id === targetPlayer.id) {
+                  if (player.id === playerId) {
                     return card;
                   } else {
                     return /* Hidden */0;

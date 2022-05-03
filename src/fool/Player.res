@@ -66,10 +66,10 @@ let isPlayerExists = (players, player) => {
   List.has(players, player, Utils.equals)
 }
 
-let mask = (targetPlayer, player) => {
+let mask = (playerId, player) => {
   ...player,
   sessionId: Some("masked"),
-  cards: player.cards->List.map(card => player.id == targetPlayer.id ? card : Hidden),
+  cards: player.cards->List.map(card => player.id == playerId ? card : Hidden),
 }
 
 let toObject = player =>

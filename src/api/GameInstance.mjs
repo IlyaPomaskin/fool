@@ -113,17 +113,7 @@ function dispatch(playerId, gameId, action) {
   var result;
   if (nextGame.TAG === /* Ok */0) {
     var game$1 = nextGame._0;
-    if (player.TAG === /* Ok */0) {
-      var player$1 = player._0;
-      result = Belt_Result.map($$Storage.ProgressGameMap.set(gamesInProgress, game$1.gameId, game$1), (function (game) {
-              return Game.maskForPlayer(game, player$1);
-            }));
-    } else {
-      result = {
-        TAG: /* Error */1,
-        _0: player._0
-      };
-    }
+    result = $$Storage.ProgressGameMap.set(gamesInProgress, game$1.gameId, game$1);
   } else {
     result = {
       TAG: /* Error */1,

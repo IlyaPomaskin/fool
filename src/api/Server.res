@@ -1,4 +1,8 @@
+open Types
 open NodeJs
+open Storage
+
+let playersSocket = PlayersSocketMap.empty()
 
 let wsServer = WsWebSocketServer.Make.make({
   backlog: 101,
@@ -9,6 +13,24 @@ let wsServer = WsWebSocketServer.Make.make({
   server: WsWebSocketServer.restartServer(),
   skipUTF8Validation: true,
 })
+
+let broadcastToPlayers = (players: list<Types.player>, event) => {
+  players->List.forEach(player => {
+    playersSocket
+    ->PlayersSocketMap.get(player.id)
+    ->Result.map(socket => {
+      socket->WsWebSocket.send(
+        Serializer.serializeServerMessage(
+          switch event {
+          | ProgressCreated(game) => ProgressCreated(Game.maskForPlayer(game, player.id))
+          | ProgressUpdated(game) => ProgressUpdated(Game.maskForPlayer(game, player.id))
+          | _ => event
+          },
+        ),
+      )
+    })
+  })
+}
 
 wsServer
 ->WsWebSocketServer.on(WsWebSocketServer.ServerEvents.connection, @this (_, ws, _) => {
@@ -47,38 +69,30 @@ wsServer
       playerId
       ->GameInstance.connectPlayer
       ->Result.map(player => {
+        playersSocket->PlayersSocketMap.set(player.id, ws)
         ws->WsWebSocket.send(Serializer.serializeServerMessage(Connected(player)))
       })
     | Ok(Lobby(Create, playerId, _)) =>
       playerId
       ->GameInstance.createLobby
-      ->Result.map(lobby =>
-        ws->WsWebSocket.send(Serializer.serializeServerMessage(LobbyUpdated(lobby)))
-      )
+      ->Result.map(lobby => broadcastToPlayers(lobby.players, LobbyCreated(lobby)))
     | Ok(Lobby(Enter, playerId, gameId)) =>
       playerId
       ->GameInstance.enterGame(gameId)
-      ->Result.map(lobby =>
-        ws->WsWebSocket.send(Serializer.serializeServerMessage(LobbyUpdated(lobby)))
-      )
+      ->Result.map(lobby => broadcastToPlayers(lobby.players, LobbyUpdated(lobby)))
     | Ok(Lobby(Ready, playerId, gameId)) =>
       playerId
       ->GameInstance.toggleReady(gameId)
-      ->Result.map(lobby => {
-        ws->WsWebSocket.send(Serializer.serializeServerMessage(LobbyUpdated(lobby)))
-      })
+      ->Result.map(lobby => broadcastToPlayers(lobby.players, LobbyUpdated(lobby)))
+
     | Ok(Lobby(Start, playerId, gameId)) =>
       playerId
       ->GameInstance.startGame(gameId)
-      ->Result.map(progress =>
-        ws->WsWebSocket.send(Serializer.serializeServerMessage(ProgressCreated(progress)))
-      )
+      ->Result.map(progress => broadcastToPlayers(progress.players, ProgressCreated(progress)))
     | Ok(Progress(move, playerId, gameId)) =>
       playerId
       ->GameInstance.dispatch(gameId, move)
-      ->Result.map(progress =>
-        ws->WsWebSocket.send(Serializer.serializeServerMessage(ProgressUpdated(progress)))
-      )
+      ->Result.map(progress => broadcastToPlayers(progress.players, ProgressUpdated(progress)))
     | _ => Error("error?")
     }->{
       result => {

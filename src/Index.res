@@ -32,12 +32,12 @@ module Client = {
           "msg:",
           switch msg {
           | Ok(Connected(player)) =>
-            "Connected: " ++ player.id ++ " " ++ player.sessionId->Option.getWithDefault("no sesid")
-          | Ok(LobbyCreated(g)) => "LobbyCreated: " ++ g.gameId
-          | Ok(LobbyUpdated(g)) => "LobbyUpdated: " ++ g.gameId
-          | Ok(ProgressCreated(g)) => "ProgressCreated: " ++ g.gameId
-          | Ok(ProgressUpdated(g)) => "ProgressUpdated: " ++ g.gameId
-          | Ok(Err(msg)) => "Error: " ++ msg
+            "Connected: " ++ playerId ++ " " ++ player.sessionId->Option.getWithDefault("no sesid")
+          | Ok(LobbyCreated(g)) => "LobbyCreated: " ++ playerId ++ " " ++ g.gameId
+          | Ok(LobbyUpdated(g)) => "LobbyUpdated: " ++ playerId ++ " " ++ g.gameId
+          | Ok(ProgressCreated(g)) => "ProgressCreated: " ++ playerId ++ " " ++ g.gameId
+          | Ok(ProgressUpdated(g)) => "ProgressUpdated: " ++ playerId ++ " " ++ g.gameId
+          | Ok(Err(msg)) => "Error: " ++ playerId ++ " " ++ msg
           | _ => "unk"
           },
         )
@@ -119,6 +119,7 @@ module Client = {
         | Some(inLobby) =>
           <div>
             <Base.Button
+              pressed={inLobby.ready->List.map(a => Some(a))->List.has(player, Utils.equals)}
               onClick={_ => {
                 ws->WebSocket.sendText(
                   Serializer.serializeClientMessage(Lobby(Ready, playerId, inLobby.gameId)),
