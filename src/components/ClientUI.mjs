@@ -226,15 +226,33 @@ function ClientUI(Props) {
   var tmp;
   switch (match$1) {
     case /* Playing */0 :
-        tmp = React.createElement(ClientUI$Parts$deck, {
-              game: game,
-              player: player,
-              beat: [
-                toBeat,
-                beatBy
-              ],
-              onCardClick: isDefender ? Curry._1(handleSelectToBeat, false) : handleMove
-            });
+        tmp = React.createElement("div", undefined, React.createElement(ClientUI$Parts$deck, {
+                  game: game,
+                  player: player,
+                  beat: [
+                    toBeat,
+                    beatBy
+                  ],
+                  onCardClick: isDefender ? Curry._1(handleSelectToBeat, false) : handleMove
+                }), isOwner ? React.createElement(ClientUI$Parts$actions, {
+                    game: game,
+                    player: player,
+                    beat: [
+                      toBeat,
+                      beatBy
+                    ],
+                    onPass: handlePass,
+                    onTake: handleTake,
+                    onBeat: handleBeat
+                  }) : null, React.createElement(ClientUI$Parts$table, {
+                  game: game,
+                  player: player,
+                  beat: [
+                    toBeat,
+                    beatBy
+                  ],
+                  onCardClick: Curry._1(handleSelectToBeat, true)
+                }));
         break;
     case /* Done */1 :
         tmp = Utils.uiStr("Done");
@@ -257,25 +275,7 @@ function ClientUI(Props) {
                 }, Utils.uiStr("Player: "), React.createElement(PlayerUI.Short.make, {
                       className: "inline-block",
                       player: player
-                    }), Utils.uiStr(isDefender ? " 🛡️" : ""), Utils.uiStr(GameUtils.isAttacker(game, player) ? " 🔪" : "")), tmp, isOwner ? React.createElement(ClientUI$Parts$actions, {
-                    game: game,
-                    player: player,
-                    beat: [
-                      toBeat,
-                      beatBy
-                    ],
-                    onPass: handlePass,
-                    onTake: handleTake,
-                    onBeat: handleBeat
-                  }) : null, React.createElement(ClientUI$Parts$table, {
-                  game: game,
-                  player: player,
-                  beat: [
-                    toBeat,
-                    beatBy
-                  ],
-                  onCardClick: Curry._1(handleSelectToBeat, true)
-                }));
+                    }), Utils.uiStr(isDefender ? " 🛡️" : ""), Utils.uiStr(GameUtils.isAttacker(game, player) ? " 🔪" : "")), tmp);
 }
 
 var make = ClientUI;

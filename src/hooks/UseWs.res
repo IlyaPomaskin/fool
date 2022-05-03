@@ -41,6 +41,7 @@ let hook = (playerId): hookReturn => {
         | LobbyCreated(inLobby)
         | LobbyUpdated(inLobby) =>
           setInLobby(_ => Some(inLobby))
+        | LobbyClosed(_) => setInLobby(_ => None)
         | ProgressCreated(inProgress)
         | ProgressUpdated(inProgress) =>
           setInProgress(_ => Some(inProgress))

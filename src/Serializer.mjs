@@ -575,17 +575,22 @@ var serverGameMsg = Jzon.object2((function (kind) {
                       "lobbyUpdated",
                       Jzon.encodeWith(kind._0, inLobbyMsg)
                     ];
-          case /* ProgressCreated */3 :
+          case /* LobbyClosed */3 :
+              return [
+                      "lobbyClosed",
+                      Jzon.encodeWith(kind._0, Jzon.string)
+                    ];
+          case /* ProgressCreated */4 :
               return [
                       "progressCreated",
                       Jzon.encodeWith(kind._0, inProgressMsg)
                     ];
-          case /* ProgressUpdated */4 :
+          case /* ProgressUpdated */5 :
               return [
                       "progressUpdated",
                       Jzon.encodeWith(kind._0, inProgressMsg)
                     ];
-          case /* ServerError */5 :
+          case /* ServerError */6 :
               return [
                       "error",
                       Jzon.encodeWith(kind._0, Jzon.string)
@@ -606,8 +611,15 @@ var serverGameMsg = Jzon.object2((function (kind) {
           case "error" :
               return Belt_Result.map(Jzon.decodeWith(payload, Jzon.string), (function (msg) {
                             return {
-                                    TAG: /* ServerError */5,
+                                    TAG: /* ServerError */6,
                                     _0: msg
+                                  };
+                          }));
+          case "lobbyClosed" :
+              return Belt_Result.map(Jzon.decodeWith(payload, Jzon.string), (function (gameId) {
+                            return {
+                                    TAG: /* LobbyClosed */3,
+                                    _0: gameId
                                   };
                           }));
           case "lobbyCreated" :
@@ -627,14 +639,14 @@ var serverGameMsg = Jzon.object2((function (kind) {
           case "progressCreated" :
               return Belt_Result.map(Jzon.decodeWith(payload, inProgressMsg), (function (game) {
                             return {
-                                    TAG: /* ProgressCreated */3,
+                                    TAG: /* ProgressCreated */4,
                                     _0: game
                                   };
                           }));
           case "progressUpdated" :
               return Belt_Result.map(Jzon.decodeWith(payload, inProgressMsg), (function (game) {
                             return {
-                                    TAG: /* ProgressUpdated */4,
+                                    TAG: /* ProgressUpdated */5,
                                     _0: game
                                   };
                           }));

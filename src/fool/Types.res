@@ -100,6 +100,7 @@ type gameMessageFromServer =
   | Connected(player)
   | LobbyCreated(inLobby)
   | LobbyUpdated(inLobby)
+  | LobbyClosed(gameId)
   | ProgressCreated(inProgress)
   | ProgressUpdated(inProgress)
   | ServerError(string)

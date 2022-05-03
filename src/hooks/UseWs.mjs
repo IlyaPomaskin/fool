@@ -47,7 +47,7 @@ function hook(playerId) {
                                   }), Serializer.deserializeServerMessage), (function (message) {
                               return Log.logMessageFromServer(message, playerId);
                             })), (function (message) {
-                          if (message.TAG === /* ServerError */5) {
+                          if (message.TAG === /* ServerError */6) {
                             var msg = message._0;
                             Curry._1(setError, (function (param) {
                                     return msg;
@@ -68,11 +68,15 @@ function hook(playerId) {
                             case /* LobbyUpdated */2 :
                                 exit = 1;
                                 break;
-                            case /* ProgressCreated */3 :
-                            case /* ProgressUpdated */4 :
+                            case /* LobbyClosed */3 :
+                                return Curry._1(setInLobby, (function (param) {
+                                              
+                                            }));
+                            case /* ProgressCreated */4 :
+                            case /* ProgressUpdated */5 :
                                 exit = 2;
                                 break;
-                            case /* ServerError */5 :
+                            case /* ServerError */6 :
                                 return ;
                             
                           }

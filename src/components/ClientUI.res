@@ -161,25 +161,27 @@ let make = (
     | Lose => uiStr("Lose")
     | Draw => uiStr("Draw")
     | Playing =>
-      <Parts.deck
-        game
-        player
-        beat={(toBeat, beatBy)}
-        onCardClick={isDefender ? handleSelectToBeat(false) : handleMove}
-      />
+      <div>
+        <Parts.deck
+          game
+          player
+          beat={(toBeat, beatBy)}
+          onCardClick={isDefender ? handleSelectToBeat(false) : handleMove}
+        />
+        {switch isOwner {
+        | true =>
+          <Parts.actions
+            game
+            player
+            beat={(toBeat, beatBy)}
+            onPass={handlePass}
+            onTake={handleTake}
+            onBeat={handleBeat}
+          />
+        | false => React.null
+        }}
+        <Parts.table game player beat={(toBeat, beatBy)} onCardClick={handleSelectToBeat(true)} />
+      </div>
     }}
-    {if isOwner {
-      <Parts.actions
-        game
-        player
-        beat={(toBeat, beatBy)}
-        onPass={handlePass}
-        onTake={handleTake}
-        onBeat={handleBeat}
-      />
-    } else {
-      React.null
-    }}
-    <Parts.table game player beat={(toBeat, beatBy)} onCardClick={handleSelectToBeat(true)} />
   </div>
 }
