@@ -229,6 +229,7 @@ function Index$Client(Props) {
                               return React.createElement(ClientUI.make, {
                                           className: "m-1 flex-initial w-96",
                                           player: player,
+                                          isOwner: player.id === playerId,
                                           game: inProgress,
                                           onMove: handleMove,
                                           key: player.id
@@ -240,11 +241,11 @@ function Index$Client(Props) {
 
 function $$default(param) {
   return React.createElement("div", undefined, React.createElement("div", {
-                  className: "my-2 border rounded-md border-solid border-slate-500"
+                  className: "my-2 w-1/2 inline-block border rounded-md border-solid border-slate-500"
                 }, React.createElement(Index$Client, {
                       playerId: "alice"
                     })), React.createElement("div", {
-                  className: "my-2 border rounded-md border-solid border-slate-500"
+                  className: "my-2 w-1/2 inline-block border rounded-md border-solid border-slate-500"
                 }, React.createElement(Index$Client, {
                       playerId: "bob"
                     })));

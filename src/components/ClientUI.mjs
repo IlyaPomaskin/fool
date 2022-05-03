@@ -112,9 +112,11 @@ var Parts = {
 function ClientUI(Props) {
   var classNameOpt = Props.className;
   var player = Props.player;
+  var isOwnerOpt = Props.isOwner;
   var game = Props.game;
   var onMove = Props.onMove;
   var className = classNameOpt !== undefined ? classNameOpt : "";
+  var isOwner = isOwnerOpt !== undefined ? isOwnerOpt : false;
   var match = React.useState(function () {
         return [
                 undefined,
@@ -241,19 +243,19 @@ function ClientUI(Props) {
                 }, Utils.uiStr("Player: "), React.createElement(PlayerUI.Short.make, {
                       className: "inline-block",
                       player: player
-                    }), Utils.uiStr(isDefender ? " 🛡️" : ""), Utils.uiStr(GameUtils.isAttacker(game, player) ? " 🔪" : "")), tmp, React.createElement(ClientUI$Parts$actions, {
-                  game: game,
-                  player: player,
-                  beat: [
-                    toBeat,
-                    beatBy
-                  ],
-                  onPass: (function (param) {
-                      return Curry._1(onMove, /* Pass */1);
-                    }),
-                  onTake: handleTake,
-                  onBeat: handleBeat
-                }), React.createElement(ClientUI$Parts$table, {
+                    }), Utils.uiStr(isDefender ? " 🛡️" : ""), Utils.uiStr(GameUtils.isAttacker(game, player) ? " 🔪" : "")), tmp, isOwner ? React.createElement(ClientUI$Parts$actions, {
+                    game: game,
+                    player: player,
+                    beat: [
+                      toBeat,
+                      beatBy
+                    ],
+                    onPass: (function (param) {
+                        return Curry._1(onMove, /* Pass */1);
+                      }),
+                    onTake: handleTake,
+                    onBeat: handleBeat
+                  }) : null, React.createElement(ClientUI$Parts$table, {
                   game: game,
                   player: player,
                   beat: [

@@ -81,7 +81,13 @@ module Parts = {
 }
 
 @react.component
-let make = (~className: string="", ~player: player, ~game: inProgress, ~onMove: move => unit) => {
+let make = (
+  ~className: string="",
+  ~player: player,
+  ~isOwner: bool=false,
+  ~game: inProgress,
+  ~onMove: move => unit,
+) => {
   let ((toBeat, beatBy), setBeat) = React.useState(() => (None, None))
   let handleSelectToBeat = (isToCard: bool, card: card) => {
     setBeat(((toBeat, beatBy)) => {
@@ -145,14 +151,18 @@ let make = (~className: string="", ~player: player, ~game: inProgress, ~onMove: 
         onCardClick={isDefender ? handleSelectToBeat(false) : handleMove}
       />
     }}
-    <Parts.actions
-      game
-      player
-      beat={(toBeat, beatBy)}
-      onPass={_ => onMove(Pass)}
-      onTake={handleTake}
-      onBeat={handleBeat}
-    />
+    {if isOwner {
+      <Parts.actions
+        game
+        player
+        beat={(toBeat, beatBy)}
+        onPass={_ => onMove(Pass)}
+        onTake={handleTake}
+        onBeat={handleBeat}
+      />
+    } else {
+      React.null
+    }}
     <Parts.table game player beat={(toBeat, beatBy)} onCardClick={handleSelectToBeat(true)} />
   </div>
 }

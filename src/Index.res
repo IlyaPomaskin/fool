@@ -162,7 +162,12 @@ module Client = {
           <div className="flex flex-wrap">
             {game.players->uiList(player =>
               <ClientUI
-                key={player.id} className="m-1 flex-initial w-96" player game onMove={handleMove}
+                key={player.id}
+                isOwner={player.id === playerId}
+                className="m-1 flex-initial w-96"
+                player
+                game
+                onMove={handleMove}
               />
             )}
           </div>
@@ -178,10 +183,10 @@ module Client = {
 
 let default = () => {
   <div>
-    <div className="my-2 border rounded-md border-solid border-slate-500">
+    <div className="my-2 w-1/2 inline-block border rounded-md border-solid border-slate-500">
       <Client playerId="alice" />
     </div>
-    <div className="my-2 border rounded-md border-solid border-slate-500">
+    <div className="my-2 w-1/2 inline-block border rounded-md border-solid border-slate-500">
       <Client playerId="bob" />
     </div>
   </div>
