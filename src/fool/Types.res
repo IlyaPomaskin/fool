@@ -102,4 +102,4 @@ type gameMessageFromServer =
   | LobbyUpdated(inLobby)
   | ProgressCreated(inProgress)
   | ProgressUpdated(inProgress)
-  | Err(string)
+  | ServerError(string)

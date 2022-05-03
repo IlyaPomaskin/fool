@@ -291,7 +291,7 @@ let serverGameMsg = Jzon.object2(
     | LobbyUpdated(game) => ("lobbyUpdated", Jzon.encodeWith(game, inLobbyMsg))
     | ProgressCreated(game) => ("progressCreated", Jzon.encodeWith(game, inProgressMsg))
     | ProgressUpdated(game) => ("progressUpdated", Jzon.encodeWith(game, inProgressMsg))
-    | Err(msg) => ("error", Jzon.encodeWith(msg, Jzon.string))
+    | ServerError(msg) => ("error", Jzon.encodeWith(msg, Jzon.string))
     },
   ((kind, payload)) => {
     switch (kind, payload) {
@@ -305,7 +305,7 @@ let serverGameMsg = Jzon.object2(
       Jzon.decodeWith(game, inProgressMsg)->Result.map(game => ProgressCreated(game))
     | ("progressUpdated", game) =>
       Jzon.decodeWith(game, inProgressMsg)->Result.map(game => ProgressUpdated(game))
-    | ("error", err) => Jzon.decodeWith(err, Jzon.string)->Result.map(msg => Err(msg))
+    | ("error", err) => Jzon.decodeWith(err, Jzon.string)->Result.map(msg => ServerError(msg))
     | (x, _) => Error(#UnexpectedJsonValue([Field("kind")], x))
     }
   },

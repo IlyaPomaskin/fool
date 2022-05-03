@@ -62,3 +62,9 @@ module Classify = {
         return "";
     }`)
 }
+
+let tapResult = (result: result<'a, 'b>, fn: 'a => unit): result<'a, 'b> =>
+  Result.map(result, content => {
+    fn(content)
+    content
+  })

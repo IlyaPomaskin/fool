@@ -585,7 +585,7 @@ var serverGameMsg = Jzon.object2((function (kind) {
                       "progressUpdated",
                       Jzon.encodeWith(kind._0, inProgressMsg)
                     ];
-          case /* Err */5 :
+          case /* ServerError */5 :
               return [
                       "error",
                       Jzon.encodeWith(kind._0, Jzon.string)
@@ -606,7 +606,7 @@ var serverGameMsg = Jzon.object2((function (kind) {
           case "error" :
               return Belt_Result.map(Jzon.decodeWith(payload, Jzon.string), (function (msg) {
                             return {
-                                    TAG: /* Err */5,
+                                    TAG: /* ServerError */5,
                                     _0: msg
                                   };
                           }));

@@ -2,20 +2,6 @@ open Types
 open Utils
 open Webapi
 
-let logServerMessage = (msg, playerId) =>
-  Log.log([
-    "got msg",
-    switch msg {
-    | Connected(player) =>
-      "Connected: " ++ playerId ++ " " ++ player.sessionId->Option.getWithDefault("no sesid")
-    | LobbyCreated(g) => "LobbyCreated: " ++ playerId ++ " " ++ g.gameId
-    | LobbyUpdated(g) => "LobbyUpdated: " ++ playerId ++ " " ++ g.gameId
-    | ProgressCreated(g) => "ProgressCreated: " ++ playerId ++ " " ++ g.gameId
-    | ProgressUpdated(g) => "ProgressUpdated: " ++ playerId ++ " " ++ g.gameId
-    | Err(msg) => "Error: " ++ playerId ++ " " ++ msg
-    },
-  ])
-
 module Client = {
   @react.component
   let make = (~playerId) => {
@@ -37,12 +23,12 @@ module Client = {
         ->toResult(#SyntaxError("Message from server cannot be parsed as text"))
         ->Result.flatMap(Serializer.deserializeServerMessage)
         ->Result.map(message => {
-          logServerMessage(message, playerId)
+          logMessageFromServer(message, playerId)
           message
         })
         ->Result.map(message => {
           switch message {
-          | Err(msg) => setError(_ => Some(msg))
+          | ServerError(msg) => setError(_ => Some(msg))
           | _ => setError(_ => None)
           }
 

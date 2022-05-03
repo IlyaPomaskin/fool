@@ -15,258 +15,332 @@ import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Belt_Result from "rescript/lib/es6/belt_Result.js";
 import * as Webapi__WebSocket from "rescript-webapi/src/Webapi/Webapi__WebSocket.mjs";
 
-function logServerMessage(msg, playerId) {
+function logMessageFromServer(msg, playerId) {
   var tmp;
   switch (msg.TAG | 0) {
-    case /* Connected */0 :
-        tmp = "Connected: " + playerId + " " + Belt_Option.getWithDefault(msg._0.sessionId, "no sesid");
-        break;
-    case /* LobbyCreated */1 :
-        tmp = "LobbyCreated: " + playerId + " " + msg._0.gameId;
-        break;
-    case /* LobbyUpdated */2 :
-        tmp = "LobbyUpdated: " + playerId + " " + msg._0.gameId;
-        break;
-    case /* ProgressCreated */3 :
-        tmp = "ProgressCreated: " + playerId + " " + msg._0.gameId;
-        break;
-    case /* ProgressUpdated */4 :
-        tmp = "ProgressUpdated: " + playerId + " " + msg._0.gameId;
-        break;
-    case /* Err */5 :
-        tmp = "Error: " + playerId + " " + msg._0;
-        break;
-    
+    case /* Connected */ 0:
+      tmp =
+        "Connected: " +
+        playerId +
+        " " +
+        Belt_Option.getWithDefault(msg._0.sessionId, "no sesid");
+      break;
+    case /* LobbyCreated */ 1:
+      tmp = "LobbyCreated: " + playerId + " " + msg._0.gameId;
+      break;
+    case /* LobbyUpdated */ 2:
+      tmp = "LobbyUpdated: " + playerId + " " + msg._0.gameId;
+      break;
+    case /* ProgressCreated */ 3:
+      tmp = "ProgressCreated: " + playerId + " " + msg._0.gameId;
+      break;
+    case /* ProgressUpdated */ 4:
+      tmp = "ProgressUpdated: " + playerId + " " + msg._0.gameId;
+      break;
+    case /* ServerError */ 5:
+      tmp = "Error: " + playerId + " " + msg._0;
+      break;
   }
-  return Log.log([
-              "got msg",
-              tmp
-            ]);
+  return Log.log(["[server]", tmp]);
 }
 
 function Index$Client(Props) {
   var playerId = Props.playerId;
-  var match = React.useState(function () {
-        
-      });
+  var match = React.useState(function () {});
   var setPlayer = match[1];
   var player = match[0];
-  var match$1 = React.useState(function () {
-        
-      });
+  var match$1 = React.useState(function () {});
   var setInLobby = match$1[1];
   var inLobby = match$1[0];
-  var match$2 = React.useState(function () {
-        
-      });
+  var match$2 = React.useState(function () {});
   var setInProgress = match$2[1];
   var inProgress = match$2[0];
-  var match$3 = React.useState(function () {
-        
-      });
+  var match$3 = React.useState(function () {});
   var setError = match$3[1];
   var error = match$3[0];
-  var ws = React.useMemo((function () {
-          return new WebSocket("ws://localhost:3001/ws");
-        }), []);
-  React.useEffect((function () {
-          ws.addEventListener("open", (function (param) {
-                  Log.info([
-                        "open",
-                        playerId
-                      ]);
-                  ws.send(Serializer.serializeClientMessage({
-                            TAG: /* Player */0,
-                            _0: /* Connect */0,
-                            _1: playerId
-                          }));
-                  
-                }));
-          ws.addEventListener("message", (function ($$event) {
-                  Belt_Result.map(Belt_Result.map(Belt_Result.flatMap(Utils.toResult(Webapi__WebSocket.messageAsText($$event), {
-                                    NAME: "SyntaxError",
-                                    VAL: "Message from server cannot be parsed as text"
-                                  }), Serializer.deserializeServerMessage), (function (message) {
-                              logServerMessage(message, playerId);
-                              return message;
-                            })), (function (message) {
-                          if (message.TAG === /* Err */5) {
-                            var msg = message._0;
-                            Curry._1(setError, (function (param) {
-                                    return msg;
-                                  }));
-                          } else {
-                            Curry._1(setError, (function (param) {
-                                    
-                                  }));
-                          }
-                          var exit = 0;
-                          switch (message.TAG | 0) {
-                            case /* Connected */0 :
-                                var player = message._0;
-                                return Curry._1(setPlayer, (function (param) {
-                                              return player;
-                                            }));
-                            case /* LobbyCreated */1 :
-                            case /* LobbyUpdated */2 :
-                                exit = 1;
-                                break;
-                            case /* ProgressCreated */3 :
-                            case /* ProgressUpdated */4 :
-                                exit = 2;
-                                break;
-                            case /* Err */5 :
-                                return ;
-                            
-                          }
-                          switch (exit) {
-                            case 1 :
-                                var inLobby = message._0;
-                                return Curry._1(setInLobby, (function (param) {
-                                              return inLobby;
-                                            }));
-                            case 2 :
-                                var inProgress = message._0;
-                                return Curry._1(setInProgress, (function (param) {
-                                              return inProgress;
-                                            }));
-                            
-                          }
-                        }));
-                  
-                }));
-          ws.addEventListener("close", (function (param) {
-                  Log.info([
-                        "disconnect",
-                        playerId
-                      ]);
-                  ws.send(Serializer.serializeClientMessage({
-                            TAG: /* Player */0,
-                            _0: /* Disconnect */1,
-                            _1: playerId
-                          }));
-                  
-                }));
-          ws.addEventListener("error", (function (param) {
-                  return Log.error([
-                              "socket error for player",
-                              playerId
-                            ]);
-                }));
-          return (function (param) {
-                    ws.close();
-                    
+  var ws = React.useMemo(function () {
+    return new WebSocket("ws://localhost:3001/ws");
+  }, []);
+  React.useEffect(function () {
+    ws.addEventListener("open", function (param) {
+      Log.info(["open", playerId]);
+      ws.send(
+        Serializer.serializeClientMessage({
+          TAG: /* Player */ 0,
+          _0: /* Connect */ 0,
+          _1: playerId,
+        })
+      );
+    });
+    ws.addEventListener("message", function ($$event) {
+      Belt_Result.map(
+        Belt_Result.map(
+          Belt_Result.flatMap(
+            Utils.toResult(Webapi__WebSocket.messageAsText($$event), {
+              NAME: "SyntaxError",
+              VAL: "Message from server cannot be parsed as text",
+            }),
+            Serializer.deserializeServerMessage
+          ),
+          function (message) {
+            logMessageFromServer(message, playerId);
+            return message;
+          }
+        ),
+        function (message) {
+          if (message.TAG === /* ServerError */ 5) {
+            var msg = message._0;
+            Curry._1(setError, function (param) {
+              return msg;
+            });
+          } else {
+            Curry._1(setError, function (param) {});
+          }
+          var exit = 0;
+          switch (message.TAG | 0) {
+            case /* Connected */ 0:
+              var player = message._0;
+              return Curry._1(setPlayer, function (param) {
+                return player;
+              });
+            case /* LobbyCreated */ 1:
+            case /* LobbyUpdated */ 2:
+              exit = 1;
+              break;
+            case /* ProgressCreated */ 3:
+            case /* ProgressUpdated */ 4:
+              exit = 2;
+              break;
+            case /* ServerError */ 5:
+              return;
+          }
+          switch (exit) {
+            case 1:
+              var inLobby = message._0;
+              return Curry._1(setInLobby, function (param) {
+                return inLobby;
+              });
+            case 2:
+              var inProgress = message._0;
+              return Curry._1(setInProgress, function (param) {
+                return inProgress;
+              });
+          }
+        }
+      );
+    });
+    ws.addEventListener("close", function (param) {
+      Log.info(["disconnect", playerId]);
+      ws.send(
+        Serializer.serializeClientMessage({
+          TAG: /* Player */ 0,
+          _0: /* Disconnect */ 1,
+          _1: playerId,
+        })
+      );
+    });
+    ws.addEventListener("error", function (param) {
+      return Log.error(["socket error for player", playerId]);
+    });
+    return function (param) {
+      ws.close();
+    };
+  }, []);
+  return React.createElement(
+    "div",
+    undefined,
+    React.createElement(
+      "div",
+      undefined,
+      React.createElement(Base.Button.make, {
+        onClick: function (param) {
+          ws.send(
+            Serializer.serializeClientMessage({
+              TAG: /* Player */ 0,
+              _0: /* Connect */ 0,
+              _1: playerId,
+            })
+          );
+        },
+        children: Utils.uiStr("create player"),
+      }),
+      React.createElement(Base.Button.make, {
+        onClick: function (param) {
+          ws.send(
+            Serializer.serializeClientMessage({
+              TAG: /* Lobby */ 1,
+              _0: /* Create */ 0,
+              _1: playerId,
+              _2: "",
+            })
+          );
+        },
+        children: Utils.uiStr("create lobby"),
+      }),
+      React.createElement(Base.Button.make, {
+        onClick: function (param) {
+          ws.send(
+            Serializer.serializeClientMessage({
+              TAG: /* Lobby */ 1,
+              _0: /* Enter */ 1,
+              _1: playerId,
+              _2: "gameId",
+            })
+          );
+        },
+        children: Utils.uiStr("lobby connect"),
+      }),
+      inLobby !== undefined
+        ? React.createElement(
+            "div",
+            undefined,
+            React.createElement(Base.Button.make, {
+              pressed: Belt_List.has(
+                Belt_List.map(inLobby.ready, function (a) {
+                  return a;
+                }),
+                player,
+                Utils.equals
+              ),
+              onClick: function (param) {
+                ws.send(
+                  Serializer.serializeClientMessage({
+                    TAG: /* Lobby */ 1,
+                    _0: /* Ready */ 2,
+                    _1: playerId,
+                    _2: inLobby.gameId,
+                  })
+                );
+              },
+              children: Utils.uiStr("lobby ready"),
+            }),
+            React.createElement(Base.Button.make, {
+              onClick: function (param) {
+                ws.send(
+                  Serializer.serializeClientMessage({
+                    TAG: /* Lobby */ 1,
+                    _0: /* Start */ 3,
+                    _1: playerId,
+                    _2: inLobby.gameId,
+                  })
+                );
+              },
+              children: Utils.uiStr("lobby start"),
+            })
+          )
+        : null
+    ),
+    React.createElement(
+      "div",
+      undefined,
+      error !== undefined
+        ? React.createElement(
+            "div",
+            undefined,
+            Utils.uiStr("server error: " + error)
+          )
+        : React.createElement("div", undefined, Utils.uiStr("no server error"))
+    ),
+    React.createElement(
+      "div",
+      undefined,
+      player !== undefined
+        ? React.createElement(PlayerUI.Short.make, {
+            player: player,
+          })
+        : React.createElement("div", undefined)
+    ),
+    inLobby !== undefined
+      ? React.createElement("div", undefined, Utils.uiStr("inLobby"))
+      : React.createElement("div", undefined),
+    inProgress !== undefined
+      ? React.createElement(
+          "div",
+          undefined,
+          React.createElement(GameUI.InProgressUI.make, {
+            game: inProgress,
+          }),
+          React.createElement(
+            "div",
+            {
+              className: "flex flex-wrap",
+            },
+            Utils.uiList(inProgress.players, function (player$1) {
+              return React.createElement(ClientUI.make, {
+                className: "m-1 flex-initial w-96",
+                player: player$1,
+                isOwner: player$1.id === playerId,
+                game: inProgress,
+                onMove: function (param) {
+                  var nextGame = Belt_Result.flatMap(
+                    Utils.toResult(player, "No player"),
+                    function (player) {
+                      return Game.dispatch(inProgress, player, param);
+                    }
+                  );
+                  if (nextGame.TAG === /* Ok */ 0) {
+                    ws.send(
+                      Serializer.serializeClientMessage({
+                        TAG: /* Progress */ 2,
+                        _0: param,
+                        _1: playerId,
+                        _2: nextGame._0.gameId,
+                      })
+                    );
+                    return;
+                  }
+                  var error = nextGame._0;
+                  return Curry._1(setError, function (param) {
+                    return error;
                   });
-        }), []);
-  return React.createElement("div", undefined, React.createElement("div", undefined, React.createElement(Base.Button.make, {
-                      onClick: (function (param) {
-                          ws.send(Serializer.serializeClientMessage({
-                                    TAG: /* Player */0,
-                                    _0: /* Connect */0,
-                                    _1: playerId
-                                  }));
-                          
-                        }),
-                      children: Utils.uiStr("create player")
-                    }), React.createElement(Base.Button.make, {
-                      onClick: (function (param) {
-                          ws.send(Serializer.serializeClientMessage({
-                                    TAG: /* Lobby */1,
-                                    _0: /* Create */0,
-                                    _1: playerId,
-                                    _2: ""
-                                  }));
-                          
-                        }),
-                      children: Utils.uiStr("create lobby")
-                    }), React.createElement(Base.Button.make, {
-                      onClick: (function (param) {
-                          ws.send(Serializer.serializeClientMessage({
-                                    TAG: /* Lobby */1,
-                                    _0: /* Enter */1,
-                                    _1: playerId,
-                                    _2: "gameId"
-                                  }));
-                          
-                        }),
-                      children: Utils.uiStr("lobby connect")
-                    }), inLobby !== undefined ? React.createElement("div", undefined, React.createElement(Base.Button.make, {
-                            pressed: Belt_List.has(Belt_List.map(inLobby.ready, (function (a) {
-                                        return a;
-                                      })), player, Utils.equals),
-                            onClick: (function (param) {
-                                ws.send(Serializer.serializeClientMessage({
-                                          TAG: /* Lobby */1,
-                                          _0: /* Ready */2,
-                                          _1: playerId,
-                                          _2: inLobby.gameId
-                                        }));
-                                
-                              }),
-                            children: Utils.uiStr("lobby ready")
-                          }), React.createElement(Base.Button.make, {
-                            onClick: (function (param) {
-                                ws.send(Serializer.serializeClientMessage({
-                                          TAG: /* Lobby */1,
-                                          _0: /* Start */3,
-                                          _1: playerId,
-                                          _2: inLobby.gameId
-                                        }));
-                                
-                              }),
-                            children: Utils.uiStr("lobby start")
-                          })) : null), React.createElement("div", undefined, error !== undefined ? React.createElement("div", undefined, Utils.uiStr("server error: " + error)) : React.createElement("div", undefined, Utils.uiStr("no server error"))), React.createElement("div", undefined, player !== undefined ? React.createElement(PlayerUI.Short.make, {
-                        player: player
-                      }) : React.createElement("div", undefined)), inLobby !== undefined ? React.createElement("div", undefined, Utils.uiStr("inLobby")) : React.createElement("div", undefined), inProgress !== undefined ? React.createElement("div", undefined, React.createElement(GameUI.InProgressUI.make, {
-                        game: inProgress
-                      }), React.createElement("div", {
-                        className: "flex flex-wrap"
-                      }, Utils.uiList(inProgress.players, (function (player$1) {
-                              return React.createElement(ClientUI.make, {
-                                          className: "m-1 flex-initial w-96",
-                                          player: player$1,
-                                          isOwner: player$1.id === playerId,
-                                          game: inProgress,
-                                          onMove: (function (param) {
-                                              var nextGame = Belt_Result.flatMap(Utils.toResult(player, "No player"), (function (player) {
-                                                      return Game.dispatch(inProgress, player, param);
-                                                    }));
-                                              if (nextGame.TAG === /* Ok */0) {
-                                                ws.send(Serializer.serializeClientMessage({
-                                                          TAG: /* Progress */2,
-                                                          _0: param,
-                                                          _1: playerId,
-                                                          _2: nextGame._0.gameId
-                                                        }));
-                                                return ;
-                                              }
-                                              var error = nextGame._0;
-                                              return Curry._1(setError, (function (param) {
-                                                            return error;
-                                                          }));
-                                            }),
-                                          key: player$1.id
-                                        });
-                            }))), React.createElement("div", undefined, Utils.uiStr(Belt_Option.getWithDefault(Belt_Option.map(error, (function (err) {
-                                      return "Error: " + err;
-                                    })), "No errors")))) : React.createElement("div", undefined));
+                },
+                key: player$1.id,
+              });
+            })
+          ),
+          React.createElement(
+            "div",
+            undefined,
+            Utils.uiStr(
+              Belt_Option.getWithDefault(
+                Belt_Option.map(error, function (err) {
+                  return "Error: " + err;
+                }),
+                "No errors"
+              )
+            )
+          )
+        )
+      : React.createElement("div", undefined)
+  );
 }
 
 function $$default(param) {
-  return React.createElement("div", undefined, React.createElement("div", {
-                  className: "my-2 w-1/2 inline-block border rounded-md border-solid border-slate-500"
-                }, React.createElement(Index$Client, {
-                      playerId: "alice"
-                    })), React.createElement("div", {
-                  className: "my-2 w-1/2 inline-block border rounded-md border-solid border-slate-500"
-                }, React.createElement(Index$Client, {
-                      playerId: "bob"
-                    })));
+  return React.createElement(
+    "div",
+    undefined,
+    React.createElement(
+      "div",
+      {
+        className:
+          "my-2 w-1/2 inline-block border rounded-md border-solid border-slate-500",
+      },
+      React.createElement(Index$Client, {
+        playerId: "alice",
+      })
+    ),
+    React.createElement(
+      "div",
+      {
+        className:
+          "my-2 w-1/2 inline-block border rounded-md border-solid border-slate-500",
+      },
+      React.createElement(Index$Client, {
+        playerId: "bob",
+      })
+    )
+  );
 }
 
-export {
-  $$default ,
-  $$default as default,
-  
-}
+export { $$default, $$default as default };
 /* Base Not a pure module */
