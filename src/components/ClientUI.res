@@ -80,14 +80,14 @@ module Parts = {
   }
 }
 
-@react.component
-let make = (
-  ~className: string="",
-  ~player: player,
-  ~isOwner: bool=false,
-  ~game: inProgress,
-  ~onMove: move => unit,
-) => {
+type useBeatCardReturn = {
+  toBeat: option<card>,
+  beatBy: option<card>,
+  setBeat: (((option<card>, option<card>)) => (option<card>, option<card>)) => unit,
+  handleSelectToBeat: (bool, card) => unit,
+}
+
+let useBeatCard = (~game: inProgress, ~player: player): useBeatCardReturn => {
   let ((toBeat, beatBy), setBeat) = React.useState(() => (None, None))
   let handleSelectToBeat = (isToCard: bool, card: card) => {
     setBeat(((toBeat, beatBy)) => {
@@ -103,25 +103,6 @@ let make = (
     })
   }
 
-  let handleBeat = _ => {
-    switch (toBeat, beatBy) {
-    | (Some(to), Some(by)) => {
-        setBeat(_ => (None, None))
-        onMove(Beat(to, by))
-      }
-    | _ => ()
-    }
-  }
-
-  let handleMove = (card: card) => {
-    onMove(Move(card))
-  }
-
-  let handleTake = _ => {
-    setBeat(_ => (None, None))
-    onMove(Take)
-  }
-
   let isDefender = GameUtils.isDefender(game, player)
 
   React.useEffect1(() => {
@@ -131,6 +112,42 @@ let make = (
 
     None
   }, [isDefender])
+
+  {
+    toBeat: toBeat,
+    beatBy: beatBy,
+    setBeat: setBeat,
+    handleSelectToBeat: handleSelectToBeat,
+  }
+}
+
+@react.component
+let make = (
+  ~className: string="",
+  ~player: player,
+  ~isOwner: bool=false,
+  ~game: inProgress,
+  ~onMove: move => unit,
+) => {
+  let {toBeat, beatBy, setBeat, handleSelectToBeat} = useBeatCard(~game, ~player)
+
+  let handleBeat = _ => {
+    switch (toBeat, beatBy) {
+    | (Some(to), Some(by)) => {
+        setBeat(_ => (None, None))
+        onMove(Beat(to, by))
+      }
+    | _ => ()
+    }
+  }
+  let handleTake = _ => {
+    setBeat(_ => (None, None))
+    onMove(Take)
+  }
+  let handleMove = card => onMove(Move(card))
+  let handlePass = _ => onMove(Pass)
+
+  let isDefender = GameUtils.isDefender(game, player)
 
   <div className={cx([className, "p-1 border rounded-md border-solid border-slate-500"])}>
     <div className="mb-1">
@@ -156,7 +173,7 @@ let make = (
         game
         player
         beat={(toBeat, beatBy)}
-        onPass={_ => onMove(Pass)}
+        onPass={handlePass}
         onTake={handleTake}
         onBeat={handleBeat}
       />

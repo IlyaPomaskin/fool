@@ -109,14 +109,7 @@ var Parts = {
   deck: ClientUI$Parts$deck
 };
 
-function ClientUI(Props) {
-  var classNameOpt = Props.className;
-  var player = Props.player;
-  var isOwnerOpt = Props.isOwner;
-  var game = Props.game;
-  var onMove = Props.onMove;
-  var className = classNameOpt !== undefined ? classNameOpt : "";
-  var isOwner = isOwnerOpt !== undefined ? isOwnerOpt : false;
+function useBeatCard(game, player) {
   var match = React.useState(function () {
         return [
                 undefined,
@@ -125,8 +118,6 @@ function ClientUI(Props) {
       });
   var setBeat = match[1];
   var match$1 = match[0];
-  var beatBy = match$1[1];
-  var toBeat = match$1[0];
   var handleSelectToBeat = function (isToCard, card) {
     return Curry._1(setBeat, (function (param) {
                   var beatBy = param[1];
@@ -163,6 +154,39 @@ function ClientUI(Props) {
                   }
                 }));
   };
+  var isDefender = GameUtils.isDefender(game, player);
+  React.useEffect((function () {
+          if (!isDefender) {
+            Curry._1(setBeat, (function (param) {
+                    return [
+                            undefined,
+                            undefined
+                          ];
+                  }));
+          }
+          
+        }), [isDefender]);
+  return {
+          toBeat: match$1[0],
+          beatBy: match$1[1],
+          setBeat: setBeat,
+          handleSelectToBeat: handleSelectToBeat
+        };
+}
+
+function ClientUI(Props) {
+  var classNameOpt = Props.className;
+  var player = Props.player;
+  var isOwnerOpt = Props.isOwner;
+  var game = Props.game;
+  var onMove = Props.onMove;
+  var className = classNameOpt !== undefined ? classNameOpt : "";
+  var isOwner = isOwnerOpt !== undefined ? isOwnerOpt : false;
+  var match = useBeatCard(game, player);
+  var handleSelectToBeat = match.handleSelectToBeat;
+  var setBeat = match.setBeat;
+  var beatBy = match.beatBy;
+  var toBeat = match.toBeat;
   var handleBeat = function (param) {
     if (toBeat !== undefined && beatBy !== undefined) {
       Curry._1(setBeat, (function (param) {
@@ -179,12 +203,6 @@ function ClientUI(Props) {
     }
     
   };
-  var handleMove = function (card) {
-    return Curry._1(onMove, {
-                TAG: /* Move */1,
-                _0: card
-              });
-  };
   var handleTake = function (param) {
     Curry._1(setBeat, (function (param) {
             return [
@@ -194,21 +212,19 @@ function ClientUI(Props) {
           }));
     return Curry._1(onMove, /* Take */0);
   };
+  var handleMove = function (card) {
+    return Curry._1(onMove, {
+                TAG: /* Move */1,
+                _0: card
+              });
+  };
+  var handlePass = function (param) {
+    return Curry._1(onMove, /* Pass */1);
+  };
   var isDefender = GameUtils.isDefender(game, player);
-  React.useEffect((function () {
-          if (!isDefender) {
-            Curry._1(setBeat, (function (param) {
-                    return [
-                            undefined,
-                            undefined
-                          ];
-                  }));
-          }
-          
-        }), [isDefender]);
-  var match$2 = GameUtils.getPlayerGameState(game, player);
+  var match$1 = GameUtils.getPlayerGameState(game, player);
   var tmp;
-  switch (match$2) {
+  switch (match$1) {
     case /* Playing */0 :
         tmp = React.createElement(ClientUI$Parts$deck, {
               game: game,
@@ -217,9 +233,7 @@ function ClientUI(Props) {
                 toBeat,
                 beatBy
               ],
-              onCardClick: isDefender ? (function (param) {
-                    return handleSelectToBeat(false, param);
-                  }) : handleMove
+              onCardClick: isDefender ? Curry._1(handleSelectToBeat, false) : handleMove
             });
         break;
     case /* Done */1 :
@@ -250,9 +264,7 @@ function ClientUI(Props) {
                       toBeat,
                       beatBy
                     ],
-                    onPass: (function (param) {
-                        return Curry._1(onMove, /* Pass */1);
-                      }),
+                    onPass: handlePass,
                     onTake: handleTake,
                     onBeat: handleBeat
                   }) : null, React.createElement(ClientUI$Parts$table, {
@@ -262,9 +274,7 @@ function ClientUI(Props) {
                     toBeat,
                     beatBy
                   ],
-                  onCardClick: (function (param) {
-                      return handleSelectToBeat(true, param);
-                    })
+                  onCardClick: Curry._1(handleSelectToBeat, true)
                 }));
 }
 
@@ -272,6 +282,7 @@ var make = ClientUI;
 
 export {
   Parts ,
+  useBeatCard ,
   make ,
   
 }
