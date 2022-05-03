@@ -36,28 +36,61 @@ function logoutPlayer(game, player) {
 }
 
 function enterGame(game, player) {
+  var isPlayerInGame = Belt_List.has(game.players, player, (function (p1, p2) {
+          return p1.id === p2.id;
+        }));
   return {
           TAG: /* Ok */0,
           _0: {
             gameId: game.gameId,
-            players: Belt_List.add(game.players, player),
+            players: isPlayerInGame ? game.players : Belt_List.add(game.players, player),
             ready: game.ready
           }
         };
 }
 
+function isValidToggleReady(game, player) {
+  if (Belt_List.has(game.players, player, (function (p1, p2) {
+            return p1.id === p2.id;
+          }))) {
+    return {
+            TAG: /* Ok */0,
+            _0: game
+          };
+  } else {
+    return {
+            TAG: /* Error */1,
+            _0: "Player not in game"
+          };
+  }
+}
+
 function toggleReady(game, player) {
+  var isValid = isValidToggleReady(game, player);
+  if (Belt_Result.isError(isValid)) {
+    return isValid;
+  }
+  var inList = Belt_List.has(game.ready, player, (function (p1, p2) {
+          return p1.id === p2.id;
+        }));
   return {
           TAG: /* Ok */0,
           _0: {
             gameId: game.gameId,
             players: game.players,
-            ready: Utils.toggleArrayItem(game.players, player)
+            ready: inList ? game.ready : Belt_List.add(game.ready, player)
           }
         };
 }
 
 function startGame(game) {
+  var isAllPlayersAreReady = Belt_List.length(game.players) === Belt_List.length(game.ready);
+  if (!isAllPlayersAreReady) {
+    return {
+            TAG: /* Error */1,
+            _0: "Not all players are ready"
+          };
+  }
   var match = Player.dealDeckToPlayers(Deck.makeShuffled(undefined), game.players);
   var deck = match[1];
   var players = match[0];
@@ -440,6 +473,7 @@ export {
   makeGameInLobby ,
   logoutPlayer ,
   enterGame ,
+  isValidToggleReady ,
   toggleReady ,
   startGame ,
   isValidMove ,

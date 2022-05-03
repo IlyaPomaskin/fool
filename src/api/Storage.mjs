@@ -6,6 +6,7 @@ import * as Curry from "rescript/lib/es6/curry.js";
 import * as Utils from "../Utils.mjs";
 import * as Player from "../fool/Player.mjs";
 import * as Belt_Id from "rescript/lib/es6/belt_Id.js";
+import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
 import * as Belt_Result from "rescript/lib/es6/belt_Result.js";
 import * as Belt_MutableMap from "rescript/lib/es6/belt_MutableMap.js";
 
@@ -22,6 +23,7 @@ function MakeGameMap(Item) {
   };
   var set = function (map, gameId, game) {
     Belt_MutableMap.set(map, gameId, game);
+    console.log("game map", Belt_Array.get(Belt_MutableMap.toArray(map), 0));
     return {
             TAG: /* Ok */0,
             _0: game
@@ -95,6 +97,7 @@ function get(map, gameId) {
 
 function set(map, gameId, game) {
   Belt_MutableMap.set(map, gameId, game);
+  console.log("game map", Belt_Array.get(Belt_MutableMap.toArray(map), 0));
   return {
           TAG: /* Ok */0,
           _0: game
@@ -157,6 +160,7 @@ function get$1(map, gameId) {
 
 function set$1(map, gameId, game) {
   Belt_MutableMap.set(map, gameId, game);
+  console.log("game map", Belt_Array.get(Belt_MutableMap.toArray(map), 0));
   return {
           TAG: /* Ok */0,
           _0: game

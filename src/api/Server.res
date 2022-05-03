@@ -13,10 +13,6 @@ let wsServer = WsWebSocketServer.Make.make({
 wsServer
 ->WsWebSocketServer.on(WsWebSocketServer.ServerEvents.connection, @this (_, ws, _) => {
   ws
-  ->WsWebSocket.on(WsWebSocket.ClientEvents.open_, @this client => {
-    Js.log("connection open")
-    client->WsWebSocket.send("connected")
-  })
   ->WsWebSocket.on(WsWebSocket.ClientEvents.message, @this (ws, msg, _) => {
     let msg =
       WsWebSocket.RawData.toString(msg)
@@ -49,7 +45,7 @@ wsServer
     switch msg {
     | Ok(Player(Connect, playerId)) =>
       playerId
-      ->GameInstance.createPlayer
+      ->GameInstance.connectPlayer
       ->Result.map(player => {
         ws->WsWebSocket.send(Serializer.serializeServerMessage(Connected(player)))
       })
@@ -85,13 +81,13 @@ wsServer
       )
     | _ => Error("error?")
     }->{
-      aa => {
-        ws->WsWebSocket.send(Serializer.serializeServerMessage(Err("some error")))
+      result => {
+        switch result {
+        | Ok(_) => ()
+        | Error(msg) => ws->WsWebSocket.send(Serializer.serializeServerMessage(Err(msg)))
+        }
       }
     }
-  })
-  ->WsWebSocket.on(WsWebSocket.ClientEvents.close, @this (_, _, _) => {
-    Js.log("connection close")
   })
   ->ignore
 })

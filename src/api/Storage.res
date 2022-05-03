@@ -23,6 +23,7 @@ module MakeGameMap = (Item: GameType) => {
 
   let set = (map, gameId, game) => {
     MutableMap.set(map, gameId, game)
+    Js.log2("game map", MutableMap.toArray(map)->Array.get(0))
     Ok(game)
   }
 
@@ -47,7 +48,7 @@ module LobbyGameMap = MakeGameMap({
   type t = inLobby
   type createGameArg = player
 
-  let createGame = player => Game.makeGameInLobby(player)
+  // let createGame = player => Game.makeGameInLobby(player)
   let createGame = player => Ok({
     gameId: "gameId",
     players: list{player},

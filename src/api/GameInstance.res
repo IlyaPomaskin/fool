@@ -5,7 +5,14 @@ let gamesInLobby = LobbyGameMap.empty()
 let gamesInProgress = ProgressGameMap.empty()
 let players = PlayersMap.empty()
 
-let createPlayer = playerId => players->PlayersMap.create(playerId)
+let connectPlayer = playerId => {
+  let player = PlayersMap.get(players, playerId)
+
+  switch player {
+  | Ok(player) => Ok(player)
+  | Error(_) => players->PlayersMap.create(playerId)
+  }
+}
 
 let createLobby = playerId => {
   players
@@ -36,9 +43,10 @@ let startGame = (playerId, gameId) => {
   players
   ->PlayersMap.get(playerId)
   ->Result.flatMap(_ => gamesInLobby->LobbyGameMap.get(gameId))
+  ->Result.flatMap(game => Game.startGame(game))
   ->Result.flatMap(game => {
     gamesInLobby->LobbyGameMap.remove(gameId)
-    gamesInProgress->ProgressGameMap.create(game)
+    gamesInProgress->ProgressGameMap.set(gameId, game)
   })
 }
 

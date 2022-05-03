@@ -13,8 +13,16 @@ var gamesInProgress = $$Storage.ProgressGameMap.empty(undefined);
 
 var players = $$Storage.PlayersMap.empty(undefined);
 
-function createPlayer(playerId) {
-  return $$Storage.PlayersMap.create(players, playerId);
+function connectPlayer(playerId) {
+  var player = $$Storage.PlayersMap.get(players, playerId);
+  if (player.TAG === /* Ok */0) {
+    return {
+            TAG: /* Ok */0,
+            _0: player._0
+          };
+  } else {
+    return $$Storage.PlayersMap.create(players, playerId);
+  }
 }
 
 function createLobby(playerId) {
@@ -42,11 +50,11 @@ function toggleReady(playerId, gameId) {
 }
 
 function startGame(playerId, gameId) {
-  return Belt_Result.flatMap(Belt_Result.flatMap($$Storage.PlayersMap.get(players, playerId), (function (param) {
-                    return $$Storage.LobbyGameMap.get(gamesInLobby, gameId);
-                  })), (function (game) {
+  return Belt_Result.flatMap(Belt_Result.flatMap(Belt_Result.flatMap($$Storage.PlayersMap.get(players, playerId), (function (param) {
+                        return $$Storage.LobbyGameMap.get(gamesInLobby, gameId);
+                      })), Game.startGame), (function (game) {
                 $$Storage.LobbyGameMap.remove(gamesInLobby, gameId);
-                return $$Storage.ProgressGameMap.create(gamesInProgress, game);
+                return $$Storage.ProgressGameMap.set(gamesInProgress, gameId, game);
               }));
 }
 
@@ -134,7 +142,7 @@ export {
   gamesInLobby ,
   gamesInProgress ,
   players ,
-  createPlayer ,
+  connectPlayer ,
   createLobby ,
   enterGame ,
   toggleReady ,

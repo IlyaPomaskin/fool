@@ -12,37 +12,65 @@ let logoutPlayer = (game: inLobby, player) => {
   players: Belt.List.keep(game.players, item => item !== player),
 }
 
-let enterGame = (game: inLobby, player) => Ok({
-  ...game,
-  players: List.add(game.players, player),
-})
+let enterGame = (game: inLobby, player) => {
+  let isPlayerInGame = List.has(game.players, player, (p1, p2) => p1.id == p2.id)
 
-let toggleReady = (game: inLobby, player) => Ok({
-  ...game,
-  ready: Utils.toggleArrayItem(game.players, player),
-})
+  Ok({
+    ...game,
+    players: isPlayerInGame ? game.players : List.add(game.players, player),
+  })
+}
+
+let isValidToggleReady = (game: inLobby, player) => {
+  if !List.has(game.players, player, (p1, p2) => p1.id == p2.id) {
+    Error("Player not in game")
+  } else {
+    Ok(game)
+  }
+}
+
+let toggleReady = (game: inLobby, player) => {
+  let isValid = isValidToggleReady(game, player)
+
+  if Result.isError(isValid) {
+    isValid
+  } else {
+    let inList = List.has(game.ready, player, (p1, p2) => p1.id == p2.id)
+
+    Ok({
+      ...game,
+      ready: !inList ? List.add(game.ready, player) : game.ready,
+    })
+  }
+}
 
 let startGame = (game: inLobby) => {
-  let (players, deck) = Deck.makeShuffled()->Player.dealDeckToPlayers(game.players)
+  let isAllPlayersAreReady = List.length(game.players) === List.length(game.ready)
 
-  let trump = getTrump(deck, players)
-  let attacker = trump->Option.flatMap(tr => Player.findFirstAttacker(tr, players))
-  let defender = attacker->Option.flatMap(at => Player.getNextPlayer(at, players))
+  if !isAllPlayersAreReady {
+    Error("Not all players are ready")
+  } else {
+    let (players, deck) = Deck.makeShuffled()->Player.dealDeckToPlayers(game.players)
 
-  switch (trump, attacker, defender) {
-  | (Some(trump), Some(a), Some(d)) =>
-    Ok({
-      gameId: game.gameId,
-      attacker: a,
-      defender: d,
-      table: list{},
-      trump: trump,
-      pass: list{},
-      players: players,
-      deck: deck,
-    })
-  | (None, _, _) => Error("Can't find trump")
-  | _ => Error("Can't find next attacker/defender")
+    let trump = getTrump(deck, players)
+    let attacker = trump->Option.flatMap(tr => Player.findFirstAttacker(tr, players))
+    let defender = attacker->Option.flatMap(at => Player.getNextPlayer(at, players))
+
+    switch (trump, attacker, defender) {
+    | (Some(trump), Some(a), Some(d)) =>
+      Ok({
+        gameId: game.gameId,
+        attacker: a,
+        defender: d,
+        table: list{},
+        trump: trump,
+        pass: list{},
+        players: players,
+        deck: deck,
+      })
+    | (None, _, _) => Error("Can't find trump")
+    | _ => Error("Can't find next attacker/defender")
+    }
   }
 }
 
