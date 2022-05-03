@@ -2,7 +2,6 @@
 
 import * as Game from "../fool/Game.mjs";
 import * as Utils from "../Utils.mjs";
-import * as Player from "../fool/Player.mjs";
 import * as $$Storage from "./Storage.mjs";
 import * as GameUtils from "../fool/GameUtils.mjs";
 import * as Belt_Result from "rescript/lib/es6/belt_Result.js";
@@ -58,74 +57,19 @@ function startGame(playerId, gameId) {
               }));
 }
 
-function initiateGame(param) {
-  var alicePlayer = $$Storage.PlayersMap.create(players, "alice");
-  var bobPlayer = $$Storage.PlayersMap.create(players, "bob");
-  var tmp;
-  if (alicePlayer.TAG === /* Ok */0) {
-    var alice = alicePlayer._0;
-    if (bobPlayer.TAG === /* Ok */0) {
-      var bob = bobPlayer._0;
-      tmp = Belt_Result.flatMap(Belt_Result.flatMap(Belt_Result.flatMap(Belt_Result.flatMap(Belt_Result.flatMap(Belt_Result.flatMap($$Storage.LobbyGameMap.create(gamesInLobby, alice), (function (game) {
-                                  return Game.enterGame(game, bob);
-                                })), (function (game) {
-                              return Game.toggleReady(game, alice);
-                            })), (function (game) {
-                          return Game.toggleReady(game, bob);
-                        })), (function (game) {
-                      return $$Storage.LobbyGameMap.set(gamesInLobby, game.gameId, game);
-                    })), (function (game) {
-                  return $$Storage.ProgressGameMap.create(gamesInProgress, game);
-                })), (function (game) {
-              $$Storage.LobbyGameMap.remove(gamesInLobby, game.gameId);
-              return {
-                      TAG: /* Ok */0,
-                      _0: game
-                    };
-            }));
-    } else {
-      tmp = {
-        TAG: /* Error */1,
-        _0: "Can't create alice or bob"
-      };
-    }
-  } else {
-    tmp = {
-      TAG: /* Error */1,
-      _0: "Can't create alice or bob"
-    };
-  }
-  console.log(tmp, "game created");
-  
-}
-
-function dispatch(playerId, gameId, action) {
-  var game = $$Storage.ProgressGameMap.get(gamesInProgress, gameId);
-  var player = Belt_Result.flatMap(game, (function (game) {
-          return Utils.toResult(GameUtils.findPlayerById(game, playerId), "Player " + playerId + " not found");
-        }));
-  console.log("[predispatch]", Belt_Result.map(game, Game.toObject), Belt_Result.map(player, Player.toObject), Game.actionToObject(action));
-  var nextGame = Belt_Result.flatMap(player, (function (player) {
-          return Belt_Result.flatMap(game, (function (game) {
-                        return Game.dispatch(game, player, action);
-                      }));
-        }));
-  var result;
-  if (nextGame.TAG === /* Ok */0) {
-    var game$1 = nextGame._0;
-    result = $$Storage.ProgressGameMap.set(gamesInProgress, game$1.gameId, game$1);
-  } else {
-    result = {
-      TAG: /* Error */1,
-      _0: nextGame._0
-    };
-  }
-  if (result.TAG === /* Ok */0) {
-    console.log("[dispatch] ok ", Game.toObject(result._0));
-  } else {
-    console.log("[dispatch] error ", result._0);
-  }
-  return result;
+function dispatchMove(playerId, gameId, action) {
+  return Belt_Result.flatMap(Belt_Result.flatMap(Belt_Result.flatMap($$Storage.ProgressGameMap.get(gamesInProgress, gameId), (function (game) {
+                        return Belt_Result.map(Utils.toResult(GameUtils.findPlayerById(game, playerId), "Player " + playerId + " not found"), (function (player) {
+                                      return [
+                                              player,
+                                              game
+                                            ];
+                                    }));
+                      })), (function (param) {
+                    return Game.dispatch(param[1], param[0], action);
+                  })), (function (game) {
+                return $$Storage.ProgressGameMap.set(gamesInProgress, game.gameId, game);
+              }));
 }
 
 export {
@@ -137,8 +81,7 @@ export {
   enterGame ,
   toggleReady ,
   startGame ,
-  initiateGame ,
-  dispatch ,
+  dispatchMove ,
   
 }
 /* gamesInLobby Not a pure module */

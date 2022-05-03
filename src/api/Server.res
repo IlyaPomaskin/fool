@@ -91,7 +91,7 @@ wsServer
       ->Result.map(progress => broadcastToPlayers(progress.players, ProgressCreated(progress)))
     | Ok(Progress(move, playerId, gameId)) =>
       playerId
-      ->GameInstance.dispatch(gameId, move)
+      ->GameInstance.dispatchMove(gameId, move)
       ->Result.map(progress => broadcastToPlayers(progress.players, ProgressUpdated(progress)))
     | _ => Error("error?")
     }->{

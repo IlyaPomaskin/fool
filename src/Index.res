@@ -2,49 +2,51 @@ open Types
 open Utils
 open Webapi
 
+let logServerMessage = (msg, playerId) =>
+  Log.log([
+    "got msg",
+    switch msg {
+    | Connected(player) =>
+      "Connected: " ++ playerId ++ " " ++ player.sessionId->Option.getWithDefault("no sesid")
+    | LobbyCreated(g) => "LobbyCreated: " ++ playerId ++ " " ++ g.gameId
+    | LobbyUpdated(g) => "LobbyUpdated: " ++ playerId ++ " " ++ g.gameId
+    | ProgressCreated(g) => "ProgressCreated: " ++ playerId ++ " " ++ g.gameId
+    | ProgressUpdated(g) => "ProgressUpdated: " ++ playerId ++ " " ++ g.gameId
+    | Err(msg) => "Error: " ++ playerId ++ " " ++ msg
+    },
+  ])
+
 module Client = {
   @react.component
   let make = (~playerId) => {
-    let ws = React.useMemo0(_ => WebSocket.make("ws://localhost:3001/ws"))
-
     let (player, setPlayer) = React.useState(_ => None)
     let (inLobby, setInLobby) = React.useState(_ => None)
     let (inProgress, setInProgress) = React.useState(_ => None)
     let (error, setError) = React.useState(_ => None)
 
+    let ws = React.useMemo0(_ => WebSocket.make("ws://localhost:3001/ws"))
     React.useEffect0(() => {
-      Js.log("CREATE SOCKET")
-
       ws->WebSocket.addOpenListener(_ => {
-        Js.log2("open", playerId)
+        Log.info(["open", playerId])
         ws->WebSocket.sendText(Serializer.serializeClientMessage(Player(Connect, playerId)))
       })
 
       ws->WebSocket.addMessageListener(event => {
-        let msg = switch WebSocket.messageAsText(event) {
-        | Some(msg) => Serializer.deserializeServerMessage(msg)
-        | None => Error(#SyntaxError("Message can't be parsed as json"))
-        }
+        event
+        ->WebSocket.messageAsText
+        ->toResult(#SyntaxError("Message from server cannot be parsed as text"))
+        ->Result.flatMap(Serializer.deserializeServerMessage)
+        ->Result.map(message => {
+          logServerMessage(message, playerId)
+          message
+        })
+        ->Result.map(message => {
+          switch message {
+          | Err(msg) => setError(_ => Some(msg))
+          | _ => setError(_ => None)
+          }
 
-        Js.log2("unbox", @unboxed @unboxed msg)
-
-        Js.log2(
-          "msg:",
-          switch msg {
-          | Ok(Connected(player)) =>
-            "Connected: " ++ playerId ++ " " ++ player.sessionId->Option.getWithDefault("no sesid")
-          | Ok(LobbyCreated(g)) => "LobbyCreated: " ++ playerId ++ " " ++ g.gameId
-          | Ok(LobbyUpdated(g)) => "LobbyUpdated: " ++ playerId ++ " " ++ g.gameId
-          | Ok(ProgressCreated(g)) => "ProgressCreated: " ++ playerId ++ " " ++ g.gameId
-          | Ok(ProgressUpdated(g)) => "ProgressUpdated: " ++ playerId ++ " " ++ g.gameId
-          | Ok(Err(msg)) => "Error: " ++ playerId ++ " " ++ msg
-          | _ => "unk"
-          },
-        )
-
-        switch msg {
-        | Ok(gMsg) =>
-          switch gMsg {
+          switch message {
           | Connected(player) => setPlayer(_ => Some(player))
           | LobbyCreated(inLobby)
           | LobbyUpdated(inLobby) =>
@@ -52,44 +54,36 @@ module Client = {
           | ProgressCreated(inProgress)
           | ProgressUpdated(inProgress) =>
             setInProgress(_ => Some(inProgress))
-          | Err(msg) => {
-              Js.log2("msg event", msg)
-              setError(_ => Some(msg))
-            }
+          | _ => ()
           }
-        | Error(err) => Js.log("received msg error: " ++ Jzon.DecodingError.toString(err))
-        }
+        })
+        ->ignore
       })
 
       ws->WebSocket.addCloseListener(_ => {
-        Js.log2("close", playerId)
+        Log.info(["disconnect", playerId])
         ws->WebSocket.sendText(Serializer.serializeClientMessage(Player(Disconnect, playerId)))
       })
 
-      ws->WebSocket.addErrorListener(event => {
-        Js.log3("error", playerId, event)
+      ws->WebSocket.addErrorListener(_ => {
+        Log.error(["socket error for player", playerId])
       })
 
-      Some(
-        () => {
-          WebSocket.close(ws)
-        },
-      )
+      Some(() => WebSocket.close(ws))
     })
 
-    let handleMove = move => {
-      // let nextGame = player->Utils.toResult("No player") // ->Result.map(player => Game.dispatch(game, player, move))
+    let handleMove = (game, move) => {
+      let nextGame =
+        player
+        ->Utils.toResult("No player")
+        ->Result.flatMap(player => Game.dispatch(game, player, move))
 
-      switch inProgress {
-      | Some(game) => {
-          WebSocket.sendText(
-            ws,
-            Serializer.serializeClientMessage(Progress(move, playerId, game.gameId)),
-          )
-          setError(_ => None)
-        }
-      | None => ()
-      // | Error(err) => setError(_ => Some(err))
+      switch nextGame {
+      | Ok(game) =>
+        ws->WebSocket.sendText(
+          Serializer.serializeClientMessage(Progress(move, playerId, game.gameId)),
+        )
+      | Error(error) => setError(_ => Some(error))
       }
     }
 
@@ -167,7 +161,7 @@ module Client = {
                 className="m-1 flex-initial w-96"
                 player
                 game
-                onMove={handleMove}
+                onMove={handleMove(game)}
               />
             )}
           </div>
