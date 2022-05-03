@@ -12,20 +12,20 @@ let logMessageFromClient = msg => {
     "[client]",
     switch msg {
     | Player(event, pId) =>
-      `player [$pid] ` ++
+      `player [${pId}] ` ++
       switch event {
-      | Connect => "Connect " ++ pId
-      | Disconnect => "Disconnect " ++ pId
-      | Ping => "Ping " ++ pId
-      | Pong => "Pong " ++ pId
+      | Connect => "Connect"
+      | Disconnect => "Disconnect"
+      | Ping => "Ping"
+      | Pong => "Pong"
       }
     | Lobby(game, pId, gId) =>
       `lobby [${gId}][${pId}] ` ++
       switch game {
-      | Create => "Create " ++ pId ++ " " ++ gId
-      | Enter => "Enter " ++ pId ++ " " ++ gId
-      | Ready => "Ready " ++ pId ++ " " ++ gId
-      | Start => "Start " ++ pId ++ " " ++ gId
+      | Create => "Create"
+      | Enter => "Enter"
+      | Ready => "Ready"
+      | Start => "Start"
       }
     | Progress(game, pId, gId) =>
       `progress [${gId}][${pId}] ` ++
@@ -40,15 +40,14 @@ let logMessageFromClient = msg => {
 }
 
 let logMessageFromServer = (msg, playerId) =>
-  Log.log([
-    "[server]",
+  info([
+    `[server] [${playerId}]`,
     switch msg {
-    | Connected(player) =>
-      "Connected: " ++ playerId ++ " " ++ player.sessionId->Option.getWithDefault("no sesid")
-    | LobbyCreated(g) => "LobbyCreated: " ++ playerId ++ " " ++ g.gameId
-    | LobbyUpdated(g) => "LobbyUpdated: " ++ playerId ++ " " ++ g.gameId
-    | ProgressCreated(g) => "ProgressCreated: " ++ playerId ++ " " ++ g.gameId
-    | ProgressUpdated(g) => "ProgressUpdated: " ++ playerId ++ " " ++ g.gameId
-    | ServerError(msg) => "Error: " ++ playerId ++ " " ++ msg
+    | Connected(player) => `Connected ${player.id}`
+    | LobbyCreated(g) => `[${g.gameId}] LobbyCreated`
+    | LobbyUpdated(g) => `[${g.gameId}] LobbyUpdated`
+    | ProgressCreated(g) => `[${g.gameId}] ProgressCreated`
+    | ProgressUpdated(g) => `[${g.gameId}] ProgressUpdated`
+    | ServerError(msg) => `ServerError: ${msg}`
     },
   ])
