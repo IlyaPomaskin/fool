@@ -4,7 +4,9 @@ open Utils
 module Client = {
   @react.component
   let make = (~playerId) => {
-    let {player, inLobby, inProgress, error, handleMove, sendMessage} = UseWs.hook(playerId)
+    let {player, inLobby, inProgress, error, sendMessage} = UseWs.hook(playerId)
+
+    Js.logMany([{"player": player, "inLobby": inLobby, "inProgress": inProgress}])
 
     <div>
       <div>
@@ -19,7 +21,7 @@ module Client = {
         | None => <div> {uiStr("no server error")} </div>
         }}
       </div>
-      <LobbyUI playerId game={inLobby} onLobbyMessage={message => sendMessage(message)} />
+      <LobbyUI playerId game={inLobby} onLobbyMessage={sendMessage} />
       {switch inProgress {
       | Some(game) =>
         <div>
@@ -32,7 +34,7 @@ module Client = {
                 className="m-1 flex-initial w-96"
                 player
                 game
-                onMove={handleMove(game)}
+                onMove={move => sendMessage(Progress(move, playerId, game.gameId))}
               />
             )}
           </div>
@@ -47,12 +49,37 @@ module Client = {
 }
 
 let default = () => {
+  let (first, setFirst) = React.useState(_ => "")
+  let (firstPlayerId, setFirstPlayerId) = React.useState(_ => None)
+  let (second, setSecond) = React.useState(_ => "")
+  let (secondPlayerId, setSecondPlayerId) = React.useState(_ => None)
+
   <div>
     <div className="my-2 w-1/2 inline-block border rounded-md border-solid border-slate-500">
-      <Client playerId="alice" />
+      {switch firstPlayerId {
+      | Some(playerId) => <Client playerId />
+      | None =>
+        <div>
+          <input value={first} onChange={e => setFirst(_ => ReactEvent.Form.target(e)["value"])} />
+          <Base.Button onClick={_ => setFirstPlayerId(_ => Some(first))}>
+            {uiStr("connect")}
+          </Base.Button>
+        </div>
+      }}
     </div>
     <div className="my-2 w-1/2 inline-block border rounded-md border-solid border-slate-500">
-      <Client playerId="bob" />
+      {switch secondPlayerId {
+      | Some(playerId) => <Client playerId />
+      | None =>
+        <div>
+          <input
+            value={second} onChange={e => setSecond(_ => ReactEvent.Form.target(e)["value"])}
+          />
+          <Base.Button onClick={_ => setSecondPlayerId(_ => Some(second))}>
+            {uiStr("connect")}
+          </Base.Button>
+        </div>
+      }}
     </div>
   </div>
 }

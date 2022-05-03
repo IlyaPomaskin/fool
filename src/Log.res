@@ -39,15 +39,15 @@ let logMessageFromClient = msg => {
   ])
 }
 
+let serverMsgToString = msg =>
+  switch msg {
+  | Connected(player) => `Connected ${player.id}`
+  | LobbyCreated(g) => `[${g.gameId}] LobbyCreated`
+  | LobbyUpdated(g) => `[${g.gameId}] LobbyUpdated`
+  | ProgressCreated(g) => `[${g.gameId}] ProgressCreated`
+  | ProgressUpdated(g) => `[${g.gameId}] ProgressUpdated`
+  | ServerError(msg) => `ServerError: ${msg}`
+  }
+
 let logMessageFromServer = (msg, playerId) =>
-  info([
-    `[server] [${playerId}]`,
-    switch msg {
-    | Connected(player) => `Connected ${player.id}`
-    | LobbyCreated(g) => `[${g.gameId}] LobbyCreated`
-    | LobbyUpdated(g) => `[${g.gameId}] LobbyUpdated`
-    | ProgressCreated(g) => `[${g.gameId}] ProgressCreated`
-    | ProgressUpdated(g) => `[${g.gameId}] ProgressUpdated`
-    | ServerError(msg) => `ServerError: ${msg}`
-    },
-  ])
+  info([`[server] [${playerId}]`, serverMsgToString(msg)])

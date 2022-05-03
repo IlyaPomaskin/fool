@@ -2,7 +2,7 @@ open Types
 open GameUtils
 
 let makeGameInLobby = player => Ok({
-  gameId: "session:" ++ string_of_int(Js.Math.random_int(0, 10000000)),
+  gameId: "gameId:" ++ string_of_int(Js.Math.random_int(0, 10000000)),
   players: list{player},
   ready: list{},
 })

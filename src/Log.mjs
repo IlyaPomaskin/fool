@@ -89,32 +89,28 @@ function logMessageFromClient(msg) {
             ]);
 }
 
-function logMessageFromServer(msg, playerId) {
-  var tmp;
+function serverMsgToString(msg) {
   switch (msg.TAG | 0) {
     case /* Connected */0 :
-        tmp = "Connected " + msg._0.id;
-        break;
+        return "Connected " + msg._0.id;
     case /* LobbyCreated */1 :
-        tmp = "[" + msg._0.gameId + "] LobbyCreated";
-        break;
+        return "[" + msg._0.gameId + "] LobbyCreated";
     case /* LobbyUpdated */2 :
-        tmp = "[" + msg._0.gameId + "] LobbyUpdated";
-        break;
+        return "[" + msg._0.gameId + "] LobbyUpdated";
     case /* ProgressCreated */3 :
-        tmp = "[" + msg._0.gameId + "] ProgressCreated";
-        break;
+        return "[" + msg._0.gameId + "] ProgressCreated";
     case /* ProgressUpdated */4 :
-        tmp = "[" + msg._0.gameId + "] ProgressUpdated";
-        break;
+        return "[" + msg._0.gameId + "] ProgressUpdated";
     case /* ServerError */5 :
-        tmp = "ServerError: " + msg._0;
-        break;
+        return "ServerError: " + msg._0;
     
   }
+}
+
+function logMessageFromServer(msg, playerId) {
   return info([
               "[server] [" + playerId + "]",
-              tmp
+              serverMsgToString(msg)
             ]);
 }
 
@@ -124,6 +120,7 @@ export {
   log ,
   info ,
   logMessageFromClient ,
+  serverMsgToString ,
   logMessageFromServer ,
   
 }

@@ -6,7 +6,6 @@ type hookReturn = {
   inLobby: option<inLobby>,
   inProgress: option<inProgress>,
   error: option<string>,
-  handleMove: (inProgress, move) => unit,
   sendMessage: gameMessageFromClient => unit,
 }
 
@@ -16,7 +15,7 @@ let hook = (playerId): hookReturn => {
   let (inProgress, setInProgress) = React.useState(_ => None)
   let (error, setError) = React.useState(_ => None)
 
-  let ws = React.useMemo0(_ => WebSocket.make("ws://localhost:3001/ws"))
+  let ws = React.useMemo0(_ => WebSocket.make(`ws://${playerId}@localhost:3001/ws`))
 
   let sendMessage = React.useCallback1((message: gameMessageFromClient) => {
     ws->WebSocket.sendText(Serializer.serializeClientMessage(message))
@@ -60,24 +59,11 @@ let hook = (playerId): hookReturn => {
     Some(() => WebSocket.close(ws))
   })
 
-  let handleMove = React.useCallback2((game, move) => {
-    let nextGame =
-      player
-      ->Utils.toResult("No player")
-      ->Result.flatMap(player => Game.dispatch(game, player, move))
-
-    switch nextGame {
-    | Ok(game) => sendMessage(Progress(move, playerId, game.gameId))
-    | Error(error) => setError(_ => Some(error))
-    }
-  }, (player, ws))
-
   {
     player: player,
     inLobby: inLobby,
     inProgress: inProgress,
     error: error,
-    handleMove: handleMove,
     sendMessage: sendMessage,
   }
 }

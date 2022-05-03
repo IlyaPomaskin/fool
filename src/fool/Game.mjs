@@ -15,7 +15,7 @@ function makeGameInLobby(player) {
   return {
           TAG: /* Ok */0,
           _0: {
-            gameId: "session:" + String(Js_math.random_int(0, 10000000)),
+            gameId: "gameId:" + String(Js_math.random_int(0, 10000000)),
             players: {
               hd: player,
               tl: /* [] */0

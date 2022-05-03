@@ -47,12 +47,7 @@ module LobbyGameMap = MakeGameMap({
   type t = inLobby
   type createGameArg = player
 
-  // let createGame = player => Game.makeGameInLobby(player)
-  let createGame = player => Ok({
-    gameId: "gameId",
-    players: list{player},
-    ready: list{},
-  })
+  let createGame = player => Game.makeGameInLobby(player)
   let getId = (game: t) => game.gameId
 })
 
@@ -103,5 +98,7 @@ module PlayersSocketMap = {
   let get = (map, playerId) =>
     map->MutableMap.get(playerId)->Utils.toResult(`Player "${playerId}" socket not found`)
 
-  let set = (map, game) => map->MutableMap.set(game)
+  let set = (map, playerId, socket) => map->MutableMap.set(playerId, socket)
+
+  let remove = (map, playerId) => map->MutableMap.remove(playerId)
 }

@@ -61,20 +61,6 @@ function MakeGameMap(Item) {
         };
 }
 
-function createGame(player) {
-  return {
-          TAG: /* Ok */0,
-          _0: {
-            gameId: "gameId",
-            players: {
-              hd: player,
-              tl: /* [] */0
-            },
-            ready: /* [] */0
-          }
-        };
-}
-
 function getId(game) {
   return game.gameId;
 }
@@ -102,7 +88,7 @@ function set(map, gameId, game) {
 }
 
 function create(map, arg) {
-  var game = createGame(arg);
+  var game = Game.makeGameInLobby(arg);
   var gameWithSameIdFound = Belt_Result.flatMap(Belt_Result.map(game, getId), (function (id) {
           return get(map, id);
         }));
@@ -257,17 +243,16 @@ function get$3(map, playerId) {
   return Utils.toResult(Belt_MutableMap.get(map, playerId), "Player \"" + playerId + "\" socket not found");
 }
 
-function set$3(map, game) {
-  return function (param) {
-    return Belt_MutableMap.set(map, game, param);
-  };
-}
+var set$3 = Belt_MutableMap.set;
+
+var remove$2 = Belt_MutableMap.remove;
 
 var PlayersSocketMap = {
   PlayerId: PlayerId$1,
   empty: empty$3,
   get: get$3,
-  set: set$3
+  set: set$3,
+  remove: remove$2
 };
 
 export {
