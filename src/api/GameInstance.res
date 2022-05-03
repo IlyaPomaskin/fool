@@ -5,6 +5,43 @@ let gamesInLobby = LobbyGameMap.empty()
 let gamesInProgress = ProgressGameMap.empty()
 let players = PlayersMap.empty()
 
+let createPlayer = playerId => players->PlayersMap.create(playerId)
+
+let createLobby = playerId => {
+  players
+  ->PlayersMap.get(playerId)
+  ->Result.flatMap(player => gamesInLobby->LobbyGameMap.create(player))
+}
+
+let enterGame = (playerId, gameId) => {
+  players
+  ->PlayersMap.get(playerId)
+  ->Result.flatMap(player => {
+    gamesInLobby->LobbyGameMap.get(gameId)->Result.flatMap(lobby => Game.enterGame(lobby, player))
+  })
+  ->Result.flatMap(game => gamesInLobby->LobbyGameMap.set(game.gameId, game))
+}
+
+let toggleReady = (playerId, gameId) => {
+  players
+  ->PlayersMap.get(playerId)
+  ->Result.flatMap(player =>
+    gamesInLobby->LobbyGameMap.update(gameId, game =>
+      Game.toggleReady(game, player)->Result.getWithDefault(game)
+    )
+  )
+}
+
+let startGame = (playerId, gameId) => {
+  players
+  ->PlayersMap.get(playerId)
+  ->Result.flatMap(_ => gamesInLobby->LobbyGameMap.get(gameId))
+  ->Result.flatMap(game => {
+    gamesInLobby->LobbyGameMap.remove(gameId)
+    gamesInProgress->ProgressGameMap.create(game)
+  })
+}
+
 let initiateGame = () =>
   {
     let alicePlayer = players->PlayersMap.create("alice")
@@ -17,10 +54,7 @@ let initiateGame = () =>
       ->Result.flatMap(game => Game.enterGame(game, bob))
       ->Result.flatMap(game => Game.toggleReady(game, alice))
       ->Result.flatMap(game => Game.toggleReady(game, bob))
-      ->Result.flatMap(game => {
-        LobbyGameMap.set(gamesInLobby, game.gameId, game)
-        Ok(game)
-      })
+      ->Result.flatMap(game => LobbyGameMap.set(gamesInLobby, game.gameId, game))
       ->Result.flatMap(game => ProgressGameMap.create(gamesInProgress, game))
       ->Result.flatMap(game => {
         LobbyGameMap.remove(gamesInLobby, game.gameId)
@@ -30,22 +64,7 @@ let initiateGame = () =>
     }
   }->Js.log2("game created")
 
-let startGame = (gameId: gameId): unit => {
-  let nextGame = gamesInLobby->LobbyGameMap.get(gameId)->Result.flatMap(Game.startGame)
-
-  switch nextGame {
-  | Ok(game) => {
-      ProgressGameMap.set(gamesInProgress, gameId, game)
-
-      game.players->List.forEach(player =>
-        Socket.SServer.send(player, Game.maskForPlayer(player, game)->Game.toObject)
-      )
-    }
-  | Error(err) => Socket.SServer.broadcast(gameId, {"error": err})
-  }
-}
-
-let dispatch = (gameId, playerId, action: move) => {
+let dispatch = (playerId, gameId, action): result<inProgress, string> => {
   let game = gamesInProgress->ProgressGameMap.get(gameId)
   let player =
     game->Result.flatMap(game =>
@@ -64,10 +83,10 @@ let dispatch = (gameId, playerId, action: move) => {
     )
 
   let result = switch (nextGame, player) {
-  | (Ok(game), Ok(player)) => {
-      ProgressGameMap.set(gamesInProgress, game.gameId, game)
-      Ok(Game.maskForPlayer(player, game))
-    }
+  | (Ok(game), Ok(player)) =>
+    gamesInProgress
+    ->ProgressGameMap.set(game.gameId, game)
+    ->Result.map(game => Game.maskForPlayer(game, player))
   | (Error(err), _) => Error(err)
   | (_, Error(err)) => Error(err)
   }
@@ -76,4 +95,6 @@ let dispatch = (gameId, playerId, action: move) => {
   | Ok(game) => Js.log2("[dispatch] ok ", Game.toObject(game))
   | Error(err) => Js.log2("[dispatch] error ", err)
   }
+
+  result
 }

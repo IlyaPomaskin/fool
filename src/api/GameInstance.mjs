@@ -3,9 +3,7 @@
 import * as Game from "../fool/Game.mjs";
 import * as Utils from "../Utils.mjs";
 import * as Player from "../fool/Player.mjs";
-import * as Socket from "../Socket.mjs";
 import * as $$Storage from "./Storage.mjs";
-import * as Belt_List from "rescript/lib/es6/belt_List.js";
 import * as GameUtils from "../fool/GameUtils.mjs";
 import * as Belt_Result from "rescript/lib/es6/belt_Result.js";
 
@@ -14,6 +12,43 @@ var gamesInLobby = $$Storage.LobbyGameMap.empty(undefined);
 var gamesInProgress = $$Storage.ProgressGameMap.empty(undefined);
 
 var players = $$Storage.PlayersMap.empty(undefined);
+
+function createPlayer(playerId) {
+  return $$Storage.PlayersMap.create(players, playerId);
+}
+
+function createLobby(playerId) {
+  return Belt_Result.flatMap($$Storage.PlayersMap.get(players, playerId), (function (player) {
+                return $$Storage.LobbyGameMap.create(gamesInLobby, player);
+              }));
+}
+
+function enterGame(playerId, gameId) {
+  return Belt_Result.flatMap(Belt_Result.flatMap($$Storage.PlayersMap.get(players, playerId), (function (player) {
+                    return Belt_Result.flatMap($$Storage.LobbyGameMap.get(gamesInLobby, gameId), (function (lobby) {
+                                  return Game.enterGame(lobby, player);
+                                }));
+                  })), (function (game) {
+                return $$Storage.LobbyGameMap.set(gamesInLobby, game.gameId, game);
+              }));
+}
+
+function toggleReady(playerId, gameId) {
+  return Belt_Result.flatMap($$Storage.PlayersMap.get(players, playerId), (function (player) {
+                return $$Storage.LobbyGameMap.update(gamesInLobby, gameId, (function (game) {
+                              return Belt_Result.getWithDefault(Game.toggleReady(game, player), game);
+                            }));
+              }));
+}
+
+function startGame(playerId, gameId) {
+  return Belt_Result.flatMap(Belt_Result.flatMap($$Storage.PlayersMap.get(players, playerId), (function (param) {
+                    return $$Storage.LobbyGameMap.get(gamesInLobby, gameId);
+                  })), (function (game) {
+                $$Storage.LobbyGameMap.remove(gamesInLobby, gameId);
+                return $$Storage.ProgressGameMap.create(gamesInProgress, game);
+              }));
+}
 
 function initiateGame(param) {
   var alicePlayer = $$Storage.PlayersMap.create(players, "alice");
@@ -30,11 +65,7 @@ function initiateGame(param) {
                             })), (function (game) {
                           return Game.toggleReady(game, bob);
                         })), (function (game) {
-                      $$Storage.LobbyGameMap.set(gamesInLobby, game.gameId, game);
-                      return {
-                              TAG: /* Ok */0,
-                              _0: game
-                            };
+                      return $$Storage.LobbyGameMap.set(gamesInLobby, game.gameId, game);
                     })), (function (game) {
                   return $$Storage.ProgressGameMap.create(gamesInProgress, game);
                 })), (function (game) {
@@ -60,21 +91,7 @@ function initiateGame(param) {
   
 }
 
-function startGame(gameId) {
-  var nextGame = Belt_Result.flatMap($$Storage.LobbyGameMap.get(gamesInLobby, gameId), Game.startGame);
-  if (nextGame.TAG !== /* Ok */0) {
-    return Socket.SServer.broadcast(gameId, {
-                error: nextGame._0
-              });
-  }
-  var game = nextGame._0;
-  $$Storage.ProgressGameMap.set(gamesInProgress, gameId, game);
-  return Belt_List.forEach(game.players, (function (player) {
-                return Socket.SServer.send(player, Game.toObject(Game.maskForPlayer(player, game)));
-              }));
-}
-
-function dispatch(gameId, playerId, action) {
+function dispatch(playerId, gameId, action) {
   var game = $$Storage.ProgressGameMap.get(gamesInProgress, gameId);
   var player = Belt_Result.flatMap(game, (function (game) {
           return Utils.toResult(GameUtils.findPlayerById(game, playerId), "Player " + playerId + " not found");
@@ -89,11 +106,10 @@ function dispatch(gameId, playerId, action) {
   if (nextGame.TAG === /* Ok */0) {
     var game$1 = nextGame._0;
     if (player.TAG === /* Ok */0) {
-      $$Storage.ProgressGameMap.set(gamesInProgress, game$1.gameId, game$1);
-      result = {
-        TAG: /* Ok */0,
-        _0: Game.maskForPlayer(player._0, game$1)
-      };
+      var player$1 = player._0;
+      result = Belt_Result.map($$Storage.ProgressGameMap.set(gamesInProgress, game$1.gameId, game$1), (function (game) {
+              return Game.maskForPlayer(game, player$1);
+            }));
     } else {
       result = {
         TAG: /* Error */1,
@@ -108,18 +124,22 @@ function dispatch(gameId, playerId, action) {
   }
   if (result.TAG === /* Ok */0) {
     console.log("[dispatch] ok ", Game.toObject(result._0));
-    return ;
+  } else {
+    console.log("[dispatch] error ", result._0);
   }
-  console.log("[dispatch] error ", result._0);
-  
+  return result;
 }
 
 export {
   gamesInLobby ,
   gamesInProgress ,
   players ,
-  initiateGame ,
+  createPlayer ,
+  createLobby ,
+  enterGame ,
+  toggleReady ,
   startGame ,
+  initiateGame ,
   dispatch ,
   
 }

@@ -20,7 +20,13 @@ function MakeGameMap(Item) {
   var get = function (map, gameId) {
     return Utils.toResult(Belt_MutableMap.get(map, gameId), "Game \"" + gameId + "\" not found");
   };
-  var set = Belt_MutableMap.set;
+  var set = function (map, gameId, game) {
+    Belt_MutableMap.set(map, gameId, game);
+    return {
+            TAG: /* Ok */0,
+            _0: game
+          };
+  };
   var create = function (map, arg) {
     var game = Curry._1(Item.createGame, arg);
     var gameWithSameIdFound = Belt_Result.flatMap(Belt_Result.map(game, Item.getId), (function (id) {
@@ -36,20 +42,36 @@ function MakeGameMap(Item) {
             };
     }
     var game$1 = game._0;
-    Belt_MutableMap.set(map, Curry._1(Item.getId, game$1), game$1);
-    return {
-            TAG: /* Ok */0,
-            _0: game$1
-          };
+    return set(map, Curry._1(Item.getId, game$1), game$1);
   };
   var remove = Belt_MutableMap.remove;
+  var update = function (map, gameId, fn) {
+    return Belt_Result.flatMap(get(map, gameId), (function (game) {
+                  return set(map, gameId, Curry._1(fn, game));
+                }));
+  };
   return {
           GameId: GameId,
           empty: empty,
           get: get,
           set: set,
           create: create,
-          remove: remove
+          remove: remove,
+          update: update
+        };
+}
+
+function createGame(player) {
+  return {
+          TAG: /* Ok */0,
+          _0: {
+            gameId: "gameId",
+            players: {
+              hd: player,
+              tl: /* [] */0
+            },
+            ready: /* [] */0
+          }
         };
 }
 
@@ -71,10 +93,16 @@ function get(map, gameId) {
   return Utils.toResult(Belt_MutableMap.get(map, gameId), "Game \"" + gameId + "\" not found");
 }
 
-var set = Belt_MutableMap.set;
+function set(map, gameId, game) {
+  Belt_MutableMap.set(map, gameId, game);
+  return {
+          TAG: /* Ok */0,
+          _0: game
+        };
+}
 
 function create(map, arg) {
-  var game = Game.makeGameInLobby(arg);
+  var game = createGame(arg);
   var gameWithSameIdFound = Belt_Result.flatMap(Belt_Result.map(game, getId), (function (id) {
           return get(map, id);
         }));
@@ -88,14 +116,16 @@ function create(map, arg) {
           };
   }
   var game$1 = game._0;
-  Belt_MutableMap.set(map, game$1.gameId, game$1);
-  return {
-          TAG: /* Ok */0,
-          _0: game$1
-        };
+  return set(map, game$1.gameId, game$1);
 }
 
 var remove = Belt_MutableMap.remove;
+
+function update(map, gameId, fn) {
+  return Belt_Result.flatMap(get(map, gameId), (function (game) {
+                return set(map, gameId, Curry._1(fn, game));
+              }));
+}
 
 var LobbyGameMap = {
   GameId: GameId,
@@ -103,7 +133,8 @@ var LobbyGameMap = {
   get: get,
   set: set,
   create: create,
-  remove: remove
+  remove: remove,
+  update: update
 };
 
 function getId$1(game) {
@@ -124,7 +155,13 @@ function get$1(map, gameId) {
   return Utils.toResult(Belt_MutableMap.get(map, gameId), "Game \"" + gameId + "\" not found");
 }
 
-var set$1 = Belt_MutableMap.set;
+function set$1(map, gameId, game) {
+  Belt_MutableMap.set(map, gameId, game);
+  return {
+          TAG: /* Ok */0,
+          _0: game
+        };
+}
 
 function create$1(map, arg) {
   var game = Game.startGame(arg);
@@ -141,14 +178,16 @@ function create$1(map, arg) {
           };
   }
   var game$1 = game._0;
-  Belt_MutableMap.set(map, game$1.gameId, game$1);
-  return {
-          TAG: /* Ok */0,
-          _0: game$1
-        };
+  return set$1(map, game$1.gameId, game$1);
 }
 
 var remove$1 = Belt_MutableMap.remove;
+
+function update$1(map, gameId, fn) {
+  return Belt_Result.flatMap(get$1(map, gameId), (function (game) {
+                return set$1(map, gameId, Curry._1(fn, game));
+              }));
+}
 
 var ProgressGameMap = {
   GameId: GameId$1,
@@ -156,7 +195,8 @@ var ProgressGameMap = {
   get: get$1,
   set: set$1,
   create: create$1,
-  remove: remove$1
+  remove: remove$1,
+  update: update$1
 };
 
 var cmp$2 = Caml.caml_string_compare;
@@ -186,12 +226,13 @@ function create$2(map, playerId) {
             TAG: /* Error */1,
             _0: "Player " + playerId + " already exists"
           };
-  } else {
-    return {
-            TAG: /* Ok */0,
-            _0: Player.make(playerId)
-          };
   }
+  var player = Player.make(playerId);
+  Belt_MutableMap.set(map, playerId, player);
+  return {
+          TAG: /* Ok */0,
+          _0: player
+        };
 }
 
 var PlayersMap = {

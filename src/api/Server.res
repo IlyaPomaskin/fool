@@ -17,8 +17,78 @@ wsServer
     Js.log("connection open")
     client->WsWebSocket.send("connected")
   })
-  ->WsWebSocket.on(WsWebSocket.ClientEvents.message, @this (_, msg, _) => {
-    Js.log2("msg:", WsWebSocket.RawData.toString(msg))
+  ->WsWebSocket.on(WsWebSocket.ClientEvents.message, @this (ws, msg, _) => {
+    let msg =
+      WsWebSocket.RawData.toString(msg)
+      ->Option.getWithDefault("")
+      ->Serializer.deserializeClientMessage
+
+    Js.log2(
+      "msg:",
+      switch msg {
+      | Ok(Player(p, pId)) =>
+        "player: " ++
+        switch p {
+        | Connect => "connect " ++ pId
+        | Disconnect => "disconnect " ++ pId
+        | Ping => "ping " ++ pId
+        | Pong => "pong " ++ pId
+        }
+      | Ok(Lobby(g, pId, gId)) =>
+        "game: " ++
+        switch g {
+        | Create => "Create " ++ pId ++ " " ++ gId
+        | Enter => "Enter " ++ pId ++ " " ++ gId
+        | Ready => "Ready " ++ pId ++ " " ++ gId
+        | Start => "Start " ++ pId ++ " " ++ gId
+        }
+      | _ => "unk"
+      },
+    )
+
+    switch msg {
+    | Ok(Player(Connect, playerId)) =>
+      playerId
+      ->GameInstance.createPlayer
+      ->Result.map(player => {
+        ws->WsWebSocket.send(Serializer.serializeServerMessage(Connected(player)))
+      })
+    | Ok(Lobby(Create, playerId, _)) =>
+      playerId
+      ->GameInstance.createLobby
+      ->Result.map(lobby =>
+        ws->WsWebSocket.send(Serializer.serializeServerMessage(LobbyUpdated(lobby)))
+      )
+    | Ok(Lobby(Enter, playerId, gameId)) =>
+      playerId
+      ->GameInstance.enterGame(gameId)
+      ->Result.map(lobby =>
+        ws->WsWebSocket.send(Serializer.serializeServerMessage(LobbyUpdated(lobby)))
+      )
+    | Ok(Lobby(Ready, playerId, gameId)) =>
+      playerId
+      ->GameInstance.toggleReady(gameId)
+      ->Result.map(lobby => {
+        ws->WsWebSocket.send(Serializer.serializeServerMessage(LobbyUpdated(lobby)))
+      })
+    | Ok(Lobby(Start, playerId, gameId)) =>
+      playerId
+      ->GameInstance.startGame(gameId)
+      ->Result.map(progress =>
+        ws->WsWebSocket.send(Serializer.serializeServerMessage(ProgressCreated(progress)))
+      )
+    | Ok(Progress(move, playerId, gameId)) =>
+      playerId
+      ->GameInstance.dispatch(gameId, move)
+      ->Result.map(progress =>
+        ws->WsWebSocket.send(Serializer.serializeServerMessage(ProgressUpdated(progress)))
+      )
+    | _ => Error("error?")
+    }->{
+      aa => {
+        ws->WsWebSocket.send(Serializer.serializeServerMessage(Err("some error")))
+      }
+    }
   })
   ->WsWebSocket.on(WsWebSocket.ClientEvents.close, @this (_, _, _) => {
     Js.log("connection close")
@@ -28,6 +98,5 @@ wsServer
 ->ignore
 
 let default = (_: Http.ClientRequest.t, res: Http.ServerResponse.t) => {
-  GameInstance.initiateGame()
   res->Http.ServerResponse.endWithData(Buffer.fromString("response"))
 }

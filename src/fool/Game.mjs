@@ -392,7 +392,7 @@ function maskGameDeck(deck) {
               }));
 }
 
-function maskForPlayer(player, game) {
+function maskForPlayer(game, player) {
   return {
           gameId: game.gameId,
           attacker: Player.mask(player, game.attacker),

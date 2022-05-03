@@ -91,16 +91,10 @@ type beatPayload = {
 
 type movePayload = {card: card}
 
-type clientProgressMessage =
-  | Pass
-  | Take
-  | Beat(beatPayload)
-  | Move(movePayload)
-
 type gameMessageFromClient =
   | Player(clientPlayerMessage, playerId)
   | Lobby(clientLobbyMessage, playerId, gameId)
-  | Progress(clientProgressMessage, playerId, gameId)
+  | Progress(move, playerId, gameId)
 
 type gameMessageFromServer =
   | Connected(player)
@@ -108,3 +102,4 @@ type gameMessageFromServer =
   | LobbyUpdated(inLobby)
   | ProgressCreated(inProgress)
   | ProgressUpdated(inProgress)
+  | Err(string)

@@ -21,7 +21,10 @@ module MakeGameMap = (Item: GameType) => {
   let get = (map, gameId): result<Item.t, string> =>
     map->MutableMap.get(gameId)->Utils.toResult(`Game "${gameId}" not found`)
 
-  let set = (map, gameId, game) => MutableMap.set(map, gameId, game)
+  let set = (map, gameId, game) => {
+    MutableMap.set(map, gameId, game)
+    Ok(game)
+  }
 
   let create = (map, arg) => {
     let game = Item.createGame(arg)
@@ -30,14 +33,14 @@ module MakeGameMap = (Item: GameType) => {
     switch (game, gameWithSameIdFound) {
     | (Error(_), _) => game
     | (_, Ok(game)) => Error(`Game ${Item.getId(game)} already exists`)
-    | (Ok(game), _) => {
-        set(map, Item.getId(game), game)
-        Ok(game)
-      }
+    | (Ok(game), _) => set(map, Item.getId(game), game)
     }
   }
 
   let remove = (map, gameId) => map->MutableMap.remove(gameId)
+
+  let update = (map, gameId, fn: Item.t => Item.t) =>
+    map->get(gameId)->Result.flatMap(game => set(map, gameId, fn(game)))
 }
 
 module LobbyGameMap = MakeGameMap({
@@ -45,6 +48,11 @@ module LobbyGameMap = MakeGameMap({
   type createGameArg = player
 
   let createGame = player => Game.makeGameInLobby(player)
+  let createGame = player => Ok({
+    gameId: "gameId",
+    players: list{player},
+    ready: list{},
+  })
   let getId = (game: t) => game.gameId
 })
 
@@ -74,6 +82,10 @@ module PlayersMap = {
   let create = (map, playerId): result<player, string> =>
     switch MutableMap.get(map, playerId) {
     | Some(_) => Error(`Player ${playerId} already exists`)
-    | None => Ok(Player.make(playerId))
+    | None => {
+        let player = Player.make(playerId)
+        MutableMap.set(map, playerId, player)
+        Ok(player)
+      }
     }
 }

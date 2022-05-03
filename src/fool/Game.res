@@ -218,7 +218,7 @@ let maskGameDeck = deck => {
   )
 }
 
-let maskForPlayer = (player, game) => {
+let maskForPlayer = (game, player) => {
   ...game,
   attacker: player->Player.mask(game.attacker),
   defender: player->Player.mask(game.defender),

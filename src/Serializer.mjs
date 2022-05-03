@@ -318,26 +318,31 @@ var movePayload = Jzon.object1((function (param) {
 
 var progressMsg = Jzon.object2((function (kind) {
         if (typeof kind === "number") {
-          if (kind === /* Pass */0) {
+          if (kind === /* Take */0) {
             return [
-                    "pass",
+                    "take",
                     undefined
                   ];
           } else {
             return [
-                    "take",
+                    "pass",
                     undefined
                   ];
           }
         } else if (kind.TAG === /* Beat */0) {
           return [
                   "beat",
-                  Caml_option.some(Jzon.encodeWith(kind._0, beatPayload))
+                  Caml_option.some(Jzon.encodeWith({
+                            to: kind._0,
+                            by: kind._1
+                          }, beatPayload))
                 ];
         } else {
           return [
                   "move",
-                  Caml_option.some(Jzon.encodeWith(kind._0, movePayload))
+                  Caml_option.some(Jzon.encodeWith({
+                            card: kind._0
+                          }, movePayload))
                 ];
         }
       }), (function (param) {
@@ -349,10 +354,8 @@ var progressMsg = Jzon.object2((function (kind) {
                 return Belt_Result.map(Jzon.decodeWith(Caml_option.valFromOption(payload), beatPayload), (function (param) {
                               return {
                                       TAG: /* Beat */0,
-                                      _0: {
-                                        to: param.to,
-                                        by: param.by
-                                      }
+                                      _0: param.to,
+                                      _1: param.by
                                     };
                             }));
               }
@@ -362,9 +365,7 @@ var progressMsg = Jzon.object2((function (kind) {
                 return Belt_Result.map(Jzon.decodeWith(Caml_option.valFromOption(payload), movePayload), (function (param) {
                               return {
                                       TAG: /* Move */1,
-                                      _0: {
-                                        card: param.card
-                                      }
+                                      _0: param.card
                                     };
                             }));
               }
@@ -372,12 +373,12 @@ var progressMsg = Jzon.object2((function (kind) {
           case "pass" :
               return {
                       TAG: /* Ok */0,
-                      _0: /* Pass */0
+                      _0: /* Pass */1
                     };
           case "take" :
               return {
                       TAG: /* Ok */0,
-                      _0: /* Take */1
+                      _0: /* Take */0
                     };
           default:
             
@@ -584,6 +585,11 @@ var serverGameMsg = Jzon.object2((function (kind) {
                       "progressUpdated",
                       Jzon.encodeWith(kind._0, inProgressMsg)
                     ];
+          case /* Err */5 :
+              return [
+                      "error",
+                      Jzon.encodeWith(kind._0, Jzon.string)
+                    ];
           
         }
       }), (function (param) {
@@ -595,6 +601,13 @@ var serverGameMsg = Jzon.object2((function (kind) {
                             return {
                                     TAG: /* Connected */0,
                                     _0: player
+                                  };
+                          }));
+          case "error" :
+              return Belt_Result.map(Jzon.decodeWith(payload, Jzon.string), (function (msg) {
+                            return {
+                                    TAG: /* Err */5,
+                                    _0: msg
                                   };
                           }));
           case "lobbyCreated" :
