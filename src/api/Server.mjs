@@ -16,154 +16,132 @@ import * as WsWebSocketServer from "../bindings/WsWebSocketServer.mjs";
 var playersSocket = $$Storage.PlayersSocketMap.empty(undefined);
 
 var wsServer = new Ws.WebSocketServer({
-  backlog: 101,
-  clientTracking: true,
-  maxPayload: 104857600,
-  noServer: false,
-  path: "/ws",
-  server: restartServer(),
-  skipUTF8Validation: true,
-});
+      backlog: 101,
+      clientTracking: true,
+      maxPayload: 104857600,
+      noServer: false,
+      path: "/ws",
+      server: restartServer(),
+      skipUTF8Validation: true
+    });
 
 function sendToPlayer(playerId, $$event) {
-  Belt_Result.map(
-    $$Storage.PlayersSocketMap.get(playersSocket, playerId),
-    function (socket) {
-      var tmp;
-      switch ($$event.TAG | 0) {
-        case /* ProgressCreated */ 3:
-          tmp = {
-            TAG: /* ProgressCreated */ 3,
-            _0: Game.maskForPlayer($$event._0, playerId),
-          };
-          break;
-        case /* ProgressUpdated */ 4:
-          tmp = {
-            TAG: /* ProgressUpdated */ 4,
-            _0: Game.maskForPlayer($$event._0, playerId),
-          };
-          break;
-        default:
-          tmp = $$event;
-      }
-      socket.send(Serializer.serializeServerMessage(tmp));
-    }
-  );
+  Belt_Result.map($$Storage.PlayersSocketMap.get(playersSocket, playerId), (function (socket) {
+          var tmp;
+          switch ($$event.TAG | 0) {
+            case /* ProgressCreated */3 :
+                tmp = {
+                  TAG: /* ProgressCreated */3,
+                  _0: Game.maskForPlayer($$event._0, playerId)
+                };
+                break;
+            case /* ProgressUpdated */4 :
+                tmp = {
+                  TAG: /* ProgressUpdated */4,
+                  _0: Game.maskForPlayer($$event._0, playerId)
+                };
+                break;
+            default:
+              tmp = $$event;
+          }
+          socket.send(Serializer.serializeServerMessage(tmp));
+          
+        }));
+  
 }
 
 function broadcastToPlayers(players, $$event) {
-  return Belt_List.forEach(players, function (player) {
-    return sendToPlayer(player.id, $$event);
-  });
+  return Belt_List.forEach(players, (function (player) {
+                return sendToPlayer(player.id, $$event);
+              }));
 }
 
-wsServer.on(WsWebSocketServer.ServerEvents.connection, function (ws, param) {
-  ws.on(WsWebSocket.ClientEvents.message, function (msg, param) {
-    var ws = this;
-    Belt_Result.map(
-      Utils.tapResult(
-        Serializer.deserializeClientMessage(
-          Belt_Option.getWithDefault(WsWebSocket.RawData.toString(msg), "")
-        ),
-        Log.logMessageFromClient
-      ),
-      function (msg) {
-        var result;
-        switch (msg.TAG | 0) {
-          case /* Player */ 0:
-            result =
-              msg._0 !== 0
-                ? {
-                    TAG: /* Error */ 1,
-                    _0: "Message from server cannot be parsed as text",
-                  }
-                : Belt_Result.map(
-                    GameInstance.connectPlayer(msg._1),
-                    function (player) {
-                      return sendToPlayer(player.id, {
-                        TAG: /* Connected */ 0,
-                        _0: player,
-                      });
-                    }
-                  );
-            break;
-          case /* Lobby */ 1:
-            switch (msg._0) {
-              case /* Create */ 0:
-                result = Belt_Result.map(
-                  GameInstance.createLobby(msg._1),
-                  function (lobby) {
-                    return broadcastToPlayers(lobby.players, {
-                      TAG: /* LobbyCreated */ 1,
-                      _0: lobby,
-                    });
-                  }
-                );
-                break;
-              case /* Enter */ 1:
-                result = Belt_Result.map(
-                  GameInstance.enterGame(msg._1, msg._2),
-                  function (lobby) {
-                    return broadcastToPlayers(lobby.players, {
-                      TAG: /* LobbyUpdated */ 2,
-                      _0: lobby,
-                    });
-                  }
-                );
-                break;
-              case /* Ready */ 2:
-                result = Belt_Result.map(
-                  GameInstance.toggleReady(msg._1, msg._2),
-                  function (lobby) {
-                    return broadcastToPlayers(lobby.players, {
-                      TAG: /* LobbyUpdated */ 2,
-                      _0: lobby,
-                    });
-                  }
-                );
-                break;
-              case /* Start */ 3:
-                result = Belt_Result.map(
-                  GameInstance.startGame(msg._1, msg._2),
-                  function (progress) {
-                    return broadcastToPlayers(progress.players, {
-                      TAG: /* ProgressCreated */ 3,
-                      _0: progress,
-                    });
-                  }
-                );
-                break;
-            }
-            break;
-          case /* Progress */ 2:
-            result = Belt_Result.map(
-              GameInstance.dispatchMove(msg._1, msg._2, msg._0),
-              function (progress) {
-                return broadcastToPlayers(progress.players, {
-                  TAG: /* ProgressUpdated */ 4,
-                  _0: progress,
-                });
-              }
-            );
-            break;
-        }
-        if (result.TAG === /* Ok */ 0) {
-          return;
-        }
-        ws.send(
-          Serializer.serializeServerMessage({
-            TAG: /* ServerError */ 5,
-            _0: result._0,
-          })
-        );
-      }
-    );
-  });
-});
+wsServer.on(WsWebSocketServer.ServerEvents.connection, (function (ws, param) {
+        ws.on(WsWebSocket.ClientEvents.message, (function (msg, param) {
+                var ws = this ;
+                Belt_Result.map(Utils.tapResult(Serializer.deserializeClientMessage(Belt_Option.getWithDefault(WsWebSocket.RawData.toString(msg), "")), Log.logMessageFromClient), (function (msg) {
+                        var result;
+                        switch (msg.TAG | 0) {
+                          case /* Player */0 :
+                              result = msg._0 !== 0 ? ({
+                                    TAG: /* Error */1,
+                                    _0: "Message from server cannot be parsed as text"
+                                  }) : Belt_Result.map(GameInstance.connectPlayer(msg._1), (function (player) {
+                                        return sendToPlayer(player.id, {
+                                                    TAG: /* Connected */0,
+                                                    _0: player
+                                                  });
+                                      }));
+                              break;
+                          case /* Lobby */1 :
+                              switch (msg._0) {
+                                case /* Create */0 :
+                                    result = Belt_Result.map(GameInstance.createLobby(msg._1), (function (lobby) {
+                                            return broadcastToPlayers(lobby.players, {
+                                                        TAG: /* LobbyCreated */1,
+                                                        _0: lobby
+                                                      });
+                                          }));
+                                    break;
+                                case /* Enter */1 :
+                                    result = Belt_Result.map(GameInstance.enterGame(msg._1, msg._2), (function (lobby) {
+                                            return broadcastToPlayers(lobby.players, {
+                                                        TAG: /* LobbyUpdated */2,
+                                                        _0: lobby
+                                                      });
+                                          }));
+                                    break;
+                                case /* Ready */2 :
+                                    result = Belt_Result.map(GameInstance.toggleReady(msg._1, msg._2), (function (lobby) {
+                                            return broadcastToPlayers(lobby.players, {
+                                                        TAG: /* LobbyUpdated */2,
+                                                        _0: lobby
+                                                      });
+                                          }));
+                                    break;
+                                case /* Start */3 :
+                                    result = Belt_Result.map(GameInstance.startGame(msg._1, msg._2), (function (progress) {
+                                            return broadcastToPlayers(progress.players, {
+                                                        TAG: /* ProgressCreated */3,
+                                                        _0: progress
+                                                      });
+                                          }));
+                                    break;
+                                
+                              }
+                              break;
+                          case /* Progress */2 :
+                              result = Belt_Result.map(GameInstance.dispatchMove(msg._1, msg._2, msg._0), (function (progress) {
+                                      return broadcastToPlayers(progress.players, {
+                                                  TAG: /* ProgressUpdated */4,
+                                                  _0: progress
+                                                });
+                                    }));
+                              break;
+                          
+                        }
+                        if (result.TAG === /* Ok */0) {
+                          return ;
+                        }
+                        ws.send(Serializer.serializeServerMessage({
+                                  TAG: /* ServerError */5,
+                                  _0: result._0
+                                }));
+                        
+                      }));
+                
+              }));
+        
+      }));
 
 function $$default(param, res) {
   res.end(Buffer.from("response"));
+  
 }
 
-export { $$default, $$default as default };
+export {
+  $$default ,
+  $$default as default,
+  
+}
 /* playersSocket Not a pure module */
