@@ -124,14 +124,14 @@ let tablePair = Jzon.custom(
 let playerMsg = Jzon.object1(
   kind =>
     switch kind {
-    | Connect => "connect"
+    // | Connect => "connect"
     | Disconnect => "disconnect"
     | Ping => "ping"
     | Pong => "pong"
     },
   kind =>
     switch kind {
-    | "connect" => Ok(Connect)
+    // | "connect" => Ok(Connect)
     | "disconnect" => Ok(Disconnect)
     | "ping" => Ok(Ping)
     | "Pong" => Ok(Pong)
@@ -193,6 +193,8 @@ let progressMsg = Jzon.object2(
 let gameMsg = Jzon.object4(
   kind =>
     switch kind {
+    | Register(playerId) => ("register", Jzon.encodeWith(playerId, Jzon.string), "", None)
+    | Login(sessionId) => ("login", Jzon.encodeWith(sessionId, Jzon.string), "", None)
     | Player(msg, playerId) => ("player", Jzon.encodeWith(msg, playerMsg), playerId, None)
     | Lobby(msg, playerId, gameId) => (
         "lobby",
@@ -208,13 +210,31 @@ let gameMsg = Jzon.object4(
       )
     },
   ((kind, msg, playerId, gameId)) => {
-    switch (kind, gameId) {
-    | ("player", _) => Jzon.decodeWith(msg, playerMsg)->Result.map(msg => Player(msg, playerId))
-    | ("lobby", Some(gameId)) =>
-      Jzon.decodeWith(msg, lobbyMsg)->Result.map(msg => Lobby(msg, playerId, gameId))
-    | ("progress", Some(gameId)) =>
-      Jzon.decodeWith(msg, progressMsg)->Result.map(msg => Progress(msg, playerId, gameId))
-    | (x, _) => Error(#UnexpectedJsonValue([Field("kind")], x))
+    switch kind {
+    | "register" => Jzon.decodeWith(msg, Jzon.string)->Result.map(playerId => Register(playerId))
+    | "login" => Jzon.decodeWith(msg, Jzon.string)->Result.map(sessionId => Login(sessionId))
+    | "player" => Jzon.decodeWith(msg, playerMsg)->Result.map(msg => Player(msg, playerId))
+    | "lobby" =>
+      gameId
+      ->Utils.toResult(
+        #UnexpectedJsonValue([Jzon.DecodingError.Field("gameId")], Js.Json.stringify(msg)),
+      )
+      ->Result.flatMap(gameId =>
+        Jzon.decodeWith(msg, lobbyMsg)->Result.flatMap(lobbyMessage => {
+          Ok(Lobby(lobbyMessage, playerId, gameId))
+        })
+      )
+    | "progress" =>
+      gameId
+      ->Utils.toResult(
+        #UnexpectedJsonValue([Jzon.DecodingError.Field("gameId")], Js.Json.stringify(msg)),
+      )
+      ->Result.flatMap(gameId =>
+        Jzon.decodeWith(msg, progressMsg)->Result.flatMap(move => {
+          Ok(Progress(move, playerId, gameId))
+        })
+      )
+    | x => Error(#UnexpectedJsonValue([Field("kind")], x))
     }
   },
   Jzon.field("kind", Jzon.string),
@@ -237,7 +257,7 @@ let playerMsg = Jzon.object3(
   ({id, sessionId, cards}) => (id, sessionId, cards),
   ((id, sessionId, cards)) => {id: id, sessionId: sessionId, cards: cards}->Ok,
   Jzon.field("id", Jzon.string),
-  Jzon.field("sessionId", Jzon.string)->Jzon.optional,
+  Jzon.field("sessionId", Jzon.string),
   Jzon.field("cards", listViaArray(card)),
 )
 

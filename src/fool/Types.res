@@ -29,7 +29,7 @@ type table = list<tableCards>
 
 type playerId = string
 
-type sessionId = option<string>
+type sessionId = string
 
 type player = {
   id: playerId,
@@ -73,7 +73,6 @@ type playerWinState =
   | Draw
 
 type clientPlayerMessage =
-  | Connect
   | Disconnect
   | Ping
   | Pong
@@ -92,6 +91,8 @@ type beatPayload = {
 type movePayload = {card: card}
 
 type gameMessageFromClient =
+  | Register(playerId)
+  | Login(sessionId)
   | Player(clientPlayerMessage, playerId)
   | Lobby(clientLobbyMessage, playerId, gameId)
   | Progress(move, playerId, gameId)

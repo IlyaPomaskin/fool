@@ -11,10 +11,11 @@ let logMessageFromClient = msg => {
   info([
     "[client]",
     switch msg {
+    | Register(playerId) => `Register ${playerId}`
+    | Login(sessionId) => `Login ${sessionId}`
     | Player(event, pId) =>
       `player [${pId}] ` ++
       switch event {
-      | Connect => "Connect"
       | Disconnect => "Disconnect"
       | Ping => "Ping"
       | Pong => "Pong"

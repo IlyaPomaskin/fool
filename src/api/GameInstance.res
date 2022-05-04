@@ -5,8 +5,17 @@ let gamesInLobby = LobbyGameMap.empty()
 let gamesInProgress = ProgressGameMap.empty()
 let players = PlayersMap.empty()
 
-let connectPlayer = playerId => {
-  let player = PlayersMap.get(players, playerId)
+let registerPlayer = (playerId: playerId): result<Types.player, string> => {
+  let player = players->PlayersMap.get(playerId)
+
+  switch player {
+  | Ok(_) => Error("Player with same name already exists")
+  | Error(_) => players->PlayersMap.create(playerId)
+  }
+}
+
+let loginPlayer = sessionId => {
+  let player = PlayersMap.findBySessionId(players, playerId)
 
   switch player {
   | Ok(player) => Ok(player)

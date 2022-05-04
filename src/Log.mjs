@@ -33,26 +33,29 @@ function info(param) {
 function logMessageFromClient(msg) {
   var tmp;
   switch (msg.TAG | 0) {
-    case /* Player */0 :
+    case /* Register */0 :
+        tmp = "Register " + msg._0;
+        break;
+    case /* Login */1 :
+        tmp = "Login " + msg._0;
+        break;
+    case /* Player */2 :
         var tmp$1;
         switch (msg._0) {
-          case /* Connect */0 :
-              tmp$1 = "Connect";
-              break;
-          case /* Disconnect */1 :
+          case /* Disconnect */0 :
               tmp$1 = "Disconnect";
               break;
-          case /* Ping */2 :
+          case /* Ping */1 :
               tmp$1 = "Ping";
               break;
-          case /* Pong */3 :
+          case /* Pong */2 :
               tmp$1 = "Pong";
               break;
           
         }
         tmp = "player [" + msg._1 + "] " + tmp$1;
         break;
-    case /* Lobby */1 :
+    case /* Lobby */3 :
         var tmp$2;
         switch (msg._0) {
           case /* Create */0 :
@@ -71,7 +74,7 @@ function logMessageFromClient(msg) {
         }
         tmp = "lobby [" + msg._2 + "][" + msg._1 + "] " + tmp$2;
         break;
-    case /* Progress */2 :
+    case /* Progress */4 :
         var game = msg._0;
         var tmp$3;
         tmp$3 = typeof game === "number" ? (

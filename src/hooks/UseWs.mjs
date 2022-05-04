@@ -26,20 +26,13 @@ function hook(playerId) {
       });
   var setError = match$3[1];
   var ws = React.useMemo((function () {
-          return new WebSocket("ws://" + playerId + "@localhost:3001/ws");
+          return new WebSocket("ws://localhost:3001/ws");
         }), []);
   var sendMessage = React.useCallback((function (message) {
           ws.send(Serializer.serializeClientMessage(message));
           
         }), [ws]);
   React.useEffect((function () {
-          ws.addEventListener("open", (function (param) {
-                  return Curry._1(sendMessage, {
-                              TAG: /* Player */0,
-                              _0: /* Connect */0,
-                              _1: playerId
-                            });
-                }));
           ws.addEventListener("message", (function ($$event) {
                   Belt_Result.map(Utils.tapResult(Belt_Result.flatMap(Utils.toResult(Webapi__WebSocket.messageAsText($$event), {
                                     NAME: "SyntaxError",
@@ -98,8 +91,8 @@ function hook(playerId) {
                 }));
           ws.addEventListener("close", (function (param) {
                   return Curry._1(sendMessage, {
-                              TAG: /* Player */0,
-                              _0: /* Disconnect */1,
+                              TAG: /* Player */2,
+                              _0: /* Disconnect */0,
                               _1: playerId
                             });
                 }));

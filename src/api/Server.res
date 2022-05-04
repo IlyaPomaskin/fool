@@ -74,6 +74,7 @@ wsServer
       ->Utils.tapResult(Log.logMessageFromClient)
       ->Result.map(msg => {
         switch msg {
+        | Register(playerId) => playerId
         | Player(Connect, playerId) =>
           playerId
           ->GameInstance.connectPlayer

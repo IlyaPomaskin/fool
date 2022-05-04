@@ -72,6 +72,14 @@ module PlayersMap = {
   let get = (map, playerId): result<player, string> =>
     map->MutableMap.get(playerId)->Utils.toResult(`Player "${playerId}" not found`)
 
+  let findBySessionId = (map, sessionId: sessionId): result<player, string> =>
+    map->MutableMap.reduce(None, (acc, key, value) => {
+      switch acc {
+      | Some(_) => acc
+      | None => value.sessionId === sessionId ? Some(value) : None
+      }
+    })
+
   let set = (map, game) => map->MutableMap.set(game)
 
   let create = (map, playerId): result<player, string> =>

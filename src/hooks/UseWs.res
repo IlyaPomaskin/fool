@@ -15,15 +15,13 @@ let hook = (playerId): hookReturn => {
   let (inProgress, setInProgress) = React.useState(_ => None)
   let (error, setError) = React.useState(_ => None)
 
-  let ws = React.useMemo0(_ => WebSocket.make(`ws://${playerId}@localhost:3001/ws`))
+  let ws = React.useMemo0(_ => WebSocket.make(`ws://localhost:3001/ws`))
 
   let sendMessage = React.useCallback1((message: gameMessageFromClient) => {
     ws->WebSocket.sendText(Serializer.serializeClientMessage(message))
   }, [ws])
 
   React.useEffect0(() => {
-    ws->WebSocket.addOpenListener(_ => sendMessage(Player(Connect, playerId)))
-
     ws->WebSocket.addMessageListener(event => {
       event
       ->WebSocket.messageAsText
