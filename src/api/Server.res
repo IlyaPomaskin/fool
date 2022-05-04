@@ -54,15 +54,15 @@ wsServer
   | None => Log.error(["Connection without playerId", "url.toString()"])
   | Some(playerId) =>
     ws
-    ->WsWebSocket.on(WsWebSocket.ClientEvents.open_, @this ws => {
-      playerId
-      ->GameInstance.connectPlayer
-      ->Result.map(player => {
-        playersSocket->PlayersSocketMap.set(player.id, ws)
-        sendToPlayer(player.id, Connected(player))
-      })
-      ->ignore
-    })
+    // ->WsWebSocket.on(WsWebSocket.ClientEvents.open_, @this ws => {
+    //   playerId
+    //   ->GameInstance.connectPlayer
+    //   ->Result.map(player => {
+    //     playersSocket->PlayersSocketMap.set(player.id, ws)
+    //     sendToPlayer(player.id, Connected(player))
+    //   })
+    //   ->ignore
+    // })
     ->WsWebSocket.on(WsWebSocket.ClientEvents.close, @this (_, _, _) => {
       playersSocket->PlayersSocketMap.remove(playerId)
     })
@@ -74,10 +74,16 @@ wsServer
       ->Utils.tapResult(Log.logMessageFromClient)
       ->Result.map(msg => {
         switch msg {
-        | Register(playerId) => playerId
-        | Player(Connect, playerId) =>
+        | Login(sessionId) =>
+          sessionId
+          ->GameInstance.loginPlayer
+          ->Result.map(player => {
+            playersSocket->PlayersSocketMap.set(player.id, ws)
+            sendToPlayer(player.id, Connected(player))
+          })
+        | Register(playerId) =>
           playerId
-          ->GameInstance.connectPlayer
+          ->GameInstance.registerPlayer
           ->Result.map(player => {
             playersSocket->PlayersSocketMap.set(player.id, ws)
             sendToPlayer(player.id, Connected(player))

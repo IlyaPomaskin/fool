@@ -82,36 +82,38 @@ wsServer.on(WsWebSocketServer.ServerEvents.connection, (function (ws, req) {
                 return url.username;
               }));
         if (playerId !== undefined) {
-          ws.on(WsWebSocket.ClientEvents.open_, (function () {
-                      var ws = this ;
-                      Belt_Result.map(GameInstance.connectPlayer(playerId), (function (player) {
-                              $$Storage.PlayersSocketMap.set(playersSocket, player.id, ws);
-                              return sendToPlayer(player.id, {
-                                          TAG: /* Connected */0,
-                                          _0: player
-                                        });
-                            }));
-                      
-                    })).on(WsWebSocket.ClientEvents.close, (function (param, param$1) {
+          ws.on(WsWebSocket.ClientEvents.close, (function (param, param$1) {
                     return $$Storage.PlayersSocketMap.remove(playersSocket, playerId);
                   })).on(WsWebSocket.ClientEvents.message, (function (msg, param) {
                   var ws = this ;
                   Belt_Result.map(Utils.tapResult(Serializer.deserializeClientMessage(Belt_Option.getWithDefault(WsWebSocket.RawData.toString(msg), "")), Log.logMessageFromClient), (function (msg) {
                           var result;
                           switch (msg.TAG | 0) {
-                            case /* Player */0 :
-                                result = msg._0 !== 0 ? ({
-                                      TAG: /* Error */1,
-                                      _0: "Message from server cannot be parsed as text"
-                                    }) : Belt_Result.map(GameInstance.connectPlayer(msg._1), (function (player) {
-                                          $$Storage.PlayersSocketMap.set(playersSocket, player.id, ws);
-                                          return sendToPlayer(player.id, {
-                                                      TAG: /* Connected */0,
-                                                      _0: player
-                                                    });
-                                        }));
+                            case /* Register */0 :
+                                result = Belt_Result.map(GameInstance.registerPlayer(msg._0), (function (player) {
+                                        $$Storage.PlayersSocketMap.set(playersSocket, player.id, ws);
+                                        return sendToPlayer(player.id, {
+                                                    TAG: /* Connected */0,
+                                                    _0: player
+                                                  });
+                                      }));
                                 break;
-                            case /* Lobby */1 :
+                            case /* Login */1 :
+                                result = Belt_Result.map(GameInstance.loginPlayer(msg._0), (function (player) {
+                                        $$Storage.PlayersSocketMap.set(playersSocket, player.id, ws);
+                                        return sendToPlayer(player.id, {
+                                                    TAG: /* Connected */0,
+                                                    _0: player
+                                                  });
+                                      }));
+                                break;
+                            case /* Player */2 :
+                                result = {
+                                  TAG: /* Error */1,
+                                  _0: "Message from server cannot be parsed as text"
+                                };
+                                break;
+                            case /* Lobby */3 :
                                 switch (msg._0) {
                                   case /* Create */0 :
                                       result = Belt_Result.map(GameInstance.createLobby(msg._1), (function (lobby) {
@@ -153,7 +155,7 @@ wsServer.on(WsWebSocketServer.ServerEvents.connection, (function (ws, req) {
                                   
                                 }
                                 break;
-                            case /* Progress */2 :
+                            case /* Progress */4 :
                                 result = Belt_Result.map(GameInstance.dispatchMove(msg._1, msg._2, msg._0), (function (progress) {
                                         return broadcastToPlayers(progress.players, {
                                                     TAG: /* ProgressUpdated */5,

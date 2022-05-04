@@ -199,6 +199,18 @@ function get$2(map, playerId) {
   return Utils.toResult(Belt_MutableMap.get(map, playerId), "Player \"" + playerId + "\" not found");
 }
 
+function findBySessionId(map, sessionId) {
+  return Utils.toResult(Belt_MutableMap.reduce(map, undefined, (function (acc, param, value) {
+                    if (acc !== undefined) {
+                      return acc;
+                    } else if (value.sessionId === sessionId) {
+                      return value;
+                    } else {
+                      return ;
+                    }
+                  })), "Player not found");
+}
+
 function set$2(map, game) {
   return function (param) {
     return Belt_MutableMap.set(map, game, param);
@@ -225,6 +237,7 @@ var PlayersMap = {
   PlayerId: PlayerId,
   empty: empty$2,
   get: get$2,
+  findBySessionId: findBySessionId,
   set: set$2,
   create: create$2
 };

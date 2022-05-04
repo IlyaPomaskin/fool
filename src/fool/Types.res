@@ -105,3 +105,8 @@ type gameMessageFromServer =
   | ProgressCreated(inProgress)
   | ProgressUpdated(inProgress)
   | ServerError(string)
+
+type clientScreen =
+  | AuthorizationScreen
+  | InLobbyScreen(playerId, inLobby)
+  | InProgressScreen(playerId, inProgress)

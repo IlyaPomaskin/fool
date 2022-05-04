@@ -12,16 +12,20 @@ var gamesInProgress = $$Storage.ProgressGameMap.empty(undefined);
 
 var players = $$Storage.PlayersMap.empty(undefined);
 
-function connectPlayer(playerId) {
+function registerPlayer(playerId) {
   var player = $$Storage.PlayersMap.get(players, playerId);
   if (player.TAG === /* Ok */0) {
     return {
-            TAG: /* Ok */0,
-            _0: player._0
+            TAG: /* Error */1,
+            _0: "Player with same name already exists"
           };
   } else {
     return $$Storage.PlayersMap.create(players, playerId);
   }
+}
+
+function loginPlayer(sessionId) {
+  return $$Storage.PlayersMap.findBySessionId(players, sessionId);
 }
 
 function createLobby(playerId) {
@@ -76,7 +80,8 @@ export {
   gamesInLobby ,
   gamesInProgress ,
   players ,
-  connectPlayer ,
+  registerPlayer ,
+  loginPlayer ,
   createLobby ,
   enterGame ,
   toggleReady ,

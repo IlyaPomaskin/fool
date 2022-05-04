@@ -14,14 +14,7 @@ let registerPlayer = (playerId: playerId): result<Types.player, string> => {
   }
 }
 
-let loginPlayer = sessionId => {
-  let player = PlayersMap.findBySessionId(players, playerId)
-
-  switch player {
-  | Ok(player) => Ok(player)
-  | Error(_) => players->PlayersMap.create(playerId)
-  }
-}
+let loginPlayer = sessionId => PlayersMap.findBySessionId(players, sessionId)
 
 let createLobby = playerId => {
   players

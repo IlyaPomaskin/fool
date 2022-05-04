@@ -2,7 +2,7 @@ open Types
 
 let make = login => {
   id: login,
-  sessionId: Some("session:" ++ string_of_int(Js.Math.random_int(0, 10000000))),
+  sessionId: "session:" ++ string_of_int(Js.Math.random_int(0, 10000000)),
   cards: list{},
 }
 
@@ -68,7 +68,7 @@ let isPlayerExists = (players, player) => {
 
 let mask = (playerId, player) => {
   ...player,
-  sessionId: Some("masked"),
+  sessionId: "masked",
   cards: player.cards->List.map(card => player.id == playerId ? card : Hidden),
 }
 
