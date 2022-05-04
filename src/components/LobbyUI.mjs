@@ -8,7 +8,7 @@ import * as Belt_List from "rescript/lib/es6/belt_List.js";
 
 function LobbyUI(Props) {
   var game = Props.game;
-  var onLobbyMessage = Props.onLobbyMessage;
+  var onMessage = Props.onMessage;
   var playerId = Props.playerId;
   var match = React.useState(function () {
         return "";
@@ -17,17 +17,8 @@ function LobbyUI(Props) {
   var gameId = match[0];
   return React.createElement("div", undefined, React.createElement(Base.Button.make, {
                   onClick: (function (param) {
-                      return Curry._1(onLobbyMessage, {
-                                  TAG: /* Player */0,
-                                  _0: /* Connect */0,
-                                  _1: playerId
-                                });
-                    }),
-                  children: Utils.uiStr("create player")
-                }), React.createElement(Base.Button.make, {
-                  onClick: (function (param) {
-                      return Curry._1(onLobbyMessage, {
-                                  TAG: /* Lobby */1,
+                      return Curry._1(onMessage, {
+                                  TAG: /* Lobby */3,
                                   _0: /* Create */0,
                                   _1: playerId,
                                   _2: ""
@@ -43,38 +34,38 @@ function LobbyUI(Props) {
                         })
                     }), React.createElement(Base.Button.make, {
                       onClick: (function (param) {
-                          return Curry._1(onLobbyMessage, {
-                                      TAG: /* Lobby */1,
+                          return Curry._1(onMessage, {
+                                      TAG: /* Lobby */3,
                                       _0: /* Enter */1,
                                       _1: playerId,
                                       _2: gameId
                                     });
                         }),
                       children: Utils.uiStr("lobby connect")
-                    })), game !== undefined ? React.createElement("div", undefined, React.createElement("div", undefined, Utils.uiStr("Lobby Id: " + game.gameId)), React.createElement(Base.Button.make, {
-                        pressed: Belt_List.has(game.ready, playerId, (function (player, id) {
-                                return player.id === id;
-                              })),
-                        onClick: (function (param) {
-                            return Curry._1(onLobbyMessage, {
-                                        TAG: /* Lobby */1,
-                                        _0: /* Ready */2,
-                                        _1: playerId,
-                                        _2: game.gameId
-                                      });
-                          }),
-                        children: Utils.uiStr("lobby ready")
-                      }), React.createElement(Base.Button.make, {
-                        onClick: (function (param) {
-                            return Curry._1(onLobbyMessage, {
-                                        TAG: /* Lobby */1,
-                                        _0: /* Start */3,
-                                        _1: playerId,
-                                        _2: game.gameId
-                                      });
-                          }),
-                        children: Utils.uiStr("lobby start")
-                      })) : null);
+                    })), React.createElement("div", undefined, React.createElement("div", undefined, Utils.uiStr("Lobby Id: " + game.gameId)), React.createElement(Base.Button.make, {
+                      pressed: Belt_List.has(game.ready, playerId, (function (player, id) {
+                              return player.id === id;
+                            })),
+                      onClick: (function (param) {
+                          return Curry._1(onMessage, {
+                                      TAG: /* Lobby */3,
+                                      _0: /* Ready */2,
+                                      _1: playerId,
+                                      _2: game.gameId
+                                    });
+                        }),
+                      children: Utils.uiStr("lobby ready")
+                    }), React.createElement(Base.Button.make, {
+                      onClick: (function (param) {
+                          return Curry._1(onMessage, {
+                                      TAG: /* Lobby */3,
+                                      _0: /* Start */3,
+                                      _1: playerId,
+                                      _2: game.gameId
+                                    });
+                        }),
+                      children: Utils.uiStr("lobby start")
+                    })));
 }
 
 var make = LobbyUI;

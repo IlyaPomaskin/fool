@@ -31,15 +31,15 @@ function sendToPlayer(playerId, $$event) {
   var result = Belt_Result.map($$Storage.PlayersSocketMap.get(playersSocket, playerId), (function (socket) {
           var tmp;
           switch ($$event.TAG | 0) {
-            case /* ProgressCreated */4 :
+            case /* ProgressCreated */3 :
                 tmp = {
-                  TAG: /* ProgressCreated */4,
+                  TAG: /* ProgressCreated */3,
                   _0: Game.maskForPlayer($$event._0, playerId)
                 };
                 break;
-            case /* ProgressUpdated */5 :
+            case /* ProgressUpdated */4 :
                 tmp = {
-                  TAG: /* ProgressUpdated */5,
+                  TAG: /* ProgressUpdated */4,
                   _0: Game.maskForPlayer($$event._0, playerId)
                 };
                 break;
@@ -140,14 +140,9 @@ wsServer.on(WsWebSocketServer.ServerEvents.connection, (function (ws, req) {
                                             }));
                                       break;
                                   case /* Start */3 :
-                                      var gameId = msg._2;
-                                      result = Belt_Result.map(GameInstance.startGame(msg._1, gameId), (function (progress) {
-                                              broadcastToPlayers(progress.players, {
-                                                    TAG: /* LobbyClosed */3,
-                                                    _0: gameId
-                                                  });
+                                      result = Belt_Result.map(GameInstance.startGame(msg._1, msg._2), (function (progress) {
                                               return broadcastToPlayers(progress.players, {
-                                                          TAG: /* ProgressCreated */4,
+                                                          TAG: /* ProgressCreated */3,
                                                           _0: progress
                                                         });
                                             }));
@@ -158,7 +153,7 @@ wsServer.on(WsWebSocketServer.ServerEvents.connection, (function (ws, req) {
                             case /* Progress */4 :
                                 result = Belt_Result.map(GameInstance.dispatchMove(msg._1, msg._2, msg._0), (function (progress) {
                                         return broadcastToPlayers(progress.players, {
-                                                    TAG: /* ProgressUpdated */5,
+                                                    TAG: /* ProgressUpdated */4,
                                                     _0: progress
                                                   });
                                       }));
@@ -169,7 +164,7 @@ wsServer.on(WsWebSocketServer.ServerEvents.connection, (function (ws, req) {
                             return ;
                           }
                           ws.send(Serializer.serializeServerMessage({
-                                    TAG: /* ServerError */6,
+                                    TAG: /* ServerError */5,
                                     _0: result._0
                                   }));
                           

@@ -8,111 +8,167 @@ import * as React from "react";
 import * as GameUI from "./components/GameUI.mjs";
 import * as LobbyUI from "./components/LobbyUI.mjs";
 import * as ClientUI from "./components/ClientUI.mjs";
-import * as PlayerUI from "./components/PlayerUI.mjs";
-import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 
-function Index$Client(Props) {
-  var playerId = Props.playerId;
-  var match = UseWs.hook(playerId);
-  var sendMessage = match.sendMessage;
-  var error = match.error;
-  var inProgress = match.inProgress;
-  var inLobby = match.inLobby;
-  var player = match.player;
-  console.log({
-        player: player,
-        inLobby: inLobby,
-        inProgress: inProgress
+function Index$AuthorizationUI(Props) {
+  var onMessage = Props.onMessage;
+  React.useEffect((function () {
+          var sessionId = localStorage.getItem("sessionId");
+          if (!(sessionId == null)) {
+            Curry._1(onMessage, {
+                  TAG: /* Login */1,
+                  _0: sessionId
+                });
+          }
+          
+        }), []);
+  var match = React.useState(function () {
+        return "";
       });
-  return React.createElement("div", undefined, React.createElement("div", undefined, player !== undefined ? React.createElement(PlayerUI.Short.make, {
-                        player: player
-                      }) : React.createElement("div", undefined)), React.createElement("div", undefined, error !== undefined ? React.createElement("div", undefined, Utils.uiStr("server error: " + error)) : React.createElement("div", undefined, Utils.uiStr("no server error"))), React.createElement(LobbyUI.make, {
-                  game: inLobby,
-                  onLobbyMessage: sendMessage,
-                  playerId: playerId
-                }), inProgress !== undefined ? React.createElement("div", undefined, React.createElement(GameUI.InProgressUI.make, {
-                        game: inProgress
+  var setLogin = match[1];
+  var login = match[0];
+  return React.createElement("div", undefined, React.createElement("input", {
+                  value: login,
+                  onChange: (function (e) {
+                      return Curry._1(setLogin, (function (param) {
+                                    return e.target.value;
+                                  }));
+                    })
+                }), React.createElement(Base.Button.make, {
+                  onClick: (function (param) {
+                      return Curry._1(onMessage, {
+                                  TAG: /* Register */0,
+                                  _0: login
+                                });
+                    }),
+                  children: Utils.uiStr("Create user")
+                }));
+}
+
+function Index$LobbySetupScreen(Props) {
+  var playerId = Props.playerId;
+  return React.createElement("div", undefined, Utils.uiStr("lobby setup " + playerId));
+}
+
+function Index$PlayerScreen(Props) {
+  var match = React.useState(function () {
+        
+      });
+  var setPlayer = match[1];
+  var player = match[0];
+  var match$1 = React.useState(function () {
+        return /* AuthorizationScreen */0;
+      });
+  var setScreen = match$1[1];
+  var screen = match$1[0];
+  var onMessage = React.useCallback((function (message) {
+          var exit = 0;
+          switch (message.TAG | 0) {
+            case /* Connected */0 :
+                var player$1 = message._0;
+                Curry._1(setPlayer, (function (param) {
+                        return player$1;
+                      }));
+                Curry._1(setScreen, (function (param) {
+                        return {
+                                TAG: /* LobbySetupScreen */0,
+                                _0: player$1.id
+                              };
+                      }));
+                localStorage.setItem("sessionId", player$1.sessionId);
+                return ;
+            case /* LobbyCreated */1 :
+            case /* LobbyUpdated */2 :
+                exit = 1;
+                break;
+            case /* ProgressCreated */3 :
+            case /* ProgressUpdated */4 :
+                exit = 2;
+                break;
+            case /* ServerError */5 :
+                return ;
+            
+          }
+          switch (exit) {
+            case 1 :
+                if (player === undefined) {
+                  return ;
+                }
+                var game = message._0;
+                return Curry._1(setScreen, (function (param) {
+                              return {
+                                      TAG: /* InLobbyScreen */1,
+                                      _0: game,
+                                      _1: player.id
+                                    };
+                            }));
+            case 2 :
+                if (player === undefined) {
+                  return ;
+                }
+                var game$1 = message._0;
+                return Curry._1(setScreen, (function (param) {
+                              return {
+                                      TAG: /* InProgressScreen */2,
+                                      _0: game$1,
+                                      _1: player.id
+                                    };
+                            }));
+            
+          }
+        }), []);
+  var match$2 = UseWs.hook(onMessage);
+  var sendMessage = match$2.sendMessage;
+  var error = match$2.error;
+  if (typeof screen === "number") {
+    return React.createElement(Index$AuthorizationUI, {
+                onMessage: sendMessage
+              });
+  }
+  switch (screen.TAG | 0) {
+    case /* LobbySetupScreen */0 :
+        return React.createElement(Index$LobbySetupScreen, {
+                    playerId: screen._0
+                  });
+    case /* InLobbyScreen */1 :
+        return React.createElement(LobbyUI.make, {
+                    game: screen._0,
+                    onMessage: sendMessage,
+                    playerId: screen._1
+                  });
+    case /* InProgressScreen */2 :
+        var playerId = screen._1;
+        var game = screen._0;
+        return React.createElement("div", undefined, React.createElement("div", undefined, error !== undefined ? React.createElement("div", undefined, Utils.uiStr("error: " + error)) : React.createElement("div", undefined, Utils.uiStr("No error"))), React.createElement(GameUI.InProgressUI.make, {
+                        game: game
                       }), React.createElement("div", {
                         className: "flex flex-wrap"
-                      }, Utils.uiList(inProgress.players, (function (player) {
+                      }, Utils.uiList(game.players, (function (player) {
                               return React.createElement(ClientUI.make, {
                                           className: "m-1 flex-initial w-96",
                                           player: player,
                                           isOwner: player.id === playerId,
-                                          game: inProgress,
+                                          game: game,
                                           onMove: (function (move) {
                                               return Curry._1(sendMessage, {
-                                                          TAG: /* Progress */2,
+                                                          TAG: /* Progress */4,
                                                           _0: move,
                                                           _1: playerId,
-                                                          _2: inProgress.gameId
+                                                          _2: game.gameId
                                                         });
                                             }),
                                           key: player.id
                                         });
-                            }))), React.createElement("div", undefined, Utils.uiStr(Belt_Option.getWithDefault(Belt_Option.map(error, (function (err) {
-                                      return "Error: " + err;
-                                    })), "No errors")))) : React.createElement("div", undefined));
+                            }))));
+    
+  }
 }
 
 function $$default(param) {
-  var match = React.useState(function () {
-        return "";
-      });
-  var setFirst = match[1];
-  var first = match[0];
-  var match$1 = React.useState(function () {
-        
-      });
-  var setFirstPlayerId = match$1[1];
-  var firstPlayerId = match$1[0];
-  var match$2 = React.useState(function () {
-        return "";
-      });
-  var setSecond = match$2[1];
-  var second = match$2[0];
-  var match$3 = React.useState(function () {
-        
-      });
-  var setSecondPlayerId = match$3[1];
-  var secondPlayerId = match$3[0];
   return React.createElement("div", undefined, React.createElement("div", {
                   className: "my-2 w-1/2 inline-block border rounded-md border-solid border-slate-500"
-                }, firstPlayerId !== undefined ? React.createElement(Index$Client, {
-                        playerId: firstPlayerId
-                      }) : React.createElement("div", undefined, React.createElement("input", {
-                            value: first,
-                            onChange: (function (e) {
-                                return Curry._1(setFirst, (function (param) {
-                                              return e.target.value;
-                                            }));
-                              })
-                          }), React.createElement(Base.Button.make, {
-                            onClick: (function (param) {
-                                return Curry._1(setFirstPlayerId, (function (param) {
-                                              return first;
-                                            }));
-                              }),
-                            children: Utils.uiStr("connect")
-                          }))), React.createElement("div", {
+                }, React.createElement(Index$PlayerScreen, {})), React.createElement("div", {
                   className: "my-2 w-1/2 inline-block border rounded-md border-solid border-slate-500"
-                }, secondPlayerId !== undefined ? React.createElement(Index$Client, {
-                        playerId: secondPlayerId
-                      }) : React.createElement("div", undefined, React.createElement("input", {
-                            value: second,
-                            onChange: (function (e) {
-                                return Curry._1(setSecond, (function (param) {
-                                              return e.target.value;
-                                            }));
-                              })
-                          }), React.createElement(Base.Button.make, {
-                            onClick: (function (param) {
-                                return Curry._1(setSecondPlayerId, (function (param) {
-                                              return second;
-                                            }));
-                              }),
-                            children: Utils.uiStr("connect")
-                          }))));
+                }, React.createElement(Index$PlayerScreen, {})));
 }
 
 export {

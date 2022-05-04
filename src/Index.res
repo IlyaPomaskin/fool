@@ -1,85 +1,98 @@
 open Types
 open Utils
 
-module Client = {
+module AuthorizationUI = {
   @react.component
-  let make = (~playerId) => {
-    let {player, inLobby, inProgress, error, sendMessage} = UseWs.hook(playerId)
+  let make = (~onMessage: gameMessageFromClient => unit) => {
+    React.useEffect0(() => {
+      let sessionId = LocalStorage.getItem("sessionId")->Js.Nullable.toOption
 
-    Js.logMany([{"player": player, "inLobby": inLobby, "inProgress": inProgress}])
+      switch sessionId {
+      | Some(sessionId) => onMessage(Login(sessionId))
+      | None => ()
+      }
+
+      None
+    })
+
+    let (login, setLogin) = React.useState(_ => "")
 
     <div>
-      <div>
-        {switch player {
-        | Some(player) => <PlayerUI.Short player />
-        | None => <div />
-        }}
-      </div>
-      <div>
-        {switch error {
-        | Some(error) => <div> {uiStr("server error: " ++ error)} </div>
-        | None => <div> {uiStr("no server error")} </div>
-        }}
-      </div>
-      <LobbyUI playerId game={inLobby} onLobbyMessage={sendMessage} />
-      {switch inProgress {
-      | Some(game) =>
-        <div>
-          <GameUI.InProgressUI game />
-          <div className="flex flex-wrap">
-            {game.players->uiList(player =>
-              <ClientUI
-                key={player.id}
-                isOwner={player.id === playerId}
-                className="m-1 flex-initial w-96"
-                player
-                game
-                onMove={move => sendMessage(Progress(move, playerId, game.gameId))}
-              />
-            )}
-          </div>
-          <div>
-            {error->Option.map(err => "Error: " ++ err)->Option.getWithDefault("No errors")->uiStr}
-          </div>
-        </div>
-      | _ => <div />
-      }}
+      <input value={login} onChange={e => setLogin(_ => ReactEvent.Form.target(e)["value"])} />
+      <Base.Button onClick={_ => onMessage(Register(login))}> {uiStr("Create user")} </Base.Button>
     </div>
   }
 }
 
-let default = () => {
-  let (first, setFirst) = React.useState(_ => "")
-  let (firstPlayerId, setFirstPlayerId) = React.useState(_ => None)
-  let (second, setSecond) = React.useState(_ => "")
-  let (secondPlayerId, setSecondPlayerId) = React.useState(_ => None)
+module LobbySetupScreen = {
+  @react.component
+  let make = (~playerId) => {
+    <div> {uiStr("lobby setup " ++ playerId)} </div>
+  }
+}
 
+module PlayerScreen = {
+  @react.component
+  let make = () => {
+    let (player, setPlayer) = React.useState(_ => None)
+    let (screen, setScreen) = React.useState(_ => AuthorizationScreen)
+
+    let onMessage = React.useCallback0(message => {
+      switch (message, player) {
+      | (Connected(player), _) => {
+          setPlayer(_ => Some(player))
+          setScreen(_ => LobbySetupScreen(player.id))
+          LocalStorage.setItem("sessionId", player.sessionId)
+        }
+      | (LobbyCreated(game), Some(player))
+      | (LobbyUpdated(game), Some(player)) =>
+        setScreen(_ => InLobbyScreen(game, player.id))
+      | (ProgressCreated(game), Some(player))
+      | (ProgressUpdated(game), Some(player)) =>
+        setScreen(_ => InProgressScreen(game, player.id))
+      | _ => ()
+      }
+    })
+
+    let {error, sendMessage} = UseWs.hook(onMessage)
+
+    switch screen {
+    | AuthorizationScreen => <AuthorizationUI onMessage={sendMessage} />
+    | LobbySetupScreen(playerId) => <LobbySetupScreen playerId={playerId} />
+    | InLobbyScreen(game, playerId) => <LobbyUI playerId game onMessage={sendMessage} />
+    | InProgressScreen(game, playerId) =>
+      <div>
+        <div>
+          {switch error {
+          | Some(err) => <div> {uiStr("error: " ++ err)} </div>
+          | None => <div> {uiStr("No error")} </div>
+          }}
+        </div>
+        <GameUI.InProgressUI game />
+        <div className="flex flex-wrap">
+          {game.players->uiList(player =>
+            <ClientUI
+              key={player.id}
+              isOwner={player.id === playerId}
+              className="m-1 flex-initial w-96"
+              player
+              game
+              onMove={move => sendMessage(Progress(move, playerId, game.gameId))}
+            />
+          )}
+        </div>
+      </div>
+    }
+  }
+}
+
+let default = () => {
   <div>
     <div className="my-2 w-1/2 inline-block border rounded-md border-solid border-slate-500">
-      {switch firstPlayerId {
-      | Some(playerId) => <Client playerId />
-      | None =>
-        <div>
-          <input value={first} onChange={e => setFirst(_ => ReactEvent.Form.target(e)["value"])} />
-          <Base.Button onClick={_ => setFirstPlayerId(_ => Some(first))}>
-            {uiStr("connect")}
-          </Base.Button>
-        </div>
-      }}
+      <PlayerScreen />
     </div>
     <div className="my-2 w-1/2 inline-block border rounded-md border-solid border-slate-500">
-      {switch secondPlayerId {
-      | Some(playerId) => <Client playerId />
-      | None =>
-        <div>
-          <input
-            value={second} onChange={e => setSecond(_ => ReactEvent.Form.target(e)["value"])}
-          />
-          <Base.Button onClick={_ => setSecondPlayerId(_ => Some(second))}>
-            {uiStr("connect")}
-          </Base.Button>
-        </div>
-      }}
+      <PlayerScreen />
     </div>
   </div>
 }

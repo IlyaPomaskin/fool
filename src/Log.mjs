@@ -100,13 +100,11 @@ function serverMsgToString(msg) {
         return "[" + msg._0.gameId + "] LobbyCreated";
     case /* LobbyUpdated */2 :
         return "[" + msg._0.gameId + "] LobbyUpdated";
-    case /* LobbyClosed */3 :
-        return "[" + msg._0 + "] LobbyUpdated";
-    case /* ProgressCreated */4 :
+    case /* ProgressCreated */3 :
         return "[" + msg._0.gameId + "] ProgressCreated";
-    case /* ProgressUpdated */5 :
+    case /* ProgressUpdated */4 :
         return "[" + msg._0.gameId + "] ProgressUpdated";
-    case /* ServerError */6 :
+    case /* ServerError */5 :
         return "ServerError: " + msg._0;
     
   }

@@ -101,12 +101,12 @@ type gameMessageFromServer =
   | Connected(player)
   | LobbyCreated(inLobby)
   | LobbyUpdated(inLobby)
-  | LobbyClosed(gameId)
   | ProgressCreated(inProgress)
   | ProgressUpdated(inProgress)
   | ServerError(string)
 
 type clientScreen =
   | AuthorizationScreen
-  | InLobbyScreen(playerId, inLobby)
-  | InProgressScreen(playerId, inProgress)
+  | LobbySetupScreen(playerId)
+  | InLobbyScreen(inLobby, playerId)
+  | InProgressScreen(inProgress, playerId)

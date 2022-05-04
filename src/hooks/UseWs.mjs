@@ -8,39 +8,26 @@ import * as Serializer from "../Serializer.mjs";
 import * as Belt_Result from "rescript/lib/es6/belt_Result.js";
 import * as Webapi__WebSocket from "rescript-webapi/src/Webapi/Webapi__WebSocket.mjs";
 
-function hook(playerId) {
+function hook(onMessage) {
   var match = React.useState(function () {
         
       });
-  var setPlayer = match[1];
-  var match$1 = React.useState(function () {
-        
-      });
-  var setInLobby = match$1[1];
-  var match$2 = React.useState(function () {
-        
-      });
-  var setInProgress = match$2[1];
-  var match$3 = React.useState(function () {
-        
-      });
-  var setError = match$3[1];
+  var setError = match[1];
   var ws = React.useMemo((function () {
           return new WebSocket("ws://localhost:3001/ws");
         }), []);
   var sendMessage = React.useCallback((function (message) {
+          console.log("ws", ws);
           ws.send(Serializer.serializeClientMessage(message));
           
         }), [ws]);
   React.useEffect((function () {
           ws.addEventListener("message", (function ($$event) {
-                  Belt_Result.map(Utils.tapResult(Belt_Result.flatMap(Utils.toResult(Webapi__WebSocket.messageAsText($$event), {
-                                    NAME: "SyntaxError",
-                                    VAL: "Message from server cannot be parsed as text"
-                                  }), Serializer.deserializeServerMessage), (function (message) {
-                              return Log.logMessageFromServer(message, playerId);
-                            })), (function (message) {
-                          if (message.TAG === /* ServerError */6) {
+                  Belt_Result.map(Belt_Result.flatMap(Utils.toResult(Webapi__WebSocket.messageAsText($$event), {
+                                NAME: "SyntaxError",
+                                VAL: "Message from server cannot be parsed as text"
+                              }), Serializer.deserializeServerMessage), (function (message) {
+                          if (message.TAG === /* ServerError */5) {
                             var msg = message._0;
                             Curry._1(setError, (function (param) {
                                     return msg;
@@ -50,57 +37,12 @@ function hook(playerId) {
                                     
                                   }));
                           }
-                          var exit = 0;
-                          switch (message.TAG | 0) {
-                            case /* Connected */0 :
-                                var player = message._0;
-                                return Curry._1(setPlayer, (function (param) {
-                                              return player;
-                                            }));
-                            case /* LobbyCreated */1 :
-                            case /* LobbyUpdated */2 :
-                                exit = 1;
-                                break;
-                            case /* LobbyClosed */3 :
-                                return Curry._1(setInLobby, (function (param) {
-                                              
-                                            }));
-                            case /* ProgressCreated */4 :
-                            case /* ProgressUpdated */5 :
-                                exit = 2;
-                                break;
-                            case /* ServerError */6 :
-                                return ;
-                            
-                          }
-                          switch (exit) {
-                            case 1 :
-                                var inLobby = message._0;
-                                return Curry._1(setInLobby, (function (param) {
-                                              return inLobby;
-                                            }));
-                            case 2 :
-                                var inProgress = message._0;
-                                return Curry._1(setInProgress, (function (param) {
-                                              return inProgress;
-                                            }));
-                            
-                          }
+                          return Curry._1(onMessage, message);
                         }));
                   
                 }));
-          ws.addEventListener("close", (function (param) {
-                  return Curry._1(sendMessage, {
-                              TAG: /* Player */2,
-                              _0: /* Disconnect */0,
-                              _1: playerId
-                            });
-                }));
           ws.addEventListener("error", (function (param) {
-                  return Log.error([
-                              "socket error for player",
-                              playerId
-                            ]);
+                  return Log.error(["socket error"]);
                 }));
           return (function (param) {
                     ws.close();
@@ -108,10 +50,7 @@ function hook(playerId) {
                   });
         }), []);
   return {
-          player: match[0],
-          inLobby: match$1[0],
-          inProgress: match$2[0],
-          error: match$3[0],
+          error: match[0],
           sendMessage: sendMessage
         };
 }

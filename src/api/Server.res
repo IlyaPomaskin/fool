@@ -103,10 +103,7 @@ wsServer
         | Lobby(Start, playerId, gameId) =>
           playerId
           ->GameInstance.startGame(gameId)
-          ->Result.map(progress => {
-            broadcastToPlayers(progress.players, LobbyClosed(gameId))
-            broadcastToPlayers(progress.players, ProgressCreated(progress))
-          })
+          ->Result.map(progress => broadcastToPlayers(progress.players, ProgressCreated(progress)))
         | Progress(move, playerId, gameId) =>
           playerId
           ->GameInstance.dispatchMove(gameId, move)
