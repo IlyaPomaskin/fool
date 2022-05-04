@@ -5,19 +5,16 @@ import * as Curry from "rescript/lib/es6/curry.js";
 import * as UseWs from "./hooks/UseWs.mjs";
 import * as Utils from "./Utils.mjs";
 import * as React from "react";
-import * as GameUI from "./components/GameUI.mjs";
-import * as LobbyUI from "./components/LobbyUI.mjs";
-import * as ClientUI from "./components/ClientUI.mjs";
+import * as InLobbyScreen from "./components/InLobbyScreen.mjs";
+import * as InProgressScreen from "./components/InProgressScreen.mjs";
+import * as LobbySetupScreen from "./components/LobbySetupScreen.mjs";
 
 function Index$AuthorizationUI(Props) {
   var onMessage = Props.onMessage;
   React.useEffect((function () {
           var sessionId = localStorage.getItem("sessionId");
           if (!(sessionId == null)) {
-            Curry._1(onMessage, {
-                  TAG: /* Login */1,
-                  _0: sessionId
-                });
+            console.log("sessionId", sessionId);
           }
           
         }), []);
@@ -42,11 +39,6 @@ function Index$AuthorizationUI(Props) {
                     }),
                   children: Utils.uiStr("Create user")
                 }));
-}
-
-function Index$LobbySetupScreen(Props) {
-  var playerId = Props.playerId;
-  return React.createElement("div", undefined, Utils.uiStr("lobby setup " + playerId));
 }
 
 function Index$PlayerScreen(Props) {
@@ -119,48 +111,37 @@ function Index$PlayerScreen(Props) {
   var match$2 = UseWs.hook(onMessage);
   var sendMessage = match$2.sendMessage;
   var error = match$2.error;
+  var tmp;
   if (typeof screen === "number") {
-    return React.createElement(Index$AuthorizationUI, {
+    tmp = React.createElement(Index$AuthorizationUI, {
+          onMessage: sendMessage
+        });
+  } else {
+    switch (screen.TAG | 0) {
+      case /* LobbySetupScreen */0 :
+          tmp = React.createElement(LobbySetupScreen.make, {
+                playerId: screen._0,
                 onMessage: sendMessage
               });
+          break;
+      case /* InLobbyScreen */1 :
+          tmp = React.createElement(InLobbyScreen.make, {
+                game: screen._0,
+                onMessage: sendMessage,
+                playerId: screen._1
+              });
+          break;
+      case /* InProgressScreen */2 :
+          tmp = React.createElement(InProgressScreen.make, {
+                game: screen._0,
+                playerId: screen._1,
+                onMessage: sendMessage
+              });
+          break;
+      
+    }
   }
-  switch (screen.TAG | 0) {
-    case /* LobbySetupScreen */0 :
-        return React.createElement(Index$LobbySetupScreen, {
-                    playerId: screen._0
-                  });
-    case /* InLobbyScreen */1 :
-        return React.createElement(LobbyUI.make, {
-                    game: screen._0,
-                    onMessage: sendMessage,
-                    playerId: screen._1
-                  });
-    case /* InProgressScreen */2 :
-        var playerId = screen._1;
-        var game = screen._0;
-        return React.createElement("div", undefined, React.createElement("div", undefined, error !== undefined ? React.createElement("div", undefined, Utils.uiStr("error: " + error)) : React.createElement("div", undefined, Utils.uiStr("No error"))), React.createElement(GameUI.InProgressUI.make, {
-                        game: game
-                      }), React.createElement("div", {
-                        className: "flex flex-wrap"
-                      }, Utils.uiList(game.players, (function (player) {
-                              return React.createElement(ClientUI.make, {
-                                          className: "m-1 flex-initial w-96",
-                                          player: player,
-                                          isOwner: player.id === playerId,
-                                          game: game,
-                                          onMove: (function (move) {
-                                              return Curry._1(sendMessage, {
-                                                          TAG: /* Progress */4,
-                                                          _0: move,
-                                                          _1: playerId,
-                                                          _2: game.gameId
-                                                        });
-                                            }),
-                                          key: player.id
-                                        });
-                            }))));
-    
-  }
+  return React.createElement("div", undefined, React.createElement("div", undefined, error !== undefined ? React.createElement("div", undefined, Utils.uiStr("error: " + error)) : React.createElement("div", undefined, Utils.uiStr("No error"))), tmp);
 }
 
 function $$default(param) {

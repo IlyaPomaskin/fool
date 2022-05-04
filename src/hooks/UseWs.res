@@ -11,12 +11,11 @@ let hook = (onMessage): hookReturn => {
 
   let ws = React.useMemo0(_ => WebSocket.make(`ws://localhost:3001/ws`))
 
-  let sendMessage = React.useCallback1((message: gameMessageFromClient) => {
-    Js.log2("ws", ws)
+  let sendMessage = React.useCallback1(message => {
     ws->WebSocket.sendText(Serializer.serializeClientMessage(message))
   }, [ws])
 
-  React.useEffect0(() => {
+  React.useEffect1(() => {
     ws->WebSocket.addMessageListener(event => {
       event
       ->WebSocket.messageAsText
@@ -41,7 +40,7 @@ let hook = (onMessage): hookReturn => {
     })
 
     Some(() => WebSocket.close(ws))
-  })
+  }, [sendMessage])
 
   {
     error: error,

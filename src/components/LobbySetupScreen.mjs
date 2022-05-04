@@ -4,18 +4,16 @@ import * as Base from "./Base.mjs";
 import * as Curry from "rescript/lib/es6/curry.js";
 import * as Utils from "../Utils.mjs";
 import * as React from "react";
-import * as Belt_List from "rescript/lib/es6/belt_List.js";
 
-function LobbyUI(Props) {
-  var game = Props.game;
-  var onMessage = Props.onMessage;
+function LobbySetupScreen(Props) {
   var playerId = Props.playerId;
+  var onMessage = Props.onMessage;
   var match = React.useState(function () {
         return "";
       });
   var setGameId = match[1];
   var gameId = match[0];
-  return React.createElement("div", undefined, React.createElement(Base.Button.make, {
+  return React.createElement("div", undefined, Utils.uiStr("lobby setup " + playerId), React.createElement(Base.Button.make, {
                   onClick: (function (param) {
                       return Curry._1(onMessage, {
                                   TAG: /* Lobby */3,
@@ -42,33 +40,10 @@ function LobbyUI(Props) {
                                     });
                         }),
                       children: Utils.uiStr("lobby connect")
-                    })), React.createElement("div", undefined, React.createElement("div", undefined, Utils.uiStr("Lobby Id: " + game.gameId)), React.createElement(Base.Button.make, {
-                      pressed: Belt_List.has(game.ready, playerId, (function (player, id) {
-                              return player.id === id;
-                            })),
-                      onClick: (function (param) {
-                          return Curry._1(onMessage, {
-                                      TAG: /* Lobby */3,
-                                      _0: /* Ready */2,
-                                      _1: playerId,
-                                      _2: game.gameId
-                                    });
-                        }),
-                      children: Utils.uiStr("lobby ready")
-                    }), React.createElement(Base.Button.make, {
-                      onClick: (function (param) {
-                          return Curry._1(onMessage, {
-                                      TAG: /* Lobby */3,
-                                      _0: /* Start */3,
-                                      _1: playerId,
-                                      _2: game.gameId
-                                    });
-                        }),
-                      children: Utils.uiStr("lobby start")
                     })));
 }
 
-var make = LobbyUI;
+var make = LobbySetupScreen;
 
 export {
   make ,

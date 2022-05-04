@@ -3,12 +3,12 @@ open Utils
 
 module AuthorizationUI = {
   @react.component
-  let make = (~onMessage: gameMessageFromClient => unit) => {
+  let make = (~onMessage) => {
     React.useEffect0(() => {
       let sessionId = LocalStorage.getItem("sessionId")->Js.Nullable.toOption
 
       switch sessionId {
-      | Some(sessionId) => onMessage(Login(sessionId))
+      | Some(sessionId) => Js.log2("sessionId", sessionId)
       | None => ()
       }
 
@@ -21,13 +21,6 @@ module AuthorizationUI = {
       <input value={login} onChange={e => setLogin(_ => ReactEvent.Form.target(e)["value"])} />
       <Base.Button onClick={_ => onMessage(Register(login))}> {uiStr("Create user")} </Base.Button>
     </div>
-  }
-}
-
-module LobbySetupScreen = {
-  @react.component
-  let make = (~playerId) => {
-    <div> {uiStr("lobby setup " ++ playerId)} </div>
   }
 }
 
@@ -56,33 +49,22 @@ module PlayerScreen = {
 
     let {error, sendMessage} = UseWs.hook(onMessage)
 
-    switch screen {
-    | AuthorizationScreen => <AuthorizationUI onMessage={sendMessage} />
-    | LobbySetupScreen(playerId) => <LobbySetupScreen playerId={playerId} />
-    | InLobbyScreen(game, playerId) => <LobbyUI playerId game onMessage={sendMessage} />
-    | InProgressScreen(game, playerId) =>
+    <div>
       <div>
-        <div>
-          {switch error {
-          | Some(err) => <div> {uiStr("error: " ++ err)} </div>
-          | None => <div> {uiStr("No error")} </div>
-          }}
-        </div>
-        <GameUI.InProgressUI game />
-        <div className="flex flex-wrap">
-          {game.players->uiList(player =>
-            <ClientUI
-              key={player.id}
-              isOwner={player.id === playerId}
-              className="m-1 flex-initial w-96"
-              player
-              game
-              onMove={move => sendMessage(Progress(move, playerId, game.gameId))}
-            />
-          )}
-        </div>
+        {switch error {
+        | Some(err) => <div> {uiStr("error: " ++ err)} </div>
+        | None => <div> {uiStr("No error")} </div>
+        }}
       </div>
-    }
+      {switch screen {
+      | AuthorizationScreen => <AuthorizationUI onMessage={sendMessage} />
+      | LobbySetupScreen(playerId) =>
+        <LobbySetupScreen playerId={playerId} onMessage={sendMessage} />
+      | InLobbyScreen(game, playerId) => <InLobbyScreen playerId game onMessage={sendMessage} />
+      | InProgressScreen(game, playerId) =>
+        <InProgressScreen playerId game onMessage={sendMessage} />
+      }}
+    </div>
   }
 }
 

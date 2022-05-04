@@ -17,7 +17,6 @@ function hook(onMessage) {
           return new WebSocket("ws://localhost:3001/ws");
         }), []);
   var sendMessage = React.useCallback((function (message) {
-          console.log("ws", ws);
           ws.send(Serializer.serializeClientMessage(message));
           
         }), [ws]);
@@ -48,7 +47,7 @@ function hook(onMessage) {
                     ws.close();
                     
                   });
-        }), []);
+        }), [sendMessage]);
   return {
           error: match[0],
           sendMessage: sendMessage
