@@ -13,7 +13,12 @@ function LobbySetupScreen(Props) {
       });
   var setGameId = match[1];
   var gameId = match[0];
-  return React.createElement("div", undefined, Utils.uiStr("lobby setup " + player.id), React.createElement(Base.Button.make, {
+  return React.createElement("div", {
+              className: "m-2"
+            }, React.createElement(Base.Heading.make, {
+                  size: /* H5 */3,
+                  children: Utils.uiStr("Lobby select")
+                }), React.createElement(Base.Button.make, {
                   onClick: (function (param) {
                       return Curry._1(onMessage, {
                                   TAG: /* Lobby */3,
@@ -22,25 +27,26 @@ function LobbySetupScreen(Props) {
                                   _2: ""
                                 });
                     }),
-                  children: Utils.uiStr("create lobby")
-                }), React.createElement("div", undefined, React.createElement("input", {
-                      value: gameId,
-                      onChange: (function (e) {
-                          return Curry._1(setGameId, (function (param) {
-                                        return e.target.value;
-                                      }));
-                        })
-                    }), React.createElement(Base.Button.make, {
-                      onClick: (function (param) {
-                          return Curry._1(onMessage, {
-                                      TAG: /* Lobby */3,
-                                      _0: /* Enter */1,
-                                      _1: player.id,
-                                      _2: gameId
-                                    });
-                        }),
-                      children: Utils.uiStr("lobby connect")
-                    })));
+                  children: Utils.uiStr("New")
+                }), React.createElement("br", undefined), React.createElement("br", undefined), React.createElement("span", undefined, Utils.uiStr("Connect:")), React.createElement(Base.Input.make, {
+                  value: gameId,
+                  onChange: (function (value) {
+                      return Curry._1(setGameId, (function (param) {
+                                    return value;
+                                  }));
+                    }),
+                  className: "my-2"
+                }), React.createElement(Base.Button.make, {
+                  onClick: (function (param) {
+                      return Curry._1(onMessage, {
+                                  TAG: /* Lobby */3,
+                                  _0: /* Enter */1,
+                                  _1: player.id,
+                                  _2: gameId
+                                });
+                    }),
+                  children: Utils.uiStr("Connect")
+                }));
 }
 
 var make = LobbySetupScreen;

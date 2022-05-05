@@ -5,16 +5,17 @@ open Utils
 let make = (~player, ~onMessage) => {
   let (gameId, setGameId) = React.useState(_ => "")
 
-  <div>
-    {uiStr("lobby setup " ++ player.id)}
+  <div className="m-2">
+    <Base.Heading size={Base.Heading.H5}> {uiStr("Lobby select")} </Base.Heading>
     <Base.Button onClick={_ => onMessage(Lobby(Create, player.id, ""))}>
-      {uiStr("create lobby")}
+      {uiStr("New")}
     </Base.Button>
-    <div>
-      <input value={gameId} onChange={e => setGameId(_ => ReactEvent.Form.target(e)["value"])} />
-      <Base.Button onClick={_ => onMessage(Lobby(Enter, player.id, gameId))}>
-        {uiStr("lobby connect")}
-      </Base.Button>
-    </div>
+    <br />
+    <br />
+    <span> {uiStr("Connect:")} </span>
+    <Base.Input className="my-2" value={gameId} onChange={value => setGameId(_ => value)} />
+    <Base.Button onClick={_ => onMessage(Lobby(Enter, player.id, gameId))}>
+      {uiStr("Connect")}
+    </Base.Button>
   </div>
 }

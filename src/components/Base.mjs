@@ -4,6 +4,40 @@ import * as Curry from "rescript/lib/es6/curry.js";
 import * as Utils from "../Utils.mjs";
 import * as React from "react";
 
+function Base$Heading(Props) {
+  var classNameOpt = Props.className;
+  var size = Props.size;
+  var children = Props.children;
+  var className = classNameOpt !== undefined ? classNameOpt : "";
+  var sizeClassName;
+  switch (size) {
+    case /* H2 */0 :
+        sizeClassName = "text-4xl";
+        break;
+    case /* H3 */1 :
+        sizeClassName = "text-3xl";
+        break;
+    case /* H4 */2 :
+        sizeClassName = "text-2xl";
+        break;
+    case /* H5 */3 :
+        sizeClassName = "text-xl";
+        break;
+    
+  }
+  return React.createElement("h1", {
+              className: Utils.cx([
+                    "font-medium leading-tight",
+                    sizeClassName,
+                    className
+                  ])
+            }, children);
+}
+
+var Heading = {
+  make: Base$Heading
+};
+
 function Base$Button(Props) {
   var disabledOpt = Props.disabled;
   var classNameOpt = Props.className;
@@ -100,6 +134,7 @@ var Input = {
 };
 
 export {
+  Heading ,
   Button ,
   Switch ,
   Input ,

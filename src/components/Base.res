@@ -1,5 +1,25 @@
 open Utils
 
+module Heading = {
+  type size =
+    | H2
+    | H3
+    | H4
+    | H5
+
+  @react.component
+  let make = (~className: string="", ~size: size, ~children: React.element) => {
+    let sizeClassName = switch size {
+    | H2 => "text-4xl"
+    | H3 => "text-3xl"
+    | H4 => "text-2xl"
+    | H5 => "text-xl"
+    }
+
+    <h1 className={cx(["font-medium leading-tight", sizeClassName, className])}> children </h1>
+  }
+}
+
 module Button = {
   @react.component
   let make = (

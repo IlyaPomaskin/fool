@@ -14,7 +14,10 @@ function AuthorizationScreen(Props) {
   var login = match[0];
   return React.createElement("div", {
               className: "m-2"
-            }, React.createElement("span", undefined, Utils.uiStr("Login:")), React.createElement(Base.Input.make, {
+            }, React.createElement(Base.Heading.make, {
+                  size: /* H5 */3,
+                  children: Utils.uiStr("Authorization")
+                }), React.createElement("span", undefined, Utils.uiStr("Login:")), React.createElement(Base.Input.make, {
                   value: login,
                   onChange: (function (value) {
                       return Curry._1(setLogin, (function (param) {
