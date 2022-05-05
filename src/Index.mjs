@@ -12,15 +12,8 @@ import * as InLobbyScreen from "./components/InLobbyScreen.mjs";
 import * as InProgressScreen from "./components/InProgressScreen.mjs";
 import * as LobbySetupScreen from "./components/LobbySetupScreen.mjs";
 
-function Index$AuthorizationUI(Props) {
+function Index$AuthorizationScreen(Props) {
   var onMessage = Props.onMessage;
-  React.useEffect((function () {
-          var sessionId = localStorage.getItem("sessionId");
-          if (!(sessionId == null)) {
-            console.log("sessionId", sessionId);
-          }
-          
-        }), []);
   var match = React.useState(function () {
         return "";
       });
@@ -66,11 +59,9 @@ function Index$PlayerScreen(Props) {
                 Curry._1(setPlayer, (function (param) {
                         return player$1;
                       }));
-                Curry._1(setScreen, (function (param) {
-                        return /* LobbySetupScreen */1;
-                      }));
-                localStorage.setItem("sessionId", player$1.sessionId);
-                return ;
+                return Curry._1(setScreen, (function (param) {
+                              return /* LobbySetupScreen */1;
+                            }));
             case /* LobbyCreated */1 :
             case /* LobbyUpdated */2 :
                 exit = 1;
@@ -113,7 +104,7 @@ function Index$PlayerScreen(Props) {
   var exit = 0;
   if (typeof screen === "number") {
     if (screen === /* AuthorizationScreen */0) {
-      tmp = React.createElement(Index$AuthorizationUI, {
+      tmp = React.createElement(Index$AuthorizationScreen, {
             onMessage: sendMessage
           });
     } else if (player !== undefined) {

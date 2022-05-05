@@ -1,20 +1,9 @@
 open Types
 open Utils
 
-module AuthorizationUI = {
+module AuthorizationScreen = {
   @react.component
   let make = (~onMessage) => {
-    React.useEffect0(() => {
-      let sessionId = LocalStorage.getItem("sessionId")->Js.Nullable.toOption
-
-      switch sessionId {
-      | Some(sessionId) => Js.log2("sessionId", sessionId)
-      | None => ()
-      }
-
-      None
-    })
-
     let (login, setLogin) = React.useState(_ => "")
 
     <div>
@@ -40,7 +29,6 @@ module PlayerScreen = {
       | Connected(player) => {
           setPlayer(_ => Some(player))
           setScreen(_ => LobbySetupScreen)
-          LocalStorage.setItem("sessionId", player.sessionId)
         }
       | LobbyCreated(game)
       | LobbyUpdated(game) =>
@@ -69,7 +57,7 @@ module PlayerScreen = {
         }}
       </div>
       {switch (screen, player) {
-      | (AuthorizationScreen, _) => <AuthorizationUI onMessage={sendMessage} />
+      | (AuthorizationScreen, _) => <AuthorizationScreen onMessage={sendMessage} />
       | (LobbySetupScreen, Some(player)) => <LobbySetupScreen player onMessage={sendMessage} />
       | (InLobbyScreen(game), Some(player)) => <InLobbyScreen player game onMessage={sendMessage} />
       | (InProgressScreen(game), Some(player)) =>
