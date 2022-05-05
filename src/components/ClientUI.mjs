@@ -175,19 +175,7 @@ function useBeatCard(game, player) {
         };
 }
 
-function ClientUI(Props) {
-  var classNameOpt = Props.className;
-  var player = Props.player;
-  var isOwnerOpt = Props.isOwner;
-  var game = Props.game;
-  var onMove = Props.onMove;
-  var className = classNameOpt !== undefined ? classNameOpt : "";
-  var isOwner = isOwnerOpt !== undefined ? isOwnerOpt : false;
-  var match = useBeatCard(game, player);
-  var handleSelectToBeat = match.handleSelectToBeat;
-  var setBeat = match.setBeat;
-  var beatBy = match.beatBy;
-  var toBeat = match.toBeat;
+function useProgressActions(toBeat, beatBy, setBeat, onMove) {
   var handleBeat = function (param) {
     if (toBeat !== undefined && beatBy !== undefined) {
       Curry._1(setBeat, (function (param) {
@@ -222,30 +210,53 @@ function ClientUI(Props) {
   var handlePass = function (param) {
     return Curry._1(onMove, /* Pass */1);
   };
+  return {
+          handleBeat: handleBeat,
+          handleTake: handleTake,
+          handleMove: handleMove,
+          handlePass: handlePass
+        };
+}
+
+function ClientUI(Props) {
+  var classNameOpt = Props.className;
+  var player = Props.player;
+  var isOwnerOpt = Props.isOwner;
+  var game = Props.game;
+  var onMove = Props.onMove;
+  var className = classNameOpt !== undefined ? classNameOpt : "";
+  var isOwner = isOwnerOpt !== undefined ? isOwnerOpt : false;
+  var match = useBeatCard(game, player);
+  var handleSelectToBeat = match.handleSelectToBeat;
+  var beatBy = match.beatBy;
+  var toBeat = match.toBeat;
+  var match$1 = useProgressActions(toBeat, beatBy, match.setBeat, onMove);
   var isDefender = GameUtils.isDefender(game, player);
-  var match$1 = GameUtils.getPlayerGameState(game, player);
+  var match$2 = GameUtils.getPlayerGameState(game, player);
   var tmp;
-  switch (match$1) {
+  switch (match$2) {
     case /* Playing */0 :
-        tmp = React.createElement("div", undefined, React.createElement(ClientUI$Parts$deck, {
+        tmp = React.createElement("div", undefined, isOwner ? React.createElement("div", {
+                    className: "my-2"
+                  }, React.createElement(ClientUI$Parts$actions, {
+                        game: game,
+                        player: player,
+                        beat: [
+                          toBeat,
+                          beatBy
+                        ],
+                        onPass: match$1.handlePass,
+                        onTake: match$1.handleTake,
+                        onBeat: match$1.handleBeat
+                      })) : null, React.createElement(ClientUI$Parts$deck, {
                   game: game,
                   player: player,
                   beat: [
                     toBeat,
                     beatBy
                   ],
-                  onCardClick: isDefender ? Curry._1(handleSelectToBeat, false) : handleMove
-                }), isOwner ? React.createElement(ClientUI$Parts$actions, {
-                    game: game,
-                    player: player,
-                    beat: [
-                      toBeat,
-                      beatBy
-                    ],
-                    onPass: handlePass,
-                    onTake: handleTake,
-                    onBeat: handleBeat
-                  }) : null, React.createElement(ClientUI$Parts$table, {
+                  onCardClick: isDefender ? Curry._1(handleSelectToBeat, false) : match$1.handleMove
+                }), React.createElement(ClientUI$Parts$table, {
                   game: game,
                   player: player,
                   beat: [
@@ -284,6 +295,7 @@ var make = ClientUI;
 export {
   Parts ,
   useBeatCard ,
+  useProgressActions ,
   make ,
   
 }

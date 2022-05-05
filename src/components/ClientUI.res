@@ -119,16 +119,14 @@ let useBeatCard = (~game: inProgress, ~player: player): useBeatCardReturn => {
   }
 }
 
-@react.component
-let make = (
-  ~className: string="",
-  ~player: player,
-  ~isOwner: bool=false,
-  ~game: inProgress,
-  ~onMove: move => unit,
-) => {
-  let {toBeat, beatBy, setBeat, handleSelectToBeat} = useBeatCard(~game, ~player)
+type useProgressActionsReturn = {
+  handleBeat: unit => unit,
+  handleTake: unit => unit,
+  handleMove: card => unit,
+  handlePass: unit => unit,
+}
 
+let useProgressActions = (~toBeat, ~beatBy, ~setBeat, ~onMove): useProgressActionsReturn => {
   let handleBeat = _ => {
     switch (toBeat, beatBy) {
     | (Some(to), Some(by)) => {
@@ -145,6 +143,30 @@ let make = (
   let handleMove = card => onMove(Move(card))
   let handlePass = _ => onMove(Pass)
 
+  {
+    handleBeat: handleBeat,
+    handleTake: handleTake,
+    handleMove: handleMove,
+    handlePass: handlePass,
+  }
+}
+
+@react.component
+let make = (
+  ~className: string="",
+  ~player: player,
+  ~isOwner: bool=false,
+  ~game: inProgress,
+  ~onMove: move => unit,
+) => {
+  let {toBeat, beatBy, setBeat, handleSelectToBeat} = useBeatCard(~game, ~player)
+  let {handleBeat, handleTake, handleMove, handlePass} = useProgressActions(
+    ~toBeat,
+    ~beatBy,
+    ~setBeat,
+    ~onMove,
+  )
+
   let isDefender = GameUtils.isDefender(game, player)
 
   <div className={cx([className, "p-1 border rounded-md border-solid border-slate-500"])}>
@@ -160,24 +182,26 @@ let make = (
     | Draw => uiStr("Draw")
     | Playing =>
       <div>
+        {switch isOwner {
+        | true =>
+          <div className="my-2">
+            <Parts.actions
+              game
+              player
+              beat={(toBeat, beatBy)}
+              onPass={handlePass}
+              onTake={handleTake}
+              onBeat={handleBeat}
+            />
+          </div>
+        | false => React.null
+        }}
         <Parts.deck
           game
           player
           beat={(toBeat, beatBy)}
           onCardClick={isDefender ? handleSelectToBeat(false) : handleMove}
         />
-        {switch isOwner {
-        | true =>
-          <Parts.actions
-            game
-            player
-            beat={(toBeat, beatBy)}
-            onPass={handlePass}
-            onTake={handleTake}
-            onBeat={handleBeat}
-          />
-        | false => React.null
-        }}
         <Parts.table game player beat={(toBeat, beatBy)} onCardClick={handleSelectToBeat(true)} />
       </div>
     }}
