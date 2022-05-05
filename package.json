@@ -12,6 +12,7 @@
     "rescript-logger": "^2.1.0",
     "rescript-nodejs": "^14.2.0",
     "rescript-webapi": "^0.6.1",
+    "tw-elements": "^1.0.0-alpha12",
     "ws": "^8.5.0"
   },
   "repository": "https://github.com/ryyppy/rescript-nextjs-template",

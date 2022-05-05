@@ -3,7 +3,9 @@ module.exports = {
     "./src/components/**/*.res",
     "./src/layouts/**/*.res",
     "./src/*.res",
+    "./node_modules/tw-elements/dist/js/**/*.js",
   ],
+  plugins: [require("tw-elements/dist/plugin")],
   theme: {
     extend: {},
     /* Most of the time we customize the font-sizes,
@@ -50,5 +52,4 @@ module.exports = {
       ],
     },
   },
-  plugins: [],
 };

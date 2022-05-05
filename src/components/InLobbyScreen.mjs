@@ -10,8 +10,8 @@ function InLobbyScreen(Props) {
   var game = Props.game;
   var onMessage = Props.onMessage;
   var player = Props.player;
-  return React.createElement("div", undefined, React.createElement("div", undefined, Utils.uiStr("Lobby Id: " + game.gameId)), React.createElement(Base.Button.make, {
-                  pressed: Belt_List.has(game.ready, player.id, (function (player, id) {
+  return React.createElement("div", undefined, React.createElement("div", undefined, Utils.uiStr("Lobby Id: " + game.gameId)), React.createElement(Base.Switch.make, {
+                  checked: Belt_List.has(game.ready, player.id, (function (player, id) {
                           return player.id === id;
                         })),
                   onClick: (function (param) {
@@ -22,7 +22,7 @@ function InLobbyScreen(Props) {
                                   _2: game.gameId
                                 });
                     }),
-                  children: Utils.uiStr("lobby ready")
+                  text: "Ready?"
                 }), React.createElement(Base.Button.make, {
                   onClick: (function (param) {
                       return Curry._1(onMessage, {

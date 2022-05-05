@@ -1,18 +1,6 @@
 open Types
 open Utils
 
-module AuthorizationScreen = {
-  @react.component
-  let make = (~onMessage) => {
-    let (login, setLogin) = React.useState(_ => "")
-
-    <div>
-      <input value={login} onChange={e => setLogin(_ => ReactEvent.Form.target(e)["value"])} />
-      <Base.Button onClick={_ => onMessage(Register(login))}> {uiStr("Create user")} </Base.Button>
-    </div>
-  }
-}
-
 module PlayerScreen = {
   @react.component
   let make = () => {

@@ -20,15 +20,16 @@ function ClientUI$Parts$actions(Props) {
   var onBeat = Props.onBeat;
   var isDefender = GameUtils.isDefender(game, player);
   var isPassDisabled = !GameUtils.isCanPass(game, player);
+  var isPassed = GameUtils.isPassed(game, player);
   var isTakeDisabled = !GameUtils.isCanTake(game, player);
   var isBeatDisabled = !isDefender || Belt_Option.isNone(beat[0]) || Belt_Option.isNone(beat[1]);
   return React.createElement("div", {
               className: "grid grid-flow-col gap-1"
-            }, React.createElement(Base.Button.make, {
+            }, React.createElement(Base.Switch.make, {
                   disabled: isPassDisabled,
-                  pressed: GameUtils.isPassed(game, player),
+                  checked: isPassed,
                   onClick: onPass,
-                  children: Utils.uiStr("pass")
+                  text: "pass"
                 }), React.createElement(Base.Button.make, {
                   disabled: isTakeDisabled,
                   onClick: onTake,

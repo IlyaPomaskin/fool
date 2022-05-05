@@ -14,14 +14,12 @@ module Parts = {
     let (toBeat, beatBy) = beat
     let isDefender = GameUtils.isDefender(game, player)
     let isPassDisabled = !GameUtils.isCanPass(game, player)
+    let isPassed = GameUtils.isPassed(game, player)
     let isTakeDisabled = !GameUtils.isCanTake(game, player)
     let isBeatDisabled = !isDefender || Option.isNone(toBeat) || Option.isNone(beatBy)
 
     <div className="grid grid-flow-col gap-1">
-      <Base.Button
-        disabled={isPassDisabled} pressed={GameUtils.isPassed(game, player)} onClick={onPass}>
-        {uiStr("pass")}
-      </Base.Button>
+      <Base.Switch disabled={isPassDisabled} onClick={onPass} checked={isPassed} text="pass" />
       <Base.Button disabled={isTakeDisabled} onClick={onTake}> {uiStr("take")} </Base.Button>
       <Base.Button disabled={isBeatDisabled} onClick={onBeat}> {uiStr("beat")} </Base.Button>
     </div>
