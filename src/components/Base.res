@@ -55,7 +55,9 @@ module Switch = {
     ~onClick: ReactEvent.Form.t => unit,
     ~text: string,
     ~className: string="",
-  ) =>
+  ) => {
+    let uniqId = React.useMemo0(() => string_of_int(Js.Math.random_int(0, 10000000)))
+
     <div className={cx(["form-check form-switch", className])}>
       <input
         disabled
@@ -65,23 +67,24 @@ module Switch = {
           "form-check-input appearance-none w-9 -ml-10 loat-left h-5 align-top",
           "rounded-full f",
           "bg-white bg-no-repeat bg-contain bg-gray-300",
-          "focus:outline-none cursor-pointer shadow-sm",
+          "focus:outline-none shadow-sm",
           disabled ? "pointer-events-none filter-none opacity-50" : "",
         ])}
         type_="checkbox"
         role="switch"
-        id="flexSwitchCheckDefault"
+        id={"switch-" ++ uniqId}
       />
       <label
         disabled
         className={cx([
-          "form-check-label inline-block text-gray-800",
-          disabled ? "opacity-50" : "",
+          "ml-2 form-check-label cursor-pointer inline-block text-gray-800 select-none",
+          disabled ? "pointer-events-none opacity-50" : "",
         ])}
-        htmlFor="flexSwitchCheckDefault">
+        htmlFor={"switch-" ++ uniqId}>
         {uiStr(text)}
       </label>
     </div>
+  }
 }
 
 module Input = {

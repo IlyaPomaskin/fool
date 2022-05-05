@@ -78,26 +78,14 @@ function toggleReady(game, player) {
           _0: {
             gameId: game.gameId,
             players: game.players,
-            ready: inList ? game.ready : Belt_List.add(game.ready, player)
+            ready: inList ? Belt_List.keep(game.ready, (function (p) {
+                      return p.id !== player.id;
+                    })) : Belt_List.add(game.ready, player)
           }
         };
 }
 
 function startGame(game) {
-  var isEnoughPlayers = Belt_List.length(game.players) > 1;
-  var isAllPlayersAreReady = Belt_List.length(game.players) === Belt_List.length(game.ready);
-  if (!isEnoughPlayers) {
-    return {
-            TAG: /* Error */1,
-            _0: "Not enough players"
-          };
-  }
-  if (!isAllPlayersAreReady) {
-    return {
-            TAG: /* Error */1,
-            _0: "Not all players are ready"
-          };
-  }
   var match = Player.dealDeckToPlayers(Deck.makeShuffled(undefined), game.players);
   var deck = match[1];
   var players = match[0];

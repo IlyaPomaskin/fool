@@ -44,7 +44,11 @@ let toggleReady = (playerId, gameId) => {
 let startGame = (playerId, gameId) => {
   players
   ->PlayersMap.get(playerId)
-  ->Result.flatMap(_ => gamesInLobby->LobbyGameMap.get(gameId))
+  ->Result.flatMap(player =>
+    gamesInLobby
+    ->LobbyGameMap.get(gameId)
+    ->Result.flatMap(game => GameUtils.isCanStart(game, player))
+  )
   ->Result.flatMap(game => Game.startGame(game))
   ->Result.flatMap(game => {
     gamesInLobby->LobbyGameMap.remove(gameId)

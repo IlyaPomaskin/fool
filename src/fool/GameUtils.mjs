@@ -142,6 +142,43 @@ function findPlayerById(game, playerId) {
               }));
 }
 
+function isFirstPlayerAddedToList(players, player) {
+  return Belt_Option.getWithDefault(Belt_Option.map(Belt_List.get(players, Belt_List.length(players) - 1 | 0), (function (p) {
+                    return p.id === player.id;
+                  })), false);
+}
+
+function isCanStart(game, player) {
+  var isEnoughPlayers = Belt_List.length(game.players) > 1;
+  var isAllPlayersAreReady = Belt_List.cmpByLength(game.players, game.ready) === 0;
+  var isOwner = isFirstPlayerAddedToList(game.players, player);
+  if (isOwner) {
+    if (isEnoughPlayers) {
+      if (isAllPlayersAreReady) {
+        return {
+                TAG: /* Ok */0,
+                _0: game
+              };
+      } else {
+        return {
+                TAG: /* Error */1,
+                _0: "Not all players are ready"
+              };
+      }
+    } else {
+      return {
+              TAG: /* Error */1,
+              _0: "Not enough players"
+            };
+    }
+  } else {
+    return {
+            TAG: /* Error */1,
+            _0: "Only owner can start game"
+          };
+  }
+}
+
 export {
   isDefender ,
   isAttacker ,
@@ -157,6 +194,8 @@ export {
   isAllPassed ,
   getPlayerGameState ,
   findPlayerById ,
+  isFirstPlayerAddedToList ,
+  isCanStart ,
   
 }
 /* No side effect */

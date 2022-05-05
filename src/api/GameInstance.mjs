@@ -53,8 +53,10 @@ function toggleReady(playerId, gameId) {
 }
 
 function startGame(playerId, gameId) {
-  return Belt_Result.flatMap(Belt_Result.flatMap(Belt_Result.flatMap($$Storage.PlayersMap.get(players, playerId), (function (param) {
-                        return $$Storage.LobbyGameMap.get(gamesInLobby, gameId);
+  return Belt_Result.flatMap(Belt_Result.flatMap(Belt_Result.flatMap($$Storage.PlayersMap.get(players, playerId), (function (player) {
+                        return Belt_Result.flatMap($$Storage.LobbyGameMap.get(gamesInLobby, gameId), (function (game) {
+                                      return GameUtils.isCanStart(game, player);
+                                    }));
                       })), Game.startGame), (function (game) {
                 $$Storage.LobbyGameMap.remove(gamesInLobby, gameId);
                 return $$Storage.ProgressGameMap.set(gamesInProgress, gameId, game);

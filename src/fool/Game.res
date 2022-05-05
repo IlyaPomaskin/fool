@@ -39,41 +39,34 @@ let toggleReady = (game: inLobby, player) => {
 
     Ok({
       ...game,
-      ready: !inList ? List.add(game.ready, player) : game.ready,
+      ready: !inList
+        ? List.add(game.ready, player)
+        : game.ready->List.keep(p => p.id !== player.id),
     })
   }
 }
 
 let startGame = (game: inLobby) => {
-  let isEnoughPlayers = List.length(game.players) > 1
-  let isAllPlayersAreReady = List.length(game.players) === List.length(game.ready)
+  let (players, deck) = Deck.makeShuffled()->Player.dealDeckToPlayers(game.players)
 
-  if !isEnoughPlayers {
-    Error("Not enough players")
-  } else if !isAllPlayersAreReady {
-    Error("Not all players are ready")
-  } else {
-    let (players, deck) = Deck.makeShuffled()->Player.dealDeckToPlayers(game.players)
+  let trump = getTrump(deck, players)
+  let attacker = trump->Option.flatMap(tr => Player.findFirstAttacker(tr, players))
+  let defender = attacker->Option.flatMap(at => Player.getNextPlayer(at, players))
 
-    let trump = getTrump(deck, players)
-    let attacker = trump->Option.flatMap(tr => Player.findFirstAttacker(tr, players))
-    let defender = attacker->Option.flatMap(at => Player.getNextPlayer(at, players))
-
-    switch (trump, attacker, defender) {
-    | (Some(trump), Some(a), Some(d)) =>
-      Ok({
-        gameId: game.gameId,
-        attacker: a,
-        defender: d,
-        table: list{},
-        trump: trump,
-        pass: list{},
-        players: players,
-        deck: deck,
-      })
-    | (None, _, _) => Error("Can't find trump")
-    | _ => Error("Can't find next attacker/defender")
-    }
+  switch (trump, attacker, defender) {
+  | (Some(trump), Some(a), Some(d)) =>
+    Ok({
+      gameId: game.gameId,
+      attacker: a,
+      defender: d,
+      table: list{},
+      trump: trump,
+      pass: list{},
+      players: players,
+      deck: deck,
+    })
+  | (None, _, _) => Error("Can't find trump")
+  | _ => Error("Can't find next attacker/defender")
   }
 }
 

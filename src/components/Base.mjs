@@ -3,6 +3,7 @@
 import * as Curry from "rescript/lib/es6/curry.js";
 import * as Utils from "../Utils.mjs";
 import * as React from "react";
+import * as Js_math from "rescript/lib/es6/js_math.js";
 
 function Base$Heading(Props) {
   var classNameOpt = Props.className;
@@ -73,6 +74,9 @@ function Base$Switch(Props) {
   var classNameOpt = Props.className;
   var disabled = disabledOpt !== undefined ? disabledOpt : false;
   var className = classNameOpt !== undefined ? classNameOpt : "";
+  var uniqId = React.useMemo((function () {
+          return String(Js_math.random_int(0, 10000000));
+        }), []);
   return React.createElement("div", {
               className: Utils.cx([
                     "form-check form-switch",
@@ -83,10 +87,10 @@ function Base$Switch(Props) {
                         "form-check-input appearance-none w-9 -ml-10 loat-left h-5 align-top",
                         "rounded-full f",
                         "bg-white bg-no-repeat bg-contain bg-gray-300",
-                        "focus:outline-none cursor-pointer shadow-sm",
+                        "focus:outline-none shadow-sm",
                         disabled ? "pointer-events-none filter-none opacity-50" : ""
                       ]),
-                  id: "flexSwitchCheckDefault",
+                  id: "switch-" + uniqId,
                   role: "switch",
                   checked: checked,
                   disabled: disabled,
@@ -94,11 +98,11 @@ function Base$Switch(Props) {
                   onChange: onClick
                 }), React.createElement("label", {
                   className: Utils.cx([
-                        "form-check-label inline-block text-gray-800",
-                        disabled ? "opacity-50" : ""
+                        "ml-2 form-check-label cursor-pointer inline-block text-gray-800 select-none",
+                        disabled ? "pointer-events-none opacity-50" : ""
                       ]),
                   disabled: disabled,
-                  htmlFor: "flexSwitchCheckDefault"
+                  htmlFor: "switch-" + uniqId
                 }, Utils.uiStr(text)));
 }
 
