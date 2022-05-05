@@ -6,7 +6,6 @@
     "@rescript/react",
     "@ryyppy/rescript-promise",
     "rescript-jzon",
-    "rescript-webapi",
     "rescript-nodejs",
     "rescript-dnd"
   ],

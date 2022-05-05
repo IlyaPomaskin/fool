@@ -4,9 +4,9 @@ import * as Log from "../Log.mjs";
 import * as Curry from "rescript/lib/es6/curry.js";
 import * as Utils from "../Utils.mjs";
 import * as React from "react";
+import * as $$WebSocket from "../bindings/WebSocket.mjs";
 import * as Serializer from "../Serializer.mjs";
 import * as Belt_Result from "rescript/lib/es6/belt_Result.js";
-import * as Webapi__WebSocket from "rescript-webapi/src/Webapi/Webapi__WebSocket.mjs";
 
 function hook(onMessage) {
   var match = React.useState(function () {
@@ -23,7 +23,7 @@ function hook(onMessage) {
         }), [ws]);
   React.useEffect((function () {
           var handleMessage = function ($$event) {
-            Belt_Result.map(Belt_Result.flatMap(Utils.toResult(Webapi__WebSocket.messageAsText($$event), {
+            Belt_Result.map(Belt_Result.flatMap(Utils.toResult($$WebSocket.messageAsText($$event), {
                           NAME: "SyntaxError",
                           VAL: "Message from server cannot be parsed as text"
                         }), Serializer.deserializeServerMessage), (function (message) {

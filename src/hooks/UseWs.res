@@ -1,5 +1,4 @@
 open Types
-open Webapi
 
 type hookReturn = {
   error: option<string>,
