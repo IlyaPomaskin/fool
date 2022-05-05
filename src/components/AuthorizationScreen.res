@@ -5,10 +5,9 @@ open Utils
 let make = (~onMessage) => {
   let (login, setLogin) = React.useState(_ => "")
 
-  <div>
-    <Base.Input className="m-2 mb-0" value={login} onChange={value => setLogin(_ => value)} />
-    <Base.Button className="m-2" onClick={_ => onMessage(Register(login))}>
-      {uiStr("normal")}
-    </Base.Button>
+  <div className="m-2">
+    <span> {uiStr("Login:")} </span>
+    <Base.Input className="my-2" value={login} onChange={value => setLogin(_ => value)} />
+    <Base.Button onClick={_ => onMessage(Register(login))}> {uiStr("Register")} </Base.Button>
   </div>
 }

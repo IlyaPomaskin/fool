@@ -10,7 +10,9 @@ function InLobbyScreen(Props) {
   var game = Props.game;
   var onMessage = Props.onMessage;
   var player = Props.player;
-  return React.createElement("div", undefined, React.createElement("div", undefined, Utils.uiStr("Lobby Id: " + game.gameId)), React.createElement(Base.Switch.make, {
+  return React.createElement("div", undefined, React.createElement("div", {
+                  className: "m-1"
+                }, Utils.uiStr("Lobby Id: " + game.gameId)), React.createElement(Base.Switch.make, {
                   checked: Belt_List.has(game.ready, player.id, (function (player, id) {
                           return player.id === id;
                         })),

@@ -4,7 +4,7 @@ open Utils
 @react.component
 let make = (~game: inLobby, ~onMessage, ~player) => {
   <div>
-    <div> {uiStr("Lobby Id: " ++ game.gameId)} </div>
+    <div className="m-1"> {uiStr("Lobby Id: " ++ game.gameId)} </div>
     <Base.Switch
       text="Ready?"
       checked={game.ready->List.has(player.id, (player, id) => player.id === id)}

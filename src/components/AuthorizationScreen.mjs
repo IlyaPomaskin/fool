@@ -12,23 +12,24 @@ function AuthorizationScreen(Props) {
       });
   var setLogin = match[1];
   var login = match[0];
-  return React.createElement("div", undefined, React.createElement(Base.Input.make, {
+  return React.createElement("div", {
+              className: "m-2"
+            }, React.createElement("span", undefined, Utils.uiStr("Login:")), React.createElement(Base.Input.make, {
                   value: login,
                   onChange: (function (value) {
                       return Curry._1(setLogin, (function (param) {
                                     return value;
                                   }));
                     }),
-                  className: "m-2 mb-0"
+                  className: "my-2"
                 }), React.createElement(Base.Button.make, {
-                  className: "m-2",
                   onClick: (function (param) {
                       return Curry._1(onMessage, {
                                   TAG: /* Register */0,
                                   _0: login
                                 });
                     }),
-                  children: Utils.uiStr("normal")
+                  children: Utils.uiStr("Register")
                 }));
 }
 
