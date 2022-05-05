@@ -7,7 +7,8 @@
     "@ryyppy/rescript-promise",
     "rescript-jzon",
     "rescript-webapi",
-    "rescript-nodejs"
+    "rescript-nodejs",
+    "rescript-dnd"
   ],
   "bsc-flags": ["-open Belt"],
   "ppx-flags": [],
