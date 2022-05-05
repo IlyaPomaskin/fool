@@ -17,37 +17,36 @@ function hook(onMessage) {
           return new WebSocket("ws://localhost:3001/ws");
         }), []);
   var sendMessage = React.useCallback((function (message) {
+          Log.logMessageFromClient(message);
           ws.send(Serializer.serializeClientMessage(message));
           
         }), [ws]);
   React.useEffect((function () {
-          ws.addEventListener("message", (function ($$event) {
-                  Belt_Result.map(Belt_Result.flatMap(Utils.toResult(Webapi__WebSocket.messageAsText($$event), {
-                                NAME: "SyntaxError",
-                                VAL: "Message from server cannot be parsed as text"
-                              }), Serializer.deserializeServerMessage), (function (message) {
-                          if (message.TAG === /* ServerError */5) {
-                            var msg = message._0;
-                            Curry._1(setError, (function (param) {
-                                    return msg;
-                                  }));
-                          } else {
-                            Curry._1(setError, (function (param) {
-                                    
-                                  }));
-                          }
-                          return Curry._1(onMessage, message);
-                        }));
-                  
-                }));
-          ws.addEventListener("error", (function (param) {
-                  return Log.error(["socket error"]);
-                }));
+          var handleMessage = function ($$event) {
+            Belt_Result.map(Belt_Result.flatMap(Utils.toResult(Webapi__WebSocket.messageAsText($$event), {
+                          NAME: "SyntaxError",
+                          VAL: "Message from server cannot be parsed as text"
+                        }), Serializer.deserializeServerMessage), (function (message) {
+                    if (message.TAG === /* ServerError */5) {
+                      var msg = message._0;
+                      Curry._1(setError, (function (param) {
+                              return msg;
+                            }));
+                    } else {
+                      Curry._1(setError, (function (param) {
+                              
+                            }));
+                    }
+                    return Curry._1(onMessage, message);
+                  }));
+            
+          };
+          ws.addEventListener("message", handleMessage);
           return (function (param) {
-                    ws.close();
+                    ws.removeEventListener("message", handleMessage);
                     
                   });
-        }), [sendMessage]);
+        }), [ws]);
   return {
           error: match[0],
           sendMessage: sendMessage

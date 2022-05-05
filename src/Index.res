@@ -30,39 +30,51 @@ module PlayerScreen = {
     let (player, setPlayer) = React.useState(_ => None)
     let (screen, setScreen) = React.useState(_ => AuthorizationScreen)
 
-    let onMessage = React.useCallback0(message => {
-      switch (message, player) {
-      | (Connected(player), _) => {
+    let onMessage = React.useCallback1(message => {
+      Log.logMessageFromServer(
+        message,
+        player->Option.map(p => p.id)->Option.getWithDefault("no player"),
+      )
+
+      switch message {
+      | Connected(player) => {
           setPlayer(_ => Some(player))
-          setScreen(_ => LobbySetupScreen(player.id))
+          setScreen(_ => LobbySetupScreen)
           LocalStorage.setItem("sessionId", player.sessionId)
         }
-      | (LobbyCreated(game), Some(player))
-      | (LobbyUpdated(game), Some(player)) =>
-        setScreen(_ => InLobbyScreen(game, player.id))
-      | (ProgressCreated(game), Some(player))
-      | (ProgressUpdated(game), Some(player)) =>
-        setScreen(_ => InProgressScreen(game, player.id))
-      | _ => ()
+      | LobbyCreated(game)
+      | LobbyUpdated(game) =>
+        setScreen(_ => InLobbyScreen(game))
+      | ProgressCreated(game)
+      | ProgressUpdated(game) =>
+        setScreen(_ => InProgressScreen(game))
+      | ServerError(msg) => Log.info(["ServerError", msg])
       }
-    })
+    }, [player])
 
     let {error, sendMessage} = UseWs.hook(onMessage)
 
     <div>
+      <div>
+        {switch player {
+        | Some(player) =>
+          <div> {uiStr("Player: ")} <PlayerUI.Short className="inline-block" player /> </div>
+        | None => uiStr("No player")
+        }}
+      </div>
       <div>
         {switch error {
         | Some(err) => <div> {uiStr("error: " ++ err)} </div>
         | None => <div> {uiStr("No error")} </div>
         }}
       </div>
-      {switch screen {
-      | AuthorizationScreen => <AuthorizationUI onMessage={sendMessage} />
-      | LobbySetupScreen(playerId) =>
-        <LobbySetupScreen playerId={playerId} onMessage={sendMessage} />
-      | InLobbyScreen(game, playerId) => <InLobbyScreen playerId game onMessage={sendMessage} />
-      | InProgressScreen(game, playerId) =>
-        <InProgressScreen playerId game onMessage={sendMessage} />
+      {switch (screen, player) {
+      | (AuthorizationScreen, _) => <AuthorizationUI onMessage={sendMessage} />
+      | (LobbySetupScreen, Some(player)) => <LobbySetupScreen player onMessage={sendMessage} />
+      | (InLobbyScreen(game), Some(player)) => <InLobbyScreen player game onMessage={sendMessage} />
+      | (InProgressScreen(game), Some(player)) =>
+        <InProgressScreen player game onMessage={sendMessage} />
+      | _ => <div> {uiStr("unhandled case")} </div>
       }}
     </div>
   }

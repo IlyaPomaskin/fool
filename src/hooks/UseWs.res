@@ -12,16 +12,16 @@ let hook = (onMessage): hookReturn => {
   let ws = React.useMemo0(_ => WebSocket.make(`ws://localhost:3001/ws`))
 
   let sendMessage = React.useCallback1(message => {
+    Log.logMessageFromClient(message)
     ws->WebSocket.sendText(Serializer.serializeClientMessage(message))
   }, [ws])
 
   React.useEffect1(() => {
-    ws->WebSocket.addMessageListener(event => {
+    let handleMessage = event => {
       event
       ->WebSocket.messageAsText
       ->Utils.toResult(#SyntaxError("Message from server cannot be parsed as text"))
       ->Result.flatMap(Serializer.deserializeServerMessage)
-      // ->Utils.tapResult(message => Log.logMessageFromServer(message, playerId))
       ->Result.map(message => {
         switch message {
         | ServerError(msg) => setError(_ => Some(msg))
@@ -31,16 +31,12 @@ let hook = (onMessage): hookReturn => {
         onMessage(message)
       })
       ->ignore
-    })
+    }
 
-    // ws->WebSocket.addCloseListener(_ => sendMessage(Player(Disconnect, playerId)))
+    ws->WebSocket.addMessageListener(handleMessage)
 
-    ws->WebSocket.addErrorListener(_ => {
-      Log.error(["socket error"])
-    })
-
-    Some(() => WebSocket.close(ws))
-  }, [sendMessage])
+    Some(() => ws->WebSocket.removeMessageListener(handleMessage))
+  }, [ws])
 
   {
     error: error,

@@ -8,27 +8,27 @@ import * as ClientUI from "./ClientUI.mjs";
 
 function InProgressScreen(Props) {
   var game = Props.game;
-  var playerId = Props.playerId;
+  var player = Props.player;
   var onMessage = Props.onMessage;
   return React.createElement("div", undefined, React.createElement(GameUI.InProgressUI.make, {
                   game: game
                 }), React.createElement("div", {
                   className: "flex flex-wrap"
-                }, Utils.uiList(game.players, (function (player) {
+                }, Utils.uiList(game.players, (function (p) {
                         return React.createElement(ClientUI.make, {
                                     className: "m-1 flex-initial w-96",
-                                    player: player,
-                                    isOwner: player.id === playerId,
+                                    player: p,
+                                    isOwner: p.id === player.id,
                                     game: game,
                                     onMove: (function (move) {
                                         return Curry._1(onMessage, {
                                                     TAG: /* Progress */4,
                                                     _0: move,
-                                                    _1: playerId,
+                                                    _1: player.id,
                                                     _2: game.gameId
                                                   });
                                       }),
-                                    key: player.id
+                                    key: p.id
                                   });
                       }))));
 }

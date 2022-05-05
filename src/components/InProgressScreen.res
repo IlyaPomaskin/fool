@@ -2,18 +2,18 @@ open Types
 open Utils
 
 @react.component
-let make = (~game, ~playerId, ~onMessage) => {
+let make = (~game, ~player, ~onMessage) => {
   <div>
     <GameUI.InProgressUI game />
     <div className="flex flex-wrap">
-      {game.players->uiList(player =>
+      {game.players->uiList(p =>
         <ClientUI
-          key={player.id}
-          isOwner={player.id === playerId}
+          key={p.id}
+          isOwner={p.id === player.id}
           className="m-1 flex-initial w-96"
-          player
+          player={p}
           game
-          onMove={move => onMessage(Progress(move, playerId, game.gameId))}
+          onMove={move => onMessage(Progress(move, player.id, game.gameId))}
         />
       )}
     </div>

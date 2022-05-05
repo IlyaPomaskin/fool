@@ -107,6 +107,6 @@ type gameMessageFromServer =
 
 type clientScreen =
   | AuthorizationScreen
-  | LobbySetupScreen(playerId)
-  | InLobbyScreen(inLobby, playerId)
-  | InProgressScreen(inProgress, playerId)
+  | LobbySetupScreen
+  | InLobbyScreen(inLobby)
+  | InProgressScreen(inProgress)

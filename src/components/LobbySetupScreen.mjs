@@ -6,19 +6,19 @@ import * as Utils from "../Utils.mjs";
 import * as React from "react";
 
 function LobbySetupScreen(Props) {
-  var playerId = Props.playerId;
+  var player = Props.player;
   var onMessage = Props.onMessage;
   var match = React.useState(function () {
         return "";
       });
   var setGameId = match[1];
   var gameId = match[0];
-  return React.createElement("div", undefined, Utils.uiStr("lobby setup " + playerId), React.createElement(Base.Button.make, {
+  return React.createElement("div", undefined, Utils.uiStr("lobby setup " + player.id), React.createElement(Base.Button.make, {
                   onClick: (function (param) {
                       return Curry._1(onMessage, {
                                   TAG: /* Lobby */3,
                                   _0: /* Create */0,
-                                  _1: playerId,
+                                  _1: player.id,
                                   _2: ""
                                 });
                     }),
@@ -35,7 +35,7 @@ function LobbySetupScreen(Props) {
                           return Curry._1(onMessage, {
                                       TAG: /* Lobby */3,
                                       _0: /* Enter */1,
-                                      _1: playerId,
+                                      _1: player.id,
                                       _2: gameId
                                     });
                         }),
