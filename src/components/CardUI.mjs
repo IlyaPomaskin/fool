@@ -4,6 +4,7 @@ import * as Card from "../fool/Card.mjs";
 import * as Curry from "rescript/lib/es6/curry.js";
 import * as Utils from "../Utils.mjs";
 import * as React from "react";
+import * as CardDnd from "./CardDnd.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
 
@@ -173,11 +174,13 @@ function CardUI$deck(Props) {
   var deck = Props.deck;
   var classNameOpt = Props.className;
   var disabledOpt = Props.disabled;
+  var isDraggableOpt = Props.isDraggable;
   var isCardSelectedOpt = Props.isCardSelected;
   var isCardDisabledOpt = Props.isCardDisabled;
   var onCardClickOpt = Props.onCardClick;
   var className = classNameOpt !== undefined ? classNameOpt : "";
   var disabled = disabledOpt !== undefined ? disabledOpt : false;
+  var isDraggable = isDraggableOpt !== undefined ? isDraggableOpt : false;
   var isCardSelected = isCardSelectedOpt !== undefined ? isCardSelectedOpt : (function (param) {
         return false;
       });
@@ -191,16 +194,47 @@ function CardUI$deck(Props) {
                       className,
                       "leading"
                     ])
-              }, Utils.uiListWithIndex(deck, (function (index, card) {
-                      return React.createElement(CardUI$Local, {
-                                  card: card,
-                                  className: "inline-block mx-1",
-                                  disabled: disabled || Curry._1(isCardDisabled, card),
-                                  selected: Curry._1(isCardSelected, card),
-                                  onClick: onCardClick,
-                                  key: Card.cardToString(card) + String(index)
-                                });
-                    })));
+              }, React.createElement(CardDnd.Cards.DroppableContainer.make, {
+                    id: "deck",
+                    axis: /* X */0,
+                    accept: (function (param) {
+                        return false;
+                      }),
+                    children: Utils.uiListWithIndex(deck, (function (index, card) {
+                            if (isDraggable) {
+                              return React.createElement(CardDnd.Cards.DraggableItem.make, {
+                                          id: card,
+                                          containerId: "deck",
+                                          index: index,
+                                          className: (function (dragging) {
+                                              return Utils.cx([
+                                                          "inline-block mx-1",
+                                                          ""
+                                                        ]);
+                                            }),
+                                          children: {
+                                            NAME: "Children",
+                                            VAL: React.createElement(CardUI$Local, {
+                                                  card: card,
+                                                  disabled: disabled || Curry._1(isCardDisabled, card),
+                                                  selected: Curry._1(isCardSelected, card),
+                                                  onClick: onCardClick
+                                                })
+                                          },
+                                          key: Card.cardToString(card) + String(index)
+                                        });
+                            } else {
+                              return React.createElement(CardUI$Local, {
+                                          card: card,
+                                          className: "inline-block mx-1",
+                                          disabled: disabled || Curry._1(isCardDisabled, card),
+                                          selected: Curry._1(isCardSelected, card),
+                                          onClick: onCardClick,
+                                          key: Card.cardToString(card) + String(index)
+                                        });
+                            }
+                          }))
+                  }));
   } else {
     return React.createElement("div", {
                 className: className
@@ -227,19 +261,41 @@ function CardUI$table(Props) {
             }, table ? Utils.uiList(table, (function (param) {
                       var by = param[1];
                       var to = param[0];
+                      var isDisabled = Belt_Option.isSome(by) || Curry._1(isCardDisabled, to);
                       return React.createElement("div", {
                                   key: Card.cardToString(to) + Belt_Option.getWithDefault(Belt_Option.map(by, Card.cardToString), ""),
-                                  className: "inline-block mx-1"
-                                }, React.createElement(CardUI$Local, {
-                                      card: to,
-                                      className: "mb-1",
-                                      disabled: Belt_Option.isSome(by) || Curry._1(isCardDisabled, to),
-                                      selected: Curry._1(isCardSelected, to),
-                                      onClick: onCardClick
-                                    }), by !== undefined ? React.createElement(CardUI$Local, {
-                                        card: by,
-                                        disabled: Belt_Option.isSome(by)
-                                      }) : React.createElement(CardUI$EmptyCard, {}));
+                                  className: "inline-block mx-1 relative"
+                                }, by !== undefined ? React.createElement("div", undefined, React.createElement(CardUI$Local, {
+                                            card: by,
+                                            disabled: Belt_Option.isSome(by)
+                                          }), React.createElement(CardUI$Local, {
+                                            card: to,
+                                            className: "mb-1",
+                                            disabled: isDisabled,
+                                            selected: Curry._1(isCardSelected, to),
+                                            onClick: onCardClick
+                                          })) : React.createElement(CardDnd.Cards.DroppableContainer.make, {
+                                        id: Card.cardToString(to),
+                                        axis: /* X */0,
+                                        accept: (function (param) {
+                                            return true;
+                                          }),
+                                        className: (function (draggingOver) {
+                                            return Utils.cx([
+                                                        "inline-block",
+                                                        "w-12 h-16",
+                                                        "border rounded-md border-solid border-slate-500",
+                                                        draggingOver ? "bg-gradient-to-tl from-purple-200 to-pink-200 opacity-50" : ""
+                                                      ]);
+                                          }),
+                                        children: React.createElement(CardUI$Local, {
+                                              card: to,
+                                              className: "mb-1",
+                                              disabled: isDisabled,
+                                              selected: Curry._1(isCardSelected, to),
+                                              onClick: onCardClick
+                                            })
+                                      }));
                     })) : Utils.uiStr("Table empty"));
 }
 

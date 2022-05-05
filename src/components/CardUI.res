@@ -38,10 +38,10 @@ module Base = {
 }
 
 type cardProps = {
-  "card": Types.card,
+  "card": card,
   "className": option<string>,
   "disabled": option<bool>,
-  "onClick": option<Types.card => unit>,
+  "onClick": option<card => unit>,
   "selected": option<bool>,
 }
 
@@ -145,6 +145,7 @@ let deck = (
   ~deck: deck,
   ~className: string="",
   ~disabled: bool=false,
+  ~isDraggable: bool=false,
   ~isCardSelected: card => bool=_ => false,
   ~isCardDisabled: card => bool=_ => false,
   ~onCardClick: card => unit=noop,
@@ -154,16 +155,37 @@ let deck = (
   | list{} => <div className> {uiStr("No cards in deck")} </div>
   | _ =>
     <div className={cx([className, "leading"])}>
-      {deck->uiListWithIndex((index, card) => {
-        <Local
-          key={Card.cardToString(card) ++ index->string_of_int}
-          selected={isCardSelected(card)}
-          className="inline-block mx-1"
-          card
-          disabled={disabled || isCardDisabled(card)}
-          onClick={onCardClick}
-        />
-      })}
+      <CardDnd.Cards.DroppableContainer accept={_ => false} id={CardDnd.DeckId.make("deck")} axis=X>
+        {deck->uiListWithIndex((index, card) => {
+          switch isDraggable {
+          | true =>
+            <CardDnd.Cards.DraggableItem
+              className={(~dragging: bool) => cx(["inline-block mx-1", dragging ? "" : ""])}
+              key={Card.cardToString(card) ++ index->string_of_int}
+              id=card
+              containerId={CardDnd.DeckId.make("deck")}
+              index>
+              #Children(
+                <Local
+                  selected={isCardSelected(card)}
+                  card
+                  disabled={disabled || isCardDisabled(card)}
+                  onClick={onCardClick}
+                />,
+              )
+            </CardDnd.Cards.DraggableItem>
+          | false =>
+            <Local
+              key={Card.cardToString(card) ++ index->string_of_int}
+              selected={isCardSelected(card)}
+              className="inline-block mx-1"
+              card
+              disabled={disabled || isCardDisabled(card)}
+              onClick={onCardClick}
+            />
+          }
+        })}
+      </CardDnd.Cards.DroppableContainer>
     </div>
   }
 
@@ -179,23 +201,48 @@ let table = (
     {switch table {
     | list{} => uiStr("Table empty")
     | _ =>
-      table->uiList(((to, by)) =>
+      table->uiList(((to, by)) => {
+        let isDisabled = Option.isSome(by) || isCardDisabled(to)
+
         <div
-          className="inline-block mx-1"
+          className="inline-block mx-1 relative"
           key={Card.cardToString(to) ++
           by->Option.map(Card.cardToString)->Option.getWithDefault("")}>
-          <Local
-            className="mb-1"
-            selected={isCardSelected(to)}
-            card={to}
-            disabled={Option.isSome(by) || isCardDisabled(to)}
-            onClick={onCardClick}
-          />
           {switch by {
-          | Some(byCard) => <Local disabled={Option.isSome(by)} card={byCard} />
-          | None => <EmptyCard />
+          | Some(byCard) =>
+            <div>
+              <Local disabled={Option.isSome(by)} card={byCard} />
+              <Local
+                className="mb-1"
+                selected={isCardSelected(to)}
+                card={to}
+                disabled={isDisabled}
+                onClick={onCardClick}
+              />
+            </div>
+          | None =>
+            <CardDnd.Cards.DroppableContainer
+              className={(~draggingOver: bool) =>
+                cx([
+                  "inline-block",
+                  // "absolute",
+                  "w-12 h-16",
+                  "border rounded-md border-solid border-slate-500",
+                  draggingOver ? "bg-gradient-to-tl from-purple-200 to-pink-200 opacity-50" : "",
+                ])}
+              accept={_ => true}
+              id={CardDnd.DeckId.make(Card.cardToString(to))}
+              axis=X>
+              <Local
+                className="mb-1"
+                selected={isCardSelected(to)}
+                card={to}
+                disabled={isDisabled}
+                onClick={onCardClick}
+              />
+            </CardDnd.Cards.DroppableContainer>
           }}
         </div>
-      )
+      })
     }}
   </div>

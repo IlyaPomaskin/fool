@@ -60,6 +60,7 @@ module Parts = {
     ~game: inProgress,
     ~player: player,
     ~beat: (option<card>, option<card>),
+    ~isDraggable: bool=false,
     ~onCardClick: _ => unit,
   ) => {
     let (toBeat, beatBy) = beat
@@ -74,7 +75,9 @@ module Parts = {
     let isCardDisabled = by =>
       toBeat->Option.map(to => !Card.isValidBeat(to, by, game.trump))->Option.getWithDefault(false)
 
-    <CardUI.deck disabled isCardSelected isCardDisabled deck={player.cards} onCardClick />
+    <CardUI.deck
+      disabled isDraggable isCardSelected isCardDisabled deck={player.cards} onCardClick
+    />
   }
 }
 
@@ -169,6 +172,38 @@ let make = (
 
   let isDefender = GameUtils.isDefender(game, player)
 
+  let handleReorder = (
+    result: option<
+      Dnd__Types.ReorderResult.t<
+        CardDnd.Cards.DndManager.Item.t,
+        CardDnd.Cards.DndManager.Container.t,
+      >,
+    >,
+  ) => {
+    Js.log2("NNNNN", result)
+    switch result {
+    | Some(rResult) =>
+      switch rResult {
+      | SameContainer(item, placement) =>
+        Js.logMany(["same container", item->Card.cardToString, placement->Obj.magic])
+
+      | NewContainer(item, containerId, placement) =>
+        Js.logMany([
+          "same container",
+          item->Card.cardToString,
+          containerId->Obj.magic,
+          placement->Obj.magic,
+        ])
+      }
+    | x => Js.log2("unknown", x)
+    }->ignore
+    ()
+  }
+
+  let handleDropEnd = (~itemId as _itemId) => {
+    Js.log2("dropEnd", _itemId)
+  }
+
   <div className={cx([className, "p-1 border rounded-md border-solid border-slate-500"])}>
     <div className="mb-1">
       {uiStr("Player: ")}
@@ -182,27 +217,30 @@ let make = (
     | Draw => uiStr("Draw")
     | Playing =>
       <div>
-        {switch isOwner {
-        | true =>
-          <div className="my-2">
-            <Parts.actions
-              game
-              player
-              beat={(toBeat, beatBy)}
-              onPass={handlePass}
-              onTake={handleTake}
-              onBeat={handleBeat}
-            />
-          </div>
-        | false => React.null
-        }}
-        <Parts.deck
-          game
-          player
-          beat={(toBeat, beatBy)}
-          onCardClick={isDefender ? handleSelectToBeat(false) : handleMove}
-        />
-        <Parts.table game player beat={(toBeat, beatBy)} onCardClick={handleSelectToBeat(true)} />
+        <CardDnd.Cards.DndManager onDropEnd={handleDropEnd} onReorder={handleReorder}>
+          {switch isOwner {
+          | true =>
+            <div className="my-2">
+              <Parts.actions
+                game
+                player
+                beat={(toBeat, beatBy)}
+                onPass={handlePass}
+                onTake={handleTake}
+                onBeat={handleBeat}
+              />
+            </div>
+          | false => React.null
+          }}
+          <Parts.deck
+            isDraggable={true}
+            game
+            player
+            beat={(toBeat, beatBy)}
+            onCardClick={isDefender ? handleSelectToBeat(false) : handleMove}
+          />
+          <Parts.table game player beat={(toBeat, beatBy)} onCardClick={handleSelectToBeat(true)} />
+        </CardDnd.Cards.DndManager>
       </div>
     }}
   </div>

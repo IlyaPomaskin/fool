@@ -5,7 +5,7 @@ let gamesInLobby = LobbyGameMap.empty()
 let gamesInProgress = ProgressGameMap.empty()
 let players = PlayersMap.empty()
 
-let registerPlayer = (playerId: playerId): result<Types.player, string> => {
+let registerPlayer = (playerId: playerId): result<player, string> => {
   let player = players->PlayersMap.get(playerId)
 
   switch player {

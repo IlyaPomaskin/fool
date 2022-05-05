@@ -7,6 +7,7 @@ import * as Table from "../fool/Table.mjs";
 import * as Utils from "../Utils.mjs";
 import * as React from "react";
 import * as CardUI from "./CardUI.mjs";
+import * as CardDnd from "./CardDnd.mjs";
 import * as PlayerUI from "./PlayerUI.mjs";
 import * as GameUtils from "../fool/GameUtils.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
@@ -80,7 +81,9 @@ function ClientUI$Parts$deck(Props) {
   var game = Props.game;
   var player = Props.player;
   var beat = Props.beat;
+  var isDraggableOpt = Props.isDraggable;
   var onCardClick = Props.onCardClick;
+  var isDraggable = isDraggableOpt !== undefined ? isDraggableOpt : false;
   var beatBy = beat[1];
   var toBeat = beat[0];
   var isDefender = GameUtils.isDefender(game, player);
@@ -98,6 +101,7 @@ function ClientUI$Parts$deck(Props) {
   return React.createElement(CardUI.deck, {
               deck: player.cards,
               disabled: disabled,
+              isDraggable: isDraggable,
               isCardSelected: isCardSelected,
               isCardDisabled: isCardDisabled,
               onCardClick: onCardClick
@@ -232,39 +236,61 @@ function ClientUI(Props) {
   var toBeat = match.toBeat;
   var match$1 = useProgressActions(toBeat, beatBy, match.setBeat, onMove);
   var isDefender = GameUtils.isDefender(game, player);
+  var handleReorder = function (result) {
+    console.log("NNNNN", result);
+    if (result !== undefined) {
+      if (result.TAG === /* SameContainer */0) {
+        console.log("same container", Card.cardToString(result._0), result._1);
+      } else {
+        console.log("same container", Card.cardToString(result._0), result._1, result._2);
+      }
+    } else {
+      console.log("unknown", result);
+    }
+    
+  };
+  var handleDropEnd = function (_itemId) {
+    console.log("dropEnd", _itemId);
+    
+  };
   var match$2 = GameUtils.getPlayerGameState(game, player);
   var tmp;
   switch (match$2) {
     case /* Playing */0 :
-        tmp = React.createElement("div", undefined, isOwner ? React.createElement("div", {
-                    className: "my-2"
-                  }, React.createElement(ClientUI$Parts$actions, {
-                        game: game,
-                        player: player,
-                        beat: [
-                          toBeat,
-                          beatBy
-                        ],
-                        onPass: match$1.handlePass,
-                        onTake: match$1.handleTake,
-                        onBeat: match$1.handleBeat
-                      })) : null, React.createElement(ClientUI$Parts$deck, {
-                  game: game,
-                  player: player,
-                  beat: [
-                    toBeat,
-                    beatBy
-                  ],
-                  onCardClick: isDefender ? Curry._1(handleSelectToBeat, false) : match$1.handleMove
-                }), React.createElement(ClientUI$Parts$table, {
-                  game: game,
-                  player: player,
-                  beat: [
-                    toBeat,
-                    beatBy
-                  ],
-                  onCardClick: Curry._1(handleSelectToBeat, true)
-                }));
+        tmp = React.createElement("div", undefined, React.createElement(CardDnd.Cards.DndManager.make, {
+                  onDropEnd: handleDropEnd,
+                  onReorder: handleReorder,
+                  children: null
+                }, isOwner ? React.createElement("div", {
+                        className: "my-2"
+                      }, React.createElement(ClientUI$Parts$actions, {
+                            game: game,
+                            player: player,
+                            beat: [
+                              toBeat,
+                              beatBy
+                            ],
+                            onPass: match$1.handlePass,
+                            onTake: match$1.handleTake,
+                            onBeat: match$1.handleBeat
+                          })) : null, React.createElement(ClientUI$Parts$deck, {
+                      game: game,
+                      player: player,
+                      beat: [
+                        toBeat,
+                        beatBy
+                      ],
+                      isDraggable: true,
+                      onCardClick: isDefender ? Curry._1(handleSelectToBeat, false) : match$1.handleMove
+                    }), React.createElement(ClientUI$Parts$table, {
+                      game: game,
+                      player: player,
+                      beat: [
+                        toBeat,
+                        beatBy
+                      ],
+                      onCardClick: Curry._1(handleSelectToBeat, true)
+                    })));
         break;
     case /* Done */1 :
         tmp = Utils.uiStr("Done");
