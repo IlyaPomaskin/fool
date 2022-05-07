@@ -62,21 +62,23 @@ function DeckUI(Props) {
                       "leading flex flex-row gap-1"
                     ])
               }, Utils.uiListWithIndex(deck, (function (index, card) {
+                      var key = Card.cardToString(card) + String(index);
+                      var disabled$1 = disabled || Curry._1(isCardDisabled, card);
                       if (isDraggable) {
                         return React.createElement(DeckUI$DndWrapper, {
                                     card: card,
                                     index: index,
                                     children: React.createElement(CardUI.make, {
                                           card: card,
-                                          disabled: disabled || Curry._1(isCardDisabled, card)
+                                          disabled: disabled$1
                                         }),
-                                    key: Card.cardToString(card) + String(index)
+                                    key: key
                                   });
                       } else {
                         return React.createElement(CardUI.make, {
                                     card: card,
-                                    disabled: disabled || Curry._1(isCardDisabled, card),
-                                    key: Card.cardToString(card) + String(index)
+                                    disabled: disabled$1,
+                                    key: key
                                   });
                       }
                     })));

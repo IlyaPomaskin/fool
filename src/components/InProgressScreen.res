@@ -7,6 +7,7 @@ module Parts = {
     let isDefender = GameUtils.isDefender(game, player)
 
     switch (isDefender, game.table) {
+    | (true, table) => <TableUI className="my-1" table={table} />
     | (false, _) =>
       <CardDnd.Cards.DroppableContainer
         className={(~draggingOver: bool) =>
@@ -14,7 +15,7 @@ module Parts = {
             "top-0 left-0 w-12 h-16",
             draggingOver ? "bg-gradient-to-tl from-purple-200 to-pink-200 opacity-70" : "",
           ])}
-        accept={_ => true}
+        accept={_ => GameUtils.isValidMove(game, player)->Result.isOk}
         id={CardDnd.ContainerId.make(CardDnd.ToTable)}
         axis=X>
         <div
@@ -25,8 +26,6 @@ module Parts = {
           ])}
         />
       </CardDnd.Cards.DroppableContainer>
-    | (true, list{}) => uiStr("Table empty")
-    | (true, table) => <TableUI className="my-1" table={table} />
     }
   }
 }

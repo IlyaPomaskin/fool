@@ -8,6 +8,7 @@ import * as CardDnd from "./CardDnd.mjs";
 import * as TableUI from "./TableUI.mjs";
 import * as ClientUI from "./ClientUI.mjs";
 import * as GameUtils from "../fool/GameUtils.mjs";
+import * as Belt_Result from "rescript/lib/es6/belt_Result.js";
 
 function InProgressScreen$Parts$table(Props) {
   var game = Props.game;
@@ -15,20 +16,16 @@ function InProgressScreen$Parts$table(Props) {
   var isDefender = GameUtils.isDefender(game, player);
   var match = game.table;
   if (isDefender) {
-    if (match) {
-      return React.createElement(TableUI.make, {
-                  className: "my-1",
-                  table: match
-                });
-    } else {
-      return Utils.uiStr("Table empty");
-    }
+    return React.createElement(TableUI.make, {
+                className: "my-1",
+                table: match
+              });
   } else {
     return React.createElement(CardDnd.Cards.DroppableContainer.make, {
                 id: /* ToTable */0,
                 axis: /* X */0,
                 accept: (function (param) {
-                    return true;
+                    return Belt_Result.isOk(GameUtils.isValidMove(game, player));
                   }),
                 className: (function (draggingOver) {
                     return Utils.cx([

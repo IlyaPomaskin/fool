@@ -31,17 +31,12 @@ let make = (
   | _ =>
     <div className={cx([className, "leading flex flex-row gap-1"])}>
       {deck->uiListWithIndex((index, card) => {
+        let key = Card.cardToString(card) ++ index->string_of_int
+        let disabled = disabled || isCardDisabled(card)
+
         switch isDraggable {
-        | true =>
-          <DndWrapper key={Card.cardToString(card) ++ index->string_of_int} card index>
-            <CardUI card disabled={disabled || isCardDisabled(card)} />
-          </DndWrapper>
-        | false =>
-          <CardUI
-            key={Card.cardToString(card) ++ index->string_of_int}
-            card
-            disabled={disabled || isCardDisabled(card)}
-          />
+        | true => <DndWrapper key card index> <CardUI card disabled /> </DndWrapper>
+        | false => <CardUI key card disabled />
         }
       })}
     </div>
