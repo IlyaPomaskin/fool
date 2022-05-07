@@ -123,8 +123,6 @@ function Index$PlayerScreen(Props) {
                           })) : Utils.uiStr("No player")), React.createElement("div", undefined, error !== undefined ? React.createElement("div", undefined, Utils.uiStr("error: " + error)) : React.createElement("div", undefined, Utils.uiStr("No error"))), tmp);
 }
 
-var spread2 = ((x1,x2) => ({ ...x1, ...x2 }));
-
 var spread3 = ((x1,x2,x3) => ({ ...x1, ...x2, ...x3 }));
 
 var reorder = ((list, startIndex, endIndex) => {
@@ -173,7 +171,7 @@ function Index$ReactDndTest(Props) {
   var items = match[0];
   var handleDragEnd = function (result, param) {
     var dest = result.destination;
-    if (!(dest == null)) {
+    if (dest !== undefined) {
       Curry._1(setItems, (function (items) {
               return Belt_List.fromArray(reorder(Belt_List.toArray(items), result.source.index, dest.index));
             }));
@@ -196,16 +194,15 @@ function Index$ReactDndTest(Props) {
                                           return React.createElement(ReactBeautifulDnd.Draggable, {
                                                       draggableId: item.id,
                                                       index: index,
-                                                      children: (function (dp, draggableSnapshot, param) {
-                                                          return React.cloneElement(React.createElement("div", undefined, Utils.uiStr(item.id)), spread2(spread3({
-                                                                              ref: dp.innerRef
-                                                                            }, dp.draggableProps, dp.dragHandleProps), {
+                                                      children: (function (draggableProvided, draggableSnapshot, param) {
+                                                          return React.cloneElement(React.createElement("div", undefined, Utils.uiStr(item.id)), spread3(draggableProvided.draggableProps, draggableProvided.dragHandleProps, {
+                                                                          ref: draggableProvided.innerRef,
                                                                           style: Object.assign({}, {
                                                                                 background: draggableSnapshot.isDragging ? "lightgreen" : "red",
                                                                                 margin: "0 0 16px 0",
                                                                                 padding: "16px",
                                                                                 userSelect: "none"
-                                                                              }, dp.draggableProps.style)
+                                                                              }, draggableProvided.draggableProps.style)
                                                                         }));
                                                         }),
                                                       key: item.id

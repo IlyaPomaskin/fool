@@ -267,12 +267,7 @@ type pagePositions = {
   offset: position,
 }
 
-type movementMode = Fluid | Snap
-
-type dragPositions = {
-  client: clientPositions,
-  page: pagePositions,
-}
+type movementMode = string
 
 type beforeCapture = {
   draggableId: DraggableId.t,
@@ -307,191 +302,67 @@ type dragUpdate = {
   combine: option<combine>,
 }
 
-type dropReason = Drop | Cancel
-
 type dropResult = {
   draggableId: DraggableId.t,
   mode: movementMode,
   source: draggableLocation,
-  destination: Js.Nullable.t<draggableLocation>,
-  combine: option<combine>,
-  reason: dropReason,
+  destination: Js.Undefined.t<draggableLocation>,
+  combine: Js.Undefined.t<combine>,
+  reason: string,
 }
-
-type scrollOptions = {shouldPublishImmediately: bool}
-
-type liftRequest = {
-  draggableId: DraggableId.t,
-  scrollOptions: scrollOptions,
-}
-
-type critical = {
-  draggable: draggableDescriptor,
-  droppable: droppableDescriptor,
-}
-
-type viewport = {
-  frame: rect,
-  scroll: scrollDetails,
-}
-
-type liftEffect = {
-  inVirtualList: bool,
-  effected: draggableIdMap,
-  displacedBy: displacedBy,
-}
-
-type dimensionMap = {
-  draggables: draggableDimensionMap,
-  droppables: droppableDimensionMap,
-}
-
-type droppablePublish = {
-  droppableId: DroppableId.t,
-  scroll: position,
-}
-type published = {
-  additions: array<draggableDimension>,
-  removals: array<DraggableId.t>,
-  modified: array<droppablePublish>,
-}
-
-type completedDrag = {
-  critical: critical,
-  result: dropResult,
-  impact: dragImpact,
-  afterCritical: liftEffect,
-}
-
-type statePhase = Idle | Dragging | Collecting | DropPending | DropAnimating
-
-type idleState = {
-  phase: statePhase,
-  completed: option<completedDrag>,
-  shouldFlush: bool,
-}
-
-type draggingState = {
-  phase: statePhase,
-  isDragging: bool,
-  critical: critical,
-  movementMode: movementMode,
-  dimensions: dimensionMap,
-  initial: dragPositions,
-  current: dragPositions,
-  impact: dragImpact,
-  viewport: viewport,
-  afterCritical: liftEffect,
-  onLiftImpact: dragImpact,
-  isWindowScrollAllowed: bool,
-  scrollJumpRequest: option<position>,
-  forceShouldAnimate: option<bool>,
-}
-
-type collectingState = {
-  phase: statePhase,
-  isDragging: bool,
-  critical: critical,
-  movementMode: movementMode,
-  dimensions: dimensionMap,
-  initial: dragPositions,
-  current: dragPositions,
-  impact: dragImpact,
-  viewport: viewport,
-  afterCritical: liftEffect,
-  onLiftImpact: dragImpact,
-  isWindowScrollAllowed: bool,
-  scrollJumpRequest: option<position>,
-  forceShouldAnimate: option<bool>,
-}
-
-type dropPendingState = {
-  phase: statePhase,
-  isDragging: bool,
-  critical: critical,
-  movementMode: movementMode,
-  dimensions: dimensionMap,
-  initial: dragPositions,
-  current: dragPositions,
-  impact: dragImpact,
-  viewport: viewport,
-  afterCritical: liftEffect,
-  onLiftImpact: dragImpact,
-  isWindowScrollAllowed: bool,
-  scrollJumpRequest: option<position>,
-  forceShouldAnimate: option<bool>,
-  isWaiting: bool,
-  reason: dropReason,
-}
-
-type dropAnimatingState = {
-  phase: statePhase,
-  completed: completedDrag,
-  newHomeClientOffset: position,
-  dropDuration: int,
-  dimensions: dimensionMap,
-}
-
-type stateWhenUpdatesAllowed = DraggingState | CollectingState
-
-type inOutAnimationMode = None | Open | Close
 
 type responderProvided = {announce: string => unit}
 
-type onBeforeCaptureResponder = beforeCapture => unit
-
-type onBeforeDragStartResponder = dragStartBeforeCapture => unit
-
-type onDragStartResponder = (dragStartBeforeCapture, responderProvided) => unit
-
-type onDragUpdateResponder = (dragUpdate, responderProvided) => unit
-
-type onDragEndResponder = (dropResult, responderProvided) => unit
-
-type responders = {
-  onBeforeCapture: option<onBeforeCaptureResponder>,
-  onBeforeDragStart: option<onBeforeDragStartResponder>,
-  onDragStart: option<onDragStartResponder>,
-  onDragUpdate: option<onDragUpdateResponder>,
-  onDragEnd: onDragEndResponder,
-}
-
 type tryGetLockOptions = {sourceEvent: option<Dom.event>}
 
-type preDragActions = {todo: int}
+type stopDragOptions = {shouldBlockNextClick: bool}
 
-type tryGetLock = (
-  DraggableId.t,
-  option<unit => unit>,
-  option<tryGetLockOptions>,
-) => Js.Nullable.t<preDragActions>
+type dragActions = {
+  drop: Js.Undefined.t<stopDragOptions> => unit,
+  cancel: Js.Undefined.t<stopDragOptions> => unit,
+  isActive: unit => bool,
+  shouldRespectForcePress: unit => bool,
+}
+
+type fluidDragActions = {
+  drop: Js.Undefined.t<stopDragOptions> => unit,
+  cancel: Js.Undefined.t<stopDragOptions> => unit,
+  isActive: unit => bool,
+  shouldRespectForcePress: unit => bool,
+  move: position => unit,
+}
+
+type snapDragActions = {
+  drop: Js.Undefined.t<stopDragOptions> => unit,
+  cancel: Js.Undefined.t<stopDragOptions> => unit,
+  isActive: unit => bool,
+  shouldRespectForcePress: unit => bool,
+  moveUp: unit => unit,
+  moveDown: unit => unit,
+  moveRight: unit => unit,
+  moveLeft: unit => unit,
+}
+
+type preDragActions = {
+  isActive: unit => bool,
+  shouldRespectForcePress: unit => bool,
+  fluidLift: position => fluidDragActions,
+  snapLift: unit => snapDragActions,
+  abort: unit => unit,
+}
 
 type sensorApi = {
-  tryGetLock: tryGetLock,
+  tryGetLock: (
+    DraggableId.t,
+    option<unit => unit>,
+    option<tryGetLockOptions>,
+  ) => Js.Nullable.t<preDragActions>,
   canGetLock: DraggableId.t => bool,
   isLockClaimed: unit => bool,
   tryReleaseLock: unit => unit,
   findClosestDraggableId: Dom.event => Js.Nullable.t<DraggableId.t>,
   findOptionsForDraggable: DraggableId.t => Js.Nullable.t<draggableOptions>,
 }
-
-module DragDropContext = {
-  @module("react-beautiful-dnd") @react.component
-  external make: (
-    ~onBeforeCapture: option<onBeforeCaptureResponder>=?,
-    ~onBeforeDragStart: option<onBeforeDragStartResponder>=?,
-    ~onDragStart: option<onDragStartResponder>=?,
-    ~onDragUpdate: option<onDragUpdateResponder>=?,
-    ~onDragEnd: onDragEndResponder,
-    ~children: React.element,
-    ~dragHandleUsageInstructions: option<string>=?,
-    ~nonce: option<string>=?,
-    ~sensors: option<array<sensorApi => unit>>=?,
-    ~enableDefaultSensors: option<bool>=?,
-  ) => React.element = "DragDropContext"
-}
-
-type todo = int
 
 type draggableProvidedDraggableProps = {
   "style": ReactDOMStyle.t,
@@ -510,23 +381,68 @@ type draggableProvidedDragHandleProps = {
   "onDragStart": ReactEvent.Mouse.t => unit,
 }
 
-type droppableProvided = {
+type draggableProvided = {
   innerRef: ReactDOM.domRef,
   draggableProps: draggableProvidedDraggableProps,
-  dragHandleProps: Js.Undefined.t<draggableProvidedDragHandleProps>,
+  dragHandleProps: option<draggableProvidedDragHandleProps>,
+}
+
+type dropAnimation = {
+  duration: int,
+  curve: string,
+  moveTo: position,
+  opacity: Js.Undefined.t<int>,
+  scale: Js.Undefined.t<int>,
+}
+
+type draggableStateSnapshot = {
+  isDragging: bool,
+  isDropAnimating: bool,
+  dropAnimation: Js.Undefined.t<dropAnimation>,
+  draggingOver: Js.Undefined.t<DroppableId.t>,
+  combineWith: Js.Undefined.t<DraggableId.t>,
+  combineTargetFor: Js.Undefined.t<DraggableId.t>,
+  mode: Js.Undefined.t<string>,
+}
+
+type draggableChildrenFn = (
+  draggableProvided,
+  draggableStateSnapshot,
+  draggableRubric,
+) => React.element
+
+type droppableProvidedProps = {
+  "data-rbd-droppable-context-id": string,
+  "data-rbd-droppable-id": DroppableId.t,
+}
+
+type droppableProvided = {
+  innerRef: ReactDOM.domRef,
+  placeholder: React.element,
+  droppableProps: droppableProvidedProps,
 }
 
 type droppableStateSnapshot = {
   isDraggingOver: bool,
-  draggingOverWith: option<DraggableId.t>,
-  draggingFromThisWith: option<DraggableId.t>,
+  draggingOverWith: Js.Undefined.t<DraggableId.t>,
+  draggingFromThisWith: Js.Undefined.t<DraggableId.t>,
   isUsingPlaceholder: bool,
 }
 
-type droppableChildrenRef = {
-  innerRef: ReactDOM.domRef,
-  placeholder: React.element,
-  droppableProps: todo,
+module DragDropContext = {
+  @module("react-beautiful-dnd") @react.component
+  external make: (
+    ~onBeforeCapture: option<beforeCapture => unit>=?,
+    ~onBeforeDragStart: option<dragStartBeforeCapture => unit>=?,
+    ~onDragStart: option<(dragStartBeforeCapture, responderProvided) => unit>=?,
+    ~onDragUpdate: option<(dragUpdate, responderProvided) => unit>=?,
+    ~onDragEnd: (dropResult, responderProvided) => unit,
+    ~dragHandleUsageInstructions: option<string>=?,
+    ~nonce: option<string>=?,
+    ~sensors: option<array<sensorApi => unit>>=?,
+    ~enableDefaultSensors: option<bool>=?,
+    ~children: React.element,
+  ) => React.element = "DragDropContext"
 }
 
 module Droppable = {
@@ -537,32 +453,16 @@ module Droppable = {
   external make: (
     ~droppableId: DroppableId.t,
     @as("type") ~type_: option<TypeId.t>=?,
-    ~mode: option<droppableMode>=?,
+    ~mode: option<string>=?,
     ~isDropDisabled: option<bool>=?,
     ~isCombineEnabled: option<bool>=?,
-    ~direction: option<direction>=?,
+    ~direction: option<string>=?,
     ~ignoreContainerClipping: option<bool>=?,
-    ~renderClone: option<todo>=?,
+    ~renderClone: option<draggableChildrenFn>=?,
     ~getContainerForClone: option<unit => Dom.htmlElement>=?,
-    ~children: (droppableChildrenRef, droppableStateSnapshot) => React.element,
+    ~children: (droppableProvided, droppableStateSnapshot) => React.element,
     unit,
   ) => React.element = "Droppable"
-}
-
-type draggableProvided = {
-  innerRef: ReactDOM.domRef,
-  draggableProps: draggableProvidedDraggableProps,
-  dragHandleProps: option<draggableProvidedDragHandleProps>,
-}
-
-type draggableStateSnapshot = {
-  isDragging: bool,
-  isDropAnimating: bool,
-  // dropAnimation: option<dropAnimation>,
-  draggingOver: option<DroppableId.t>,
-  combineWith: option<DraggableId.t>,
-  combineTargetFor: option<DraggableId.t>,
-  mode: option<movementMode>,
 }
 
 module Draggable = {
@@ -573,7 +473,7 @@ module Draggable = {
     ~isDragDisabled: option<bool>=?,
     ~disableInteractiveElementBlocking: option<bool>=?,
     ~shouldRespectForcePress: option<bool>=?,
-    ~children: (draggableProvided, draggableStateSnapshot, draggableRubric) => React.element,
+    ~children: draggableChildrenFn,
     unit,
   ) => React.element = "Draggable"
 }

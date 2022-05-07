@@ -119,7 +119,7 @@ module ReactDndTest = {
     })
 
     let handleDragEnd = (result: ReactDnd.dropResult, _) => {
-      let dest = result.destination->Js.Nullable.toOption
+      let dest = result.destination->Js.Undefined.toOption
 
       switch dest {
       | Some(dest) =>
@@ -143,12 +143,14 @@ module ReactDndTest = {
             )}>
             {items->Utils.uiListWithIndex((index, item) =>
               <ReactDnd.Draggable key={item.id} draggableId={item.id} index>
-                {(dp, draggableSnapshot, _) =>
+                {(draggableProvided, draggableSnapshot, _) =>
                   React.cloneElement(
                     <div> {item.id->uiStr} </div>,
-                    spread2(
-                      spread3({"ref": dp.innerRef}, dp.draggableProps, dp.dragHandleProps),
+                    spread3(
+                      draggableProvided.draggableProps,
+                      draggableProvided.dragHandleProps,
                       {
+                        "ref": draggableProvided.innerRef,
                         "style": ReactDOMStyle.combine(
                           ReactDOMStyle.make(
                             ~userSelect="none",
@@ -157,7 +159,7 @@ module ReactDndTest = {
                             ~background=draggableSnapshot.isDragging ? "lightgreen" : "red",
                             (),
                           ),
-                          dp.draggableProps["style"],
+                          draggableProvided.draggableProps["style"],
                         ),
                       },
                     ),
