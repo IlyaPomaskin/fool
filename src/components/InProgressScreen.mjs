@@ -4,19 +4,104 @@ import * as Curry from "rescript/lib/es6/curry.js";
 import * as Utils from "../Utils.mjs";
 import * as React from "react";
 import * as GameUI from "./GameUI.mjs";
+import * as CardDnd from "./CardDnd.mjs";
+import * as TableUI from "./TableUI.mjs";
 import * as ClientUI from "./ClientUI.mjs";
+import * as GameUtils from "../fool/GameUtils.mjs";
+
+function InProgressScreen$Parts$table(Props) {
+  var game = Props.game;
+  var player = Props.player;
+  var isDefender = GameUtils.isDefender(game, player);
+  var match = game.table;
+  if (isDefender) {
+    if (match) {
+      return React.createElement(TableUI.make, {
+                  className: "my-1",
+                  table: match
+                });
+    } else {
+      return Utils.uiStr("Table empty");
+    }
+  } else {
+    return React.createElement(CardDnd.Cards.DroppableContainer.make, {
+                id: /* ToTable */0,
+                axis: /* X */0,
+                accept: (function (param) {
+                    return true;
+                  }),
+                className: (function (draggingOver) {
+                    return Utils.cx([
+                                "top-0 left-0 w-12 h-16",
+                                draggingOver ? "bg-gradient-to-tl from-purple-200 to-pink-200 opacity-70" : ""
+                              ]);
+                  }),
+                children: React.createElement("div", {
+                      className: Utils.cx([
+                            "w-12 h-16",
+                            "transform-x-[-100%]",
+                            "border rounded-md border-solid border-slate-500"
+                          ])
+                    })
+              });
+  }
+}
+
+var Parts = {
+  table: InProgressScreen$Parts$table
+};
 
 function InProgressScreen(Props) {
   var game = Props.game;
   var player = Props.player;
   var onMessage = Props.onMessage;
-  return React.createElement("div", undefined, React.createElement(GameUI.InProgressUI.make, {
+  var handleReorder = function (result) {
+    if (result === undefined) {
+      return ;
+    }
+    if (result.TAG === /* SameContainer */0) {
+      return ;
+    }
+    var toCard = result._1;
+    var byCard = result._0;
+    if (toCard) {
+      return Curry._1(onMessage, {
+                  TAG: /* Progress */4,
+                  _0: {
+                    TAG: /* Beat */0,
+                    _0: toCard._0,
+                    _1: byCard
+                  },
+                  _1: player.id,
+                  _2: game.gameId
+                });
+    } else {
+      return Curry._1(onMessage, {
+                  TAG: /* Progress */4,
+                  _0: {
+                    TAG: /* Move */1,
+                    _0: byCard
+                  },
+                  _1: player.id,
+                  _2: game.gameId
+                });
+    }
+  };
+  return React.createElement(CardDnd.Cards.DndManager.make, {
+              onReorder: handleReorder,
+              children: null
+            }, React.createElement(GameUI.InProgressUI.make, {
                   game: game
                 }), React.createElement("div", {
+                  className: "m-1"
+                }, React.createElement(InProgressScreen$Parts$table, {
+                      game: game,
+                      player: player
+                    })), React.createElement("div", {
                   className: "flex flex-wrap"
                 }, Utils.uiList(game.players, (function (p) {
                         return React.createElement(ClientUI.make, {
-                                    className: "m-1 flex-initial ",
+                                    className: "m-1 flex flex-col",
                                     player: p,
                                     isOwner: p.id === player.id,
                                     game: game,
@@ -36,6 +121,7 @@ function InProgressScreen(Props) {
 var make = InProgressScreen;
 
 export {
+  Parts ,
   make ,
   
 }

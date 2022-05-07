@@ -6,21 +6,24 @@ import * as Table from "../fool/Table.mjs";
 import * as Utils from "../Utils.mjs";
 import * as React from "react";
 import * as DeckUI from "./DeckUI.mjs";
-import * as CardDnd from "./CardDnd.mjs";
-import * as TableUI from "./TableUI.mjs";
 import * as PlayerUI from "./PlayerUI.mjs";
 import * as GameUtils from "../fool/GameUtils.mjs";
 
 function ClientUI$Parts$actions(Props) {
+  var classNameOpt = Props.className;
   var game = Props.game;
   var player = Props.player;
   var onPass = Props.onPass;
   var onTake = Props.onTake;
+  var className = classNameOpt !== undefined ? classNameOpt : "";
   var isPassDisabled = !GameUtils.isCanPass(game, player);
   var isPassed = GameUtils.isPassed(game, player);
   var isTakeDisabled = !GameUtils.isCanTake(game, player);
   return React.createElement("div", {
-              className: "grid grid-flow-col gap-1"
+              className: Utils.cx([
+                    "grid grid-flow-col gap-1",
+                    className
+                  ])
             }, React.createElement(Base.Switch.make, {
                   disabled: isPassDisabled,
                   checked: isPassed,
@@ -31,44 +34,6 @@ function ClientUI$Parts$actions(Props) {
                   onClick: onTake,
                   children: Utils.uiStr("take")
                 }));
-}
-
-function ClientUI$Parts$table(Props) {
-  var game = Props.game;
-  var player = Props.player;
-  var isDefender = GameUtils.isDefender(game, player);
-  var match = game.table;
-  return React.createElement("div", {
-              className: "mt-1"
-            }, isDefender ? (
-                match ? React.createElement(TableUI.make, {
-                        className: "my-1",
-                        table: match
-                      }) : Utils.uiStr("Table empty")
-              ) : React.createElement(CardDnd.Cards.DroppableContainer.make, {
-                    id: /* ToTable */0,
-                    axis: /* Y */1,
-                    lockAxis: true,
-                    accept: (function (param) {
-                        return true;
-                      }),
-                    className: (function (draggingOver) {
-                        return Utils.cx([
-                                    "top-0",
-                                    "left-0",
-                                    "w-12 h-16",
-                                    draggingOver ? "bg-gradient-to-tl from-purple-200 to-pink-200 opacity-70" : ""
-                                  ]);
-                      }),
-                    children: React.createElement("div", {
-                          className: Utils.cx([
-                                "w-12 h-16",
-                                "inline-block",
-                                "transform-x-[-100%]",
-                                "border rounded-md border-solid border-slate-500"
-                              ])
-                        })
-                  }));
 }
 
 function ClientUI$Parts$deck(Props) {
@@ -87,7 +52,6 @@ function ClientUI$Parts$deck(Props) {
 
 var Parts = {
   actions: ClientUI$Parts$actions,
-  table: ClientUI$Parts$table,
   deck: ClientUI$Parts$deck
 };
 
@@ -100,53 +64,25 @@ function ClientUI(Props) {
   var className = classNameOpt !== undefined ? classNameOpt : "";
   var isOwner = isOwnerOpt !== undefined ? isOwnerOpt : false;
   var isDefender = GameUtils.isDefender(game, player);
-  var handleReorder = function (result) {
-    if (result !== undefined && result.TAG !== /* SameContainer */0) {
-      var toCard = result._1;
-      var byCard = result._0;
-      if (toCard) {
-        Curry._1(onMove, {
-              TAG: /* Beat */0,
-              _0: toCard._0,
-              _1: byCard
-            });
-      } else {
-        Curry._1(onMove, {
-              TAG: /* Move */1,
-              _0: byCard
-            });
-      }
-    } else {
-      console.log("unknown", result);
-    }
-    
-  };
   var match = GameUtils.getPlayerGameState(game, player);
   var tmp;
   switch (match) {
     case /* Playing */0 :
-        tmp = React.createElement("div", undefined, React.createElement(CardDnd.Cards.DndManager.make, {
-                  onReorder: handleReorder,
-                  children: null
-                }, isOwner ? React.createElement("div", {
-                        className: "my-2"
-                      }, React.createElement(ClientUI$Parts$actions, {
-                            game: game,
-                            player: player,
-                            onPass: (function (param) {
-                                return Curry._1(onMove, /* Pass */1);
-                              }),
-                            onTake: (function (param) {
-                                return Curry._1(onMove, /* Take */0);
-                              })
-                          })) : null, React.createElement(ClientUI$Parts$deck, {
-                      game: game,
-                      player: player,
-                      isDraggable: isOwner
-                    }), React.createElement(ClientUI$Parts$table, {
-                      game: game,
-                      player: player
-                    })));
+        tmp = React.createElement("div", undefined, isOwner ? React.createElement(ClientUI$Parts$actions, {
+                    className: "py-2",
+                    game: game,
+                    player: player,
+                    onPass: (function (param) {
+                        return Curry._1(onMove, /* Pass */1);
+                      }),
+                    onTake: (function (param) {
+                        return Curry._1(onMove, /* Take */0);
+                      })
+                  }) : null, React.createElement(ClientUI$Parts$deck, {
+                  game: game,
+                  player: player,
+                  isDraggable: isOwner
+                }));
         break;
     case /* Done */1 :
         tmp = Utils.uiStr("Done");
