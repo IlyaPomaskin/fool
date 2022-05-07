@@ -116,3 +116,15 @@ let isCanStart = (game: inLobby, player) => {
     Ok(game)
   }
 }
+
+let isValidMove = (game, player) => {
+  if isDefender(game, player) {
+    Error("Defender can't make move")
+  } else if !Table.hasCards(game.table) && !isAttacker(game, player) {
+    Error("First move made not by attacker")
+  } else if Table.isMaximumCards(game.table) {
+    Error("Maximum cards on table")
+  } else {
+    Ok(game)
+  }
+}

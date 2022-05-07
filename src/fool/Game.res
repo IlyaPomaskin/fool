@@ -73,14 +73,12 @@ let startGame = (game: inLobby) => {
 }
 
 let isValidMove = (game, player, card) => {
-  if isDefender(game, player) {
-    Error("Defender can't make move")
-  } else if !Table.hasCards(game.table) && !isAttacker(game, player) {
-    Error("First move made not by attacker")
+  let isValidByUtils = GameUtils.isValidMove(game, player)
+
+  if Result.isError(isValidByUtils) {
+    isValidByUtils
   } else if !isPlayerHasCard(player, card) {
     Error("Player don't have card")
-  } else if Table.isMaximumCards(game.table) {
-    Error("Maximum cards on table")
   } else if Table.hasCards(game.table) && !isCorrectAdditionalCard(game, card) {
     Error("Incorrect card")
   } else {

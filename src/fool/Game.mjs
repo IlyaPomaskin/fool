@@ -125,23 +125,11 @@ function startGame(game) {
 }
 
 function isValidMove(game, player, card) {
-  if (GameUtils.isDefender(game, player)) {
-    return {
-            TAG: /* Error */1,
-            _0: "Defender can't make move"
-          };
-  } else if (!Table.hasCards(game.table) && !GameUtils.isAttacker(game, player)) {
-    return {
-            TAG: /* Error */1,
-            _0: "First move made not by attacker"
-          };
+  var isValidByUtils = GameUtils.isValidMove(game, player);
+  if (Belt_Result.isError(isValidByUtils)) {
+    return isValidByUtils;
   } else if (GameUtils.isPlayerHasCard(player, card)) {
-    if (Table.isMaximumCards(game.table)) {
-      return {
-              TAG: /* Error */1,
-              _0: "Maximum cards on table"
-            };
-    } else if (Table.hasCards(game.table) && !GameUtils.isCorrectAdditionalCard(game, card)) {
+    if (Table.hasCards(game.table) && !GameUtils.isCorrectAdditionalCard(game, card)) {
       return {
               TAG: /* Error */1,
               _0: "Incorrect card"

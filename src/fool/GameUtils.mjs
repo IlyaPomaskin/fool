@@ -179,6 +179,30 @@ function isCanStart(game, player) {
   }
 }
 
+function isValidMove(game, player) {
+  if (isDefender(game, player)) {
+    return {
+            TAG: /* Error */1,
+            _0: "Defender can't make move"
+          };
+  } else if (!Table.hasCards(game.table) && !isAttacker(game, player)) {
+    return {
+            TAG: /* Error */1,
+            _0: "First move made not by attacker"
+          };
+  } else if (Table.isMaximumCards(game.table)) {
+    return {
+            TAG: /* Error */1,
+            _0: "Maximum cards on table"
+          };
+  } else {
+    return {
+            TAG: /* Ok */0,
+            _0: game
+          };
+  }
+}
+
 export {
   isDefender ,
   isAttacker ,
@@ -196,6 +220,7 @@ export {
   findPlayerById ,
   isFirstPlayerAddedToList ,
   isCanStart ,
+  isValidMove ,
   
 }
 /* No side effect */
