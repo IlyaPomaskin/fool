@@ -1,6 +1,23 @@
 open Types
 open Utils
 
+module DndWrapper = {
+  @react.component
+  let make = (~card, ~children) => {
+    <CardDnd.Cards.DroppableContainer
+      className={(~draggingOver: bool) =>
+        cx([
+          "relative top-0 left-0 w-12 h-16",
+          draggingOver ? "bg-gradient-to-tl from-purple-200 to-pink-200 opacity-70" : "",
+        ])}
+      accept={_ => true}
+      id={CardDnd.ContainerId.make(CardDnd.ToCard(card))}
+      axis=Y>
+      children
+    </CardDnd.Cards.DroppableContainer>
+  }
+}
+
 @react.component
 let make = (~className: string="", ~isCardDisabled: card => bool=_ => false, ~table: table) =>
   <div className={cx(["flex gap-1 flex-row", className])}>
@@ -8,7 +25,6 @@ let make = (~className: string="", ~isCardDisabled: card => bool=_ => false, ~ta
       let isDisabled = Option.isSome(by) || isCardDisabled(to)
 
       <div
-        className="relative"
         key={Card.cardToString(to) ++ by->Option.map(Card.cardToString)->Option.getWithDefault("")}>
         {switch by {
         | Some(byCard) =>
@@ -17,30 +33,16 @@ let make = (~className: string="", ~isCardDisabled: card => bool=_ => false, ~ta
             <CardUI card={byCard} className="absolute opacity-0.5" disabled={true} />
           </div>
         | None =>
-          <div className="flex flex-col gap-1">
+          <div className="relative">
             <CardUI card={to} disabled={isDisabled} />
-            <CardDnd.Cards.DroppableContainer
-              className={(~draggingOver: bool) =>
-                cx([
-                  "top-0",
-                  "left-0",
-                  "w-12 h-16",
-                  draggingOver ? "bg-gradient-to-tl from-purple-200 to-pink-200 opacity-70" : "",
-                ])}
-              accept={_ => true}
-              id={CardDnd.ContainerId.make(CardDnd.ToCard(to))}
-              axis=Y
-              lockAxis={true}>
+            <DndWrapper card={to}>
               <div
                 className={cx([
-                  // "absolute",
-                  "w-12 h-16",
-                  "inline-block",
-                  "transform-x-[-100%]",
+                  "absolute top-0 left-0 w-12 h-16",
                   "border rounded-md border-solid border-slate-500",
                 ])}
               />
-            </CardDnd.Cards.DroppableContainer>
+            </DndWrapper>
           </div>
         }}
       </div>

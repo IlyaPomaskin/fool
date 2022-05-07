@@ -20,28 +20,24 @@ function InProgressScreen$Parts$table(Props) {
                 className: "my-1",
                 table: match
               });
-  } else {
-    return React.createElement(CardDnd.Cards.DroppableContainer.make, {
-                id: /* ToTable */0,
-                axis: /* X */0,
-                accept: (function (param) {
-                    return Belt_Result.isOk(GameUtils.isValidMove(game, player));
-                  }),
-                className: (function (draggingOver) {
-                    return Utils.cx([
-                                "top-0 left-0 w-12 h-16",
-                                draggingOver ? "bg-gradient-to-tl from-purple-200 to-pink-200 opacity-70" : ""
-                              ]);
-                  }),
-                children: React.createElement("div", {
-                      className: Utils.cx([
-                            "w-12 h-16",
-                            "transform-x-[-100%]",
-                            "border rounded-md border-solid border-slate-500"
-                          ])
-                    })
-              });
   }
+  var table = game.table;
+  return React.createElement(CardDnd.Cards.DroppableContainer.make, {
+              id: /* ToTable */0,
+              axis: /* X */0,
+              accept: (function (param) {
+                  return Belt_Result.isOk(GameUtils.isValidMove(game, player));
+                }),
+              className: (function (draggingOver) {
+                  return Utils.cx([draggingOver ? "bg-gradient-to-tl from-purple-200 to-pink-200 opacity-70" : ""]);
+                }),
+              children: table ? React.createElement(TableUI.make, {
+                      className: "my-1",
+                      table: table
+                    }) : React.createElement("div", {
+                      className: Utils.cx(["w-12 h-16 border rounded-md border-solid border-slate-500"])
+                    })
+            });
 }
 
 var Parts = {

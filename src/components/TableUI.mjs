@@ -8,6 +8,31 @@ import * as CardUI from "./CardUI.mjs";
 import * as CardDnd from "./CardDnd.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 
+function TableUI$DndWrapper(Props) {
+  var card = Props.card;
+  var children = Props.children;
+  return React.createElement(CardDnd.Cards.DroppableContainer.make, {
+              id: /* ToCard */{
+                _0: card
+              },
+              axis: /* Y */1,
+              accept: (function (param) {
+                  return true;
+                }),
+              className: (function (draggingOver) {
+                  return Utils.cx([
+                              "relative top-0 left-0 w-12 h-16",
+                              draggingOver ? "bg-gradient-to-tl from-purple-200 to-pink-200 opacity-70" : ""
+                            ]);
+                }),
+              children: children
+            });
+}
+
+var DndWrapper = {
+  make: TableUI$DndWrapper
+};
+
 function TableUI(Props) {
   var classNameOpt = Props.className;
   var isCardDisabledOpt = Props.isCardDisabled;
@@ -26,8 +51,7 @@ function TableUI(Props) {
                     var to = param[0];
                     var isDisabled = Belt_Option.isSome(by) || Curry._1(isCardDisabled, to);
                     return React.createElement("div", {
-                                key: Card.cardToString(to) + Belt_Option.getWithDefault(Belt_Option.map(by, Card.cardToString), ""),
-                                className: "relative"
+                                key: Card.cardToString(to) + Belt_Option.getWithDefault(Belt_Option.map(by, Card.cardToString), "")
                               }, by !== undefined ? React.createElement("div", {
                                       className: "flex flex-col gap-1"
                                     }, React.createElement(CardUI.make, {
@@ -38,32 +62,15 @@ function TableUI(Props) {
                                           className: "absolute opacity-0.5",
                                           disabled: true
                                         })) : React.createElement("div", {
-                                      className: "flex flex-col gap-1"
+                                      className: "relative"
                                     }, React.createElement(CardUI.make, {
                                           card: to,
                                           disabled: isDisabled
-                                        }), React.createElement(CardDnd.Cards.DroppableContainer.make, {
-                                          id: /* ToCard */{
-                                            _0: to
-                                          },
-                                          axis: /* Y */1,
-                                          lockAxis: true,
-                                          accept: (function (param) {
-                                              return true;
-                                            }),
-                                          className: (function (draggingOver) {
-                                              return Utils.cx([
-                                                          "top-0",
-                                                          "left-0",
-                                                          "w-12 h-16",
-                                                          draggingOver ? "bg-gradient-to-tl from-purple-200 to-pink-200 opacity-70" : ""
-                                                        ]);
-                                            }),
+                                        }), React.createElement(TableUI$DndWrapper, {
+                                          card: to,
                                           children: React.createElement("div", {
                                                 className: Utils.cx([
-                                                      "w-12 h-16",
-                                                      "inline-block",
-                                                      "transform-x-[-100%]",
+                                                      "absolute top-0 left-0 w-12 h-16",
                                                       "border rounded-md border-solid border-slate-500"
                                                     ])
                                               })
@@ -74,6 +81,7 @@ function TableUI(Props) {
 var make = TableUI;
 
 export {
+  DndWrapper ,
   make ,
   
 }

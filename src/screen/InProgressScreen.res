@@ -11,20 +11,15 @@ module Parts = {
     | (false, _) =>
       <CardDnd.Cards.DroppableContainer
         className={(~draggingOver: bool) =>
-          cx([
-            "top-0 left-0 w-12 h-16",
-            draggingOver ? "bg-gradient-to-tl from-purple-200 to-pink-200 opacity-70" : "",
-          ])}
+          cx([draggingOver ? "bg-gradient-to-tl from-purple-200 to-pink-200 opacity-70" : ""])}
         accept={_ => GameUtils.isValidMove(game, player)->Result.isOk}
         id={CardDnd.ContainerId.make(CardDnd.ToTable)}
         axis=X>
-        <div
-          className={cx([
-            "w-12 h-16",
-            "transform-x-[-100%]",
-            "border rounded-md border-solid border-slate-500",
-          ])}
-        />
+        {switch game.table {
+        | list{} =>
+          <div className={cx(["w-12 h-16 border rounded-md border-solid border-slate-500"])} />
+        | table => <TableUI className="my-1" table={table} />
+        }}
       </CardDnd.Cards.DroppableContainer>
     }
   }
