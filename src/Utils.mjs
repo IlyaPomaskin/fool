@@ -114,10 +114,6 @@ function tapResult(result, fn) {
               }));
 }
 
-var selected = "bg-slate-400";
-
-var unselected = "";
-
 export {
   cx ,
   uiList ,
@@ -125,8 +121,6 @@ export {
   uiStr ,
   noop ,
   noop2 ,
-  selected ,
-  unselected ,
   equals ,
   toggleArrayItem ,
   lastListItem ,

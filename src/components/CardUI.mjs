@@ -20,18 +20,15 @@ function suitToColor(suit) {
 function CardUI$Base(Props) {
   var classNameOpt = Props.className;
   var disabledOpt = Props.disabled;
-  var selectedOpt = Props.selected;
   var children = Props.children;
   var className = classNameOpt !== undefined ? classNameOpt : "";
   var disabled = disabledOpt !== undefined ? disabledOpt : false;
-  var selected = selectedOpt !== undefined ? selectedOpt : false;
   return React.createElement("div", {
               className: Utils.cx([
                     "relative w-12 h-16",
                     "border rounded-md border-solid border-slate-500",
                     "select-none",
                     disabled ? "border-slate-400" : "",
-                    selected ? Utils.selected : Utils.unselected,
                     className
                   ])
             }, children !== undefined ? Caml_option.valFromOption(children) : null);
@@ -41,14 +38,12 @@ var Base = {
   make: CardUI$Base
 };
 
-function makeProps(card, classNameOpt, disabledOpt, selectedOpt, param, param$1) {
+function makeProps(card, classNameOpt, disabledOpt, param, param$1) {
   var className = classNameOpt !== undefined ? classNameOpt : "";
   var disabled = disabledOpt !== undefined ? disabledOpt : false;
-  var selected = selectedOpt !== undefined ? selectedOpt : false;
   return {
           className: className,
           disabled: disabled,
-          selected: selected,
           card: card
         };
 }
@@ -56,7 +51,6 @@ function makeProps(card, classNameOpt, disabledOpt, selectedOpt, param, param$1)
 function make(props) {
   var className = props.className;
   var disabled = props.disabled;
-  var selected = props.selected;
   var card = props.card;
   return React.createElement(CardUI$Base, {
               className: Utils.cx([
@@ -65,7 +59,6 @@ function make(props) {
                     "overflow-hidden"
                   ]),
               disabled: disabled,
-              selected: selected,
               children: null
             }, React.createElement("div", {
                   className: "absolute w-full h-full bg-gradient-to-tl from-purple-200 to-pink-200 "
@@ -118,12 +111,10 @@ function CardUI$Local(Props) {
   var card = Props.card;
   var classNameOpt = Props.className;
   var disabledOpt = Props.disabled;
-  var selectedOpt = Props.selected;
   var className = classNameOpt !== undefined ? classNameOpt : "";
   var disabled = disabledOpt !== undefined ? disabledOpt : false;
-  var selected = selectedOpt !== undefined ? selectedOpt : false;
   if (card) {
-    return React.createElement(make, makeProps(card._0, className, disabled, selected, undefined, undefined));
+    return React.createElement(make, makeProps(card._0, className, disabled, undefined, undefined));
   } else {
     return React.createElement(CardUI$HiddenCard, {
                 className: className

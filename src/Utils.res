@@ -11,10 +11,6 @@ let noop = (_: 'a) => ()
 
 let noop2 = (_: 'a, _: 'a1) => ()
 
-let selected = "bg-slate-400"
-
-let unselected = ""
-
 let equals = (a: 'a, b: 'b) => a == b
 
 let toggleArrayItem = (list: list<'a>, item: 'a): list<'a> => {

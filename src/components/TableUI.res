@@ -2,12 +2,7 @@ open Types
 open Utils
 
 @react.component
-let make = (
-  ~className: string="",
-  ~isCardSelected: card => bool=_ => false,
-  ~isCardDisabled: card => bool=_ => false,
-  ~table: table,
-) =>
+let make = (~className: string="", ~isCardDisabled: card => bool=_ => false, ~table: table) =>
   <div className={cx(["flex gap-1 flex-row", className])}>
     {table->uiList(((to, by)) => {
       let isDisabled = Option.isSome(by) || isCardDisabled(to)
@@ -23,7 +18,7 @@ let make = (
           </div>
         | None =>
           <div className="flex flex-col gap-1">
-            <CardUI selected={isCardSelected(to)} card={to} disabled={isDisabled} />
+            <CardUI card={to} disabled={isDisabled} />
             <CardDnd.Cards.DroppableContainer
               className={(~draggingOver: bool) =>
                 cx([

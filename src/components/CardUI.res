@@ -14,7 +14,6 @@ module Base = {
   let make = (
     ~className: string="",
     ~disabled: bool=false,
-    ~selected: bool=false,
     ~children: option<React.element>=?,
     (),
   ) => {
@@ -24,7 +23,6 @@ module Base = {
         "border rounded-md border-solid border-slate-500",
         "select-none",
         disabled ? "border-slate-400" : "",
-        selected ? Utils.selected : Utils.unselected,
         className,
       ])}>
       {switch children {
@@ -40,26 +38,22 @@ module VisibleCard = {
     ~card: plainCard,
     ~className: string="",
     ~disabled: bool=false,
-    ~selected: bool=false,
     ~key as _: option<string>=?,
     (),
   ) =>
     {
       "className": className,
       "disabled": disabled,
-      "selected": selected,
       "card": card,
     }
 
   let make = props => {
     let className = props["className"]
     let disabled = props["disabled"]
-    let selected = props["selected"]
     let card = props["card"]
 
     <Base
       disabled
-      selected
       className={cx([
         className,
         disabled ? "text-slate-400" : suitToColor(fst(card)),
@@ -98,9 +92,9 @@ module EmptyCard = {
 
 module Local = {
   @react.component
-  let make = (~card: card, ~className: string="", ~disabled: bool=false, ~selected: bool=false) => {
+  let make = (~card: card, ~className: string="", ~disabled: bool=false) => {
     switch card {
-    | Visible(card) => <VisibleCard card className disabled selected />
+    | Visible(card) => <VisibleCard card className disabled />
     | Hidden => <HiddenCard className />
     }
   }

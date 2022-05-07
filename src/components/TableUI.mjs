@@ -10,13 +10,9 @@ import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 
 function TableUI(Props) {
   var classNameOpt = Props.className;
-  var isCardSelectedOpt = Props.isCardSelected;
   var isCardDisabledOpt = Props.isCardDisabled;
   var table = Props.table;
   var className = classNameOpt !== undefined ? classNameOpt : "";
-  var isCardSelected = isCardSelectedOpt !== undefined ? isCardSelectedOpt : (function (param) {
-        return false;
-      });
   var isCardDisabled = isCardDisabledOpt !== undefined ? isCardDisabledOpt : (function (param) {
         return false;
       });
@@ -45,8 +41,7 @@ function TableUI(Props) {
                                       className: "flex flex-col gap-1"
                                     }, React.createElement(CardUI.make, {
                                           card: to,
-                                          disabled: isDisabled,
-                                          selected: Curry._1(isCardSelected, to)
+                                          disabled: isDisabled
                                         }), React.createElement(CardDnd.Cards.DroppableContainer.make, {
                                           id: /* ToCard */{
                                             _0: to

@@ -7,19 +7,51 @@ import * as React from "react";
 import * as CardUI from "./CardUI.mjs";
 import * as CardDnd from "./CardDnd.mjs";
 
+function DeckUI$DndWrapper(Props) {
+  var card = Props.card;
+  var index = Props.index;
+  var children = Props.children;
+  return React.createElement(CardDnd.Cards.DroppableContainer.make, {
+              id: /* ToCard */{
+                _0: card
+              },
+              axis: /* X */0,
+              accept: (function (param) {
+                  return false;
+                }),
+              children: React.createElement(CardDnd.Cards.DraggableItem.make, {
+                    id: card,
+                    containerId: /* ToCard */{
+                      _0: card
+                    },
+                    index: index,
+                    className: (function (dragging) {
+                        return Utils.cx([
+                                    "",
+                                    ""
+                                  ]);
+                      }),
+                    children: {
+                      NAME: "Children",
+                      VAL: children
+                    }
+                  })
+            });
+}
+
+var DndWrapper = {
+  make: DeckUI$DndWrapper
+};
+
 function DeckUI(Props) {
   var deck = Props.deck;
   var classNameOpt = Props.className;
   var disabledOpt = Props.disabled;
   var isDraggableOpt = Props.isDraggable;
-  var isCardSelectedOpt = Props.isCardSelected;
   var isCardDisabledOpt = Props.isCardDisabled;
   var className = classNameOpt !== undefined ? classNameOpt : "";
   var disabled = disabledOpt !== undefined ? disabledOpt : false;
   var isDraggable = isDraggableOpt !== undefined ? isDraggableOpt : false;
-  var isCardSelected = isCardSelectedOpt !== undefined ? isCardSelectedOpt : (function (param) {
-        return false;
-      });
   var isCardDisabled = isCardDisabledOpt !== undefined ? isCardDisabledOpt : (function (param) {
         return false;
       });
@@ -31,34 +63,12 @@ function DeckUI(Props) {
                     ])
               }, Utils.uiListWithIndex(deck, (function (index, card) {
                       if (isDraggable) {
-                        return React.createElement(CardDnd.Cards.DroppableContainer.make, {
-                                    id: /* ToCard */{
-                                      _0: card
-                                    },
-                                    axis: /* X */0,
-                                    accept: (function (param) {
-                                        return false;
-                                      }),
-                                    children: React.createElement(CardDnd.Cards.DraggableItem.make, {
-                                          id: card,
-                                          containerId: /* ToCard */{
-                                            _0: card
-                                          },
-                                          index: index,
-                                          className: (function (dragging) {
-                                              return Utils.cx([
-                                                          "",
-                                                          ""
-                                                        ]);
-                                            }),
-                                          children: {
-                                            NAME: "Children",
-                                            VAL: React.createElement(CardUI.make, {
-                                                  card: card,
-                                                  disabled: disabled || Curry._1(isCardDisabled, card),
-                                                  selected: Curry._1(isCardSelected, card)
-                                                })
-                                          }
+                        return React.createElement(DeckUI$DndWrapper, {
+                                    card: card,
+                                    index: index,
+                                    children: React.createElement(CardUI.make, {
+                                          card: card,
+                                          disabled: disabled || Curry._1(isCardDisabled, card)
                                         }),
                                     key: Card.cardToString(card) + String(index)
                                   });
@@ -66,7 +76,6 @@ function DeckUI(Props) {
                         return React.createElement(CardUI.make, {
                                     card: card,
                                     disabled: disabled || Curry._1(isCardDisabled, card),
-                                    selected: Curry._1(isCardSelected, card),
                                     key: Card.cardToString(card) + String(index)
                                   });
                       }
@@ -81,6 +90,7 @@ function DeckUI(Props) {
 var make = DeckUI;
 
 export {
+  DndWrapper ,
   make ,
   
 }
