@@ -6,14 +6,15 @@ import * as UseWs from "./hooks/UseWs.mjs";
 import * as Utils from "./Utils.mjs";
 import * as React from "react";
 import * as PlayerUI from "./components/PlayerUI.mjs";
+import * as Belt_List from "rescript/lib/es6/belt_List.js";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as InLobbyScreen from "./screen/InLobbyScreen.mjs";
 import * as InProgressScreen from "./screen/InProgressScreen.mjs";
 import * as LobbySetupScreen from "./screen/LobbySetupScreen.mjs";
 import * as AuthorizationScreen from "./screen/AuthorizationScreen.mjs";
+import * as ReactBeautifulDnd from "react-beautiful-dnd";
 
 function Index$PlayerScreen(Props) {
-  var pId = Props.pId;
   var match = React.useState(function () {
         
       });
@@ -77,69 +78,6 @@ function Index$PlayerScreen(Props) {
   var sendMessage = match$2.sendMessage;
   var error = match$2.error;
   React.useEffect((function () {
-          var delayM = function (param, param$1, param$2) {
-            var timeout = param$1 !== undefined ? param$1 : 100;
-            return new Promise((function (resolve, param$3) {
-                          setTimeout((function (param$4) {
-                                  return resolve(Curry._1(sendMessage, param));
-                                }), timeout);
-                          
-                        }));
-          };
-          if (pId === "session:p1") {
-            delayM({
-                          TAG: /* Login */1,
-                          _0: pId
-                        }, undefined, undefined).then(function (param) {
-                        return delayM({
-                                    TAG: /* Lobby */3,
-                                    _0: /* Create */0,
-                                    _1: "p1",
-                                    _2: ""
-                                  }, 100, undefined);
-                      }).then(function (param) {
-                      return delayM({
-                                  TAG: /* Lobby */3,
-                                  _0: /* Enter */1,
-                                  _1: "p1",
-                                  _2: "g1"
-                                }, 100, undefined);
-                    }).then(function (param) {
-                    return delayM({
-                                TAG: /* Lobby */3,
-                                _0: /* Ready */2,
-                                _1: "p1",
-                                _2: "g1"
-                              }, 100, undefined);
-                  }).then(function (param) {
-                  return delayM({
-                              TAG: /* Lobby */3,
-                              _0: /* Start */3,
-                              _1: "p1",
-                              _2: "g1"
-                            }, 300, undefined);
-                });
-          }
-          if (pId === "session:p2") {
-            delayM({
-                      TAG: /* Login */1,
-                      _0: pId
-                    }, undefined, undefined).then(function (param) {
-                    return delayM({
-                                TAG: /* Lobby */3,
-                                _0: /* Enter */1,
-                                _1: "p2",
-                                _2: "g1"
-                              }, 250, undefined);
-                  }).then(function (param) {
-                  return delayM({
-                              TAG: /* Lobby */3,
-                              _0: /* Ready */2,
-                              _1: "p2",
-                              _2: "g1"
-                            }, 100, undefined);
-                });
-          }
           
         }), [sendMessage]);
   var tmp;
@@ -185,10 +123,103 @@ function Index$PlayerScreen(Props) {
                           })) : Utils.uiStr("No player")), React.createElement("div", undefined, error !== undefined ? React.createElement("div", undefined, Utils.uiStr("error: " + error)) : React.createElement("div", undefined, Utils.uiStr("No error"))), tmp);
 }
 
+var spread2 = ((x1,x2) => ({ ...x1, ...x2 }));
+
+var spread3 = ((x1,x2,x3) => ({ ...x1, ...x2, ...x3 }));
+
+var reorder = ((list, startIndex, endIndex) => {
+  const result = Array.from(list);
+  const [removed] = result.splice(startIndex, 1);
+  result.splice(endIndex, 0, removed);
+
+  return result;
+});
+
+function Index$ReactDndTest(Props) {
+  var match = React.useState(function () {
+        return {
+                hd: {
+                  id: "item-" + "1",
+                  content: "item " + "1"
+                },
+                tl: {
+                  hd: {
+                    id: "item-" + "2",
+                    content: "item " + "2"
+                  },
+                  tl: {
+                    hd: {
+                      id: "item-" + "3",
+                      content: "item " + "3"
+                    },
+                    tl: {
+                      hd: {
+                        id: "item-" + "4",
+                        content: "item " + "4"
+                      },
+                      tl: {
+                        hd: {
+                          id: "item-" + "5",
+                          content: "item " + "5"
+                        },
+                        tl: /* [] */0
+                      }
+                    }
+                  }
+                }
+              };
+      });
+  var setItems = match[1];
+  var items = match[0];
+  var handleDragEnd = function (result, param) {
+    var dest = result.destination;
+    if (!(dest == null)) {
+      Curry._1(setItems, (function (items) {
+              return Belt_List.fromArray(reorder(Belt_List.toArray(items), result.source.index, dest.index));
+            }));
+    }
+    
+  };
+  return React.createElement(ReactBeautifulDnd.DragDropContext, {
+              onDragEnd: handleDragEnd,
+              children: React.createElement(ReactBeautifulDnd.Droppable, {
+                    droppableId: "droppable",
+                    children: (function (droppableProvided, droppableSnapshot) {
+                        return React.createElement("div", {
+                                    ref: droppableProvided.innerRef,
+                                    style: {
+                                      background: droppableSnapshot.isDraggingOver ? "lightblue" : "grey",
+                                      padding: "8px",
+                                      width: "250px"
+                                    }
+                                  }, Utils.uiListWithIndex(items, (function (index, item) {
+                                          return React.createElement(ReactBeautifulDnd.Draggable, {
+                                                      draggableId: item.id,
+                                                      index: index,
+                                                      children: (function (dp, draggableSnapshot, param) {
+                                                          return React.cloneElement(React.createElement("div", undefined, Utils.uiStr(item.id)), spread2(spread3({
+                                                                              ref: dp.innerRef
+                                                                            }, dp.draggableProps, dp.dragHandleProps), {
+                                                                          style: Object.assign({}, {
+                                                                                background: draggableSnapshot.isDragging ? "lightgreen" : "red",
+                                                                                margin: "0 0 16px 0",
+                                                                                padding: "16px",
+                                                                                userSelect: "none"
+                                                                              }, dp.draggableProps.style)
+                                                                        }));
+                                                        }),
+                                                      key: item.id
+                                                    });
+                                        })), droppableProvided.placeholder);
+                      })
+                  })
+            });
+}
+
 function $$default(param) {
   return React.createElement("div", {
               className: "flex flex-col"
-            }, React.createElement("div", {
+            }, React.createElement(Index$ReactDndTest, {}), React.createElement("div", {
                   className: "border rounded-md border-solid border-slate-500"
                 }, React.createElement(Index$PlayerScreen, {
                       pId: "session:p1"
