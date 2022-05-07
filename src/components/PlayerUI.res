@@ -11,9 +11,8 @@ module Short = {
 }
 
 @react.component
-let make = (~className: string="", ~player: player, ~onCardClick: card => unit=noop, ()) => {
+let make = (~className: string="", ~player: player, ()) => {
   <div className={className}>
-    <Short player={player} />
-    <div> <CardUI.deck deck={player.cards} onCardClick={onCardClick} /> </div>
+    <Short player={player} /> <div> <CardUI.deck deck={player.cards} /> </div>
   </div>
 }

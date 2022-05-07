@@ -49,15 +49,13 @@ function ClientUI$Parts$deck(Props) {
   var game = Props.game;
   var player = Props.player;
   var isDraggableOpt = Props.isDraggable;
-  var onCardClick = Props.onCardClick;
   var isDraggable = isDraggableOpt !== undefined ? isDraggableOpt : false;
   var isDefender = GameUtils.isDefender(game, player);
   var disabled = isDefender ? !Table.hasCards(game.table) : !GameUtils.isPlayerCanMove(game, player);
   return React.createElement(CardUI.deck, {
               deck: player.cards,
               disabled: disabled,
-              isDraggable: isDraggable,
-              onCardClick: onCardClick
+              isDraggable: isDraggable
             });
 }
 
@@ -103,8 +101,7 @@ function ClientUI(Props) {
                           })) : null, React.createElement(ClientUI$Parts$deck, {
                       game: game,
                       player: player,
-                      isDraggable: true,
-                      onCardClick: isDefender ? Utils.noop : match.handleMove
+                      isDraggable: true
                     }), React.createElement(ClientUI$Parts$table, {
                       game: game,
                       player: player

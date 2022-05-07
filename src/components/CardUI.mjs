@@ -24,22 +24,19 @@ function CardUI$Base(Props) {
   var classNameOpt = Props.className;
   var disabledOpt = Props.disabled;
   var selectedOpt = Props.selected;
-  var onClickOpt = Props.onClick;
   var children = Props.children;
   var className = classNameOpt !== undefined ? classNameOpt : "";
   var disabled = disabledOpt !== undefined ? disabledOpt : false;
   var selected = selectedOpt !== undefined ? selectedOpt : false;
-  var onClick = onClickOpt !== undefined ? onClickOpt : Utils.noop;
   return React.createElement("div", {
               className: Utils.cx([
                     "relative w-12 h-16",
                     "border rounded-md border-solid border-slate-500",
-                    "cursor-pointer select-none",
+                    "select-none",
                     disabled ? "border-slate-400" : "",
                     selected ? Utils.selected : Utils.unselected,
                     className
-                  ]),
-              onClick: disabled ? Utils.noop : onClick
+                  ])
             }, children !== undefined ? Caml_option.valFromOption(children) : null);
 }
 
@@ -47,17 +44,15 @@ var Base = {
   make: CardUI$Base
 };
 
-function makeProps(card, classNameOpt, disabledOpt, selectedOpt, onClickOpt, param, param$1) {
+function makeProps(card, classNameOpt, disabledOpt, selectedOpt, param, param$1) {
   var className = classNameOpt !== undefined ? classNameOpt : "";
   var disabled = disabledOpt !== undefined ? disabledOpt : false;
   var selected = selectedOpt !== undefined ? selectedOpt : false;
-  var onClick = onClickOpt !== undefined ? onClickOpt : Utils.noop;
   return {
           className: className,
           disabled: disabled,
           selected: selected,
-          card: card,
-          onClick: onClick
+          card: card
         };
 }
 
@@ -66,7 +61,6 @@ function make(props) {
   var disabled = props.disabled;
   var selected = props.selected;
   var card = props.card;
-  var onClick = props.onClick;
   return React.createElement(CardUI$Base, {
               className: Utils.cx([
                     className,
@@ -75,11 +69,6 @@ function make(props) {
                   ]),
               disabled: disabled,
               selected: selected,
-              onClick: (function (param) {
-                  return Curry._1(onClick, /* Visible */{
-                              _0: card
-                            });
-                }),
               children: null
             }, React.createElement("div", {
                   className: "absolute w-full h-full bg-gradient-to-tl from-purple-200 to-pink-200 "
@@ -97,15 +86,12 @@ var VisibleCard = {
 
 function CardUI$HiddenCard(Props) {
   var classNameOpt = Props.className;
-  var onClickOpt = Props.onClick;
   var className = classNameOpt !== undefined ? classNameOpt : "";
-  var onClick = onClickOpt !== undefined ? onClickOpt : Utils.noop;
   return React.createElement(CardUI$Base, {
               className: Utils.cx([
                     className,
                     "overflow-hidden"
                   ]),
-              onClick: onClick,
               children: React.createElement("div", {
                     className: "absolute w-full h-full bg-gradient-to-tl from-purple-500 to-pink-500 bg-opacity-50"
                   })
@@ -118,15 +104,12 @@ var HiddenCard = {
 
 function CardUI$EmptyCard(Props) {
   var classNameOpt = Props.className;
-  var onClickOpt = Props.onClick;
   var className = classNameOpt !== undefined ? classNameOpt : "";
-  var onClick = onClickOpt !== undefined ? onClickOpt : Utils.noop;
   return React.createElement(CardUI$Base, {
               className: Utils.cx([
                     className,
                     "overflow-hidden"
-                  ]),
-              onClick: onClick
+                  ])
             });
 }
 
@@ -139,17 +122,14 @@ function CardUI$Local(Props) {
   var classNameOpt = Props.className;
   var disabledOpt = Props.disabled;
   var selectedOpt = Props.selected;
-  var onClickOpt = Props.onClick;
   var className = classNameOpt !== undefined ? classNameOpt : "";
   var disabled = disabledOpt !== undefined ? disabledOpt : false;
   var selected = selectedOpt !== undefined ? selectedOpt : false;
-  var onClick = onClickOpt !== undefined ? onClickOpt : Utils.noop;
   if (card) {
-    return React.createElement(make, makeProps(card._0, className, disabled, selected, onClick, undefined, undefined));
+    return React.createElement(make, makeProps(card._0, className, disabled, selected, undefined, undefined));
   } else {
     return React.createElement(CardUI$HiddenCard, {
-                className: className,
-                onClick: onClick
+                className: className
               });
   }
 }
@@ -177,7 +157,6 @@ function CardUI$deck(Props) {
   var isDraggableOpt = Props.isDraggable;
   var isCardSelectedOpt = Props.isCardSelected;
   var isCardDisabledOpt = Props.isCardDisabled;
-  var onCardClickOpt = Props.onCardClick;
   var className = classNameOpt !== undefined ? classNameOpt : "";
   var disabled = disabledOpt !== undefined ? disabledOpt : false;
   var isDraggable = isDraggableOpt !== undefined ? isDraggableOpt : false;
@@ -187,12 +166,11 @@ function CardUI$deck(Props) {
   var isCardDisabled = isCardDisabledOpt !== undefined ? isCardDisabledOpt : (function (param) {
         return false;
       });
-  var onCardClick = onCardClickOpt !== undefined ? onCardClickOpt : Utils.noop;
   if (deck) {
     return React.createElement("div", {
                 className: Utils.cx([
                       className,
-                      "leading flex gap-1"
+                      "leading flex flex-row gap-1"
                     ])
               }, Utils.uiListWithIndex(deck, (function (index, card) {
                       if (isDraggable) {
@@ -217,8 +195,7 @@ function CardUI$deck(Props) {
                                             VAL: React.createElement(CardUI$Local, {
                                                   card: card,
                                                   disabled: disabled || Curry._1(isCardDisabled, card),
-                                                  selected: Curry._1(isCardSelected, card),
-                                                  onClick: onCardClick
+                                                  selected: Curry._1(isCardSelected, card)
                                                 })
                                           }
                                         }),
@@ -230,7 +207,6 @@ function CardUI$deck(Props) {
                                     className: "inline-block mx-1",
                                     disabled: disabled || Curry._1(isCardDisabled, card),
                                     selected: Curry._1(isCardSelected, card),
-                                    onClick: onCardClick,
                                     key: Card.cardToString(card) + String(index)
                                   });
                       }
@@ -247,7 +223,6 @@ function CardUI$table(Props) {
   var isCardSelectedOpt = Props.isCardSelected;
   var isCardDisabledOpt = Props.isCardDisabled;
   var table = Props.table;
-  var onCardClickOpt = Props.onCardClick;
   var className = classNameOpt !== undefined ? classNameOpt : "";
   var isCardSelected = isCardSelectedOpt !== undefined ? isCardSelectedOpt : (function (param) {
         return false;
@@ -255,10 +230,9 @@ function CardUI$table(Props) {
   var isCardDisabled = isCardDisabledOpt !== undefined ? isCardDisabledOpt : (function (param) {
         return false;
       });
-  var onCardClick = onCardClickOpt !== undefined ? onCardClickOpt : Utils.noop;
   return React.createElement("div", {
               className: Utils.cx([
-                    "flex gap-1 flex-col",
+                    "flex gap-1 flex-row",
                     className
                   ])
             }, table ? Utils.uiList(table, (function (param) {
@@ -278,12 +252,11 @@ function CardUI$table(Props) {
                                             className: "absolute opacity-0.5",
                                             disabled: true
                                           })) : React.createElement("div", {
-                                        className: "relative"
+                                        className: "flex flex-col gap-1"
                                       }, React.createElement(CardUI$Local, {
                                             card: to,
                                             disabled: isDisabled,
-                                            selected: Curry._1(isCardSelected, to),
-                                            onClick: onCardClick
+                                            selected: Curry._1(isCardSelected, to)
                                           }), React.createElement(CardDnd.Cards.DroppableContainer.make, {
                                             id: to,
                                             axis: /* Y */1,

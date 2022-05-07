@@ -15,16 +15,14 @@ module Base = {
     ~className: string="",
     ~disabled: bool=false,
     ~selected: bool=false,
-    ~onClick: _ => unit=noop,
     ~children: option<React.element>=?,
     (),
   ) => {
     <div
-      onClick={disabled ? noop : onClick}
       className={cx([
         "relative w-12 h-16",
         "border rounded-md border-solid border-slate-500",
-        "cursor-pointer select-none",
+        "select-none",
         disabled ? "border-slate-400" : "",
         selected ? Utils.selected : Utils.unselected,
         className,
@@ -37,29 +35,12 @@ module Base = {
   }
 }
 
-type cardProps = {
-  "card": card,
-  "className": option<string>,
-  "disabled": option<bool>,
-  "onClick": option<card => unit>,
-  "selected": option<bool>,
-}
-
-type eCardProps = {
-  "className": string,
-  "disabled": bool,
-  "selected": bool,
-  "card": plainCard,
-  "onClick": card => unit,
-}
-
 module VisibleCard = {
   let makeProps = (
     ~card: plainCard,
     ~className: string="",
     ~disabled: bool=false,
     ~selected: bool=false,
-    ~onClick: card => unit=noop,
     ~key as _: option<string>=?,
     (),
   ) =>
@@ -68,15 +49,13 @@ module VisibleCard = {
       "disabled": disabled,
       "selected": selected,
       "card": card,
-      "onClick": onClick,
     }
 
-  let make = (props: eCardProps) => {
+  let make = props => {
     let className = props["className"]
     let disabled = props["disabled"]
     let selected = props["selected"]
     let card = props["card"]
-    let onClick = props["onClick"]
 
     <Base
       disabled
@@ -85,8 +64,7 @@ module VisibleCard = {
         className,
         disabled ? "text-slate-400" : suitToColor(fst(card)),
         "overflow-hidden",
-      ])}
-      onClick={_ => onClick(Visible(card))}>
+      ])}>
       <div className="absolute w-full h-full bg-gradient-to-tl from-purple-200 to-pink-200 " />
       <div className="absolute text-[18px] leading-[18px] inset-1">
         {uiStr(Card.suitToString(fst(card)))}
@@ -102,8 +80,8 @@ module VisibleCard = {
 
 module HiddenCard = {
   @react.component
-  let make = (~className: string="", ~onClick: card => unit=noop) => {
-    <Base className={cx([className, "overflow-hidden"])} onClick>
+  let make = (~className: string="") => {
+    <Base className={cx([className, "overflow-hidden"])}>
       <div
         className="absolute w-full h-full bg-gradient-to-tl from-purple-500 to-pink-500 bg-opacity-50"
       />
@@ -113,23 +91,17 @@ module HiddenCard = {
 
 module EmptyCard = {
   @react.component
-  let make = (~className: string="", ~onClick: card => unit=noop) => {
-    <Base className={cx([className, "overflow-hidden"])} onClick />
+  let make = (~className: string="") => {
+    <Base className={cx([className, "overflow-hidden"])} />
   }
 }
 
 module Local = {
   @react.component
-  let make = (
-    ~card: card,
-    ~className: string="",
-    ~disabled: bool=false,
-    ~selected: bool=false,
-    ~onClick: card => unit=noop,
-  ) => {
+  let make = (~card: card, ~className: string="", ~disabled: bool=false, ~selected: bool=false) => {
     switch card {
-    | Visible(card) => <VisibleCard card className disabled selected onClick />
-    | Hidden => <HiddenCard className onClick />
+    | Visible(card) => <VisibleCard card className disabled selected />
+    | Hidden => <HiddenCard className />
     }
   }
 }
@@ -148,13 +120,12 @@ let deck = (
   ~isDraggable: bool=false,
   ~isCardSelected: card => bool=_ => false,
   ~isCardDisabled: card => bool=_ => false,
-  ~onCardClick: card => unit=noop,
   (),
 ) =>
   switch deck {
   | list{} => <div className> {uiStr("No cards in deck")} </div>
   | _ =>
-    <div className={cx([className, "leading flex gap-1"])}>
+    <div className={cx([className, "leading flex flex-row gap-1"])}>
       {deck->uiListWithIndex((index, card) => {
         switch isDraggable {
         | true =>
@@ -170,10 +141,7 @@ let deck = (
               index>
               #Children(
                 <Local
-                  selected={isCardSelected(card)}
-                  card
-                  disabled={disabled || isCardDisabled(card)}
-                  onClick={onCardClick}
+                  selected={isCardSelected(card)} card disabled={disabled || isCardDisabled(card)}
                 />,
               )
             </CardDnd.Cards.DraggableItem>
@@ -185,7 +153,6 @@ let deck = (
             className="inline-block mx-1"
             card
             disabled={disabled || isCardDisabled(card)}
-            onClick={onCardClick}
           />
         }
       })}
@@ -198,9 +165,8 @@ let table = (
   ~isCardSelected: card => bool=_ => false,
   ~isCardDisabled: card => bool=_ => false,
   ~table: table,
-  ~onCardClick: card => unit=noop,
 ) =>
-  <div className={cx(["flex gap-1 flex-col", className])}>
+  <div className={cx(["flex gap-1 flex-row", className])}>
     {switch table {
     | list{} => uiStr("Table empty")
     | _ =>
@@ -218,10 +184,8 @@ let table = (
               <Local card={byCard} className="absolute opacity-0.5" disabled={true} />
             </div>
           | None =>
-            <div className="relative">
-              <Local
-                selected={isCardSelected(to)} card={to} disabled={isDisabled} onClick={onCardClick}
-              />
+            <div className="flex flex-col gap-1">
+              <Local selected={isCardSelected(to)} card={to} disabled={isDisabled} />
               <CardDnd.Cards.DroppableContainer
                 className={(~draggingOver: bool) =>
                   cx([

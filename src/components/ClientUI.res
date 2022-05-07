@@ -27,18 +27,13 @@ module Parts = {
   }
 
   @react.component
-  let deck = (
-    ~game: inProgress,
-    ~player: player,
-    ~isDraggable: bool=false,
-    ~onCardClick: _ => unit,
-  ) => {
+  let deck = (~game: inProgress, ~player: player, ~isDraggable: bool=false) => {
     let isDefender = GameUtils.isDefender(game, player)
     let disabled = isDefender
       ? !Table.hasCards(game.table)
       : !GameUtils.isPlayerCanMove(game, player)
 
-    <CardUI.deck disabled isDraggable deck={player.cards} onCardClick />
+    <CardUI.deck disabled isDraggable deck={player.cards} />
   }
 }
 
@@ -50,7 +45,7 @@ let make = (
   ~game: inProgress,
   ~onMove: move => unit,
 ) => {
-  let {handleBeat, handleTake, handleMove, handlePass} = UseInProgressActions.hook(~onMove)
+  let {handleBeat, handleTake, handlePass} = UseInProgressActions.hook(~onMove)
 
   let isDefender = GameUtils.isDefender(game, player)
 
@@ -81,7 +76,7 @@ let make = (
             </div>
           | false => React.null
           }}
-          <Parts.deck isDraggable={true} game player onCardClick={isDefender ? noop : handleMove} />
+          <Parts.deck isDraggable={true} game player />
           <Parts.table game player />
         </CardDnd.Cards.DndManager>
       </div>

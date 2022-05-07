@@ -22,16 +22,13 @@ var Short = {
 function PlayerUI(Props) {
   var classNameOpt = Props.className;
   var player = Props.player;
-  var onCardClickOpt = Props.onCardClick;
   var className = classNameOpt !== undefined ? classNameOpt : "";
-  var onCardClick = onCardClickOpt !== undefined ? onCardClickOpt : Utils.noop;
   return React.createElement("div", {
               className: className
             }, React.createElement(PlayerUI$Short, {
                   player: player
                 }), React.createElement("div", undefined, React.createElement(CardUI.deck, {
-                      deck: player.cards,
-                      onCardClick: onCardClick
+                      deck: player.cards
                     })));
 }
 
