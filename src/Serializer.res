@@ -1,79 +1,22 @@
 open Types
 
-let suitToString = suit =>
-  switch suit {
-  | Spades => "S"
-  | Hearts => "H"
-  | Diamonds => "D"
-  | Clubs => "C"
-  }
-
-let stringToSuit = str =>
-  switch str {
-  | "S" => Some(Spades)
-  | "H" => Some(Hearts)
-  | "D" => Some(Diamonds)
-  | "C" => Some(Clubs)
-  | _ => None
-  }
-
-let rankToString = rank =>
-  switch rank {
-  | Six => "6"
-  | Seven => "7"
-  | Eight => "8"
-  | Nine => "9"
-  | Ten => "10"
-  | Jack => "J"
-  | Queen => "Q"
-  | King => "K"
-  | Ace => "A"
-  }
-
-let stringToRank = str =>
-  switch str {
-  | "6" => Some(Six)
-  | "7" => Some(Seven)
-  | "8" => Some(Eight)
-  | "9" => Some(Nine)
-  | "10" => Some(Ten)
-  | "J" => Some(Jack)
-  | "Q" => Some(Queen)
-  | "K" => Some(King)
-  | "A" => Some(Ace)
-  | _ => None
-  }
-
-let cardToString = card =>
-  switch card {
-  | Hidden => "hidden"
-  | Visible(suit, rank) => suitToString(suit) ++ rankToString(rank)
-  }
-
-let stringToCard = str =>
-  switch str {
-  | "hidden" => Ok(Hidden)
-  | str => {
-      let suit = str->Js.String.slice(~from=0, ~to_=1)->stringToSuit
-      let rank = str->Js.String.slice(~from=1, ~to_=3)->stringToRank
-
-      switch (suit, rank) {
-      | (Some(suit), Some(rank)) => Ok(Visible(suit, rank))
-      | (None, _) => Error(#UnexpectedJsonValue([Jzon.DecodingError.Field("suit")], str))
-      | (_, None) => Error(#UnexpectedJsonValue([Jzon.DecodingError.Field("rank")], str))
-      }
-    }
-  }
-
 let card = Jzon.custom(
-  card => card->cardToString->Js.Json.string,
-  json => json->Js.Json.decodeString->Option.getWithDefault("")->stringToCard,
+  card => card->Card.cardToString->Js.Json.string,
+  json => {
+    let parsedCard = json->Js.Json.decodeString->Option.getWithDefault("")->Card.stringToCard
+
+    switch parsedCard {
+    | Some(card) => Ok(card)
+    | None =>
+      Error(#UnexpectedJsonValue([Jzon.DecodingError.Field("card")], json->Js.Json.stringify))
+    }
+  },
 )
 
 let suit = Jzon.custom(
-  suit => suit->suitToString->Js.Json.string,
+  suit => suit->Card.suitToString->Js.Json.string,
   json =>
-    switch json->Js.Json.decodeString->Option.flatMap(stringToSuit) {
+    switch json->Js.Json.decodeString->Option.flatMap(Card.stringToSuit) {
     | Some(suit) => Ok(suit)
     | None => Error(#UnexpectedJsonValue([Jzon.DecodingError.Field("suit")], "s"))
     },

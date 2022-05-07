@@ -108,14 +108,29 @@ function isValidBeat(to, by, trump) {
 function suitToString(suit) {
   switch (suit) {
     case /* Spades */0 :
-        return "♤";
+        return "S";
     case /* Hearts */1 :
-        return "♡";
+        return "H";
     case /* Diamonds */2 :
-        return "♢";
+        return "D";
     case /* Clubs */3 :
-        return "♧";
+        return "C";
     
+  }
+}
+
+function stringToSuit(str) {
+  switch (str) {
+    case "C" :
+        return /* Clubs */3;
+    case "D" :
+        return /* Diamonds */2;
+    case "H" :
+        return /* Hearts */1;
+    case "S" :
+        return /* Spades */0;
+    default:
+      return ;
   }
 }
 
@@ -143,12 +158,54 @@ function rankToString(rank) {
   }
 }
 
+function stringToRank(str) {
+  switch (str) {
+    case "10" :
+        return /* Ten */4;
+    case "6" :
+        return /* Six */0;
+    case "7" :
+        return /* Seven */1;
+    case "8" :
+        return /* Eight */2;
+    case "9" :
+        return /* Nine */3;
+    case "A" :
+        return /* Ace */8;
+    case "J" :
+        return /* Jack */5;
+    case "K" :
+        return /* King */7;
+    case "Q" :
+        return /* Queen */6;
+    default:
+      return ;
+  }
+}
+
 function cardToString(card) {
   if (!card) {
     return "hidden";
   }
   var match = card._0;
-  return suitToString(match[0]) + " " + rankToString(match[1]);
+  return suitToString(match[0]) + rankToString(match[1]);
+}
+
+function stringToCard(str) {
+  if (str === "hidden") {
+    return /* Hidden */0;
+  }
+  var suit = stringToSuit(str.slice(0, 1));
+  var rank = stringToRank(str.slice(1, 3));
+  if (suit !== undefined && rank !== undefined) {
+    return /* Visible */{
+            _0: [
+              suit,
+              rank
+            ]
+          };
+  }
+  
 }
 
 export {
@@ -163,8 +220,11 @@ export {
   isBeatByTrump ,
   isValidBeat ,
   suitToString ,
+  stringToSuit ,
   rankToString ,
+  stringToRank ,
   cardToString ,
+  stringToCard ,
   
 }
 /* No side effect */

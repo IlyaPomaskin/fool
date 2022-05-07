@@ -60,16 +60,24 @@ let isValidBeat = (to, by, trump) => {
   }
 }
 
-let suitToString = suit => {
+let suitToString = suit =>
   switch suit {
-  | Spades => `♤`
-  | Hearts => `♡`
-  | Diamonds => `♢`
-  | Clubs => `♧`
+  | Spades => "S"
+  | Hearts => "H"
+  | Diamonds => "D"
+  | Clubs => "C"
   }
-}
 
-let rankToString = rank => {
+let stringToSuit = str =>
+  switch str {
+  | "S" => Some(Spades)
+  | "H" => Some(Hearts)
+  | "D" => Some(Diamonds)
+  | "C" => Some(Clubs)
+  | _ => None
+  }
+
+let rankToString = rank =>
   switch rank {
   | Six => "6"
   | Seven => "7"
@@ -81,10 +89,37 @@ let rankToString = rank => {
   | King => "K"
   | Ace => "A"
   }
-}
+
+let stringToRank = str =>
+  switch str {
+  | "6" => Some(Six)
+  | "7" => Some(Seven)
+  | "8" => Some(Eight)
+  | "9" => Some(Nine)
+  | "10" => Some(Ten)
+  | "J" => Some(Jack)
+  | "Q" => Some(Queen)
+  | "K" => Some(King)
+  | "A" => Some(Ace)
+  | _ => None
+  }
 
 let cardToString = card =>
   switch card {
-  | Visible((suit, rank)) => suitToString(suit) ++ " " ++ rankToString(rank)
   | Hidden => "hidden"
+  | Visible(suit, rank) => suitToString(suit) ++ rankToString(rank)
+  }
+
+let stringToCard = str =>
+  switch str {
+  | "hidden" => Some(Hidden)
+  | str => {
+      let suit = str->Js.String.slice(~from=0, ~to_=1)->stringToSuit
+      let rank = str->Js.String.slice(~from=1, ~to_=3)->stringToRank
+
+      switch (suit, rank) {
+      | (Some(suit), Some(rank)) => Some(Visible(suit, rank))
+      | _ => None
+      }
+    }
   }

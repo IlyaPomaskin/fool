@@ -1,6 +1,29 @@
 open Utils
 open Types
 
+let suitToString = suit => {
+  switch suit {
+  | Spades => `♤`
+  | Hearts => `♡`
+  | Diamonds => `♢`
+  | Clubs => `♧`
+  }
+}
+
+let rankToString = rank => {
+  switch rank {
+  | Six => "6"
+  | Seven => "7"
+  | Eight => "8"
+  | Nine => "9"
+  | Ten => "10"
+  | Jack => "J"
+  | Queen => "Q"
+  | King => "K"
+  | Ace => "A"
+  }
+}
+
 let suitToColor = (suit: suit) =>
   switch suit {
   | Spades => "text-slate-500"
@@ -61,12 +84,12 @@ module VisibleCard = {
       ])}>
       <div className="absolute w-full h-full bg-gradient-to-tl from-purple-200 to-pink-200 " />
       <div className="absolute text-[18px] leading-[18px] inset-1">
-        {uiStr(Card.suitToString(fst(card)))}
+        {uiStr(suitToString(fst(card)))}
       </div>
       <div
         className={"absolute top-1/2 left-1/2 " ++
         "font-bold text-[18px] leading-[18px] " ++ "translate-y-[-50%] translate-x-[-50%]"}>
-        {uiStr(Card.rankToString(snd(card)))}
+        {uiStr(rankToString(snd(card)))}
       </div>
     </Base>
   }
