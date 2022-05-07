@@ -38,7 +38,7 @@ module Button = {
         "rounded shadow-md",
         "transition duration-150 ease-in-out",
         disabled
-          ? "pointer-events-none opacity-60"
+          ? "opacity-60"
           : "hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg",
       ])}
       onClick>
@@ -68,7 +68,7 @@ module Switch = {
           "rounded-full f",
           "bg-white bg-no-repeat bg-contain bg-gray-300",
           "focus:outline-none shadow-sm",
-          disabled ? "pointer-events-none filter-none opacity-50" : "",
+          disabled ? "filter-none opacity-50" : "",
         ])}
         type_="checkbox"
         role="switch"
@@ -78,7 +78,7 @@ module Switch = {
         disabled
         className={cx([
           "ml-2 form-check-label cursor-pointer inline-block text-gray-800 select-none",
-          disabled ? "pointer-events-none opacity-50" : "",
+          disabled ? "opacity-50" : "",
         ])}
         htmlFor={"switch-" ++ uniqId}>
         {uiStr(text)}
