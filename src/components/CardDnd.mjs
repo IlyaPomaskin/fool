@@ -39,11 +39,31 @@ var CardId = {
 var Id$1 = {};
 
 function eq$1(c1, c2) {
-  return Card.cardToString(c1) === Card.cardToString(c2);
+  if (c1) {
+    if (c2) {
+      return Card.cardToString(c1._0) === Card.cardToString(c2._0);
+    } else {
+      return false;
+    }
+  } else if (c2) {
+    return false;
+  } else {
+    return true;
+  }
 }
 
 function cmp$1(c1, c2) {
-  return Caml.caml_string_compare(Card.cardToString(c1), Card.cardToString(c2));
+  if (c1) {
+    if (c2) {
+      return Caml.caml_string_compare(Card.cardToString(c1._0), Card.cardToString(c2._0));
+    } else {
+      return -1;
+    }
+  } else if (c2) {
+    return 1;
+  } else {
+    return 0;
+  }
 }
 
 var Comparable$1 = Belt_Id.MakeComparable({
@@ -58,7 +78,7 @@ var $$Map$1 = {
   make: make$1
 };
 
-var DeckId = {
+var ContainerId = {
   Id: Id$1,
   eq: eq$1,
   cmp: cmp$1,
@@ -80,7 +100,7 @@ var Cards = Dnd.Make(DraggableItem, DroppableContainer);
 
 export {
   CardId ,
-  DeckId ,
+  ContainerId ,
   DraggableItem ,
   DroppableContainer ,
   Cards ,

@@ -45,7 +45,30 @@ function ClientUI$Parts$table(Props) {
                         className: "my-1",
                         table: match
                       }) : Utils.uiStr("Table empty")
-              ) : null);
+              ) : React.createElement(CardDnd.Cards.DroppableContainer.make, {
+                    id: /* ToTable */0,
+                    axis: /* Y */1,
+                    lockAxis: true,
+                    accept: (function (param) {
+                        return true;
+                      }),
+                    className: (function (draggingOver) {
+                        return Utils.cx([
+                                    "top-0",
+                                    "left-0",
+                                    "w-12 h-16",
+                                    draggingOver ? "bg-gradient-to-tl from-purple-200 to-pink-200 opacity-70" : ""
+                                  ]);
+                      }),
+                    children: React.createElement("div", {
+                          className: Utils.cx([
+                                "w-12 h-16",
+                                "inline-block",
+                                "transform-x-[-100%]",
+                                "border rounded-md border-solid border-slate-500"
+                              ])
+                        })
+                  }));
 }
 
 function ClientUI$Parts$deck(Props) {
@@ -79,11 +102,20 @@ function ClientUI(Props) {
   var isDefender = GameUtils.isDefender(game, player);
   var handleReorder = function (result) {
     if (result !== undefined && result.TAG !== /* SameContainer */0) {
-      Curry._1(onMove, {
-            TAG: /* Beat */0,
-            _0: result._1,
-            _1: result._0
-          });
+      var toCard = result._1;
+      var byCard = result._0;
+      if (toCard) {
+        Curry._1(onMove, {
+              TAG: /* Beat */0,
+              _0: toCard._0,
+              _1: byCard
+            });
+      } else {
+        Curry._1(onMove, {
+              TAG: /* Move */1,
+              _0: byCard
+            });
+      }
     } else {
       console.log("unknown", result);
     }
@@ -110,7 +142,7 @@ function ClientUI(Props) {
                           })) : null, React.createElement(ClientUI$Parts$deck, {
                       game: game,
                       player: player,
-                      isDraggable: true
+                      isDraggable: isOwner
                     }), React.createElement(ClientUI$Parts$table, {
                       game: game,
                       player: player

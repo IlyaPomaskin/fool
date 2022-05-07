@@ -32,14 +32,18 @@ function DeckUI(Props) {
               }, Utils.uiListWithIndex(deck, (function (index, card) {
                       if (isDraggable) {
                         return React.createElement(CardDnd.Cards.DroppableContainer.make, {
-                                    id: card,
+                                    id: /* ToCard */{
+                                      _0: card
+                                    },
                                     axis: /* X */0,
                                     accept: (function (param) {
                                         return false;
                                       }),
                                     children: React.createElement(CardDnd.Cards.DraggableItem.make, {
                                           id: card,
-                                          containerId: card,
+                                          containerId: /* ToCard */{
+                                            _0: card
+                                          },
                                           index: index,
                                           className: (function (dragging) {
                                               return Utils.cx([
@@ -61,7 +65,6 @@ function DeckUI(Props) {
                       } else {
                         return React.createElement(CardUI.make, {
                                     card: card,
-                                    className: "inline-block mx-1",
                                     disabled: disabled || Curry._1(isCardDisabled, card),
                                     selected: Curry._1(isCardSelected, card),
                                     key: Card.cardToString(card) + String(index)

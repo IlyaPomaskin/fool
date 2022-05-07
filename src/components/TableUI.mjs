@@ -48,7 +48,9 @@ function TableUI(Props) {
                                           disabled: isDisabled,
                                           selected: Curry._1(isCardSelected, to)
                                         }), React.createElement(CardDnd.Cards.DroppableContainer.make, {
-                                          id: to,
+                                          id: /* ToCard */{
+                                            _0: to
+                                          },
                                           axis: /* Y */1,
                                           lockAxis: true,
                                           accept: (function (param) {

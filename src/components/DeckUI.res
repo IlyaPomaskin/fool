@@ -21,12 +21,12 @@ let make = (
           <CardDnd.Cards.DroppableContainer
             key={Card.cardToString(card) ++ index->string_of_int}
             accept={_ => false}
-            id={CardDnd.DeckId.make(card)}
+            id={CardDnd.ContainerId.make(CardDnd.ToCard(card))}
             axis=X>
             <CardDnd.Cards.DraggableItem
               className={(~dragging: bool) => cx(["", dragging ? "" : ""])}
               id=card
-              containerId={CardDnd.DeckId.make(card)}
+              containerId={CardDnd.ContainerId.make(CardDnd.ToCard(card))}
               index>
               #Children(
                 <CardUI
@@ -39,7 +39,6 @@ let make = (
           <CardUI
             key={Card.cardToString(card) ++ index->string_of_int}
             selected={isCardSelected(card)}
-            className="inline-block mx-1"
             card
             disabled={disabled || isCardDisabled(card)}
           />

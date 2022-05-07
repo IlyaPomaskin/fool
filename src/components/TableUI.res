@@ -33,7 +33,7 @@ let make = (
                   draggingOver ? "bg-gradient-to-tl from-purple-200 to-pink-200 opacity-70" : "",
                 ])}
               accept={_ => true}
-              id={CardDnd.DeckId.make(to)}
+              id={CardDnd.ContainerId.make(CardDnd.ToCard(to))}
               axis=Y
               lockAxis={true}>
               <div
