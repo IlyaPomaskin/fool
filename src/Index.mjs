@@ -119,10 +119,12 @@ function Index$PlayerScreen(Props) {
 }
 
 function $$default(param) {
-  return React.createElement("div", undefined, React.createElement("div", {
-                  className: "my-2 w-1/2 inline-block border rounded-md border-solid border-slate-500"
+  return React.createElement("div", {
+              className: "flex flex-col"
+            }, React.createElement("div", {
+                  className: "border rounded-md border-solid border-slate-500"
                 }, React.createElement(Index$PlayerScreen, {})), React.createElement("div", {
-                  className: "my-2 w-1/2 inline-block border rounded-md border-solid border-slate-500"
+                  className: "border rounded-md border-solid border-slate-500"
                 }, React.createElement(Index$PlayerScreen, {})));
 }
 

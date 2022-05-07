@@ -25,15 +25,15 @@ module CardId = {
 
 module DeckId = {
   module Id = {
-    type t = string
+    type t = card
   }
 
   type t = Id.t
-  external make: string => t = "%identity"
-  external toString: t => string = "%identity"
+  external make: card => t = "%identity"
+  external toString: t => card = "%identity"
 
-  let eq = (c1, c2) => c1 == c2
-  let cmp = (c1, c2) => compare(c1, c2)
+  let eq = (c1, c2) => Card.cardToString(c1) == Card.cardToString(c2)
+  let cmp = (c1, c2) => compare(Card.cardToString(c1), Card.cardToString(c2))
 
   module Comparable = Belt.Id.MakeComparable({
     type t = Id.t

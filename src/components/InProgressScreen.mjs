@@ -16,7 +16,7 @@ function InProgressScreen(Props) {
                   className: "flex flex-wrap"
                 }, Utils.uiList(game.players, (function (p) {
                         return React.createElement(ClientUI.make, {
-                                    className: "m-1 flex-initial w-96",
+                                    className: "m-1 flex-initial ",
                                     player: p,
                                     isOwner: p.id === player.id,
                                     game: game,

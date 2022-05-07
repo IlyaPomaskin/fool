@@ -25,7 +25,7 @@ module InProgressUI = {
       <div className="my-2">
         {game.players->uiList(p =>
           <div key={p.id} className="inline-block mr-4">
-            <div className="grid grid-flow-row gap-1">
+            <div className="grid grid-flow-col gap-1">
               <PlayerUI.Short className="inline-block" player={p} />
               <div> {p.cards->List.length->Utils.numbersToEmoji->uiStr} </div>
               {GameUtils.isPassed(game, p) ? <div> {uiStr(`⏩`)} </div> : React.null}

@@ -37,7 +37,7 @@ function GameUI$InProgressUI(Props) {
                                     key: p.id,
                                     className: "inline-block mr-4"
                                   }, React.createElement("div", {
-                                        className: "grid grid-flow-row gap-1"
+                                        className: "grid grid-flow-col gap-1"
                                       }, React.createElement(PlayerUI.Short.make, {
                                             className: "inline-block",
                                             player: p

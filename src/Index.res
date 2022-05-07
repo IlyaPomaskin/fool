@@ -57,12 +57,8 @@ module PlayerScreen = {
 }
 
 let default = () => {
-  <div>
-    <div className="my-2 w-1/2 inline-block border rounded-md border-solid border-slate-500">
-      <PlayerScreen />
-    </div>
-    <div className="my-2 w-1/2 inline-block border rounded-md border-solid border-slate-500">
-      <PlayerScreen />
-    </div>
+  <div className="flex flex-col">
+    <div className="border rounded-md border-solid border-slate-500"> <PlayerScreen /> </div>
+    <div className="border rounded-md border-solid border-slate-500"> <PlayerScreen /> </div>
   </div>
 }

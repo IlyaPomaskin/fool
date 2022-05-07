@@ -2,30 +2,15 @@
 
 import * as Curry from "rescript/lib/es6/curry.js";
 
-function hook(toBeat, beatBy, setBeat, onMove) {
-  var handleBeat = function (param) {
-    if (toBeat !== undefined && beatBy !== undefined) {
-      Curry._1(setBeat, (function (param) {
-              return [
-                      undefined,
-                      undefined
-                    ];
-            }));
-      return Curry._1(onMove, {
-                  TAG: /* Beat */0,
-                  _0: toBeat,
-                  _1: beatBy
-                });
-    }
-    
+function hook(onMove) {
+  var handleBeat = function (toCard, byCard) {
+    return Curry._1(onMove, {
+                TAG: /* Beat */0,
+                _0: toCard,
+                _1: byCard
+              });
   };
   var handleTake = function (param) {
-    Curry._1(setBeat, (function (param) {
-            return [
-                    undefined,
-                    undefined
-                  ];
-          }));
     return Curry._1(onMove, /* Take */0);
   };
   var handleMove = function (card) {

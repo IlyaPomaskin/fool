@@ -192,23 +192,23 @@ function CardUI$deck(Props) {
     return React.createElement("div", {
                 className: Utils.cx([
                       className,
-                      "leading"
+                      "leading flex gap-1"
                     ])
-              }, React.createElement(CardDnd.Cards.DroppableContainer.make, {
-                    id: "deck",
-                    axis: /* X */0,
-                    accept: (function (param) {
-                        return false;
-                      }),
-                    children: Utils.uiListWithIndex(deck, (function (index, card) {
-                            if (isDraggable) {
-                              return React.createElement(CardDnd.Cards.DraggableItem.make, {
+              }, Utils.uiListWithIndex(deck, (function (index, card) {
+                      if (isDraggable) {
+                        return React.createElement(CardDnd.Cards.DroppableContainer.make, {
+                                    id: card,
+                                    axis: /* X */0,
+                                    accept: (function (param) {
+                                        return false;
+                                      }),
+                                    children: React.createElement(CardDnd.Cards.DraggableItem.make, {
                                           id: card,
-                                          containerId: "deck",
+                                          containerId: card,
                                           index: index,
                                           className: (function (dragging) {
                                               return Utils.cx([
-                                                          "inline-block mx-1",
+                                                          "",
                                                           ""
                                                         ]);
                                             }),
@@ -220,21 +220,21 @@ function CardUI$deck(Props) {
                                                   selected: Curry._1(isCardSelected, card),
                                                   onClick: onCardClick
                                                 })
-                                          },
-                                          key: Card.cardToString(card) + String(index)
-                                        });
-                            } else {
-                              return React.createElement(CardUI$Local, {
-                                          card: card,
-                                          className: "inline-block mx-1",
-                                          disabled: disabled || Curry._1(isCardDisabled, card),
-                                          selected: Curry._1(isCardSelected, card),
-                                          onClick: onCardClick,
-                                          key: Card.cardToString(card) + String(index)
-                                        });
-                            }
-                          }))
-                  }));
+                                          }
+                                        }),
+                                    key: Card.cardToString(card) + String(index)
+                                  });
+                      } else {
+                        return React.createElement(CardUI$Local, {
+                                    card: card,
+                                    className: "inline-block mx-1",
+                                    disabled: disabled || Curry._1(isCardDisabled, card),
+                                    selected: Curry._1(isCardSelected, card),
+                                    onClick: onCardClick,
+                                    key: Card.cardToString(card) + String(index)
+                                  });
+                      }
+                    })));
   } else {
     return React.createElement("div", {
                 className: className
@@ -257,45 +257,57 @@ function CardUI$table(Props) {
       });
   var onCardClick = onCardClickOpt !== undefined ? onCardClickOpt : Utils.noop;
   return React.createElement("div", {
-              className: className
+              className: Utils.cx([
+                    "flex gap-1 flex-col",
+                    className
+                  ])
             }, table ? Utils.uiList(table, (function (param) {
                       var by = param[1];
                       var to = param[0];
                       var isDisabled = Belt_Option.isSome(by) || Curry._1(isCardDisabled, to);
                       return React.createElement("div", {
                                   key: Card.cardToString(to) + Belt_Option.getWithDefault(Belt_Option.map(by, Card.cardToString), ""),
-                                  className: "inline-block mx-1 relative"
-                                }, by !== undefined ? React.createElement("div", undefined, React.createElement(CardUI$Local, {
-                                            card: by,
-                                            disabled: Belt_Option.isSome(by)
-                                          }), React.createElement(CardUI$Local, {
+                                  className: "relative"
+                                }, by !== undefined ? React.createElement("div", {
+                                        className: "flex flex-col gap-1"
+                                      }, React.createElement(CardUI$Local, {
                                             card: to,
-                                            className: "mb-1",
+                                            disabled: true
+                                          }), React.createElement(CardUI$Local, {
+                                            card: by,
+                                            className: "absolute opacity-0.5",
+                                            disabled: true
+                                          })) : React.createElement("div", {
+                                        className: "relative"
+                                      }, React.createElement(CardUI$Local, {
+                                            card: to,
                                             disabled: isDisabled,
                                             selected: Curry._1(isCardSelected, to),
                                             onClick: onCardClick
-                                          })) : React.createElement(CardDnd.Cards.DroppableContainer.make, {
-                                        id: Card.cardToString(to),
-                                        axis: /* X */0,
-                                        accept: (function (param) {
-                                            return true;
-                                          }),
-                                        className: (function (draggingOver) {
-                                            return Utils.cx([
-                                                        "inline-block",
+                                          }), React.createElement(CardDnd.Cards.DroppableContainer.make, {
+                                            id: to,
+                                            axis: /* Y */1,
+                                            lockAxis: true,
+                                            accept: (function (param) {
+                                                return true;
+                                              }),
+                                            className: (function (draggingOver) {
+                                                return Utils.cx([
+                                                            "top-0",
+                                                            "left-0",
+                                                            "w-12 h-16",
+                                                            draggingOver ? "bg-gradient-to-tl from-purple-200 to-pink-200 opacity-70" : ""
+                                                          ]);
+                                              }),
+                                            children: React.createElement("div", {
+                                                  className: Utils.cx([
                                                         "w-12 h-16",
-                                                        "border rounded-md border-solid border-slate-500",
-                                                        draggingOver ? "bg-gradient-to-tl from-purple-200 to-pink-200 opacity-50" : ""
-                                                      ]);
-                                          }),
-                                        children: React.createElement(CardUI$Local, {
-                                              card: to,
-                                              className: "mb-1",
-                                              disabled: isDisabled,
-                                              selected: Curry._1(isCardSelected, to),
-                                              onClick: onCardClick
-                                            })
-                                      }));
+                                                        "inline-block",
+                                                        "transform-x-[-100%]",
+                                                        "border rounded-md border-solid border-slate-500"
+                                                      ])
+                                                })
+                                          })));
                     })) : Utils.uiStr("Table empty"));
 }
 

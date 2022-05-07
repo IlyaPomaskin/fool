@@ -5,7 +5,6 @@ import * as Caml from "rescript/lib/es6/caml.js";
 import * as Card from "../fool/Card.mjs";
 import * as Belt_Id from "rescript/lib/es6/belt_Id.js";
 import * as Belt_Map from "rescript/lib/es6/belt_Map.js";
-import * as Caml_obj from "rescript/lib/es6/caml_obj.js";
 
 var Id = {};
 
@@ -39,9 +38,13 @@ var CardId = {
 
 var Id$1 = {};
 
-var eq$1 = Caml_obj.caml_equal;
+function eq$1(c1, c2) {
+  return Card.cardToString(c1) === Card.cardToString(c2);
+}
 
-var cmp$1 = Caml_obj.caml_compare;
+function cmp$1(c1, c2) {
+  return Caml.caml_string_compare(Card.cardToString(c1), Card.cardToString(c2));
+}
 
 var Comparable$1 = Belt_Id.MakeComparable({
       cmp: cmp$1

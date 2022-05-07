@@ -10,7 +10,7 @@ let make = (~game, ~player, ~onMessage) => {
         <ClientUI
           key={p.id}
           isOwner={p.id === player.id}
-          className="m-1 flex-initial w-96"
+          className="m-1 flex-initial "
           player={p}
           game
           onMove={move => onMessage(Progress(move, player.id, game.gameId))}
