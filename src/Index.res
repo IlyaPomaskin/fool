@@ -1,9 +1,12 @@
 open Types
 open Utils
 
+let delay = (send, msg, ~timeout=100, ()) =>
+  Promise.make((resolve, _) => Js.Global.setTimeout(() => resolve(. send(msg)), timeout)->ignore)
+
 module PlayerScreen = {
   @react.component
-  let make = () => {
+  let make = (~pId) => {
     let (player, setPlayer) = React.useState(_ => None)
     let (screen, setScreen) = React.useState(_ => AuthorizationScreen)
 
@@ -29,6 +32,31 @@ module PlayerScreen = {
     }, [player])
 
     let {error, sendMessage} = UseWs.hook(onMessage)
+
+    // FIXME remove debug code
+    React.useEffect1(() => {
+      open Promise
+
+      let delayM = delay(sendMessage)
+
+      if pId === "session:p1" {
+        delayM(Login(pId), ())
+        ->then(() => delayM(~timeout=100, Lobby(Create, "p1", ""), ()))
+        ->then(() => delayM(~timeout=100, Lobby(Enter, "p1", "g1"), ()))
+        ->then(() => delayM(~timeout=100, Lobby(Ready, "p1", "g1"), ()))
+        ->then(() => delayM(~timeout=300, Lobby(Start, "p1", "g1"), ()))
+        ->ignore
+      }
+
+      if pId === "session:p2" {
+        delayM(Login(pId), ())
+        ->then(() => delayM(~timeout=250, Lobby(Enter, "p2", "g1"), ()))
+        ->then(() => delayM(~timeout=100, Lobby(Ready, "p2", "g1"), ()))
+        ->ignore
+      }
+
+      None
+    }, [sendMessage])
 
     <div>
       <div>
@@ -58,7 +86,11 @@ module PlayerScreen = {
 
 let default = () => {
   <div className="flex flex-col">
-    <div className="border rounded-md border-solid border-slate-500"> <PlayerScreen /> </div>
-    <div className="border rounded-md border-solid border-slate-500"> <PlayerScreen /> </div>
+    <div className="border rounded-md border-solid border-slate-500">
+      <PlayerScreen pId="session:p1" />
+    </div>
+    <div className="border rounded-md border-solid border-slate-500">
+      <PlayerScreen pId="session:p2" />
+    </div>
   </div>
 }

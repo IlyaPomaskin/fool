@@ -5,7 +5,6 @@ import * as Deck from "./Deck.mjs";
 import * as Table from "./Table.mjs";
 import * as Utils from "../Utils.mjs";
 import * as Player from "./Player.mjs";
-import * as Js_math from "rescript/lib/es6/js_math.js";
 import * as Belt_List from "rescript/lib/es6/belt_List.js";
 import * as GameUtils from "./GameUtils.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
@@ -15,7 +14,7 @@ function makeGameInLobby(player) {
   return {
           TAG: /* Ok */0,
           _0: {
-            gameId: "gameId:" + String(Js_math.random_int(0, 10000000)),
+            gameId: "g1",
             players: {
               hd: player,
               tl: /* [] */0

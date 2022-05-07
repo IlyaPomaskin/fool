@@ -5,6 +5,10 @@ let gamesInLobby = LobbyGameMap.empty()
 let gamesInProgress = ProgressGameMap.empty()
 let players = PlayersMap.empty()
 
+// FIXME remove debug code
+PlayersMap.set(players, "p1", {id: "p1", sessionId: "session:p1", cards: list{}})
+PlayersMap.set(players, "p2", {id: "p2", sessionId: "session:p2", cards: list{}})
+
 let registerPlayer = (playerId: playerId): result<player, string> => {
   let player = players->PlayersMap.get(playerId)
 

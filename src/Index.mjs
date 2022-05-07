@@ -13,6 +13,7 @@ import * as LobbySetupScreen from "./components/LobbySetupScreen.mjs";
 import * as AuthorizationScreen from "./components/AuthorizationScreen.mjs";
 
 function Index$PlayerScreen(Props) {
+  var pId = Props.pId;
   var match = React.useState(function () {
         
       });
@@ -75,6 +76,72 @@ function Index$PlayerScreen(Props) {
   var match$2 = UseWs.hook(onMessage);
   var sendMessage = match$2.sendMessage;
   var error = match$2.error;
+  React.useEffect((function () {
+          var delayM = function (param, param$1, param$2) {
+            var timeout = param$1 !== undefined ? param$1 : 100;
+            return new Promise((function (resolve, param$3) {
+                          setTimeout((function (param$4) {
+                                  return resolve(Curry._1(sendMessage, param));
+                                }), timeout);
+                          
+                        }));
+          };
+          if (pId === "session:p1") {
+            delayM({
+                          TAG: /* Login */1,
+                          _0: pId
+                        }, undefined, undefined).then(function (param) {
+                        return delayM({
+                                    TAG: /* Lobby */3,
+                                    _0: /* Create */0,
+                                    _1: "p1",
+                                    _2: ""
+                                  }, 100, undefined);
+                      }).then(function (param) {
+                      return delayM({
+                                  TAG: /* Lobby */3,
+                                  _0: /* Enter */1,
+                                  _1: "p1",
+                                  _2: "g1"
+                                }, 100, undefined);
+                    }).then(function (param) {
+                    return delayM({
+                                TAG: /* Lobby */3,
+                                _0: /* Ready */2,
+                                _1: "p1",
+                                _2: "g1"
+                              }, 100, undefined);
+                  }).then(function (param) {
+                  return delayM({
+                              TAG: /* Lobby */3,
+                              _0: /* Start */3,
+                              _1: "p1",
+                              _2: "g1"
+                            }, 300, undefined);
+                });
+          }
+          if (pId === "session:p2") {
+            delayM({
+                      TAG: /* Login */1,
+                      _0: pId
+                    }, undefined, undefined).then(function (param) {
+                    return delayM({
+                                TAG: /* Lobby */3,
+                                _0: /* Enter */1,
+                                _1: "p2",
+                                _2: "g1"
+                              }, 250, undefined);
+                  }).then(function (param) {
+                  return delayM({
+                              TAG: /* Lobby */3,
+                              _0: /* Ready */2,
+                              _1: "p2",
+                              _2: "g1"
+                            }, 100, undefined);
+                });
+          }
+          
+        }), [sendMessage]);
   var tmp;
   var exit = 0;
   if (typeof screen === "number") {
@@ -123,9 +190,13 @@ function $$default(param) {
               className: "flex flex-col"
             }, React.createElement("div", {
                   className: "border rounded-md border-solid border-slate-500"
-                }, React.createElement(Index$PlayerScreen, {})), React.createElement("div", {
+                }, React.createElement(Index$PlayerScreen, {
+                      pId: "session:p1"
+                    })), React.createElement("div", {
                   className: "border rounded-md border-solid border-slate-500"
-                }, React.createElement(Index$PlayerScreen, {})));
+                }, React.createElement(Index$PlayerScreen, {
+                      pId: "session:p2"
+                    })));
 }
 
 export {

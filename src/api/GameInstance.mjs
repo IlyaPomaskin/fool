@@ -12,6 +12,18 @@ var gamesInProgress = $$Storage.ProgressGameMap.empty(undefined);
 
 var players = $$Storage.PlayersMap.empty(undefined);
 
+$$Storage.PlayersMap.set(players, "p1")({
+      id: "p1",
+      sessionId: "session:p1",
+      cards: /* [] */0
+    });
+
+$$Storage.PlayersMap.set(players, "p2")({
+      id: "p2",
+      sessionId: "session:p2",
+      cards: /* [] */0
+    });
+
 function registerPlayer(playerId) {
   var player = $$Storage.PlayersMap.get(players, playerId);
   if (player.TAG === /* Ok */0) {
