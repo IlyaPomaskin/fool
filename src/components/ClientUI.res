@@ -54,12 +54,12 @@ let make = (
     | Draw => uiStr("Draw")
     | Playing =>
       <div>
+        <Parts.deck isDraggable={isOwner} game player />
         {isOwner
           ? <Parts.actions
               className="py-2" game player onPass={_ => onMove(Pass)} onTake={_ => onMove(Take)}
             />
           : React.null}
-        <Parts.deck isDraggable={isOwner} game player />
       </div>
     }}
   </div>

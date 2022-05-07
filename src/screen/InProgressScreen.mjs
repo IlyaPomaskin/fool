@@ -3,10 +3,10 @@
 import * as Curry from "rescript/lib/es6/curry.js";
 import * as Utils from "../Utils.mjs";
 import * as React from "react";
-import * as GameUI from "./GameUI.mjs";
-import * as CardDnd from "./CardDnd.mjs";
-import * as TableUI from "./TableUI.mjs";
-import * as ClientUI from "./ClientUI.mjs";
+import * as GameUI from "../components/GameUI.mjs";
+import * as CardDnd from "../components/CardDnd.mjs";
+import * as TableUI from "../components/TableUI.mjs";
+import * as ClientUI from "../components/ClientUI.mjs";
 import * as GameUtils from "../fool/GameUtils.mjs";
 import * as Belt_Result from "rescript/lib/es6/belt_Result.js";
 

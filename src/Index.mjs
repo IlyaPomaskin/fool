@@ -7,10 +7,10 @@ import * as Utils from "./Utils.mjs";
 import * as React from "react";
 import * as PlayerUI from "./components/PlayerUI.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
-import * as InLobbyScreen from "./components/InLobbyScreen.mjs";
-import * as InProgressScreen from "./components/InProgressScreen.mjs";
-import * as LobbySetupScreen from "./components/LobbySetupScreen.mjs";
-import * as AuthorizationScreen from "./components/AuthorizationScreen.mjs";
+import * as InLobbyScreen from "./screen/InLobbyScreen.mjs";
+import * as InProgressScreen from "./screen/InProgressScreen.mjs";
+import * as LobbySetupScreen from "./screen/LobbySetupScreen.mjs";
+import * as AuthorizationScreen from "./screen/AuthorizationScreen.mjs";
 
 function Index$PlayerScreen(Props) {
   var pId = Props.pId;

@@ -68,7 +68,11 @@ function ClientUI(Props) {
   var tmp;
   switch (match) {
     case /* Playing */0 :
-        tmp = React.createElement("div", undefined, isOwner ? React.createElement(ClientUI$Parts$actions, {
+        tmp = React.createElement("div", undefined, React.createElement(ClientUI$Parts$deck, {
+                  game: game,
+                  player: player,
+                  isDraggable: isOwner
+                }), isOwner ? React.createElement(ClientUI$Parts$actions, {
                     className: "py-2",
                     game: game,
                     player: player,
@@ -78,11 +82,7 @@ function ClientUI(Props) {
                     onTake: (function (param) {
                         return Curry._1(onMove, /* Take */0);
                       })
-                  }) : null, React.createElement(ClientUI$Parts$deck, {
-                  game: game,
-                  player: player,
-                  isDraggable: isOwner
-                }));
+                  }) : null);
         break;
     case /* Done */1 :
         tmp = Utils.uiStr("Done");
