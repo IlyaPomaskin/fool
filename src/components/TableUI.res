@@ -4,17 +4,20 @@ open Utils
 module DndWrapper = {
   @react.component
   let make = (~card, ~children) => {
-    <CardDnd.Cards.DroppableContainer
-      className={(~draggingOver: bool) =>
-        cx([
-          "relative top-0 left-0 w-12 h-16",
-          draggingOver ? "bg-gradient-to-tl from-purple-200 to-pink-200 opacity-70" : "",
-        ])}
-      accept={_ => true}
-      id={CardDnd.ContainerId.make(CardDnd.ToCard(card))}
-      axis=Y>
-      children
-    </CardDnd.Cards.DroppableContainer>
+    <ReactDnd.Droppable droppableId={Card.cardToString(card)}>
+      {(droppableProvided, droppableSnapshot) => {
+        <div
+          ref={droppableProvided.innerRef}
+          className={cx([
+            "relative top-0 left-0 w-12 h-16 flex",
+            droppableSnapshot.isDraggingOver
+              ? "bg-gradient-to-tl from-purple-200 to-pink-200 opacity-70"
+              : "",
+          ])}>
+          children droppableProvided.placeholder
+        </div>
+      }}
+    </ReactDnd.Droppable>
   }
 }
 

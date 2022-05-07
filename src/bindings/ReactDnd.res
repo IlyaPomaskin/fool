@@ -1,37 +1,3 @@
-type position = {
-  x: int,
-  y: int,
-}
-
-type rect = {
-  top: int,
-  right: int,
-  bottom: int,
-  left: int,
-  width: int,
-  height: int,
-  x: int,
-  y: int,
-  center: position,
-}
-
-type spacing = {
-  top: int,
-  right: int,
-  bottom: int,
-  left: int,
-}
-
-type boxModel = {
-  marginBox: rect,
-  borderBox: rect,
-  paddingBox: rect,
-  contentBox: rect,
-  border: spacing,
-  padding: spacing,
-  margin: spacing,
-}
-
 module Id = {
   type t = string
 }
@@ -51,21 +17,9 @@ module ElementId = {
   type t = string
 }
 
-type droppableMode =
-  | Standard
-  | Virtual
-
-type droppableDescriptor = {
-  id: DroppableId.t,
-  type_: TypeId.t,
-  mode: droppableMode,
-}
-
-type draggableDescriptor = {
-  id: DraggableId.t,
-  index: int,
-  droppableId: DroppableId.t,
-  type_: TypeId.t,
+type position = {
+  x: int,
+  y: int,
 }
 
 type draggableOptions = {
@@ -74,185 +28,24 @@ type draggableOptions = {
   isEnabled: bool,
 }
 
-type direction =
-  | Horizontal
-  | Vertical
-
-type cssProperties =
-  | X
-  | Y
-  | Top
-  | Right
-  | Bottom
-  | Left
-  | Width
-  | Height
-
-type verticalAxis = {
-  direction: string, // Vertical,
-  line: string, // Y,
-  start: string, // Top,
-  end: string, // Bottom,
-  size: string, // Height,
-  crossAxisLine: string, // X,
-  crossAxisStart: string, // Left,
-  crossAxisEnd: string, // Right,
-  crossAxisSize: string, // Width,
-}
-
-type horizontalAxis = {
-  direction: string, // Horizontal,
-  line: string, // X,
-  start: string, // Left,
-  end: string, // Right,
-  size: string, // Width,
-  crossAxisLine: string, // Y,
-  crossAxisStart: string, // Top,
-  crossAxisEnd: string, // Bottom,
-  crossAxisSize: string, // Height,
-}
-
-type axis = VerticalAxis(verticalAxis) | HorizontalAxis(horizontalAxis)
-
-type scrollSize = {
-  scrollHeight: int,
-  scrollWidth: int,
-}
-
-type scrollDifference = {
-  value: position,
-  displacement: position,
-}
-
-type scrollDetails = {
-  initial: position,
-  current: position,
-  max: position,
-  diff: scrollDifference,
-}
-
-type placeholder = {
-  client: boxModel,
-  tagName: string,
-  display: string,
-}
-
-type draggableDimension = {
-  descriptor: draggableDescriptor,
-  placeholder: placeholder,
-  client: boxModel,
-  page: boxModel,
-  displaceBy: position,
-}
-
-type scrollable = {
-  pageMarginBox: rect,
-  frameClient: boxModel,
-  scrollSize: scrollSize,
-  shouldClipSubject: bool,
-  scroll: scrollDetails,
-}
-
-type placeholderInSubject = {
-  increasedBy: option<position>,
-  placeholderSize: position,
-  oldFrameMaxScroll: option<position>,
-}
-
-type droppableSubject = {
-  page: boxModel,
-  withPlaceholder: option<placeholderInSubject>,
-  active: option<rect>,
-}
-
-type droppableDimension = {
-  descriptor: droppableDescriptor,
-  axis: axis,
-  isEnabled: bool,
-  isCombineEnabled: bool,
-  client: boxModel,
-  isFixedOnPage: bool,
-  page: boxModel,
-  frame: option<scrollable>,
-  subject: droppableSubject,
-}
-
 type draggableLocation = {
   droppableId: DroppableId.t,
   index: int,
 }
 
-type draggableIdMap = {
-  a: int,
-  // [id: string]: true;
-}
-
-type droppableIdMap = {
-  a: int,
-  // [id: string]: true;
-}
-
-type draggableDimensionMap = {
-  a: int,
-  // [key: string]: DraggableDimension;
-}
-type droppableDimensionMap = {
-  a: int,
-  // [key: string]: DroppableDimension;
-}
-
-type displacement = {
-  draggableId: DraggableId.t,
-  shouldAnimate: bool,
-}
-
-type displacementMap = {
-  a: int,
-  // [key: string]: Displacement;
-}
-
-type displacedBy = {
-  value: int,
-  point: position,
-}
-
-//
 type combine = {
   draggableId: DraggableId.t,
   droppableId: DroppableId.t,
 }
 
-type displacementGroups = {
-  all: array<DraggableId.t>,
-  visible: displacementMap,
-  invisible: draggableIdMap,
-}
-
-type impact = Reorder | Combine
-
 type reorderImpact = {
-  // type_: Reorder,
   @as("type") type_: string,
   destination: draggableLocation,
 }
 
 type combineImpact = {
-  // type_: Combine,
   @as("type") type_: string,
   combine: combine,
-}
-
-type impactLocation = ReoderImpact(reorderImpact) | CombineImpact(combineImpact)
-
-type displaced = {
-  forwards: displacementGroups,
-  backwards: displacementGroups,
-}
-
-type dragImpact = {
-  displaced: displacementGroups,
-  displacedBy: displacedBy,
-  at: option<impactLocation>,
 }
 
 type clientPositions = {
@@ -306,7 +99,7 @@ type dropResult = {
   draggableId: DraggableId.t,
   mode: movementMode,
   source: draggableLocation,
-  destination: Js.Undefined.t<draggableLocation>,
+  destination: Js.Nullable.t<draggableLocation>,
   combine: Js.Undefined.t<combine>,
   reason: string,
 }
@@ -368,7 +161,7 @@ type draggableProvidedDraggableProps = {
   "style": ReactDOMStyle.t,
   "data-rbd-draggable-context-id": string,
   "data-rbd-draggable-id": string,
-  "onTransitionEnd": option<ReactEvent.Transition.t>,
+  "onTransitionEnd": Js.Undefined.t<ReactEvent.Transition.t>,
 }
 
 type draggableProvidedDragHandleProps = {
@@ -384,7 +177,7 @@ type draggableProvidedDragHandleProps = {
 type draggableProvided = {
   innerRef: ReactDOM.domRef,
   draggableProps: draggableProvidedDraggableProps,
-  dragHandleProps: option<draggableProvidedDragHandleProps>,
+  dragHandleProps: Js.Undefined.t<draggableProvidedDragHandleProps>,
 }
 
 type dropAnimation = {

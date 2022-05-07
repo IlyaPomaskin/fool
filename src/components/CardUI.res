@@ -113,17 +113,13 @@ module EmptyCard = {
   }
 }
 
-module Local = {
-  @react.component
-  let make = (~card: card, ~className: string="", ~disabled: bool=false) => {
-    switch card {
-    | Visible(card) => <VisibleCard card className disabled />
-    | Hidden => <HiddenCard className />
-    }
+@react.component
+let make = (~card: card, ~className: string="", ~disabled: bool=false) => {
+  switch card {
+  | Visible(card) => <VisibleCard card className disabled />
+  | Hidden => <HiddenCard className />
   }
 }
-
-include Local
 
 @react.component
 let trump = (~suit: suit, ~className: string="", ()) =>

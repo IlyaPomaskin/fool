@@ -1,19 +1,36 @@
 open Types
 open Utils
 
+let spread3: ('a1, 'a2, 'a3) => 'b = %raw(`(x1,x2,x3) => ({ ...x1, ...x2, ...x3 })`)
+
 module DndWrapper = {
   @react.component
   let make = (~card, ~index, ~children) => {
-    <CardDnd.Cards.DroppableContainer
-      accept={_ => false} id={CardDnd.ContainerId.make(CardDnd.ToCard(card))} axis=X>
-      <CardDnd.Cards.DraggableItem
-        className={(~dragging: bool) => cx(["", dragging ? "" : ""])}
-        id=card
-        containerId={CardDnd.ContainerId.make(CardDnd.ToCard(card))}
-        index>
-        #Children(children)
-      </CardDnd.Cards.DraggableItem>
-    </CardDnd.Cards.DroppableContainer>
+    let id = Card.cardToString(card)
+
+    <ReactDnd.Droppable isDropDisabled={true} droppableId={id}>
+      {(droppableProvided, _) => {
+        <div key={id} ref={droppableProvided.innerRef}>
+          <ReactDnd.Draggable key={id} draggableId={id} index>
+            {(draggableProvided, _, _) => {
+              React.cloneElement(
+                <div> children </div>,
+                spread3(
+                  draggableProvided.draggableProps,
+                  draggableProvided.dragHandleProps,
+                  {
+                    "key": id,
+                    "ref": draggableProvided.innerRef,
+                    "style": draggableProvided.draggableProps["style"],
+                  },
+                ),
+              )
+            }}
+          </ReactDnd.Draggable>
+          droppableProvided.placeholder
+        </div>
+      }}
+    </ReactDnd.Droppable>
   }
 }
 

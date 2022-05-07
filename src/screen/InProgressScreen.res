@@ -9,34 +9,53 @@ module Parts = {
     switch (isDefender, game.table) {
     | (true, table) => <TableUI className="my-1" table={table} />
     | (false, _) =>
-      <CardDnd.Cards.DroppableContainer
-        className={(~draggingOver: bool) =>
-          cx([draggingOver ? "bg-gradient-to-tl from-purple-200 to-pink-200 opacity-70" : ""])}
-        accept={_ => GameUtils.isValidMove(game, player)->Result.isOk}
-        id={CardDnd.ContainerId.make(CardDnd.ToTable)}
-        axis=X>
-        {switch game.table {
-        | list{} =>
-          <div className={cx(["w-12 h-16 border rounded-md border-solid border-slate-500"])} />
-        | table => <TableUI className="my-1" table={table} />
+      <ReactDnd.Droppable
+        isDropDisabled={GameUtils.isValidMove(game, player)->Result.isError} droppableId={"table"}>
+        {(droppableProvided, droppableSnapshot) => {
+          <div
+            ref={droppableProvided.innerRef}
+            className={cx([
+              droppableSnapshot.isDraggingOver
+                ? "bg-gradient-to-tl from-purple-200 to-pink-200 opacity-70"
+                : "",
+            ])}>
+            {switch game.table {
+            | list{} =>
+              <div className={cx(["w-12 h-16 border rounded-md border-solid border-slate-500"])} />
+            | table => <TableUI className="my-1" table={table} />
+            }}
+            droppableProvided.placeholder
+          </div>
         }}
-      </CardDnd.Cards.DroppableContainer>
+      </ReactDnd.Droppable>
     }
   }
 }
 
+type destionation =
+  | ToUnknown
+  | ToTable
+  | ToCard(card)
+
 @react.component
 let make = (~game, ~player, ~onMessage) => {
-  let handleReorder = result =>
-    switch result {
-    | Some(Dnd.ReorderResult.NewContainer(byCard, CardDnd.ToCard(toCard), _)) =>
-      onMessage(Progress(Beat(toCard, byCard), player.id, game.gameId))
-    | Some(Dnd.ReorderResult.NewContainer(card, CardDnd.ToTable, _)) =>
-      onMessage(Progress(Move(card), player.id, game.gameId))
-    | _ => ()
-    }
+  let handleDragEnd = (result: ReactDnd.dropResult, _) => {
+    Js.log2("result", result)
+    let byCard = Card.stringToCard(result.draggableId)
+    let dst = result.destination->Js.Nullable.toOption->Option.map(d => d.droppableId)
+    let isTable = dst->Option.map(dst => dst === "table")->Option.getWithDefault(false)
+    let toCard = dst->Option.flatMap(Card.stringToCard)
 
-  <CardDnd.Cards.DndManager onReorder={handleReorder}>
+    switch (isTable, toCard, byCard) {
+    | (true, _, Some(card)) => onMessage(Progress(Move(card), player.id, game.gameId))
+    | (false, Some(toCard), Some(byCard)) =>
+      onMessage(Progress(Beat(toCard, byCard), player.id, game.gameId))
+    | (false, None, _) => Js.log("No destination")
+    | _ => Js.log("unknown move")
+    }
+  }
+
+  <ReactDnd.DragDropContext onDragEnd={handleDragEnd}>
     <GameUI.InProgressUI game />
     <div className="m-1"> <Parts.table game player /> </div>
     <div className="flex flex-wrap">
@@ -51,5 +70,5 @@ let make = (~game, ~player, ~onMessage) => {
         />
       )}
     </div>
-  </CardDnd.Cards.DndManager>
+  </ReactDnd.DragDropContext>
 }

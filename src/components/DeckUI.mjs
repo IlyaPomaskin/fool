@@ -5,37 +5,35 @@ import * as Curry from "rescript/lib/es6/curry.js";
 import * as Utils from "../Utils.mjs";
 import * as React from "react";
 import * as CardUI from "./CardUI.mjs";
-import * as CardDnd from "./CardDnd.mjs";
+import * as ReactBeautifulDnd from "react-beautiful-dnd";
+
+var spread3 = ((x1,x2,x3) => ({ ...x1, ...x2, ...x3 }));
 
 function DeckUI$DndWrapper(Props) {
   var card = Props.card;
   var index = Props.index;
   var children = Props.children;
-  return React.createElement(CardDnd.Cards.DroppableContainer.make, {
-              id: /* ToCard */{
-                _0: card
-              },
-              axis: /* X */0,
-              accept: (function (param) {
-                  return false;
-                }),
-              children: React.createElement(CardDnd.Cards.DraggableItem.make, {
-                    id: card,
-                    containerId: /* ToCard */{
-                      _0: card
-                    },
-                    index: index,
-                    className: (function (dragging) {
-                        return Utils.cx([
-                                    "",
-                                    ""
-                                  ]);
-                      }),
-                    children: {
-                      NAME: "Children",
-                      VAL: children
-                    }
-                  })
+  var id = Card.cardToString(card);
+  return React.createElement(ReactBeautifulDnd.Droppable, {
+              droppableId: id,
+              isDropDisabled: true,
+              children: (function (droppableProvided, param) {
+                  return React.createElement("div", {
+                              key: id,
+                              ref: droppableProvided.innerRef
+                            }, React.createElement(ReactBeautifulDnd.Draggable, {
+                                  draggableId: id,
+                                  index: index,
+                                  children: (function (draggableProvided, param, param$1) {
+                                      return React.cloneElement(React.createElement("div", undefined, children), spread3(draggableProvided.draggableProps, draggableProvided.dragHandleProps, {
+                                                      key: id,
+                                                      ref: draggableProvided.innerRef,
+                                                      style: draggableProvided.draggableProps.style
+                                                    }));
+                                    }),
+                                  key: id
+                                }), droppableProvided.placeholder);
+                })
             });
 }
 
@@ -92,6 +90,7 @@ function DeckUI(Props) {
 var make = DeckUI;
 
 export {
+  spread3 ,
   DndWrapper ,
   make ,
   

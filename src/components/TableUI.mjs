@@ -5,27 +5,23 @@ import * as Curry from "rescript/lib/es6/curry.js";
 import * as Utils from "../Utils.mjs";
 import * as React from "react";
 import * as CardUI from "./CardUI.mjs";
-import * as CardDnd from "./CardDnd.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
+import * as ReactBeautifulDnd from "react-beautiful-dnd";
 
 function TableUI$DndWrapper(Props) {
   var card = Props.card;
   var children = Props.children;
-  return React.createElement(CardDnd.Cards.DroppableContainer.make, {
-              id: /* ToCard */{
-                _0: card
-              },
-              axis: /* Y */1,
-              accept: (function (param) {
-                  return true;
-                }),
-              className: (function (draggingOver) {
-                  return Utils.cx([
-                              "relative top-0 left-0 w-12 h-16",
-                              draggingOver ? "bg-gradient-to-tl from-purple-200 to-pink-200 opacity-70" : ""
-                            ]);
-                }),
-              children: children
+  return React.createElement(ReactBeautifulDnd.Droppable, {
+              droppableId: Card.cardToString(card),
+              children: (function (droppableProvided, droppableSnapshot) {
+                  return React.createElement("div", {
+                              ref: droppableProvided.innerRef,
+                              className: Utils.cx([
+                                    "relative top-0 left-0 w-12 h-16 flex",
+                                    droppableSnapshot.isDraggingOver ? "bg-gradient-to-tl from-purple-200 to-pink-200 opacity-70" : ""
+                                  ])
+                            }, children, droppableProvided.placeholder);
+                })
             });
 }
 

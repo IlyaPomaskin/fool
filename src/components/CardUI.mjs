@@ -145,7 +145,7 @@ var EmptyCard = {
   make: CardUI$EmptyCard
 };
 
-function CardUI$Local(Props) {
+function CardUI(Props) {
   var card = Props.card;
   var classNameOpt = Props.className;
   var disabledOpt = Props.disabled;
@@ -160,10 +160,6 @@ function CardUI$Local(Props) {
   }
 }
 
-var Local = {
-  make: CardUI$Local
-};
-
 function CardUI$trump(Props) {
   var suit = Props.suit;
   var classNameOpt = Props.className;
@@ -176,7 +172,7 @@ function CardUI$trump(Props) {
             }, Utils.uiStr(Card.suitToString(suit)));
 }
 
-var make$1 = CardUI$Local;
+var make$1 = CardUI;
 
 var trump = CardUI$trump;
 
@@ -188,7 +184,6 @@ export {
   VisibleCard ,
   HiddenCard ,
   EmptyCard ,
-  Local ,
   make$1 as make,
   trump ,
   
