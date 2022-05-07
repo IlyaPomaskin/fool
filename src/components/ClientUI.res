@@ -19,9 +19,10 @@ module Parts = {
     let isDefender = GameUtils.isDefender(game, player)
 
     <div className="mt-1">
-      {switch isDefender {
-      | true => <CardUI.table className="my-1" table={game.table} />
-      | false => React.null
+      {switch (isDefender, game.table) {
+      | (true, list{}) => uiStr("Table empty")
+      | (true, table) => <TableUI className="my-1" table={table} />
+      | _ => React.null
       }}
     </div>
   }
@@ -33,7 +34,7 @@ module Parts = {
       ? !Table.hasCards(game.table)
       : !GameUtils.isPlayerCanMove(game, player)
 
-    <CardUI.deck disabled isDraggable deck={player.cards} />
+    <DeckUI disabled isDraggable deck={player.cards} />
   }
 }
 

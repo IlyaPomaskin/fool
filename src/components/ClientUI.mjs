@@ -5,8 +5,9 @@ import * as Curry from "rescript/lib/es6/curry.js";
 import * as Table from "../fool/Table.mjs";
 import * as Utils from "../Utils.mjs";
 import * as React from "react";
-import * as CardUI from "./CardUI.mjs";
+import * as DeckUI from "./DeckUI.mjs";
 import * as CardDnd from "./CardDnd.mjs";
+import * as TableUI from "./TableUI.mjs";
 import * as PlayerUI from "./PlayerUI.mjs";
 import * as GameUtils from "../fool/GameUtils.mjs";
 
@@ -36,12 +37,15 @@ function ClientUI$Parts$table(Props) {
   var game = Props.game;
   var player = Props.player;
   var isDefender = GameUtils.isDefender(game, player);
+  var match = game.table;
   return React.createElement("div", {
               className: "mt-1"
-            }, isDefender ? React.createElement(CardUI.table, {
-                    className: "my-1",
-                    table: game.table
-                  }) : null);
+            }, isDefender ? (
+                match ? React.createElement(TableUI.make, {
+                        className: "my-1",
+                        table: match
+                      }) : Utils.uiStr("Table empty")
+              ) : null);
 }
 
 function ClientUI$Parts$deck(Props) {
@@ -51,7 +55,7 @@ function ClientUI$Parts$deck(Props) {
   var isDraggable = isDraggableOpt !== undefined ? isDraggableOpt : false;
   var isDefender = GameUtils.isDefender(game, player);
   var disabled = isDefender ? !Table.hasCards(game.table) : !GameUtils.isPlayerCanMove(game, player);
-  return React.createElement(CardUI.deck, {
+  return React.createElement(DeckUI.make, {
               deck: player.cards,
               disabled: disabled,
               isDraggable: isDraggable

@@ -2,7 +2,7 @@
 
 import * as Utils from "../Utils.mjs";
 import * as React from "react";
-import * as CardUI from "./CardUI.mjs";
+import * as DeckUI from "./DeckUI.mjs";
 
 function PlayerUI$Short(Props) {
   var classNameOpt = Props.className;
@@ -27,7 +27,7 @@ function PlayerUI(Props) {
               className: className
             }, React.createElement(PlayerUI$Short, {
                   player: player
-                }), React.createElement("div", undefined, React.createElement(CardUI.deck, {
+                }), React.createElement("div", undefined, React.createElement(DeckUI.make, {
                       deck: player.cards
                     })));
 }

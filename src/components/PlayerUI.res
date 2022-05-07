@@ -13,6 +13,6 @@ module Short = {
 @react.component
 let make = (~className: string="", ~player: player, ()) => {
   <div className={className}>
-    <Short player={player} /> <div> <CardUI.deck deck={player.cards} /> </div>
+    <Short player={player} /> <div> <DeckUI deck={player.cards} /> </div>
   </div>
 }
