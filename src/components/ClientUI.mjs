@@ -11,6 +11,8 @@ import * as CardDnd from "./CardDnd.mjs";
 import * as PlayerUI from "./PlayerUI.mjs";
 import * as GameUtils from "../fool/GameUtils.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
+import * as UseBeatCard from "../hooks/UseBeatCard.mjs";
+import * as UseInProgressActions from "../hooks/UseInProgressActions.mjs";
 
 function ClientUI$Parts$actions(Props) {
   var game = Props.game;
@@ -114,114 +116,6 @@ var Parts = {
   deck: ClientUI$Parts$deck
 };
 
-function useBeatCard(game, player) {
-  var match = React.useState(function () {
-        return [
-                undefined,
-                undefined
-              ];
-      });
-  var setBeat = match[1];
-  var match$1 = match[0];
-  var handleSelectToBeat = function (isToCard, card) {
-    return Curry._1(setBeat, (function (param) {
-                  var beatBy = param[1];
-                  var toBeat = param[0];
-                  if (isToCard) {
-                    var isSame = Belt_Option.getWithDefault(Belt_Option.map(toBeat, (function (param) {
-                                return Utils.equals(card, param);
-                              })), false);
-                    if (isSame) {
-                      return [
-                              undefined,
-                              beatBy
-                            ];
-                    } else {
-                      return [
-                              card,
-                              beatBy
-                            ];
-                    }
-                  }
-                  var isSame$1 = Belt_Option.getWithDefault(Belt_Option.map(beatBy, (function (param) {
-                              return Utils.equals(card, param);
-                            })), false);
-                  if (isSame$1) {
-                    return [
-                            toBeat,
-                            undefined
-                          ];
-                  } else {
-                    return [
-                            toBeat,
-                            card
-                          ];
-                  }
-                }));
-  };
-  var isDefender = GameUtils.isDefender(game, player);
-  React.useEffect((function () {
-          if (!isDefender) {
-            Curry._1(setBeat, (function (param) {
-                    return [
-                            undefined,
-                            undefined
-                          ];
-                  }));
-          }
-          
-        }), [isDefender]);
-  return {
-          toBeat: match$1[0],
-          beatBy: match$1[1],
-          setBeat: setBeat,
-          handleSelectToBeat: handleSelectToBeat
-        };
-}
-
-function useProgressActions(toBeat, beatBy, setBeat, onMove) {
-  var handleBeat = function (param) {
-    if (toBeat !== undefined && beatBy !== undefined) {
-      Curry._1(setBeat, (function (param) {
-              return [
-                      undefined,
-                      undefined
-                    ];
-            }));
-      return Curry._1(onMove, {
-                  TAG: /* Beat */0,
-                  _0: toBeat,
-                  _1: beatBy
-                });
-    }
-    
-  };
-  var handleTake = function (param) {
-    Curry._1(setBeat, (function (param) {
-            return [
-                    undefined,
-                    undefined
-                  ];
-          }));
-    return Curry._1(onMove, /* Take */0);
-  };
-  var handleMove = function (card) {
-    return Curry._1(onMove, {
-                TAG: /* Move */1,
-                _0: card
-              });
-  };
-  var handlePass = function (param) {
-    return Curry._1(onMove, /* Pass */1);
-  };
-  return {
-          handleBeat: handleBeat,
-          handleTake: handleTake,
-          handleMove: handleMove,
-          handlePass: handlePass
-        };
-}
-
 function ClientUI(Props) {
   var classNameOpt = Props.className;
   var player = Props.player;
@@ -230,11 +124,11 @@ function ClientUI(Props) {
   var onMove = Props.onMove;
   var className = classNameOpt !== undefined ? classNameOpt : "";
   var isOwner = isOwnerOpt !== undefined ? isOwnerOpt : false;
-  var match = useBeatCard(game, player);
+  var match = UseBeatCard.hook(game, player);
   var handleSelectToBeat = match.handleSelectToBeat;
   var beatBy = match.beatBy;
   var toBeat = match.toBeat;
-  var match$1 = useProgressActions(toBeat, beatBy, match.setBeat, onMove);
+  var match$1 = UseInProgressActions.hook(toBeat, beatBy, match.setBeat, onMove);
   var isDefender = GameUtils.isDefender(game, player);
   var handleReorder = function (result) {
     console.log("NNNNN", result);
@@ -320,8 +214,6 @@ var make = ClientUI;
 
 export {
   Parts ,
-  useBeatCard ,
-  useProgressActions ,
   make ,
   
 }

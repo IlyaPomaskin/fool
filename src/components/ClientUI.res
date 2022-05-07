@@ -81,79 +81,6 @@ module Parts = {
   }
 }
 
-type useBeatCardReturn = {
-  toBeat: option<card>,
-  beatBy: option<card>,
-  setBeat: (((option<card>, option<card>)) => (option<card>, option<card>)) => unit,
-  handleSelectToBeat: (bool, card) => unit,
-}
-
-let useBeatCard = (~game: inProgress, ~player: player): useBeatCardReturn => {
-  let ((toBeat, beatBy), setBeat) = React.useState(() => (None, None))
-  let handleSelectToBeat = (isToCard: bool, card: card) => {
-    setBeat(((toBeat, beatBy)) => {
-      if isToCard {
-        let isSame = toBeat->Option.map(Utils.equals(card))->Option.getWithDefault(false)
-
-        isSame ? (None, beatBy) : (Some(card), beatBy)
-      } else {
-        let isSame = beatBy->Option.map(Utils.equals(card))->Option.getWithDefault(false)
-
-        isSame ? (toBeat, None) : (toBeat, Some(card))
-      }
-    })
-  }
-
-  let isDefender = GameUtils.isDefender(game, player)
-
-  React.useEffect1(() => {
-    if !isDefender {
-      setBeat(_ => (None, None))
-    }
-
-    None
-  }, [isDefender])
-
-  {
-    toBeat: toBeat,
-    beatBy: beatBy,
-    setBeat: setBeat,
-    handleSelectToBeat: handleSelectToBeat,
-  }
-}
-
-type useProgressActionsReturn = {
-  handleBeat: unit => unit,
-  handleTake: unit => unit,
-  handleMove: card => unit,
-  handlePass: unit => unit,
-}
-
-let useProgressActions = (~toBeat, ~beatBy, ~setBeat, ~onMove): useProgressActionsReturn => {
-  let handleBeat = _ => {
-    switch (toBeat, beatBy) {
-    | (Some(to), Some(by)) => {
-        setBeat(_ => (None, None))
-        onMove(Beat(to, by))
-      }
-    | _ => ()
-    }
-  }
-  let handleTake = _ => {
-    setBeat(_ => (None, None))
-    onMove(Take)
-  }
-  let handleMove = card => onMove(Move(card))
-  let handlePass = _ => onMove(Pass)
-
-  {
-    handleBeat: handleBeat,
-    handleTake: handleTake,
-    handleMove: handleMove,
-    handlePass: handlePass,
-  }
-}
-
 @react.component
 let make = (
   ~className: string="",
@@ -162,8 +89,8 @@ let make = (
   ~game: inProgress,
   ~onMove: move => unit,
 ) => {
-  let {toBeat, beatBy, setBeat, handleSelectToBeat} = useBeatCard(~game, ~player)
-  let {handleBeat, handleTake, handleMove, handlePass} = useProgressActions(
+  let {toBeat, beatBy, setBeat, handleSelectToBeat} = UseBeatCard.hook(~game, ~player)
+  let {handleBeat, handleTake, handleMove, handlePass} = UseInProgressActions.hook(
     ~toBeat,
     ~beatBy,
     ~setBeat,
