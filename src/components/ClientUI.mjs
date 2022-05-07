@@ -9,7 +9,6 @@ import * as CardUI from "./CardUI.mjs";
 import * as CardDnd from "./CardDnd.mjs";
 import * as PlayerUI from "./PlayerUI.mjs";
 import * as GameUtils from "../fool/GameUtils.mjs";
-import * as UseInProgressActions from "../hooks/UseInProgressActions.mjs";
 
 function ClientUI$Parts$actions(Props) {
   var game = Props.game;
@@ -73,20 +72,22 @@ function ClientUI(Props) {
   var onMove = Props.onMove;
   var className = classNameOpt !== undefined ? classNameOpt : "";
   var isOwner = isOwnerOpt !== undefined ? isOwnerOpt : false;
-  var match = UseInProgressActions.hook(onMove);
-  var handleBeat = match.handleBeat;
   var isDefender = GameUtils.isDefender(game, player);
   var handleReorder = function (result) {
     if (result !== undefined && result.TAG !== /* SameContainer */0) {
-      Curry._2(handleBeat, result._1, result._0);
+      Curry._1(onMove, {
+            TAG: /* Beat */0,
+            _0: result._1,
+            _1: result._0
+          });
     } else {
       console.log("unknown", result);
     }
     
   };
-  var match$1 = GameUtils.getPlayerGameState(game, player);
+  var match = GameUtils.getPlayerGameState(game, player);
   var tmp;
-  switch (match$1) {
+  switch (match) {
     case /* Playing */0 :
         tmp = React.createElement("div", undefined, React.createElement(CardDnd.Cards.DndManager.make, {
                   onReorder: handleReorder,
@@ -96,8 +97,12 @@ function ClientUI(Props) {
                       }, React.createElement(ClientUI$Parts$actions, {
                             game: game,
                             player: player,
-                            onPass: match.handlePass,
-                            onTake: match.handleTake
+                            onPass: (function (param) {
+                                return Curry._1(onMove, /* Pass */1);
+                              }),
+                            onTake: (function (param) {
+                                return Curry._1(onMove, /* Take */0);
+                              })
                           })) : null, React.createElement(ClientUI$Parts$deck, {
                       game: game,
                       player: player,

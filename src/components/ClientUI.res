@@ -45,13 +45,11 @@ let make = (
   ~game: inProgress,
   ~onMove: move => unit,
 ) => {
-  let {handleBeat, handleTake, handlePass} = UseInProgressActions.hook(~onMove)
-
   let isDefender = GameUtils.isDefender(game, player)
 
   let handleReorder = result =>
     switch result {
-    | Some(Dnd.ReorderResult.NewContainer(byCard, toCard, _)) => handleBeat(toCard, byCard)
+    | Some(Dnd.ReorderResult.NewContainer(byCard, toCard, _)) => onMove(Beat(toCard, byCard))
     | x => Js.log2("unknown", x)
     }->ignore
 
@@ -72,7 +70,7 @@ let make = (
           {switch isOwner {
           | true =>
             <div className="my-2">
-              <Parts.actions game player onPass={handlePass} onTake={handleTake} />
+              <Parts.actions game player onPass={_ => onMove(Pass)} onTake={_ => onMove(Take)} />
             </div>
           | false => React.null
           }}
