@@ -47,7 +47,7 @@ function suitToColor(suit) {
   switch (suit) {
     case /* Hearts */1 :
     case /* Diamonds */2 :
-        return "text-red-900 dark:text-cyan-300";
+        return "text-red-900 dark:text-red-600";
     case /* Spades */0 :
     case /* Clubs */3 :
         return "text-slate-500";

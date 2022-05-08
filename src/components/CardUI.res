@@ -28,8 +28,8 @@ let suitToColor = (suit: suit) =>
   switch suit {
   | Spades => "text-slate-500"
   | Clubs => "text-slate-500"
-  | Hearts => "text-red-900 dark:text-cyan-300"
-  | Diamonds => "text-red-900 dark:text-cyan-300"
+  | Hearts => "text-red-900 dark:text-red-600"
+  | Diamonds => "text-red-900 dark:text-red-600"
   }
 
 module Base = {

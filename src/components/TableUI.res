@@ -28,25 +28,17 @@ let make = (~className: string="", ~isCardDisabled: card => bool=_ => false, ~ta
       let isDisabled = Option.isSome(by) || isCardDisabled(to)
 
       <div
-        key={Card.cardToString(to) ++ by->Option.map(Card.cardToString)->Option.getWithDefault("")}>
+        key={Card.cardToString(to) ++ by->Option.map(Card.cardToString)->Option.getWithDefault("")}
+        className="flex flex-col gap-1">
         {switch by {
-        | Some(byCard) =>
-          <div className="flex flex-col gap-1">
+        | Some(byCard) => <>
             <CardUI card={to} disabled={true} />
             <CardUI card={byCard} className="absolute opacity-0.5" disabled={true} />
-          </div>
-        | None =>
-          <div className="relative">
+          </>
+        | None => <>
             <CardUI card={to} disabled={isDisabled} />
-            <DndWrapper card={to}>
-              <div
-                className={cx([
-                  "absolute top-0 left-0 w-12 h-16",
-                  "border rounded-md border-solid border-slate-500",
-                ])}
-              />
-            </DndWrapper>
-          </div>
+            <DndWrapper card={to}> <CardUI.EmptyCard /> </DndWrapper>
+          </>
         }}
       </div>
     })}
