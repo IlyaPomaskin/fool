@@ -225,15 +225,15 @@ type droppableStateSnapshot = {
 module DragDropContext = {
   @module("react-beautiful-dnd") @react.component
   external make: (
-    ~onBeforeCapture: option<beforeCapture => unit>=?,
-    ~onBeforeDragStart: option<dragStartBeforeCapture => unit>=?,
-    ~onDragStart: option<(dragStartBeforeCapture, responderProvided) => unit>=?,
-    ~onDragUpdate: option<(dragUpdate, responderProvided) => unit>=?,
+    ~onBeforeCapture: beforeCapture => unit=?,
+    ~onBeforeDragStart: dragStartBeforeCapture => unit=?,
+    ~onDragStart: (dragStartBeforeCapture, responderProvided) => unit=?,
+    ~onDragUpdate: (dragUpdate, responderProvided) => unit=?,
     ~onDragEnd: (dropResult, responderProvided) => unit,
-    ~dragHandleUsageInstructions: option<string>=?,
-    ~nonce: option<string>=?,
-    ~sensors: option<array<sensorApi => unit>>=?,
-    ~enableDefaultSensors: option<bool>=?,
+    ~dragHandleUsageInstructions: string=?,
+    ~nonce: string=?,
+    ~sensors: array<sensorApi => unit>=?,
+    ~enableDefaultSensors: bool=?,
     ~children: React.element,
   ) => React.element = "DragDropContext"
 }
@@ -245,14 +245,14 @@ module Droppable = {
   @module("react-beautiful-dnd") @react.component
   external make: (
     ~droppableId: DroppableId.t,
-    @as("type") ~type_: option<TypeId.t>=?,
-    ~mode: option<string>=?,
-    ~isDropDisabled: option<bool>=?,
-    ~isCombineEnabled: option<bool>=?,
-    ~direction: option<string>=?,
-    ~ignoreContainerClipping: option<bool>=?,
-    ~renderClone: option<draggableChildrenFn>=?,
-    ~getContainerForClone: option<unit => Dom.htmlElement>=?,
+    @as("type") ~type_: TypeId.t=?,
+    ~mode: string=?,
+    ~isDropDisabled: bool=?,
+    ~isCombineEnabled: bool=?,
+    ~direction: string=?,
+    ~ignoreContainerClipping: bool=?,
+    ~renderClone: draggableChildrenFn=?,
+    ~getContainerForClone: unit => Dom.htmlElement=?,
     ~children: (droppableProvided, droppableStateSnapshot) => React.element,
     unit,
   ) => React.element = "Droppable"
@@ -263,9 +263,9 @@ module Draggable = {
   external make: (
     ~draggableId: DraggableId.t,
     ~index: int,
-    ~isDragDisabled: option<bool>=?,
-    ~disableInteractiveElementBlocking: option<bool>=?,
-    ~shouldRespectForcePress: option<bool>=?,
+    ~isDragDisabled: bool=?,
+    ~disableInteractiveElementBlocking: bool=?,
+    ~shouldRespectForcePress: bool=?,
     ~children: draggableChildrenFn,
     unit,
   ) => React.element = "Draggable"
