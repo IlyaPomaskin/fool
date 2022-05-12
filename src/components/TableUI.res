@@ -30,9 +30,13 @@ let make = (~className: string="", ~isDropDisabled=_ => false, ~isDefender, ~tab
 
       switch (isDefender, by) {
       | (_, Some(byCard)) =>
-        <div key className="flex flex-col gap-1">
-          <CardUI card={to} disabled={true} />
-          <CardUI card={byCard} className="absolute opacity-0.5" disabled={true} />
+        <div key className="flex flex-col gap-1 relative">
+          <CardUI
+            className="-rotate-12 -translate-x-1.5 -Qtranslate-y-1" card={to} disabled={true}
+          />
+          <div className="absolute left-1 top-1 rotate-12 translate-x-1.5 Qtranslate-y-1">
+            <CardUI card={byCard} disabled={true} />
+          </div>
         </div>
       | (false, None) =>
         <div key className="flex flex-col gap-1">

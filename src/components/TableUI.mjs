@@ -51,15 +51,17 @@ function TableUI(Props) {
                     if (by !== undefined) {
                       return React.createElement("div", {
                                   key: key,
-                                  className: "flex flex-col gap-1"
+                                  className: "flex flex-col gap-1 relative"
                                 }, React.createElement(CardUI.make, {
                                       card: to,
+                                      className: "-rotate-12 -translate-x-1.5 -Qtranslate-y-1",
                                       disabled: true
-                                    }), React.createElement(CardUI.make, {
-                                      card: by,
-                                      className: "absolute opacity-0.5",
-                                      disabled: true
-                                    }));
+                                    }), React.createElement("div", {
+                                      className: "absolute left-1 top-1 rotate-12 translate-x-1.5 Qtranslate-y-1"
+                                    }, React.createElement(CardUI.make, {
+                                          card: by,
+                                          disabled: true
+                                        })));
                     } else if (isDefender) {
                       return React.createElement("div", {
                                   key: key,
