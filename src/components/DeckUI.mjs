@@ -44,10 +44,10 @@ function DeckUI$DndWrapper(Props) {
                                       return React.cloneElement(React.createElement("div", {
                                                       ref: provided.innerRef
                                                     }, React.createElement("div", {
-                                                          className: Utils.cx([
-                                                                "transition duration-150 ease-in-out",
-                                                                snapshot.isDragging && !snapshot.isDropAnimating ? "scale-150" : "scale-100"
-                                                              ])
+                                                          className: "transition duration-150 ease-in-out",
+                                                          style: {
+                                                            transform: snapshot.isDragging && !snapshot.isDropAnimating ? "scale(1.2)" : "scale(1)"
+                                                          }
                                                         }, children)), spread3(provided.draggableProps, provided.dragHandleProps, {
                                                       style: getDropAnimation(provided.draggableProps.style, snapshot)
                                                     }));

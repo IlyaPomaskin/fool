@@ -33,10 +33,13 @@ module DndWrapper = {
               React.cloneElement(
                 <div ref={provided.innerRef}>
                   <div
-                    className={cx([
-                      "transition duration-150 ease-in-out",
-                      snapshot.isDragging && !snapshot.isDropAnimating ? "scale-150" : "scale-100",
-                    ])}>
+                    className="transition duration-150 ease-in-out"
+                    style={ReactDOMStyle.make(
+                      ~transform=snapshot.isDragging && !snapshot.isDropAnimating
+                        ? "scale(1.2)"
+                        : "scale(1)",
+                      (),
+                    )}>
                     children
                   </div>
                 </div>,
