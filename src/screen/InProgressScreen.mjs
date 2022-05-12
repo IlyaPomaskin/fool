@@ -7,6 +7,7 @@ import * as React from "react";
 import * as GameUI from "../components/GameUI.mjs";
 import * as TableUI from "../components/TableUI.mjs";
 import * as ClientUI from "../components/ClientUI.mjs";
+import * as Belt_List from "rescript/lib/es6/belt_List.js";
 import * as GameUtils from "../fool/GameUtils.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Belt_Result from "rescript/lib/es6/belt_Result.js";
@@ -15,12 +16,21 @@ import * as ReactBeautifulDnd from "react-beautiful-dnd";
 
 function InProgressScreen$Parts$table(Props) {
   var game = Props.game;
+  var draggedCard = Props.draggedCard;
   var player = Props.player;
   var isDefender = GameUtils.isDefender(game, player);
   var match = game.table;
   if (isDefender) {
     return React.createElement(TableUI.make, {
                 className: "my-1",
+                isDropDisabled: (function (toCard) {
+                    if (draggedCard !== undefined) {
+                      return Card.isValidBeat(toCard, draggedCard, game.trump);
+                    } else {
+                      return false;
+                    }
+                  }),
+                isDefender: isDefender,
                 table: match
               });
   }
@@ -29,9 +39,10 @@ function InProgressScreen$Parts$table(Props) {
               className: "flex flex-row gap-1"
             }, table ? React.createElement(TableUI.make, {
                     className: "my-1",
+                    isDefender: isDefender,
                     table: table
                   }) : React.createElement("div", {
-                    className: Utils.cx(["w-12 h-16 border rounded-md border-solid border-slate-500"])
+                    className: "h-16"
                   }), React.createElement(ReactBeautifulDnd.Droppable, {
                   droppableId: "table",
                   isDropDisabled: Belt_Result.isError(GameUtils.isValidMove(game, player)),
@@ -40,6 +51,7 @@ function InProgressScreen$Parts$table(Props) {
                                   ref: provided.innerRef,
                                   className: Utils.cx([
                                         "w-full flex flex-row",
+                                        Belt_List.length(game.table) === 0 ? "bg-pink-200" : "",
                                         snapshot.isDraggingOver ? "bg-gradient-to-tl from-purple-200 to-pink-200 opacity-70" : ""
                                       ])
                                 }, provided.placeholder);
@@ -55,6 +67,15 @@ function InProgressScreen(Props) {
   var game = Props.game;
   var player = Props.player;
   var onMessage = Props.onMessage;
+  var match = React.useState(function () {
+        
+      });
+  var setDraggedCard = match[1];
+  var handleDragStart = function (beforeCapture, param) {
+    return Curry._1(setDraggedCard, (function (param) {
+                  return Card.stringToCard(beforeCapture.draggableId);
+                }));
+  };
   var handleDragEnd = function (result, param) {
     console.log("result", result);
     var byCard = Card.stringToCard(result.draggableId);
@@ -67,41 +88,42 @@ function InProgressScreen(Props) {
     var toCard = Belt_Option.flatMap(dst, Card.stringToCard);
     if (isTable) {
       if (byCard !== undefined) {
-        return Curry._1(onMessage, {
-                    TAG: /* Progress */4,
-                    _0: {
-                      TAG: /* Move */1,
-                      _0: byCard
-                    },
-                    _1: player.id,
-                    _2: game.gameId
-                  });
+        Curry._1(onMessage, {
+              TAG: /* Progress */4,
+              _0: {
+                TAG: /* Move */1,
+                _0: byCard
+              },
+              _1: player.id,
+              _2: game.gameId
+            });
       } else {
         console.log("unknown move");
-        return ;
       }
     } else if (toCard !== undefined) {
       if (byCard !== undefined) {
-        return Curry._1(onMessage, {
-                    TAG: /* Progress */4,
-                    _0: {
-                      TAG: /* Beat */0,
-                      _0: toCard,
-                      _1: byCard
-                    },
-                    _1: player.id,
-                    _2: game.gameId
-                  });
+        Curry._1(onMessage, {
+              TAG: /* Progress */4,
+              _0: {
+                TAG: /* Beat */0,
+                _0: toCard,
+                _1: byCard
+              },
+              _1: player.id,
+              _2: game.gameId
+            });
       } else {
         console.log("unknown move");
-        return ;
       }
     } else {
       console.log("No destination");
-      return ;
     }
+    return Curry._1(setDraggedCard, (function (param) {
+                  
+                }));
   };
   return React.createElement(ReactBeautifulDnd.DragDropContext, {
+              onDragStart: handleDragStart,
               onDragEnd: handleDragEnd,
               children: null
             }, React.createElement(GameUI.InProgressUI.make, {
@@ -110,6 +132,7 @@ function InProgressScreen(Props) {
                   className: "m-1"
                 }, React.createElement(InProgressScreen$Parts$table, {
                       game: game,
+                      draggedCard: match[0],
                       player: player
                     })), React.createElement("div", {
                   className: "flex flex-wrap"
