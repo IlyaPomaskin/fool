@@ -11,8 +11,8 @@ module Parts = {
       <TableUI
         isDropDisabled={toCard => {
           switch draggedCard {
-          | Some(byCard) => Card.isValidBeat(toCard, byCard, game.trump)
-          | None => false
+          | Some(byCard) => !Card.isValidBeat(toCard, byCard, game.trump)
+          | None => true
           }
         }}
         isDefender

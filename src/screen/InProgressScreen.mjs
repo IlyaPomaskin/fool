@@ -25,9 +25,9 @@ function InProgressScreen$Parts$table(Props) {
                 className: "my-1",
                 isDropDisabled: (function (toCard) {
                     if (draggedCard !== undefined) {
-                      return Card.isValidBeat(toCard, draggedCard, game.trump);
+                      return !Card.isValidBeat(toCard, draggedCard, game.trump);
                     } else {
-                      return false;
+                      return true;
                     }
                   }),
                 isDefender: isDefender,
