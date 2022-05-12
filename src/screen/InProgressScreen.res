@@ -3,7 +3,7 @@ open Utils
 
 module Parts = {
   @react.component
-  let table = (~game: inProgress, ~draggedCard, ~player) => {
+  let table = (~game, ~draggedCard, ~player) => {
     let isDefender = GameUtils.isDefender(game, player)
 
     switch (isDefender, game.table) {
@@ -26,7 +26,14 @@ module Parts = {
         | table => <TableUI isDefender className="my-1" table={table} />
         }}
         <ReactDnd.Droppable
-          isDropDisabled={GameUtils.isValidMove(game, player)->Result.isError} droppableId="table">
+          isDropDisabled={switch draggedCard {
+          | Some(card) =>
+            Game.isValidMove(game, player, card)
+            ->Result.map(_ => true)
+            ->Result.getWithDefault(false)
+          | None => true
+          }}
+          droppableId="table">
           {(provided, snapshot) => {
             <div
               ref={provided.innerRef}
