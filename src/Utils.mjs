@@ -17,6 +17,10 @@ function uiList(items, fn) {
   return Belt_Array.map(Belt_List.toArray(items), fn);
 }
 
+function uiReverseList(items, fn) {
+  return Belt_Array.reverse(Belt_Array.map(Belt_List.toArray(items), fn));
+}
+
 function uiListWithIndex(items, fn) {
   return Belt_Array.mapWithIndex(Belt_List.toArray(items), fn);
 }
@@ -117,6 +121,7 @@ function tapResult(result, fn) {
 export {
   cx ,
   uiList ,
+  uiReverseList ,
   uiListWithIndex ,
   uiStr ,
   noop ,

@@ -2,6 +2,9 @@ let cx = (names: array<string>) => names->Array.reduce("", (acc, c) => acc ++ " 
 
 let uiList = (items: list<'a>, fn) => items->List.toArray->Array.map(fn)->React.array
 
+let uiReverseList = (items: list<'a>, fn) =>
+  items->List.toArray->Array.map(fn)->Array.reverse->React.array
+
 let uiListWithIndex = (items: list<'a>, fn) =>
   items->List.toArray->Array.mapWithIndex(fn)->React.array
 
