@@ -3,26 +3,47 @@ open Utils
 
 let spread3: ('a1, 'a2, 'a3) => 'b = %raw(`(x1,x2,x3) => ({ ...x1, ...x2, ...x3 })`)
 
+let getDropAnimation = (
+  style: ReactDnd.draggableStyles,
+  snapshot: ReactDnd.draggableStateSnapshot,
+): ReactDOMStyle.t => {
+  let dropAnimation = snapshot.dropAnimation->Js.Nullable.toOption
+
+  switch (snapshot.isDropAnimating, dropAnimation) {
+  | (true, Some(drop)) =>
+    let {moveTo} = drop
+
+    let translate = `translate(${moveTo.x->string_of_int}px, ${moveTo.y->string_of_int}px)`
+
+    ReactDOMStyle.combine(style->Obj.magic, ReactDOMStyle.make(~transform=translate, ()))
+  | _ => style->Obj.magic
+  }
+}
+
 module DndWrapper = {
   @react.component
   let make = (~card, ~index, ~children) => {
     let id = Card.cardToString(card)
 
-    <ReactDnd.Droppable isDropDisabled={true} droppableId={id}>
+    <ReactDnd.Droppable direction="horizontal" isDropDisabled={true} droppableId={id}>
       {(droppableProvided, _) => {
-        <div key={id} ref={droppableProvided.innerRef}>
-          <ReactDnd.Draggable key={id} draggableId={id} index>
-            {(draggableProvided, _, _) => {
+        <div ref={droppableProvided.innerRef}>
+          <ReactDnd.Draggable draggableId={id} index>
+            {(provided, snapshot, _) => {
               React.cloneElement(
-                <div> children </div>,
+                <div ref={provided.innerRef}>
+                  <div
+                    className={cx([
+                      "transition duration-150 ease-in-out",
+                      snapshot.isDragging && !snapshot.isDropAnimating ? "scale-150" : "scale-100",
+                    ])}>
+                    children
+                  </div>
+                </div>,
                 spread3(
-                  draggableProvided.draggableProps,
-                  draggableProvided.dragHandleProps,
-                  {
-                    "key": id,
-                    "ref": draggableProvided.innerRef,
-                    "style": draggableProvided.draggableProps["style"],
-                  },
+                  provided.draggableProps,
+                  provided.dragHandleProps,
+                  {"style": getDropAnimation(provided.draggableProps["style"], snapshot)},
                 ),
               )
             }}

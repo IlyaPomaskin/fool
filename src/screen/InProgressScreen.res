@@ -9,25 +9,28 @@ module Parts = {
     switch (isDefender, game.table) {
     | (true, table) => <TableUI className="my-1" table={table} />
     | (false, _) =>
-      <ReactDnd.Droppable
-        isDropDisabled={GameUtils.isValidMove(game, player)->Result.isError} droppableId={"table"}>
-        {(droppableProvided, droppableSnapshot) => {
-          <div
-            ref={droppableProvided.innerRef}
-            className={cx([
-              droppableSnapshot.isDraggingOver
-                ? "bg-gradient-to-tl from-purple-200 to-pink-200 opacity-70"
-                : "",
-            ])}>
-            {switch game.table {
-            | list{} =>
-              <div className={cx(["w-12 h-16 border rounded-md border-solid border-slate-500"])} />
-            | table => <TableUI className="my-1" table={table} />
-            }}
-            droppableProvided.placeholder
-          </div>
+      <div className="flex flex-row gap-1">
+        {switch game.table {
+        | list{} =>
+          <div className={cx(["w-12 h-16 border rounded-md border-solid border-slate-500"])} />
+        | table => <TableUI className="my-1" table={table} />
         }}
-      </ReactDnd.Droppable>
+        <ReactDnd.Droppable
+          isDropDisabled={GameUtils.isValidMove(game, player)->Result.isError} droppableId="table">
+          {(provided, snapshot) => {
+            <div
+              ref={provided.innerRef}
+              className={cx([
+                "w-full flex flex-row",
+                snapshot.isDraggingOver
+                  ? "bg-gradient-to-tl from-purple-200 to-pink-200 opacity-70"
+                  : "",
+              ])}>
+              provided.placeholder
+            </div>
+          }}
+        </ReactDnd.Droppable>
+      </div>
     }
   }
 }

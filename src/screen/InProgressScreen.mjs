@@ -23,24 +23,28 @@ function InProgressScreen$Parts$table(Props) {
                 className: "my-1",
                 table: match
               });
-  } else {
-    return React.createElement(ReactBeautifulDnd.Droppable, {
-                droppableId: "table",
-                isDropDisabled: Belt_Result.isError(GameUtils.isValidMove(game, player)),
-                children: (function (droppableProvided, droppableSnapshot) {
-                    var table = game.table;
-                    return React.createElement("div", {
-                                ref: droppableProvided.innerRef,
-                                className: Utils.cx([droppableSnapshot.isDraggingOver ? "bg-gradient-to-tl from-purple-200 to-pink-200 opacity-70" : ""])
-                              }, table ? React.createElement(TableUI.make, {
-                                      className: "my-1",
-                                      table: table
-                                    }) : React.createElement("div", {
-                                      className: Utils.cx(["w-12 h-16 border rounded-md border-solid border-slate-500"])
-                                    }), droppableProvided.placeholder);
-                  })
-              });
   }
+  var table = game.table;
+  return React.createElement("div", {
+              className: "flex flex-row gap-1"
+            }, table ? React.createElement(TableUI.make, {
+                    className: "my-1",
+                    table: table
+                  }) : React.createElement("div", {
+                    className: Utils.cx(["w-12 h-16 border rounded-md border-solid border-slate-500"])
+                  }), React.createElement(ReactBeautifulDnd.Droppable, {
+                  droppableId: "table",
+                  isDropDisabled: Belt_Result.isError(GameUtils.isValidMove(game, player)),
+                  children: (function (provided, snapshot) {
+                      return React.createElement("div", {
+                                  ref: provided.innerRef,
+                                  className: Utils.cx([
+                                        "w-full flex flex-row",
+                                        snapshot.isDraggingOver ? "bg-gradient-to-tl from-purple-200 to-pink-200 opacity-70" : ""
+                                      ])
+                                }, provided.placeholder);
+                    })
+                }));
 }
 
 var Parts = {

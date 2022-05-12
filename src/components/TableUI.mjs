@@ -13,14 +13,15 @@ function TableUI$DndWrapper(Props) {
   var children = Props.children;
   return React.createElement(ReactBeautifulDnd.Droppable, {
               droppableId: Card.cardToString(card),
-              children: (function (droppableProvided, droppableSnapshot) {
+              direction: "horizontal",
+              children: (function (provided, snapshot) {
                   return React.createElement("div", {
-                              ref: droppableProvided.innerRef,
+                              ref: provided.innerRef,
                               className: Utils.cx([
                                     "relative top-0 left-0 w-12 h-16 flex",
-                                    droppableSnapshot.isDraggingOver ? "bg-gradient-to-tl from-purple-200 to-pink-200 opacity-70" : ""
+                                    snapshot.isDraggingOver ? "bg-gradient-to-tl from-purple-200 to-pink-200 opacity-70" : ""
                                   ])
-                            }, children, droppableProvided.placeholder);
+                            }, children, provided.placeholder);
                 })
             });
 }
@@ -46,23 +47,36 @@ function TableUI(Props) {
                     var by = param[1];
                     var to = param[0];
                     var isDisabled = Belt_Option.isSome(by) || Curry._1(isCardDisabled, to);
-                    return React.createElement("div", {
-                                key: Card.cardToString(to) + Belt_Option.getWithDefault(Belt_Option.map(by, Card.cardToString), ""),
-                                className: "flex flex-col gap-1"
-                              }, by !== undefined ? React.createElement(React.Fragment, undefined, React.createElement(CardUI.make, {
-                                          card: to,
-                                          disabled: true
-                                        }), React.createElement(CardUI.make, {
-                                          card: by,
-                                          className: "absolute opacity-0.5",
-                                          disabled: true
-                                        })) : React.createElement(React.Fragment, undefined, React.createElement(CardUI.make, {
-                                          card: to,
-                                          disabled: isDisabled
-                                        }), React.createElement(TableUI$DndWrapper, {
-                                          card: to,
-                                          children: React.createElement(CardUI.EmptyCard.make, {})
-                                        })));
+                    if (by !== undefined) {
+                      return React.createElement("div", {
+                                  key: Card.cardToString(to) + Belt_Option.getWithDefault(Belt_Option.map(by, Card.cardToString), ""),
+                                  className: "flex flex-col gap-1"
+                                }, React.createElement(CardUI.make, {
+                                      card: to,
+                                      disabled: true
+                                    }), React.createElement(CardUI.make, {
+                                      card: by,
+                                      className: "absolute opacity-0.5",
+                                      disabled: true
+                                    }));
+                    } else {
+                      return React.createElement(ReactBeautifulDnd.Droppable, {
+                                  droppableId: Card.cardToString(to),
+                                  direction: "horizontal",
+                                  children: (function (provided, param) {
+                                      return React.createElement("div", {
+                                                  ref: provided.innerRef,
+                                                  className: "flex flex-col gap-1"
+                                                }, React.createElement(CardUI.make, {
+                                                      card: to,
+                                                      disabled: isDisabled
+                                                    }), React.createElement(CardUI.Base.make, {
+                                                      children: provided.placeholder
+                                                    }));
+                                    }),
+                                  key: Card.cardToString(to) + Belt_Option.getWithDefault(Belt_Option.map(by, Card.cardToString), "")
+                                });
+                    }
                   })));
 }
 

@@ -4,17 +4,17 @@ open Utils
 module DndWrapper = {
   @react.component
   let make = (~card, ~children) => {
-    <ReactDnd.Droppable droppableId={Card.cardToString(card)}>
-      {(droppableProvided, droppableSnapshot) => {
+    <ReactDnd.Droppable direction="horizontal" droppableId={Card.cardToString(card)}>
+      {(provided, snapshot) => {
         <div
-          ref={droppableProvided.innerRef}
+          ref={provided.innerRef}
           className={cx([
             "relative top-0 left-0 w-12 h-16 flex",
-            droppableSnapshot.isDraggingOver
+            snapshot.isDraggingOver
               ? "bg-gradient-to-tl from-purple-200 to-pink-200 opacity-70"
               : "",
           ])}>
-          children droppableProvided.placeholder
+          children provided.placeholder
         </div>
       }}
     </ReactDnd.Droppable>
@@ -27,19 +27,28 @@ let make = (~className: string="", ~isCardDisabled: card => bool=_ => false, ~ta
     {table->uiList(((to, by)) => {
       let isDisabled = Option.isSome(by) || isCardDisabled(to)
 
-      <div
-        key={Card.cardToString(to) ++ by->Option.map(Card.cardToString)->Option.getWithDefault("")}
-        className="flex flex-col gap-1">
-        {switch by {
-        | Some(byCard) => <>
-            <CardUI card={to} disabled={true} />
-            <CardUI card={byCard} className="absolute opacity-0.5" disabled={true} />
-          </>
-        | None => <>
-            <CardUI card={to} disabled={isDisabled} />
-            <DndWrapper card={to}> <CardUI.EmptyCard /> </DndWrapper>
-          </>
-        }}
-      </div>
+      switch by {
+      | Some(byCard) =>
+        <div
+          key={Card.cardToString(to) ++
+          by->Option.map(Card.cardToString)->Option.getWithDefault("")}
+          className="flex flex-col gap-1">
+          <CardUI card={to} disabled={true} />
+          <CardUI card={byCard} className="absolute opacity-0.5" disabled={true} />
+        </div>
+      | None =>
+        <ReactDnd.Droppable
+          key={Card.cardToString(to) ++
+          by->Option.map(Card.cardToString)->Option.getWithDefault("")}
+          direction="horizontal"
+          droppableId={Card.cardToString(to)}>
+          {(provided, _) => {
+            <div ref={provided.innerRef} className="flex flex-col gap-1">
+              <CardUI card={to} disabled={isDisabled} />
+              <CardUI.Base> provided.placeholder </CardUI.Base>
+            </div>
+          }}
+        </ReactDnd.Droppable>
+      }
     })}
   </div>
