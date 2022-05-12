@@ -116,17 +116,20 @@ function make(props) {
               className: Utils.cx([
                     className,
                     disabled ? "text-slate-400" : suitToColor(card[0]),
-                    "overflow-hidden"
+                    "overflow-hidden",
+                    "font-bold text-[16px] leading-[16px] "
                   ]),
               disabled: disabled,
               children: null
             }, React.createElement("div", {
                   className: "absolute w-full h-full bg-gradient-to-tl from-purple-200 to-pink-200 "
                 }), React.createElement("div", {
-                  className: "absolute text-[18px] leading-[18px] inset-1"
-                }, Utils.uiStr(suitToString(card[0]))), React.createElement("div", {
-                  className: "absolute top-1/2 left-1/2 font-bold text-[18px] leading-[18px] translate-y-[-50%] translate-x-[-50%]"
-                }, Utils.uiStr(rankToString(card[1]))));
+                  className: "flex flex-col gap-0.5 absolute top-1 left-1 "
+                }, React.createElement("div", {
+                      className: "text-center"
+                    }, Utils.uiStr(suitToString(card[0]))), React.createElement("div", {
+                      className: "text-center"
+                    }, Utils.uiStr(rankToString(card[1])))));
 }
 
 var VisibleCard = {

@@ -94,15 +94,12 @@ module VisibleCard = {
         className,
         disabled ? "text-slate-400" : suitToColor(fst(card)),
         "overflow-hidden",
+        "font-bold text-[16px] leading-[16px] ",
       ])}>
       <div className="absolute w-full h-full bg-gradient-to-tl from-purple-200 to-pink-200 " />
-      <div className="absolute text-[18px] leading-[18px] inset-1">
-        {uiStr(suitToString(fst(card)))}
-      </div>
-      <div
-        className={"absolute top-1/2 left-1/2 " ++
-        "font-bold text-[18px] leading-[18px] " ++ "translate-y-[-50%] translate-x-[-50%]"}>
-        {uiStr(rankToString(snd(card)))}
+      <div className="flex flex-col gap-0.5 absolute top-1 left-1 ">
+        <div className="text-center"> {uiStr(suitToString(fst(card)))} </div>
+        <div className="text-center"> {uiStr(rankToString(snd(card)))} </div>
       </div>
     </Base>
   }
