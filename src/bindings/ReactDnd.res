@@ -157,8 +157,22 @@ type sensorApi = {
   findOptionsForDraggable: DraggableId.t => Js.Nullable.t<draggableOptions>,
 }
 
+type draggableStyles = {
+  "position": string,
+  "top": int,
+  "left": int,
+  "boxSizing": string,
+  "width": int,
+  "height": int,
+  "transition": string,
+  "transform": Js.Undefined.t<string>,
+  "zIndex": int,
+  "opacity": Js.Undefined.t<int>,
+  "pointerEvents": string,
+}
+
 type draggableProvidedDraggableProps = {
-  "style": ReactDOMStyle.t,
+  "style": draggableStyles,
   "data-rbd-draggable-context-id": string,
   "data-rbd-draggable-id": string,
   "onTransitionEnd": Js.Undefined.t<ReactEvent.Transition.t>,
@@ -191,11 +205,11 @@ type dropAnimation = {
 type draggableStateSnapshot = {
   isDragging: bool,
   isDropAnimating: bool,
-  dropAnimation: Js.Undefined.t<dropAnimation>,
-  draggingOver: Js.Undefined.t<DroppableId.t>,
-  combineWith: Js.Undefined.t<DraggableId.t>,
-  combineTargetFor: Js.Undefined.t<DraggableId.t>,
-  mode: Js.Undefined.t<string>,
+  dropAnimation: Js.Nullable.t<dropAnimation>,
+  draggingOver: Js.Nullable.t<DroppableId.t>,
+  combineWith: Js.Nullable.t<DraggableId.t>,
+  combineTargetFor: Js.Nullable.t<DraggableId.t>,
+  mode: Js.Nullable.t<string>,
 }
 
 type draggableChildrenFn = (
