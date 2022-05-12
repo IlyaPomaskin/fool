@@ -165,7 +165,7 @@ type draggableStyles = {
   "width": int,
   "height": int,
   "transition": string,
-  "transform": Js.Undefined.t<string>,
+  "transform": Js.Nullable.t<string>,
   "zIndex": int,
   "opacity": Js.Undefined.t<int>,
   "pointerEvents": string,
