@@ -19,21 +19,22 @@ function ClientUI$Parts$actions(Props) {
   var isPassDisabled = !GameUtils.isCanPass(game, player);
   var isPassed = GameUtils.isPassed(game, player);
   var isTakeDisabled = !GameUtils.isCanTake(game, player);
+  var isDefener = GameUtils.isDefender(game, player);
   return React.createElement("div", {
               className: Utils.cx([
                     "grid grid-flow-col gap-1",
                     className
                   ])
-            }, React.createElement(Base.Switch.make, {
-                  disabled: isPassDisabled,
-                  checked: isPassed,
-                  onClick: onPass,
-                  text: "pass"
-                }), React.createElement(Base.Button.make, {
-                  disabled: isTakeDisabled,
-                  onClick: onTake,
-                  children: Utils.uiStr("take")
-                }));
+            }, isDefener ? React.createElement(Base.Button.make, {
+                    disabled: isTakeDisabled,
+                    onClick: onTake,
+                    children: Utils.uiStr("take")
+                  }) : React.createElement(Base.Switch.make, {
+                    disabled: isPassDisabled,
+                    checked: isPassed,
+                    onClick: onPass,
+                    text: "pass"
+                  }));
 }
 
 function ClientUI$Parts$deck(Props) {
