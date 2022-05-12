@@ -32,6 +32,19 @@ let suitToColor = (suit: suit) =>
   | Diamonds => "text-red-900 dark:text-red-600"
   }
 
+module Short = {
+  @react.component
+  let make = (~className="", ~card, ()) => {
+    switch card {
+    | Visible((suit, rank)) =>
+      <span className={cx([className, suitToColor(suit)])}>
+        {(suitToString(suit) ++ rankToString(rank))->uiStr}
+      </span>
+    | Hidden => <span className> {"Hidden"->uiStr} </span>
+    }
+  }
+}
+
 module Base = {
   @react.component
   let make = (
@@ -123,4 +136,4 @@ let make = (~card: card, ~className: string="", ~disabled: bool=false) => {
 
 @react.component
 let trump = (~suit: suit, ~className: string="", ()) =>
-  <div className={cx([className, suitToColor(suit)])}> {uiStr(Card.suitToString(suit))} </div>
+  <div className={cx([className, suitToColor(suit)])}> {suit->suitToString->uiStr} </div>

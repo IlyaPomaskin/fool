@@ -40,7 +40,7 @@ module InProgressUI = {
           {uiStr("Deck: " ++ game.deck->List.length->numbersToEmoji)}
           <span className="mx-1" />
           {switch lastListItem(game.deck) {
-          | Some(card) => uiStr(Card.cardToString(card))
+          | Some(card) => <CardUI.Short card />
           | None => <CardUI.trump className="inline-block" suit={game.trump} />
           }}
         </div>
