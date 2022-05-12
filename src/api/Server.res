@@ -106,7 +106,7 @@ wsServer
           ->Result.map(progress => broadcastToPlayers(progress.players, ProgressCreated(progress)))
         | Progress(move, playerId, gameId) =>
           playerId
-          ->GameInstance.dispatchMove(gameId, move)
+          ->GameInstance.move(gameId, move)
           ->Result.map(progress => broadcastToPlayers(progress.players, ProgressUpdated(progress)))
         | _ => Error("Message from server cannot be parsed as text")
         }->(

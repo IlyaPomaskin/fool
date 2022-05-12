@@ -151,7 +151,7 @@ wsServer.on(WsWebSocketServer.ServerEvents.connection, (function (ws, req) {
                                 }
                                 break;
                             case /* Progress */4 :
-                                result = Belt_Result.map(GameInstance.dispatchMove(msg._1, msg._2, msg._0), (function (progress) {
+                                result = Belt_Result.map(GameInstance.move(msg._1, msg._2, msg._0), (function (progress) {
                                         return broadcastToPlayers(progress.players, {
                                                     TAG: /* ProgressUpdated */4,
                                                     _0: progress

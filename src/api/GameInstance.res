@@ -60,7 +60,7 @@ let startGame = (playerId, gameId) => {
   })
 }
 
-let dispatchMove = (playerId, gameId, action): result<inProgress, string> => {
+let move = (playerId, gameId, action): result<inProgress, string> => {
   gamesInProgress
   ->ProgressGameMap.get(gameId)
   ->Result.flatMap(game =>

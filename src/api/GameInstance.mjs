@@ -75,7 +75,7 @@ function startGame(playerId, gameId) {
               }));
 }
 
-function dispatchMove(playerId, gameId, action) {
+function move(playerId, gameId, action) {
   return Belt_Result.flatMap(Belt_Result.flatMap(Belt_Result.flatMap($$Storage.ProgressGameMap.get(gamesInProgress, gameId), (function (game) {
                         return Belt_Result.map(Utils.toResult(GameUtils.findPlayerById(game, playerId), "Player " + playerId + " not found"), (function (player) {
                                       return [
@@ -100,7 +100,7 @@ export {
   enterGame ,
   toggleReady ,
   startGame ,
-  dispatchMove ,
+  move ,
   
 }
 /* gamesInLobby Not a pure module */
