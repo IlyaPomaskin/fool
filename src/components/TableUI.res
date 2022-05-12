@@ -22,33 +22,39 @@ module DndWrapper = {
 }
 
 @react.component
-let make = (~className: string="", ~isCardDisabled: card => bool=_ => false, ~table: table) =>
+let make = (~className: string="", ~isDropDisabled=_ => false, ~isDefender, ~table: table) =>
   <div className={cx(["flex gap-1 flex-row", className])}>
-    {table->uiList(((to, by)) => {
-      let isDisabled = Option.isSome(by) || isCardDisabled(to)
+    {table->uiReverseList(((to, by)) => {
+      let key =
+        Card.cardToString(to) ++ by->Option.map(Card.cardToString)->Option.getWithDefault("")
 
-      switch by {
-      | Some(byCard) =>
-        <div
-          key={Card.cardToString(to) ++
-          by->Option.map(Card.cardToString)->Option.getWithDefault("")}
-          className="flex flex-col gap-1">
+      switch (isDefender, by) {
+      | (_, Some(byCard)) =>
+        <div key className="flex flex-col gap-1">
           <CardUI card={to} disabled={true} />
           <CardUI card={byCard} className="absolute opacity-0.5" disabled={true} />
         </div>
-      | None =>
-        <ReactDnd.Droppable
-          key={Card.cardToString(to) ++
-          by->Option.map(Card.cardToString)->Option.getWithDefault("")}
-          direction="horizontal"
-          droppableId={Card.cardToString(to)}>
-          {(provided, _) => {
-            <div ref={provided.innerRef} className="flex flex-col gap-1">
-              <CardUI card={to} disabled={isDisabled} />
-              <CardUI.Base> provided.placeholder </CardUI.Base>
-            </div>
-          }}
-        </ReactDnd.Droppable>
+      | (false, None) =>
+        <div key className="flex flex-col gap-1">
+          <CardUI card={to} disabled={true} /> <CardUI.Base />
+        </div>
+      | (true, None) =>
+        <div key className="flex flex-col gap-1">
+          <CardUI card={to} />
+          <ReactDnd.Droppable
+            isDropDisabled={isDropDisabled(to)}
+            direction="horizontal"
+            droppableId={Card.cardToString(to)}>
+            {(provided, snapshot) => {
+              <div ref={provided.innerRef}>
+                <CardUI.Base className={cx([snapshot.isDraggingOver ? "bg-pink-200" : ""])}>
+                  provided.placeholder
+                </CardUI.Base>
+                <div />
+              </div>
+            }}
+          </ReactDnd.Droppable>
+        </div>
       }
     })}
   </div>
