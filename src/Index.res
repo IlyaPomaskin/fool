@@ -6,7 +6,7 @@ let delay = (send, msg, ~timeout=100, ()) =>
 
 module PlayerScreen = {
   @react.component
-  let make = (~pId) => {
+  let make = (~playerId, ~sessionId) => {
     let (player, setPlayer) = React.useState(_ => None)
     let (screen, setScreen) = React.useState(_ => AuthorizationScreen)
 
@@ -22,11 +22,14 @@ module PlayerScreen = {
           setScreen(_ => LobbySetupScreen)
         }
       | LobbyCreated(game)
-      | LobbyUpdated(game) =>
-        setScreen(_ => InLobbyScreen(game))
+      | LobbyUpdated(game) => {
+          setScreen(_ => InLobbyScreen(game))
+          setPlayer(_ => game.players->List.getBy(player => player.id == playerId))
+        }
       | ProgressCreated(game)
       | ProgressUpdated(game) =>
         setScreen(_ => InProgressScreen(game))
+        setPlayer(_ => game.players->List.getBy(player => player.id == playerId))
       | ServerError(msg) => Log.info(["ServerError", msg])
       }
     }, [player])
@@ -39,8 +42,8 @@ module PlayerScreen = {
 
       let delayM = delay(sendMessage)
 
-      if pId === "session:p1" {
-        delayM(Login(pId), ())
+      if playerId === "p1" {
+        delayM(Login(sessionId), ())
         ->then(() => delayM(~timeout=100, Lobby(Create, "p1", ""), ()))
         ->then(() => delayM(~timeout=100, Lobby(Enter, "p1", "g1"), ()))
         ->then(() => delayM(~timeout=100, Lobby(Ready, "p1", "g1"), ()))
@@ -48,8 +51,8 @@ module PlayerScreen = {
         ->ignore
       }
 
-      if pId === "session:p2" {
-        delayM(Login(pId), ())
+      if playerId === "p2" {
+        delayM(Login(sessionId), ())
         ->then(() => delayM(~timeout=250, Lobby(Enter, "p2", "g1"), ()))
         ->then(() => delayM(~timeout=100, Lobby(Ready, "p2", "g1"), ()))
         ->ignore
@@ -87,10 +90,10 @@ module PlayerScreen = {
 let default = () => {
   <div className="flex flex-col">
     <div className="border rounded-md border-solid border-slate-500">
-      <PlayerScreen pId="session:p1" />
+      <PlayerScreen playerId="p1" sessionId="session:p1" />
     </div>
     <div className="border rounded-md border-solid border-slate-500">
-      <PlayerScreen pId="session:p2" />
+      <PlayerScreen playerId="p2" sessionId="session:p2" />
     </div>
   </div>
 }

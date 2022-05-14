@@ -6,8 +6,8 @@ module Parts = {
   let table = (~game, ~draggedCard, ~player) => {
     let isDefender = GameUtils.isDefender(game, player)
 
-    switch (isDefender, game.table) {
-    | (true, table) =>
+    switch isDefender {
+    | true =>
       <TableUI
         isDropDisabled={toCard => {
           switch draggedCard {
@@ -15,25 +15,21 @@ module Parts = {
           | None => true
           }
         }}
-        isDefender
         className="my-1"
-        table={table}
+        table={game.table}
       />
-    | (false, _) =>
+    | false =>
       <div className="flex flex-row gap-1">
         {switch game.table {
         | list{} => <div className="h-16" />
-        | table => <TableUI isDefender className="my-1" table={table} />
+        | table => <TableUI className="my-1" table={table} />
         }}
         <ReactDnd.Droppable
-          isDropDisabled={switch draggedCard {
-          | Some(card) =>
-            Game.isValidMove(game, player, card)
-            ->Result.map(_ => true)
-            ->Result.getWithDefault(false)
-          | None => true
-          }}
-          droppableId="table">
+          droppableId="table"
+          isDropDisabled={draggedCard
+          ->Utils.toResult("No card")
+          ->Result.flatMap(card => Game.isValidMove(game, player, card))
+          ->Result.isError}>
           {(provided, snapshot) => {
             <div
               ref={provided.innerRef}

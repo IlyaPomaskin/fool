@@ -20,7 +20,6 @@ function InProgressScreen$Parts$table(Props) {
   var draggedCard = Props.draggedCard;
   var player = Props.player;
   var isDefender = GameUtils.isDefender(game, player);
-  var match = game.table;
   if (isDefender) {
     return React.createElement(TableUI.make, {
                 className: "my-1",
@@ -31,8 +30,7 @@ function InProgressScreen$Parts$table(Props) {
                       return true;
                     }
                   }),
-                isDefender: isDefender,
-                table: match
+                table: game.table
               });
   }
   var table = game.table;
@@ -40,15 +38,14 @@ function InProgressScreen$Parts$table(Props) {
               className: "flex flex-row gap-1"
             }, table ? React.createElement(TableUI.make, {
                     className: "my-1",
-                    isDefender: isDefender,
                     table: table
                   }) : React.createElement("div", {
                     className: "h-16"
                   }), React.createElement(ReactBeautifulDnd.Droppable, {
                   droppableId: "table",
-                  isDropDisabled: draggedCard !== undefined ? Belt_Result.getWithDefault(Belt_Result.map(Game.isValidMove(game, player, draggedCard), (function (param) {
-                                return true;
-                              })), false) : true,
+                  isDropDisabled: Belt_Result.isError(Belt_Result.flatMap(Utils.toResult(draggedCard, "No card"), (function (card) {
+                              return Game.isValidMove(game, player, card);
+                            }))),
                   children: (function (provided, snapshot) {
                       return React.createElement("div", {
                                   ref: provided.innerRef,

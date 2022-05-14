@@ -67,3 +67,6 @@ let tapResult = (result: result<'a, 'b>, fn: 'a => unit): result<'a, 'b> =>
     fn(content)
     content
   })
+
+let leftRotationClassName = "-rotate-12 -translate-x-1.5"
+let rightRotationClassName = "rotate-12 translate-x-1.5"

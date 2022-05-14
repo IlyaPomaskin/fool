@@ -6,6 +6,7 @@ import * as UseWs from "./hooks/UseWs.mjs";
 import * as Utils from "./Utils.mjs";
 import * as React from "react";
 import * as PlayerUI from "./components/PlayerUI.mjs";
+import * as Belt_List from "rescript/lib/es6/belt_List.js";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as InLobbyScreen from "./screen/InLobbyScreen.mjs";
 import * as InProgressScreen from "./screen/InProgressScreen.mjs";
@@ -13,7 +14,8 @@ import * as LobbySetupScreen from "./screen/LobbySetupScreen.mjs";
 import * as AuthorizationScreen from "./screen/AuthorizationScreen.mjs";
 
 function Index$PlayerScreen(Props) {
-  var pId = Props.pId;
+  var playerId = Props.playerId;
+  var sessionId = Props.sessionId;
   var match = React.useState(function () {
         
       });
@@ -56,19 +58,29 @@ function Index$PlayerScreen(Props) {
           switch (exit) {
             case 1 :
                 var game = message._0;
-                return Curry._1(setScreen, (function (param) {
-                              return {
-                                      TAG: /* InLobbyScreen */0,
-                                      _0: game
-                                    };
+                Curry._1(setScreen, (function (param) {
+                        return {
+                                TAG: /* InLobbyScreen */0,
+                                _0: game
+                              };
+                      }));
+                return Curry._1(setPlayer, (function (param) {
+                              return Belt_List.getBy(game.players, (function (player) {
+                                            return player.id === playerId;
+                                          }));
                             }));
             case 2 :
                 var game$1 = message._0;
-                return Curry._1(setScreen, (function (param) {
-                              return {
-                                      TAG: /* InProgressScreen */1,
-                                      _0: game$1
-                                    };
+                Curry._1(setScreen, (function (param) {
+                        return {
+                                TAG: /* InProgressScreen */1,
+                                _0: game$1
+                              };
+                      }));
+                return Curry._1(setPlayer, (function (param) {
+                              return Belt_List.getBy(game$1.players, (function (player) {
+                                            return player.id === playerId;
+                                          }));
                             }));
             
           }
@@ -86,10 +98,10 @@ function Index$PlayerScreen(Props) {
                           
                         }));
           };
-          if (pId === "session:p1") {
+          if (playerId === "p1") {
             delayM({
                           TAG: /* Login */1,
-                          _0: pId
+                          _0: sessionId
                         }, undefined, undefined).then(function (param) {
                         return delayM({
                                     TAG: /* Lobby */3,
@@ -120,10 +132,10 @@ function Index$PlayerScreen(Props) {
                             }, 300, undefined);
                 });
           }
-          if (pId === "session:p2") {
+          if (playerId === "p2") {
             delayM({
                       TAG: /* Login */1,
-                      _0: pId
+                      _0: sessionId
                     }, undefined, undefined).then(function (param) {
                     return delayM({
                                 TAG: /* Lobby */3,
@@ -191,11 +203,13 @@ function $$default(param) {
             }, React.createElement("div", {
                   className: "border rounded-md border-solid border-slate-500"
                 }, React.createElement(Index$PlayerScreen, {
-                      pId: "session:p1"
+                      playerId: "p1",
+                      sessionId: "session:p1"
                     })), React.createElement("div", {
                   className: "border rounded-md border-solid border-slate-500"
                 }, React.createElement(Index$PlayerScreen, {
-                      pId: "session:p2"
+                      playerId: "p2",
+                      sessionId: "session:p2"
                     })));
 }
 

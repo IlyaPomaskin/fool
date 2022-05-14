@@ -118,6 +118,10 @@ function tapResult(result, fn) {
               }));
 }
 
+var leftRotationClassName = "-rotate-12 -translate-x-1.5";
+
+var rightRotationClassName = "rotate-12 translate-x-1.5";
+
 export {
   cx ,
   uiList ,
@@ -135,6 +139,8 @@ export {
   toResult ,
   Classify ,
   tapResult ,
+  leftRotationClassName ,
+  rightRotationClassName ,
   
 }
 /* No side effect */

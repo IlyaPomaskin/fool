@@ -8,41 +8,42 @@ import * as CardUI from "./CardUI.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as ReactBeautifulDnd from "react-beautiful-dnd";
 
-function TableUI$DndWrapper(Props) {
+function TableUI$DndBeatableCard(Props) {
   var card = Props.card;
-  var children = Props.children;
+  var isDropDisabled = Props.isDropDisabled;
+  var beatByClassName = Props.beatByClassName;
   return React.createElement(ReactBeautifulDnd.Droppable, {
               droppableId: Card.cardToString(card),
+              isDropDisabled: Curry._1(isDropDisabled, card),
               direction: "horizontal",
               children: (function (provided, snapshot) {
                   return React.createElement("div", {
                               ref: provided.innerRef,
                               className: Utils.cx([
-                                    "relative top-0 left-0 w-12 h-16 flex",
-                                    snapshot.isDraggingOver ? "bg-gradient-to-tl from-purple-200 to-pink-200 opacity-70" : ""
+                                    beatByClassName,
+                                    "w-12 h-16"
                                   ])
-                            }, children, provided.placeholder);
+                            }, React.createElement(CardUI.Base.make, {
+                                  className: Utils.cx([snapshot.isDraggingOver ? "bg-pink-200 opacity-50" : ""]),
+                                  children: provided.placeholder
+                                }), React.createElement("div", undefined));
                 })
             });
 }
 
-var DndWrapper = {
-  make: TableUI$DndWrapper
+var DndBeatableCard = {
+  make: TableUI$DndBeatableCard
 };
-
-var toBeatClassName = "-rotate-12 -translate-x-1.5";
-
-var beatByClassName = "rotate-12 translate-x-1.5 absolute left-1 top-1";
 
 function TableUI(Props) {
   var classNameOpt = Props.className;
   var isDropDisabledOpt = Props.isDropDisabled;
-  var isDefender = Props.isDefender;
   var table = Props.table;
   var className = classNameOpt !== undefined ? classNameOpt : "";
   var isDropDisabled = isDropDisabledOpt !== undefined ? isDropDisabledOpt : (function (param) {
-        return false;
+        return true;
       });
+  var beatByClassName = Utils.rightRotationClassName + " absolute left-1 top-1";
   return React.createElement("div", {
               className: Utils.cx([
                     "flex gap-1 flex-row",
@@ -52,62 +53,35 @@ function TableUI(Props) {
                     var by = param[1];
                     var to = param[0];
                     var key = Card.cardToString(to) + Belt_Option.getWithDefault(Belt_Option.map(by, Card.cardToString), "");
-                    if (by !== undefined) {
-                      return React.createElement("div", {
-                                  key: key,
-                                  className: "flex flex-col gap-1 relative"
-                                }, React.createElement(CardUI.make, {
-                                      card: to,
-                                      className: toBeatClassName,
-                                      disabled: true
-                                    }), React.createElement("div", {
-                                      className: beatByClassName
+                    return React.createElement("div", {
+                                key: key,
+                                className: "flex flex-col gap-1 relative"
+                              }, by !== undefined ? React.createElement(React.Fragment, {
+                                      children: null
                                     }, React.createElement(CardUI.make, {
-                                          card: by,
-                                          disabled: true
+                                          card: to,
+                                          className: Utils.leftRotationClassName
+                                        }), React.createElement("div", {
+                                          className: beatByClassName
+                                        }, React.createElement(CardUI.make, {
+                                              card: by
+                                            }))) : React.createElement(React.Fragment, {
+                                      children: null
+                                    }, React.createElement(CardUI.make, {
+                                          card: to,
+                                          className: Utils.leftRotationClassName
+                                        }), React.createElement(TableUI$DndBeatableCard, {
+                                          card: to,
+                                          isDropDisabled: isDropDisabled,
+                                          beatByClassName: beatByClassName
                                         })));
-                    } else if (isDefender) {
-                      return React.createElement("div", {
-                                  key: key,
-                                  className: "flex flex-col gap-1 relative"
-                                }, React.createElement(CardUI.make, {
-                                      card: to,
-                                      className: toBeatClassName
-                                    }), React.createElement(ReactBeautifulDnd.Droppable, {
-                                      droppableId: Card.cardToString(to),
-                                      isDropDisabled: Curry._1(isDropDisabled, to),
-                                      direction: "horizontal",
-                                      children: (function (provided, snapshot) {
-                                          return React.createElement("div", {
-                                                      ref: provided.innerRef,
-                                                      className: Utils.cx([
-                                                            beatByClassName,
-                                                            "w-12 h-16"
-                                                          ])
-                                                    }, React.createElement(CardUI.Base.make, {
-                                                          className: Utils.cx([snapshot.isDraggingOver ? "bg-pink-200 opacity-50" : ""]),
-                                                          children: provided.placeholder
-                                                        }), React.createElement("div", undefined));
-                                        })
-                                    }));
-                    } else {
-                      return React.createElement("div", {
-                                  key: key,
-                                  className: "flex flex-col gap-1"
-                                }, React.createElement(CardUI.make, {
-                                      card: to,
-                                      disabled: true
-                                    }));
-                    }
                   })));
 }
 
 var make = TableUI;
 
 export {
-  DndWrapper ,
-  toBeatClassName ,
-  beatByClassName ,
+  DndBeatableCard ,
   make ,
   
 }
