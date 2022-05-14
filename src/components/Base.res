@@ -52,7 +52,7 @@ module Switch = {
   let make = (
     ~disabled: bool=false,
     ~checked: bool,
-    ~onClick: ReactEvent.Form.t => unit,
+    ~onClick: _ => unit,
     ~text: string,
     ~className: string="",
   ) => {

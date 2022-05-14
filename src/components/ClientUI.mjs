@@ -7,6 +7,7 @@ import * as Utils from "../Utils.mjs";
 import * as React from "react";
 import * as DeckUI from "./DeckUI.mjs";
 import * as PlayerUI from "./PlayerUI.mjs";
+import * as Belt_List from "rescript/lib/es6/belt_List.js";
 import * as GameUtils from "../fool/GameUtils.mjs";
 
 function ClientUI$Parts$actions(Props) {
@@ -19,22 +20,31 @@ function ClientUI$Parts$actions(Props) {
   var isPassDisabled = !GameUtils.isCanPass(game, player);
   var isPassed = GameUtils.isPassed(game, player);
   var isTakeDisabled = !GameUtils.isCanTake(game, player);
-  var isDefener = GameUtils.isDefender(game, player);
+  var isDefender = GameUtils.isDefender(game, player);
+  var isDuel = Belt_List.length(Belt_List.keep(game.players, (function (player) {
+              return !GameUtils.isPlayerDone(game, player);
+            }))) === 2;
   return React.createElement("div", {
               className: Utils.cx([
                     "grid grid-flow-col gap-1",
                     className
                   ])
-            }, isDefener ? React.createElement(Base.Button.make, {
+            }, isDefender ? React.createElement(Base.Button.make, {
                     disabled: isTakeDisabled,
                     onClick: onTake,
                     children: Utils.uiStr("take")
-                  }) : React.createElement(Base.Switch.make, {
-                    disabled: isPassDisabled,
-                    checked: isPassed,
-                    onClick: onPass,
-                    text: "pass"
-                  }));
+                  }) : (
+                isDuel ? React.createElement(Base.Button.make, {
+                        disabled: isPassDisabled,
+                        onClick: onPass,
+                        children: Utils.uiStr("pass")
+                      }) : React.createElement(Base.Switch.make, {
+                        disabled: isPassDisabled,
+                        checked: isPassed,
+                        onClick: onPass,
+                        text: "pass"
+                      })
+              ));
 }
 
 function ClientUI$Parts$deck(Props) {

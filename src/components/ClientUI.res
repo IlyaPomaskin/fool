@@ -13,12 +13,20 @@ module Parts = {
     let isPassDisabled = !GameUtils.isCanPass(game, player)
     let isPassed = GameUtils.isPassed(game, player)
     let isTakeDisabled = !GameUtils.isCanTake(game, player)
-    let isDefener = GameUtils.isDefender(game, player)
+    let isDefender = GameUtils.isDefender(game, player)
+    let isDuel =
+      game.players->List.keep(player => !GameUtils.isPlayerDone(game, player))->List.length === 2
 
     <div className={cx(["grid grid-flow-col gap-1", className])}>
-      {isDefener
-        ? <Base.Button disabled={isTakeDisabled} onClick={onTake}> {uiStr("take")} </Base.Button>
-        : <Base.Switch disabled={isPassDisabled} onClick={onPass} checked={isPassed} text="pass" />}
+      {switch (isDefender, isDuel) {
+      | (true, _) =>
+        <Base.Button disabled={isTakeDisabled} onClick={onTake}> {uiStr("take")} </Base.Button>
+      | (false, true) =>
+        <Base.Button disabled={isPassDisabled} onClick={onPass}> {uiStr("pass")} </Base.Button>
+      | (false, false) => <Base.Switch
+          disabled={isPassDisabled} onClick={onPass} checked={isPassed} text="pass"
+        />
+      }}
     </div>
   }
 
