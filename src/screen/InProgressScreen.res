@@ -22,7 +22,7 @@ module Parts = {
       <div className="flex flex-row gap-1">
         {switch game.table {
         | list{} => <div className="h-16" />
-        | table => <TableUI className="my-1" table={table} />
+        | table => <TableUI isDefender className="my-1" table={table} />
         }}
         <ReactDnd.Droppable
           droppableId="table"

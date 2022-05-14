@@ -9,14 +9,24 @@ let getDropAnimation = (
 ): ReactDOMStyle.t => {
   let dropAnimation = snapshot.dropAnimation->Js.Nullable.toOption
 
-  switch (snapshot.isDropAnimating, dropAnimation) {
-  | (true, Some(drop)) =>
-    let {moveTo} = drop
+  let transform = switch dropAnimation {
+  | Some(drop) => `translate(${drop.moveTo.x->string_of_int}px, ${drop.moveTo.y->string_of_int}px)`
+  | _ => style["transform"]->Js.Nullable.toOption->Option.getWithDefault("")
+  }
 
-    let translate = `translate(${moveTo.x->string_of_int}px, ${moveTo.y->string_of_int}px)`
+  let transform = `${transform} rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))`
 
-    ReactDOMStyle.combine(style->Obj.magic, ReactDOMStyle.make(~transform=translate, ()))
-  | _ => style->Obj.magic
+  ReactDOMStyle.combine(style->Obj.magic, ReactDOMStyle.make(~transform, ()))
+}
+
+let getAnimationClassNames = (snapshot: ReactDnd.draggableStateSnapshot) => {
+  let dropAnimation = snapshot.dropAnimation->Js.Nullable.toOption
+
+  switch (snapshot.isDragging, snapshot.isDropAnimating, dropAnimation) {
+  | (_, true, Some(_)) => "rotate-12 translate-x-1.5 scale-100"
+  | (true, _, _) => "rotate-12 translate-x-1.5 scale-125"
+  | (false, _, _) => "scale-100"
+  | _ => "unknown"
   }
 }
 
@@ -31,22 +41,17 @@ module DndWrapper = {
           <ReactDnd.Draggable draggableId={id} index>
             {(provided, snapshot, _) => {
               React.cloneElement(
-                <div ref={provided.innerRef}>
-                  <div
-                    className="transition duration-150 ease-in-out"
-                    style={ReactDOMStyle.make(
-                      ~transform=snapshot.isDragging && !snapshot.isDropAnimating
-                        ? "scale(1.2)"
-                        : "scale(1)",
-                      (),
-                    )}>
-                    children
-                  </div>
-                </div>,
+                <div ref={provided.innerRef}> children </div>,
                 spread3(
                   provided.draggableProps,
                   provided.dragHandleProps,
-                  {"style": getDropAnimation(provided.draggableProps["style"], snapshot)},
+                  {
+                    "className": cx([
+                      "transition duration-150 ease-in-out",
+                      getAnimationClassNames(snapshot),
+                    ]),
+                    "style": getDropAnimation(provided.draggableProps["style"], snapshot),
+                  },
                 ),
               )
             }}

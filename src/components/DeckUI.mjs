@@ -5,24 +5,40 @@ import * as Curry from "rescript/lib/es6/curry.js";
 import * as Utils from "../Utils.mjs";
 import * as React from "react";
 import * as CardUI from "./CardUI.mjs";
+import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
+import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as ReactBeautifulDnd from "react-beautiful-dnd";
 
 var spread3 = ((x1,x2,x3) => ({ ...x1, ...x2, ...x3 }));
 
 function getDropAnimation(style, snapshot) {
   var dropAnimation = snapshot.dropAnimation;
-  var match = snapshot.isDropAnimating;
-  if (!match) {
-    return style;
-  }
-  if (dropAnimation == null) {
-    return style;
-  }
-  var moveTo = dropAnimation.moveTo;
-  var translate = "translate(" + String(moveTo.x) + "px, " + String(moveTo.y) + "px)";
+  var transform = (dropAnimation == null) ? Belt_Option.getWithDefault(Caml_option.nullable_to_opt(style.transform), "") : "translate(" + String(dropAnimation.moveTo.x) + "px, " + String(dropAnimation.moveTo.y) + "px)";
+  var transform$1 = transform + " rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))";
   return Object.assign({}, style, {
-              transform: translate
+              transform: transform$1
             });
+}
+
+function getAnimationClassNames(snapshot) {
+  var dropAnimation = snapshot.dropAnimation;
+  var match = snapshot.isDragging;
+  var match$1 = snapshot.isDropAnimating;
+  if (match$1) {
+    if (dropAnimation == null) {
+      if (match) {
+        return "rotate-12 translate-x-1.5 scale-125";
+      } else {
+        return "scale-100";
+      }
+    } else {
+      return "rotate-12 translate-x-1.5 scale-100";
+    }
+  } else if (match) {
+    return "rotate-12 translate-x-1.5 scale-125";
+  } else {
+    return "scale-100";
+  }
 }
 
 function DeckUI$DndWrapper(Props) {
@@ -43,12 +59,11 @@ function DeckUI$DndWrapper(Props) {
                                   children: (function (provided, snapshot, param) {
                                       return React.cloneElement(React.createElement("div", {
                                                       ref: provided.innerRef
-                                                    }, React.createElement("div", {
-                                                          className: "transition duration-150 ease-in-out",
-                                                          style: {
-                                                            transform: snapshot.isDragging && !snapshot.isDropAnimating ? "scale(1.2)" : "scale(1)"
-                                                          }
-                                                        }, children)), spread3(provided.draggableProps, provided.dragHandleProps, {
+                                                    }, children), spread3(provided.draggableProps, provided.dragHandleProps, {
+                                                      className: Utils.cx([
+                                                            "transition duration-150 ease-in-out",
+                                                            getAnimationClassNames(snapshot)
+                                                          ]),
                                                       style: getDropAnimation(provided.draggableProps.style, snapshot)
                                                     }));
                                     })
@@ -112,6 +127,7 @@ var make = DeckUI;
 export {
   spread3 ,
   getDropAnimation ,
+  getAnimationClassNames ,
   DndWrapper ,
   make ,
   

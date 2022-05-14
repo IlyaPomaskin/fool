@@ -23,9 +23,8 @@ module Parts = {
         <Base.Button disabled={isTakeDisabled} onClick={onTake}> {uiStr("take")} </Base.Button>
       | (false, true) =>
         <Base.Button disabled={isPassDisabled} onClick={onPass}> {uiStr("pass")} </Base.Button>
-      | (false, false) => <Base.Switch
-          disabled={isPassDisabled} onClick={onPass} checked={isPassed} text="pass"
-        />
+      | (false, false) =>
+        <Base.Switch disabled={isPassDisabled} onClick={onPass} checked={isPassed} text="pass" />
       }}
     </div>
   }

@@ -38,6 +38,7 @@ function InProgressScreen$Parts$table(Props) {
               className: "flex flex-row gap-1"
             }, table ? React.createElement(TableUI.make, {
                     className: "my-1",
+                    isDefender: isDefender,
                     table: table
                   }) : React.createElement("div", {
                     className: "h-16"
