@@ -1,9 +1,50 @@
 open Types
 open Utils
 
-module Parts = {
+module PlayerActionsUI = {
   @react.component
-  let table = (~game, ~draggedCard, ~player) => {
+  let make = (
+    ~className: string="",
+    ~game: inProgress,
+    ~player: player,
+    ~onPass: _ => unit,
+    ~onTake: _ => unit,
+  ) => {
+    let isPassDisabled = !GameUtils.isCanPass(game, player)
+    let isPassed = GameUtils.isPassed(game, player)
+    let isTakeDisabled = !GameUtils.isCanTake(game, player)
+    let isDefender = GameUtils.isDefender(game, player)
+    let isDuel =
+      game.players->List.keep(player => !GameUtils.isPlayerDone(game, player))->List.length === 2
+
+    <div className={cx(["grid grid-flow-col gap-1", className])}>
+      {switch (isDefender, isDuel) {
+      | (true, _) =>
+        <Base.Button disabled={isTakeDisabled} onClick={onTake}> {uiStr("take")} </Base.Button>
+      | (false, true) =>
+        <Base.Button disabled={isPassDisabled} onClick={onPass}> {uiStr("pass")} </Base.Button>
+      | (false, false) =>
+        <Base.Switch disabled={isPassDisabled} onClick={onPass} checked={isPassed} text="pass" />
+      }}
+    </div>
+  }
+}
+
+module PlayerDeckUI = {
+  @react.component
+  let make = (~game: inProgress, ~player: player, ~isDraggable: bool=false) => {
+    let isDefender = GameUtils.isDefender(game, player)
+    let disabled = isDefender
+      ? !Table.hasCards(game.table)
+      : !GameUtils.isPlayerCanMove(game, player)
+
+    <DeckUI disabled isDraggable deck={player.cards} />
+  }
+}
+
+module PlayerTableUI = {
+  @react.component
+  let make = (~game, ~draggedCard, ~player) => {
     let isDefender = GameUtils.isDefender(game, player)
 
     switch isDefender {
@@ -49,6 +90,42 @@ module Parts = {
   }
 }
 
+module ClientUI = {
+  @react.component
+  let make = (
+    ~className: string="",
+    ~player: player,
+    ~isOwner: bool=false,
+    ~game: inProgress,
+    ~onMove: move => unit,
+  ) => {
+    let isDefender = GameUtils.isDefender(game, player)
+
+    <div className={cx([className, "p-1 border rounded-md border-solid border-slate-500"])}>
+      <div className="mb-1">
+        {uiStr("Player: ")}
+        <PlayerUI.Short className="inline-block" player />
+        {uiStr(isDefender ? ` 🛡️` : "")}
+        {uiStr(GameUtils.isAttacker(game, player) ? ` 🔪` : "")}
+      </div>
+      {switch GameUtils.getPlayerGameState(game, player) {
+      | Done => uiStr("Done")
+      | Lose => uiStr("Lose")
+      | Draw => uiStr("Draw")
+      | Playing =>
+        <div>
+          <PlayerDeckUI isDraggable={isOwner} game player />
+          {isOwner
+            ? <PlayerActionsUI
+                className="py-2" game player onPass={_ => onMove(Pass)} onTake={_ => onMove(Take)}
+              />
+            : React.null}
+        </div>
+      }}
+    </div>
+  }
+}
+
 type destionation =
   | ToUnknown
   | ToTable
@@ -82,7 +159,7 @@ let make = (~game, ~player, ~onMessage) => {
 
   <ReactDnd.DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
     <GameUI.InProgressUI game />
-    <div className="m-1"> <Parts.table draggedCard game player /> </div>
+    <div className="m-1"> <PlayerTableUI draggedCard game player /> </div>
     <div className="flex flex-wrap">
       {game.players->uiList(p =>
         <ClientUI

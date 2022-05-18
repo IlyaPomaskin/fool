@@ -26,7 +26,6 @@ let getAnimationClassNames = (snapshot: ReactDnd.draggableStateSnapshot) => {
   | (_, true, Some(_)) => "rotate-12 translate-x-1.5 scale-100"
   | (true, _, _) => "rotate-12 translate-x-1.5 scale-125"
   | (false, _, _) => "scale-100"
-  | _ => "unknown"
   }
 }
 
