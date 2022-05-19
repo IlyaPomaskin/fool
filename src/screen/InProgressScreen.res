@@ -30,18 +30,6 @@ module PlayerActionsUI = {
   }
 }
 
-module PlayerDeckUI = {
-  @react.component
-  let make = (~game: inProgress, ~player: player, ~isDraggable: bool=false) => {
-    let isDefender = GameUtils.isDefender(game, player)
-    let disabled = isDefender
-      ? !Table.hasCards(game.table)
-      : !GameUtils.isPlayerCanMove(game, player)
-
-    <DeckUI disabled isDraggable deck={player.cards} />
-  }
-}
-
 module PlayerTableUI = {
   @react.component
   let make = (~game, ~draggedCard, ~player) => {
@@ -101,6 +89,12 @@ module ClientUI = {
   ) => {
     let isDefender = GameUtils.isDefender(game, player)
 
+    let isDeckDisabled = isDefender
+      ? !Table.hasCards(game.table)
+      : !GameUtils.isPlayerCanMove(game, player)
+
+    let deck = <DeckUI disabled={isDeckDisabled} isDraggable={isOwner} deck={player.cards} />
+
     <div className={cx([className, "p-1 border rounded-md border-solid border-slate-500"])}>
       <div className="mb-1">
         {uiStr("Player: ")}
@@ -114,7 +108,7 @@ module ClientUI = {
       | Draw => uiStr("Draw")
       | Playing =>
         <div>
-          <PlayerDeckUI isDraggable={isOwner} game player />
+          {deck}
           {isOwner
             ? <PlayerActionsUI
                 className="py-2" game player onPass={_ => onMove(Pass)} onTake={_ => onMove(Take)}

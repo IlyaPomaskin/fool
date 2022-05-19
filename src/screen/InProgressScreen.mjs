@@ -59,24 +59,6 @@ var PlayerActionsUI = {
   make: InProgressScreen$PlayerActionsUI
 };
 
-function InProgressScreen$PlayerDeckUI(Props) {
-  var game = Props.game;
-  var player = Props.player;
-  var isDraggableOpt = Props.isDraggable;
-  var isDraggable = isDraggableOpt !== undefined ? isDraggableOpt : false;
-  var isDefender = GameUtils.isDefender(game, player);
-  var disabled = isDefender ? !Table.hasCards(game.table) : !GameUtils.isPlayerCanMove(game, player);
-  return React.createElement(DeckUI.make, {
-              deck: player.cards,
-              disabled: disabled,
-              isDraggable: isDraggable
-            });
-}
-
-var PlayerDeckUI = {
-  make: InProgressScreen$PlayerDeckUI
-};
-
 function InProgressScreen$PlayerTableUI(Props) {
   var game = Props.game;
   var draggedCard = Props.draggedCard;
@@ -135,15 +117,17 @@ function InProgressScreen$ClientUI(Props) {
   var className = classNameOpt !== undefined ? classNameOpt : "";
   var isOwner = isOwnerOpt !== undefined ? isOwnerOpt : false;
   var isDefender = GameUtils.isDefender(game, player);
+  var isDeckDisabled = isDefender ? !Table.hasCards(game.table) : !GameUtils.isPlayerCanMove(game, player);
+  var deck = React.createElement(DeckUI.make, {
+        deck: player.cards,
+        disabled: isDeckDisabled,
+        isDraggable: isOwner
+      });
   var match = GameUtils.getPlayerGameState(game, player);
   var tmp;
   switch (match) {
     case /* Playing */0 :
-        tmp = React.createElement("div", undefined, React.createElement(InProgressScreen$PlayerDeckUI, {
-                  game: game,
-                  player: player,
-                  isDraggable: isOwner
-                }), isOwner ? React.createElement(InProgressScreen$PlayerActionsUI, {
+        tmp = React.createElement("div", undefined, deck, isOwner ? React.createElement(InProgressScreen$PlayerActionsUI, {
                     className: "py-2",
                     game: game,
                     player: player,
@@ -279,7 +263,6 @@ var make = InProgressScreen;
 
 export {
   PlayerActionsUI ,
-  PlayerDeckUI ,
   PlayerTableUI ,
   ClientUI ,
   make ,
