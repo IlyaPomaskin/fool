@@ -8,8 +8,7 @@
     "rescript-jzon",
     "rescript-nodejs",
     "rescript-dnd",
-    "bs-react-spring",
-    "bs-fetch"
+    "bs-react-spring"
   ],
   "bsc-flags": ["-open Belt"],
   "ppx-flags": [],
@@ -18,7 +17,7 @@
     "module": "es6",
     "in-source": true
   },
-  "suffix": ".js",
+  "suffix": ".mjs",
   "warnings": {
     "number": "-3",
     "error": "+101+8"
