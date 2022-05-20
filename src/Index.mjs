@@ -198,19 +198,36 @@ function Index$PlayerScreen(Props) {
 }
 
 function $$default(param) {
-  return React.createElement("div", {
-              className: "flex flex-col"
-            }, React.createElement("div", {
-                  className: "border rounded-md border-solid border-slate-500"
-                }, React.createElement(Index$PlayerScreen, {
-                      playerId: "p1",
-                      sessionId: "session:p1"
-                    })), React.createElement("div", {
-                  className: "border rounded-md border-solid border-slate-500"
-                }, React.createElement(Index$PlayerScreen, {
-                      playerId: "p2",
-                      sessionId: "session:p2"
-                    })));
+  var match = React.useState(function () {
+        return false;
+      });
+  var setIsLoaded = match[1];
+  React.useEffect((function () {
+          fetch("/api/server").then(function (param) {
+                Curry._1(setIsLoaded, (function (param) {
+                        return true;
+                      }));
+                return Promise.resolve(1);
+              });
+          
+        }), []);
+  if (match[0]) {
+    return React.createElement("div", {
+                className: "flex flex-col"
+              }, React.createElement("div", {
+                    className: "border rounded-md border-solid border-slate-500"
+                  }, React.createElement(Index$PlayerScreen, {
+                        playerId: "p1",
+                        sessionId: "session:p1"
+                      })), React.createElement("div", {
+                    className: "border rounded-md border-solid border-slate-500"
+                  }, React.createElement(Index$PlayerScreen, {
+                        playerId: "p2",
+                        sessionId: "session:p2"
+                      })));
+  } else {
+    return React.createElement("div", undefined, "Loading...");
+  }
 }
 
 export {

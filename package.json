@@ -5,6 +5,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@ryyppy/rescript-promise": "2.1.0",
+    "bs-fetch": "0.6.2",
     "bs-react-spring": "^0.4.2",
     "next": "10.2.3",
     "react": "17.0.1",

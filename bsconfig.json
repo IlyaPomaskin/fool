@@ -8,7 +8,8 @@
     "rescript-jzon",
     "rescript-nodejs",
     "rescript-dnd",
-    "bs-react-spring"
+    "bs-react-spring",
+    "bs-fetch"
   ],
   "bsc-flags": ["-open Belt"],
   "ppx-flags": [],
