@@ -88,29 +88,12 @@ module PlayerScreen = {
 }
 
 let default = () => {
-  // FIXME remove debug code
-  let (isLoaded, setIsLoaded) = React.useState(_ => false)
-  React.useEffect0(() => {
-    Fetch.fetch("/api/server")
-    |> Js.Promise.then_(_ => {
-      setIsLoaded(_ => true)
-      Js.Promise.resolve(1)
-    })
-    |> ignore
-
-    None
-  })
-
-  if !isLoaded {
-    <div> {React.string("loading")} </div>
-  } else {
-    <div className="flex flex-col">
-      <div className="border rounded-md border-solid border-slate-500">
-        <PlayerScreen playerId="p1" sessionId="session:p1" />
-      </div>
-      <div className="border rounded-md border-solid border-slate-500">
-        <PlayerScreen playerId="p2" sessionId="session:p2" />
-      </div>
+  <div className="flex flex-col">
+    <div className="border rounded-md border-solid border-slate-500">
+      <PlayerScreen playerId="p1" sessionId="session:p1" />
     </div>
-  }
+    <div className="border rounded-md border-solid border-slate-500">
+      <PlayerScreen playerId="p2" sessionId="session:p2" />
+    </div>
+  </div>
 }

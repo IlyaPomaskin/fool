@@ -1,6 +1,6 @@
 import "styles/main.css";
 
-import ResApp from "src/App";
+import ResApp from "src/App.mjs";
 
 const SafeHydrate = ({ children }) => (
   <div suppressHydrationWarning>
