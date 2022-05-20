@@ -1,3 +1,3 @@
-import ServerRes from "src/api/Server.mjs";
+import ServerRes from "src/api/Server";
 
 export default ServerRes;
