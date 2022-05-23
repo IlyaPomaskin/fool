@@ -1,8 +1,7 @@
 module.exports = {
   content: [
-    "./src/components/**/*.res",
-    "./src/layouts/**/*.res",
-    "./src/*.res",
+    "./src/**/*.{res,mjs}",
+    "./src/*.{res,mjs}",
     "./node_modules/tw-elements/dist/js/**/*.js",
   ],
   plugins: [require("tw-elements/dist/plugin")],
