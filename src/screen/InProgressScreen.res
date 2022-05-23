@@ -152,7 +152,7 @@ let make = (~game, ~player, ~onMessage) => {
   let currentPlayer = game.players->List.getBy(p => p.id === player.id)->Option.getExn
 
   <ReactDnd.DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-    <div className="my-2 inline-block">
+    <div className="m-1 inline-block">
       <DeckUI.hidden
         deck={game.deck}
         text={switch lastListItem(game.deck) {

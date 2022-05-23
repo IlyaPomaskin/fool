@@ -260,7 +260,7 @@ function InProgressScreen(Props) {
               onDragEnd: handleDragEnd,
               children: null
             }, React.createElement("div", {
-                  className: "my-2 inline-block"
+                  className: "m-1 inline-block"
                 }, React.createElement(DeckUI.hidden, {
                       deck: game.deck,
                       text: card !== undefined ? React.createElement(CardUI.Short.make, {
