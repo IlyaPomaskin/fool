@@ -25,6 +25,11 @@ function Index$PlayerScreen(Props) {
       });
   var setScreen = match$1[1];
   var screen = match$1[0];
+  var match$2 = React.useState(function () {
+        return false;
+      });
+  var setIsLoaded = match$2[1];
+  var isLoaded = match$2[0];
   var onMessage = React.useCallback((function (message) {
           Log.logMessageFromServer(message, playerId);
           var exit = 0;
@@ -82,75 +87,83 @@ function Index$PlayerScreen(Props) {
             
           }
         }), [playerId]);
-  var match$2 = UseWs.hook(onMessage);
-  var sendMessage = match$2.sendMessage;
-  var error = match$2.error;
+  var match$3 = UseWs.hook(onMessage);
+  var sendMessage = match$3.sendMessage;
+  var error = match$3.error;
   React.useEffect((function () {
-          var delayM = function (param, param$1, param$2) {
-            var timeout = param$1 !== undefined ? param$1 : 100;
-            return new Promise((function (resolve, param$3) {
-                          setTimeout((function (param$4) {
-                                  return resolve(Curry._1(sendMessage, param));
-                                }), timeout);
-                          
-                        }));
-          };
-          if (playerId === "p1") {
-            delayM({
-                          TAG: /* Login */1,
-                          _0: sessionId
-                        }, undefined, undefined).then(function (param) {
+          if (!isLoaded) {
+            var delayM = function (param, param$1, param$2) {
+              var timeout = param$1 !== undefined ? param$1 : 100;
+              return new Promise((function (resolve, param$3) {
+                            setTimeout((function (param$4) {
+                                    return resolve(Curry._1(sendMessage, param));
+                                  }), timeout);
+                            
+                          }));
+            };
+            if (playerId === "p1") {
+              delayM({
+                            TAG: /* Login */1,
+                            _0: sessionId
+                          }, undefined, undefined).then(function (param) {
+                          return delayM({
+                                      TAG: /* Lobby */3,
+                                      _0: /* Create */0,
+                                      _1: "p1",
+                                      _2: ""
+                                    }, 100, undefined);
+                        }).then(function (param) {
                         return delayM({
                                     TAG: /* Lobby */3,
-                                    _0: /* Create */0,
+                                    _0: /* Enter */1,
                                     _1: "p1",
-                                    _2: ""
+                                    _2: "g1"
                                   }, 100, undefined);
                       }).then(function (param) {
                       return delayM({
                                   TAG: /* Lobby */3,
-                                  _0: /* Enter */1,
+                                  _0: /* Ready */2,
                                   _1: "p1",
                                   _2: "g1"
                                 }, 100, undefined);
                     }).then(function (param) {
                     return delayM({
                                 TAG: /* Lobby */3,
-                                _0: /* Ready */2,
+                                _0: /* Start */3,
                                 _1: "p1",
                                 _2: "g1"
-                              }, 100, undefined);
-                  }).then(function (param) {
-                  return delayM({
-                              TAG: /* Lobby */3,
-                              _0: /* Start */3,
-                              _1: "p1",
-                              _2: "g1"
-                            }, 300, undefined);
-                });
-          }
-          if (playerId === "p2") {
-            delayM({
-                      TAG: /* Login */1,
-                      _0: sessionId
-                    }, undefined, undefined).then(function (param) {
+                              }, 300, undefined);
+                  });
+            }
+            if (playerId === "p2") {
+              delayM({
+                        TAG: /* Login */1,
+                        _0: sessionId
+                      }, undefined, undefined).then(function (param) {
+                      return delayM({
+                                  TAG: /* Lobby */3,
+                                  _0: /* Enter */1,
+                                  _1: "p2",
+                                  _2: "g1"
+                                }, 250, undefined);
+                    }).then(function (param) {
                     return delayM({
                                 TAG: /* Lobby */3,
-                                _0: /* Enter */1,
+                                _0: /* Ready */2,
                                 _1: "p2",
                                 _2: "g1"
-                              }, 250, undefined);
-                  }).then(function (param) {
-                  return delayM({
-                              TAG: /* Lobby */3,
-                              _0: /* Ready */2,
-                              _1: "p2",
-                              _2: "g1"
-                            }, 100, undefined);
-                });
+                              }, 100, undefined);
+                  });
+            }
+            Curry._1(setIsLoaded, (function (param) {
+                    return true;
+                  }));
           }
           
-        }), [sendMessage]);
+        }), [
+        sendMessage,
+        isLoaded
+      ]);
   var tmp;
   var exit = 0;
   if (typeof screen === "number") {
@@ -199,16 +212,19 @@ function $$default(param) {
         return false;
       });
   var setIsLoaded = match[1];
+  var isLoaded = match[0];
   React.useEffect((function () {
-          fetch("/api/server").then(function (param) {
-                Curry._1(setIsLoaded, (function (param) {
-                        return true;
-                      }));
-                return Promise.resolve(1);
-              });
+          if (!isLoaded) {
+            fetch("/api/server").then(function (param) {
+                  Curry._1(setIsLoaded, (function (param) {
+                          return true;
+                        }));
+                  return Promise.resolve(1);
+                });
+          }
           
-        }), []);
-  if (match[0]) {
+        }), [isLoaded]);
+  if (isLoaded) {
     return React.createElement("div", {
                 className: "flex flex-col"
               }, React.createElement("div", {

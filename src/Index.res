@@ -9,6 +9,7 @@ module PlayerScreen = {
   let make = (~playerId, ~sessionId) => {
     let (player, setPlayer) = React.useState(_ => None)
     let (screen, setScreen) = React.useState(_ => AuthorizationScreen)
+    let (isLoaded, setIsLoaded) = React.useState(_ => false)
 
     let onMessage = React.useCallback1(message => {
       Log.logMessageFromServer(message, playerId)
@@ -34,29 +35,33 @@ module PlayerScreen = {
     let {error, sendMessage} = UseWs.hook(onMessage)
 
     // FIXME remove debug code
-    React.useEffect1(() => {
-      open Promise
+    React.useEffect2(() => {
+      if !isLoaded {
+        open Promise
 
-      let delayM = delay(sendMessage)
+        let delayM = delay(sendMessage)
 
-      if playerId === "p1" {
-        delayM(Login(sessionId), ())
-        ->then(() => delayM(~timeout=100, Lobby(Create, "p1", ""), ()))
-        ->then(() => delayM(~timeout=100, Lobby(Enter, "p1", "g1"), ()))
-        ->then(() => delayM(~timeout=100, Lobby(Ready, "p1", "g1"), ()))
-        ->then(() => delayM(~timeout=300, Lobby(Start, "p1", "g1"), ()))
-        ->ignore
-      }
+        if playerId === "p1" {
+          delayM(Login(sessionId), ())
+          ->then(() => delayM(~timeout=100, Lobby(Create, "p1", ""), ()))
+          ->then(() => delayM(~timeout=100, Lobby(Enter, "p1", "g1"), ()))
+          ->then(() => delayM(~timeout=100, Lobby(Ready, "p1", "g1"), ()))
+          ->then(() => delayM(~timeout=300, Lobby(Start, "p1", "g1"), ()))
+          ->ignore
+        }
 
-      if playerId === "p2" {
-        delayM(Login(sessionId), ())
-        ->then(() => delayM(~timeout=250, Lobby(Enter, "p2", "g1"), ()))
-        ->then(() => delayM(~timeout=100, Lobby(Ready, "p2", "g1"), ()))
-        ->ignore
+        if playerId === "p2" {
+          delayM(Login(sessionId), ())
+          ->then(() => delayM(~timeout=250, Lobby(Enter, "p2", "g1"), ()))
+          ->then(() => delayM(~timeout=100, Lobby(Ready, "p2", "g1"), ()))
+          ->ignore
+        }
+
+        setIsLoaded(_ => true)
       }
 
       None
-    }, [sendMessage])
+    }, (sendMessage, isLoaded))
 
     <div>
       <div>
@@ -87,16 +92,18 @@ module PlayerScreen = {
 let default = () => {
   // FIXME remove debug code
   let (isLoaded, setIsLoaded) = React.useState(_ => false)
-  React.useEffect0(() => {
-    Fetch.fetch("/api/server")
-    |> Js.Promise.then_(_ => {
-      setIsLoaded(_ => true)
-      Js.Promise.resolve(1)
-    })
-    |> ignore
+  React.useEffect1(() => {
+    if !isLoaded {
+      Fetch.fetch("/api/server")
+      |> Js.Promise.then_(_ => {
+        setIsLoaded(_ => true)
+        Js.Promise.resolve(1)
+      })
+      |> ignore
+    }
 
     None
-  })
+  }, [isLoaded])
 
   if !isLoaded {
     <div> {React.string("Loading...")} </div>
