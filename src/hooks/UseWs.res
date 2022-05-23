@@ -11,11 +11,15 @@ let hook = (onMessage): hookReturn => {
   let ws = React.useMemo0(_ => WebSocket.make(`ws://localhost:3001/ws`))
 
   let sendMessage = React.useCallback1(message => {
-    Log.logMessageFromClient(message)
-    ws->WebSocket.sendText(Serializer.serializeClientMessage(message))
+    if ws->WebSocket.isOpen {
+      Log.logMessageFromClient(message)
+      ws->WebSocket.sendText(Serializer.serializeClientMessage(message))
+    } else {
+      Log.error(["Not connected", Log.clientMsgToString(message)])
+    }
   }, [ws])
 
-  React.useEffect1(() => {
+  React.useEffect2(() => {
     let handleMessage = event => {
       event
       ->WebSocket.messageAsText
@@ -35,7 +39,7 @@ let hook = (onMessage): hookReturn => {
     ws->WebSocket.addMessageListener(handleMessage)
 
     Some(() => ws->WebSocket.removeMessageListener(handleMessage))
-  }, [ws])
+  }, (ws, onMessage))
 
   {
     error: error,

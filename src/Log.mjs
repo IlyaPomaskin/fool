@@ -30,65 +30,62 @@ function info(param) {
               }), param);
 }
 
-function logMessageFromClient(msg) {
-  var tmp;
+function clientMsgToString(msg) {
   switch (msg.TAG | 0) {
     case /* Register */0 :
-        tmp = "Register " + msg._0;
-        break;
+        return "Register " + msg._0;
     case /* Login */1 :
-        tmp = "Login " + msg._0;
-        break;
+        return "Login " + msg._0;
     case /* Player */2 :
-        var tmp$1;
+        var tmp;
         switch (msg._0) {
           case /* Disconnect */0 :
-              tmp$1 = "Disconnect";
+              tmp = "Disconnect";
               break;
           case /* Ping */1 :
-              tmp$1 = "Ping";
+              tmp = "Ping";
               break;
           case /* Pong */2 :
-              tmp$1 = "Pong";
+              tmp = "Pong";
               break;
           
         }
-        tmp = "player [" + msg._1 + "] " + tmp$1;
-        break;
+        return "player [" + msg._1 + "] " + tmp;
     case /* Lobby */3 :
-        var tmp$2;
+        var tmp$1;
         switch (msg._0) {
           case /* Create */0 :
-              tmp$2 = "Create";
+              tmp$1 = "Create";
               break;
           case /* Enter */1 :
-              tmp$2 = "Enter";
+              tmp$1 = "Enter";
               break;
           case /* Ready */2 :
-              tmp$2 = "Ready";
+              tmp$1 = "Ready";
               break;
           case /* Start */3 :
-              tmp$2 = "Start";
+              tmp$1 = "Start";
               break;
           
         }
-        tmp = "lobby [" + msg._2 + "][" + msg._1 + "] " + tmp$2;
-        break;
+        return "lobby [" + msg._2 + "][" + msg._1 + "] " + tmp$1;
     case /* Progress */4 :
         var game = msg._0;
-        var tmp$3;
-        tmp$3 = typeof game === "number" ? (
+        var tmp$2;
+        tmp$2 = typeof game === "number" ? (
             game === /* Take */0 ? "Take" : "Pass"
           ) : (
             game.TAG === /* Beat */0 ? "Beat to: " + Card.cardToString(game._0) + " by: " + Card.cardToString(game._1) : "Move " + Card.cardToString(game._0)
           );
-        tmp = "progress [" + msg._2 + "][" + msg._1 + "] " + tmp$3;
-        break;
+        return "progress [" + msg._2 + "][" + msg._1 + "] " + tmp$2;
     
   }
+}
+
+function logMessageFromClient(msg) {
   return info([
               "[client]",
-              tmp
+              clientMsgToString(msg)
             ]);
 }
 
@@ -122,6 +119,7 @@ export {
   error ,
   log ,
   info ,
+  clientMsgToString ,
   logMessageFromClient ,
   serverMsgToString ,
   logMessageFromServer ,

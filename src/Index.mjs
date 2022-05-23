@@ -7,7 +7,6 @@ import * as Utils from "./Utils.mjs";
 import * as React from "react";
 import * as PlayerUI from "./components/PlayerUI.mjs";
 import * as Belt_List from "rescript/lib/es6/belt_List.js";
-import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as InLobbyScreen from "./screen/InLobbyScreen.mjs";
 import * as InProgressScreen from "./screen/InProgressScreen.mjs";
 import * as LobbySetupScreen from "./screen/LobbySetupScreen.mjs";
@@ -27,15 +26,13 @@ function Index$PlayerScreen(Props) {
   var setScreen = match$1[1];
   var screen = match$1[0];
   var onMessage = React.useCallback((function (message) {
-          Log.logMessageFromServer(message, Belt_Option.getWithDefault(Belt_Option.map(player, (function (p) {
-                          return p.id;
-                        })), "no player"));
+          Log.logMessageFromServer(message, playerId);
           var exit = 0;
           switch (message.TAG | 0) {
             case /* Connected */0 :
-                var player$1 = message._0;
+                var player = message._0;
                 Curry._1(setPlayer, (function (param) {
-                        return player$1;
+                        return player;
                       }));
                 return Curry._1(setScreen, (function (param) {
                               return /* LobbySetupScreen */1;
@@ -84,7 +81,7 @@ function Index$PlayerScreen(Props) {
                             }));
             
           }
-        }), [player]);
+        }), [playerId]);
   var match$2 = UseWs.hook(onMessage);
   var sendMessage = match$2.sendMessage;
   var error = match$2.error;

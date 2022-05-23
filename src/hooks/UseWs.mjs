@@ -17,9 +17,16 @@ function hook(onMessage) {
           return new WebSocket("ws://localhost:3001/ws");
         }), []);
   var sendMessage = React.useCallback((function (message) {
-          Log.logMessageFromClient(message);
-          ws.send(Serializer.serializeClientMessage(message));
-          
+          if ($$WebSocket.isOpen(ws)) {
+            Log.logMessageFromClient(message);
+            ws.send(Serializer.serializeClientMessage(message));
+            return ;
+          } else {
+            return Log.error([
+                        "Not connected",
+                        Log.clientMsgToString(message)
+                      ]);
+          }
         }), [ws]);
   React.useEffect((function () {
           var handleMessage = function ($$event) {
@@ -46,7 +53,10 @@ function hook(onMessage) {
                     ws.removeEventListener("message", handleMessage);
                     
                   });
-        }), [ws]);
+        }), [
+        ws,
+        onMessage
+      ]);
   return {
           error: match[0],
           sendMessage: sendMessage

@@ -11,10 +11,7 @@ module PlayerScreen = {
     let (screen, setScreen) = React.useState(_ => AuthorizationScreen)
 
     let onMessage = React.useCallback1(message => {
-      Log.logMessageFromServer(
-        message,
-        player->Option.map(p => p.id)->Option.getWithDefault("no player"),
-      )
+      Log.logMessageFromServer(message, playerId)
 
       switch message {
       | Connected(player) => {
@@ -32,7 +29,7 @@ module PlayerScreen = {
         setPlayer(_ => game.players->List.getBy(player => player.id == playerId))
       | ServerError(msg) => Log.info(["ServerError", msg])
       }
-    }, [player])
+    }, [playerId])
 
     let {error, sendMessage} = UseWs.hook(onMessage)
 
