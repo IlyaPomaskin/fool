@@ -64,13 +64,9 @@ function CardUI$Short(Props) {
               }, Utils.uiStr("Hidden"));
   }
   var match = card._0;
-  var suit = match[0];
   return React.createElement("span", {
-              className: Utils.cx([
-                    className,
-                    suitToColor(suit)
-                  ])
-            }, Utils.uiStr(suitToString(suit) + rankToString(match[1])));
+              className: className
+            }, Utils.uiStr(suitToString(match[0]) + rankToString(match[1])));
 }
 
 var Short = {

@@ -7,8 +7,8 @@ import * as Curry from "rescript/lib/es6/curry.js";
 import * as Table from "../fool/Table.mjs";
 import * as Utils from "../Utils.mjs";
 import * as React from "react";
+import * as CardUI from "../components/CardUI.mjs";
 import * as DeckUI from "../components/DeckUI.mjs";
-import * as GameUI from "../components/GameUI.mjs";
 import * as TableUI from "../components/TableUI.mjs";
 import * as PlayerUI from "../components/PlayerUI.mjs";
 import * as Belt_List from "rescript/lib/es6/belt_List.js";
@@ -111,33 +111,40 @@ var PlayerTableUI = {
 function InProgressScreen$ClientUI(Props) {
   var classNameOpt = Props.className;
   var player = Props.player;
-  var isOwnerOpt = Props.isOwner;
   var game = Props.game;
-  var onMove = Props.onMove;
+  var onMessage = Props.onMessage;
   var className = classNameOpt !== undefined ? classNameOpt : "";
-  var isOwner = isOwnerOpt !== undefined ? isOwnerOpt : false;
   var isDefender = GameUtils.isDefender(game, player);
-  var isDeckDisabled = isDefender ? !Table.hasCards(game.table) : !GameUtils.isPlayerCanMove(game, player);
-  var deck = React.createElement(DeckUI.make, {
-        deck: player.cards,
-        disabled: isDeckDisabled,
-        isDraggable: isOwner
-      });
+  var isThereCardsOnTable = Table.hasCards(game.table);
+  var isPlayerCanMove = GameUtils.isPlayerCanMove(game, player);
+  var isDeckEnabled = isDefender ? isThereCardsOnTable : isPlayerCanMove;
+  var onMove = function (move) {
+    return Curry._1(onMessage, {
+                TAG: /* Progress */4,
+                _0: move,
+                _1: player.id,
+                _2: game.gameId
+              });
+  };
   var match = GameUtils.getPlayerGameState(game, player);
   var tmp;
   switch (match) {
     case /* Playing */0 :
-        tmp = React.createElement("div", undefined, deck, isOwner ? React.createElement(InProgressScreen$PlayerActionsUI, {
-                    className: "py-2",
-                    game: game,
-                    player: player,
-                    onPass: (function (param) {
-                        return Curry._1(onMove, /* Pass */1);
-                      }),
-                    onTake: (function (param) {
-                        return Curry._1(onMove, /* Take */0);
-                      })
-                  }) : null);
+        tmp = React.createElement("div", undefined, React.createElement(DeckUI.make, {
+                  deck: player.cards,
+                  disabled: !isDeckEnabled,
+                  isDraggable: true
+                }), React.createElement(InProgressScreen$PlayerActionsUI, {
+                  className: "py-2",
+                  game: game,
+                  player: player,
+                  onPass: (function (param) {
+                      return onMove(/* Pass */1);
+                    }),
+                  onTake: (function (param) {
+                      return onMove(/* Take */0);
+                    })
+                }));
         break;
     case /* Done */1 :
         tmp = Utils.uiStr("Done");
@@ -155,16 +162,35 @@ function InProgressScreen$ClientUI(Props) {
                     className,
                     "p-1 border rounded-md border-solid border-slate-500"
                   ])
-            }, React.createElement("div", {
-                  className: "mb-1"
-                }, Utils.uiStr("Player: "), React.createElement(PlayerUI.Short.make, {
-                      className: "inline-block",
-                      player: player
-                    }), Utils.uiStr(isDefender ? " 🛡️" : ""), Utils.uiStr(GameUtils.isAttacker(game, player) ? " 🔪" : "")), tmp);
+            }, tmp);
 }
 
 var ClientUI = {
   make: InProgressScreen$ClientUI
+};
+
+function InProgressScreen$OpponentUI(Props) {
+  var player = Props.player;
+  var className = Props.className;
+  var isDefender = Props.isDefender;
+  var isAttacker = Props.isAttacker;
+  return React.createElement("div", {
+              className: Utils.cx([
+                    "flex flex-col",
+                    className
+                  ])
+            }, React.createElement("div", {
+                  className: "vertial-align"
+                }, React.createElement(PlayerUI.Short.make, {
+                      className: "inline-block",
+                      player: player
+                    }), Utils.uiStr(isDefender ? " 🛡️" : ""), Utils.uiStr(isAttacker ? " 🔪" : "")), React.createElement(DeckUI.hidden, {
+                  deck: player.cards
+                }));
+}
+
+var OpponentUI = {
+  make: InProgressScreen$OpponentUI
 };
 
 function InProgressScreen(Props) {
@@ -181,7 +207,6 @@ function InProgressScreen(Props) {
                 }));
   };
   var handleDragEnd = function (result, param) {
-    console.log("result", result);
     var byCard = Card.stringToCard(result.draggableId);
     var dst = Belt_Option.map(Caml_option.nullable_to_opt(result.destination), (function (d) {
             return d.droppableId;
@@ -226,37 +251,46 @@ function InProgressScreen(Props) {
                   
                 }));
   };
+  var currentPlayer = Belt_Option.getExn(Belt_List.getBy(game.players, (function (p) {
+              return p.id === player.id;
+            })));
+  var card = Utils.lastListItem(game.deck);
   return React.createElement(ReactBeautifulDnd.DragDropContext, {
               onDragStart: handleDragStart,
               onDragEnd: handleDragEnd,
               children: null
-            }, React.createElement(GameUI.InProgressUI.make, {
-                  game: game
-                }), React.createElement("div", {
+            }, React.createElement("div", {
+                  className: "my-2 inline-block"
+                }, React.createElement(DeckUI.hidden, {
+                      deck: game.deck,
+                      text: card !== undefined ? React.createElement(CardUI.Short.make, {
+                              card: card
+                            }) : React.createElement(CardUI.trump, {
+                              suit: game.trump,
+                              className: "inline-block"
+                            })
+                    })), React.createElement("div", {
+                  className: "flex flex-wrap"
+                }, Utils.uiList(game.players, (function (p) {
+                        return React.createElement(InProgressScreen$OpponentUI, {
+                                    player: p,
+                                    className: "m-1 flex flex-col",
+                                    isDefender: GameUtils.isDefender(game, p),
+                                    isAttacker: GameUtils.isAttacker(game, p),
+                                    key: p.id
+                                  });
+                      }))), React.createElement("div", {
                   className: "m-1"
                 }, React.createElement(InProgressScreen$PlayerTableUI, {
                       game: game,
                       draggedCard: match[0],
                       player: player
-                    })), React.createElement("div", {
-                  className: "flex flex-wrap"
-                }, Utils.uiList(game.players, (function (p) {
-                        return React.createElement(InProgressScreen$ClientUI, {
-                                    className: "m-1 flex flex-col",
-                                    player: p,
-                                    isOwner: p.id === player.id,
-                                    game: game,
-                                    onMove: (function (move) {
-                                        return Curry._1(onMessage, {
-                                                    TAG: /* Progress */4,
-                                                    _0: move,
-                                                    _1: player.id,
-                                                    _2: game.gameId
-                                                  });
-                                      }),
-                                    key: p.id
-                                  });
-                      }))));
+                    })), React.createElement(InProgressScreen$ClientUI, {
+                  className: "m-1 flex flex-col",
+                  player: currentPlayer,
+                  game: game,
+                  onMessage: onMessage
+                }));
 }
 
 var make = InProgressScreen;
@@ -265,6 +299,7 @@ export {
   PlayerActionsUI ,
   PlayerTableUI ,
   ClientUI ,
+  OpponentUI ,
   make ,
   
 }

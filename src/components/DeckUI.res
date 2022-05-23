@@ -63,6 +63,38 @@ module DndWrapper = {
 }
 
 @react.component
+let hidden = (~deck, ~text: option<React.element>=?) => {
+  let cardsAmount = deck->List.length
+  let cardsList =
+    deck->List.keepWithIndex((_, index) => index <= 2)->List.mapWithIndex((index, _) => index)
+  let deckText = switch (text, cardsAmount) {
+  | (Some(text), _) => text
+  | (_, 0) => uiStr("0")
+  | (_, amount) => uiStr(string_of_int(amount))
+  }
+
+  <div className="relative">
+    {switch cardsAmount {
+    | 0 => <CardUI.EmptyCard />
+    | _ =>
+      cardsList->uiList(index => {
+        let offset = `${string_of_int(index * 2)}px`
+
+        <div
+          key={string_of_int(index)}
+          className={index === 0 ? "relative" : "absolute"}
+          style={ReactDOMStyle.make(~top=offset, ~left=offset, ())}>
+          <CardUI.HiddenCard />
+        </div>
+      })
+    }}
+    <div className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 text-slate-200">
+      {deckText}
+    </div>
+  </div>
+}
+
+@react.component
 let make = (
   ~deck: deck,
   ~className: string="",

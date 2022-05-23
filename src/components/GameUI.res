@@ -41,7 +41,7 @@ module InProgressUI = {
           <span className="mx-1" />
           {switch lastListItem(game.deck) {
           | Some(card) => <CardUI.Short card />
-          | None => <CardUI.trump className="inline-block" suit={game.trump} />
+          | None => <CardUI.trump suit={game.trump} />
           }}
         </div>
       </div>

@@ -5,6 +5,7 @@ import * as Curry from "rescript/lib/es6/curry.js";
 import * as Utils from "../Utils.mjs";
 import * as React from "react";
 import * as CardUI from "./CardUI.mjs";
+import * as Belt_List from "rescript/lib/es6/belt_List.js";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as ReactBeautifulDnd from "react-beautiful-dnd";
@@ -76,6 +77,35 @@ var DndWrapper = {
   make: DeckUI$DndWrapper
 };
 
+function DeckUI$hidden(Props) {
+  var deck = Props.deck;
+  var text = Props.text;
+  var cardsAmount = Belt_List.length(deck);
+  var cardsList = Belt_List.mapWithIndex(Belt_List.keepWithIndex(deck, (function (param, index) {
+              return index <= 2;
+            })), (function (index, param) {
+          return index;
+        }));
+  var deckText = text !== undefined ? Caml_option.valFromOption(text) : (
+      cardsAmount !== 0 ? Utils.uiStr(String(cardsAmount)) : Utils.uiStr("0")
+    );
+  return React.createElement("div", {
+              className: "relative"
+            }, cardsAmount !== 0 ? Utils.uiList(cardsList, (function (index) {
+                      var offset = String((index << 1)) + "px";
+                      return React.createElement("div", {
+                                  key: String(index),
+                                  className: index === 0 ? "relative" : "absolute",
+                                  style: {
+                                    left: offset,
+                                    top: offset
+                                  }
+                                }, React.createElement(CardUI.HiddenCard.make, {}));
+                    })) : React.createElement(CardUI.EmptyCard.make, {}), React.createElement("div", {
+                  className: "absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 text-slate-200"
+                }, deckText));
+}
+
 function DeckUI(Props) {
   var deck = Props.deck;
   var classNameOpt = Props.className;
@@ -122,6 +152,8 @@ function DeckUI(Props) {
   }
 }
 
+var hidden = DeckUI$hidden;
+
 var make = DeckUI;
 
 export {
@@ -129,6 +161,7 @@ export {
   getDropAnimation ,
   getAnimationClassNames ,
   DndWrapper ,
+  hidden ,
   make ,
   
 }

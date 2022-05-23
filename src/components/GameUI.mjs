@@ -48,8 +48,7 @@ function GameUI$InProgressUI(Props) {
                         }), card !== undefined ? React.createElement(CardUI.Short.make, {
                             card: card
                           }) : React.createElement(CardUI.trump, {
-                            suit: game.trump,
-                            className: "inline-block"
+                            suit: game.trump
                           }))));
 }
 

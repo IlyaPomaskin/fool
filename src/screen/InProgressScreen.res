@@ -80,47 +80,45 @@ module PlayerTableUI = {
 
 module ClientUI = {
   @react.component
-  let make = (
-    ~className: string="",
-    ~player: player,
-    ~isOwner: bool=false,
-    ~game: inProgress,
-    ~onMove: move => unit,
-  ) => {
+  let make = (~className: string="", ~player, ~game: inProgress, ~onMessage) => {
     let isDefender = GameUtils.isDefender(game, player)
-
-    let isDeckDisabled = isDefender
-      ? !Table.hasCards(game.table)
-      : !GameUtils.isPlayerCanMove(game, player)
-
-    let deck = <DeckUI disabled={isDeckDisabled} isDraggable={isOwner} deck={player.cards} />
+    let isThereCardsOnTable = Table.hasCards(game.table)
+    let isPlayerCanMove = GameUtils.isPlayerCanMove(game, player)
+    let isDeckEnabled = isDefender ? isThereCardsOnTable : isPlayerCanMove
+    let onMove = move => onMessage(Progress(move, player.id, game.gameId))
 
     <div className={cx([className, "p-1 border rounded-md border-solid border-slate-500"])}>
-      <div className="mb-1">
-        {uiStr("Player: ")}
-        <PlayerUI.Short className="inline-block" player />
-        {uiStr(isDefender ? ` 🛡️` : "")}
-        {uiStr(GameUtils.isAttacker(game, player) ? ` 🔪` : "")}
-      </div>
       {switch GameUtils.getPlayerGameState(game, player) {
       | Done => uiStr("Done")
       | Lose => uiStr("Lose")
       | Draw => uiStr("Draw")
       | Playing =>
         <div>
-          {deck}
-          {isOwner
-            ? <PlayerActionsUI
-                className="py-2" game player onPass={_ => onMove(Pass)} onTake={_ => onMove(Take)}
-              />
-            : React.null}
+          <DeckUI disabled={!isDeckEnabled} isDraggable={true} deck={player.cards} />
+          <PlayerActionsUI
+            className="py-2" game player onPass={_ => onMove(Pass)} onTake={_ => onMove(Take)}
+          />
         </div>
       }}
     </div>
   }
 }
 
-type destionation =
+module OpponentUI = {
+  @react.component
+  let make = (~player, ~className, ~isDefender, ~isAttacker) => {
+    <div className={cx(["flex flex-col", className])}>
+      <div className="vertial-align">
+        <PlayerUI.Short player className="inline-block" />
+        {uiStr(isDefender ? ` 🛡️` : "")}
+        {uiStr(isAttacker ? ` 🔪` : "")}
+      </div>
+      <DeckUI.hidden deck={player.cards} />
+    </div>
+  }
+}
+
+type destination =
   | ToUnknown
   | ToTable
   | ToCard(card)
@@ -134,7 +132,6 @@ let make = (~game, ~player, ~onMessage) => {
   }
 
   let handleDragEnd = (result: ReactDnd.dropResult, _) => {
-    Js.log2("result", result)
     let byCard = Card.stringToCard(result.draggableId)
     let dst = result.destination->Js.Nullable.toOption->Option.map(d => d.droppableId)
     let isTable = dst->Option.map(dst => dst === "table")->Option.getWithDefault(false)
@@ -151,20 +148,31 @@ let make = (~game, ~player, ~onMessage) => {
     setDraggedCard(_ => None)
   }
 
+  // FIXME remove getExn
+  let currentPlayer = game.players->List.getBy(p => p.id === player.id)->Option.getExn
+
   <ReactDnd.DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-    <GameUI.InProgressUI game />
-    <div className="m-1"> <PlayerTableUI draggedCard game player /> </div>
+    <div className="my-2 inline-block">
+      <DeckUI.hidden
+        deck={game.deck}
+        text={switch lastListItem(game.deck) {
+        | Some(card) => <CardUI.Short card />
+        | None => <CardUI.trump className="inline-block" suit={game.trump} />
+        }}
+      />
+    </div>
     <div className="flex flex-wrap">
       {game.players->uiList(p =>
-        <ClientUI
+        <OpponentUI
+          isDefender={GameUtils.isDefender(game, p)}
+          isAttacker={GameUtils.isAttacker(game, p)}
           key={p.id}
-          isOwner={p.id === player.id}
           className="m-1 flex flex-col"
           player={p}
-          game
-          onMove={move => onMessage(Progress(move, player.id, game.gameId))}
         />
       )}
     </div>
+    <div className="m-1"> <PlayerTableUI draggedCard game player /> </div>
+    <ClientUI className="m-1 flex flex-col" player={currentPlayer} game onMessage />
   </ReactDnd.DragDropContext>
 }

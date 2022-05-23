@@ -37,10 +37,8 @@ module Short = {
   let make = (~className="", ~card, ()) => {
     switch card {
     | Visible((suit, rank)) =>
-      <span className={cx([className, suitToColor(suit)])}>
-        {(suitToString(suit) ++ rankToString(rank))->uiStr}
-      </span>
-    | Hidden => <span className> {"Hidden"->uiStr} </span>
+      <span className> {uiStr(suitToString(suit) ++ rankToString(rank))} </span>
+    | Hidden => <span className> {uiStr("Hidden")} </span>
     }
   }
 }
