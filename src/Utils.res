@@ -70,3 +70,12 @@ let tapResult = (result: result<'a, 'b>, fn: 'a => unit): result<'a, 'b> =>
 
 let leftRotationClassName = "-rotate-12 -translate-x-1.5"
 let rightRotationClassName = "rotate-12 translate-x-1.5"
+
+let listIndexOf = (list, equalsFn) =>
+  List.reduceWithIndex(list, None, (acc, item, index) => {
+    if equalsFn(item) {
+      Some(index)
+    } else {
+      acc
+    }
+  })

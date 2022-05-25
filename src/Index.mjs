@@ -134,8 +134,7 @@ function Index$PlayerScreen(Props) {
                                 _2: "g1"
                               }, 300, undefined);
                   });
-            }
-            if (playerId === "p2") {
+            } else {
               delayM({
                         TAG: /* Login */1,
                         _0: sessionId
@@ -143,14 +142,14 @@ function Index$PlayerScreen(Props) {
                       return delayM({
                                   TAG: /* Lobby */3,
                                   _0: /* Enter */1,
-                                  _1: "p2",
+                                  _1: playerId,
                                   _2: "g1"
                                 }, 250, undefined);
                     }).then(function (param) {
                     return delayM({
                                 TAG: /* Lobby */3,
                                 _0: /* Ready */2,
-                                _1: "p2",
+                                _1: playerId,
                                 _2: "g1"
                               }, 100, undefined);
                   });
@@ -201,7 +200,9 @@ function Index$PlayerScreen(Props) {
   if (exit === 1) {
     tmp = React.createElement("div", undefined, Utils.uiStr("unhandled case"));
   }
-  return React.createElement("div", undefined, React.createElement("div", undefined, player !== undefined ? React.createElement("div", undefined, Utils.uiStr("Player: "), React.createElement(PlayerUI.Short.make, {
+  return React.createElement("div", {
+              className: "w-96 h-128 border rounded-md border-solid border-slate-500"
+            }, React.createElement("div", undefined, player !== undefined ? React.createElement("div", undefined, Utils.uiStr("Player: "), React.createElement(PlayerUI.Short.make, {
                             className: "inline-block",
                             player: player
                           })) : Utils.uiStr("No player")), React.createElement("div", undefined, error !== undefined ? React.createElement("div", undefined, Utils.uiStr("error: " + error)) : React.createElement("div", undefined, Utils.uiStr("No error"))), tmp);
@@ -226,18 +227,20 @@ function $$default(param) {
         }), [isLoaded]);
   if (isLoaded) {
     return React.createElement("div", {
-                className: "flex flex-col"
-              }, React.createElement("div", {
-                    className: "border rounded-md border-solid border-slate-500"
-                  }, React.createElement(Index$PlayerScreen, {
-                        playerId: "p1",
-                        sessionId: "session:p1"
-                      })), React.createElement("div", {
-                    className: "border rounded-md border-solid border-slate-500"
-                  }, React.createElement(Index$PlayerScreen, {
-                        playerId: "p2",
-                        sessionId: "session:p2"
-                      })));
+                className: "flex flex-row flex-wrap w-full"
+              }, React.createElement(Index$PlayerScreen, {
+                    playerId: "p1",
+                    sessionId: "session:p1"
+                  }), React.createElement(Index$PlayerScreen, {
+                    playerId: "p2",
+                    sessionId: "session:p2"
+                  }), React.createElement(Index$PlayerScreen, {
+                    playerId: "p3",
+                    sessionId: "session:p3"
+                  }), React.createElement(Index$PlayerScreen, {
+                    playerId: "p4",
+                    sessionId: "session:p4"
+                  }));
   } else {
     return React.createElement("div", undefined, "Loading...");
   }

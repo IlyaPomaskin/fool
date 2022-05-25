@@ -118,6 +118,16 @@ function tapResult(result, fn) {
               }));
 }
 
+function listIndexOf(list, equalsFn) {
+  return Belt_List.reduceWithIndex(list, undefined, (function (acc, item, index) {
+                if (Curry._1(equalsFn, item)) {
+                  return index;
+                } else {
+                  return acc;
+                }
+              }));
+}
+
 var leftRotationClassName = "-rotate-12 -translate-x-1.5";
 
 var rightRotationClassName = "rotate-12 translate-x-1.5";
@@ -141,6 +151,7 @@ export {
   tapResult ,
   leftRotationClassName ,
   rightRotationClassName ,
+  listIndexOf ,
   
 }
 /* No side effect */

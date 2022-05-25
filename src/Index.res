@@ -48,12 +48,10 @@ module PlayerScreen = {
           ->then(() => delayM(~timeout=100, Lobby(Ready, "p1", "g1"), ()))
           ->then(() => delayM(~timeout=300, Lobby(Start, "p1", "g1"), ()))
           ->ignore
-        }
-
-        if playerId === "p2" {
+        } else {
           delayM(Login(sessionId), ())
-          ->then(() => delayM(~timeout=250, Lobby(Enter, "p2", "g1"), ()))
-          ->then(() => delayM(~timeout=100, Lobby(Ready, "p2", "g1"), ()))
+          ->then(() => delayM(~timeout=250, Lobby(Enter, playerId, "g1"), ()))
+          ->then(() => delayM(~timeout=100, Lobby(Ready, playerId, "g1"), ()))
           ->ignore
         }
 
@@ -63,7 +61,7 @@ module PlayerScreen = {
       None
     }, (sendMessage, isLoaded))
 
-    <div>
+    <div className="w-96 h-128 border rounded-md border-solid border-slate-500">
       <div>
         {switch player {
         | Some(player) =>
@@ -108,13 +106,11 @@ let default = () => {
   if !isLoaded {
     <div> {React.string("Loading...")} </div>
   } else {
-    <div className="flex flex-col">
-      <div className="border rounded-md border-solid border-slate-500">
-        <PlayerScreen playerId="p1" sessionId="session:p1" />
-      </div>
-      <div className="border rounded-md border-solid border-slate-500">
-        <PlayerScreen playerId="p2" sessionId="session:p2" />
-      </div>
+    <div className="flex flex-row flex-wrap w-full">
+      <PlayerScreen playerId="p1" sessionId="session:p1" />
+      <PlayerScreen playerId="p2" sessionId="session:p2" />
+      <PlayerScreen playerId="p3" sessionId="session:p3" />
+      <PlayerScreen playerId="p4" sessionId="session:p4" />
     </div>
   }
 }

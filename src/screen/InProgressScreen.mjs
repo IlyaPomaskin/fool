@@ -255,9 +255,17 @@ function InProgressScreen(Props) {
                   
                 }));
   };
-  var currentPlayer = Belt_Option.getExn(Belt_List.getBy(game.players, (function (p) {
-              return p.id === player.id;
-            })));
+  var reorderedPlayers = Belt_Option.getWithDefault(Belt_Option.map(Belt_Option.map(Belt_Option.flatMap(Utils.listIndexOf(game.players, (function (item) {
+                          return Player.equals(item, player);
+                        })), (function (index) {
+                      return Belt_List.splitAt(game.players, index);
+                    })), (function (param) {
+                  return Belt_List.concat(param[1], param[0]);
+                })), (function (players) {
+              return Belt_List.keep(players, (function (p) {
+                            return !Player.equals(p, player);
+                          }));
+            })), game.players);
   var trumpCard = Utils.lastListItem(game.deck);
   return React.createElement("div", undefined, React.createElement("div", {
                   className: "flex"
@@ -281,20 +289,16 @@ function InProgressScreen(Props) {
                                   suit: game.trump
                                 })
                           })), React.createElement("div", {
-                      className: "flex m-2 w-full justify-around"
-                    }, React.createElement("div", {
-                          className: "flex flex-wrap"
-                        }, Utils.uiList(Belt_List.keep(game.players, (function (p) {
-                                    return !Player.equals(p, player);
-                                  })), (function (p) {
-                                return React.createElement(InProgressScreen$OpponentUI, {
-                                            player: p,
-                                            className: "m-1 flex flex-col",
-                                            isDefender: GameUtils.isDefender(game, p),
-                                            isAttacker: GameUtils.isAttacker(game, p),
-                                            key: p.id
-                                          });
-                              }))))), React.createElement(ReactBeautifulDnd.DragDropContext, {
+                      className: "flex m-2 w-full justify-evenly"
+                    }, Utils.uiList(reorderedPlayers, (function (player) {
+                            return React.createElement(InProgressScreen$OpponentUI, {
+                                        player: player,
+                                        className: "m-1 flex flex-col",
+                                        isDefender: GameUtils.isDefender(game, player),
+                                        isAttacker: GameUtils.isAttacker(game, player),
+                                        key: player.id
+                                      });
+                          })))), React.createElement(ReactBeautifulDnd.DragDropContext, {
                   onDragStart: handleDragStart,
                   onDragEnd: handleDragEnd,
                   children: null
@@ -306,7 +310,7 @@ function InProgressScreen(Props) {
                           player: player
                         })), React.createElement(InProgressScreen$ClientUI, {
                       className: "m-1 flex flex-col",
-                      player: currentPlayer,
+                      player: player,
                       game: game,
                       onMessage: onMessage
                     })));

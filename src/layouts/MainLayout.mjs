@@ -30,7 +30,7 @@ function MainLayout(Props) {
               className: "flex lg:justify-center",
               style: minWidth
             }, React.createElement("div", {
-                  className: "max-w-5xl w-full lg:w-3/4 text-gray-900 font-base"
+                  className: "w-full text-gray-900 font-base"
                 }, React.createElement(MainLayout$Navigation, {}), React.createElement("main", {
                       className: "mt-4 mx-4"
                     }, children)));

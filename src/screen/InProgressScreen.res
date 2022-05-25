@@ -149,8 +149,13 @@ let make = (~game, ~player, ~onMessage) => {
     setDraggedCard(_ => None)
   }
 
-  // FIXME remove getExn
-  let currentPlayer = game.players->List.getBy(p => p.id === player.id)->Option.getExn
+  let reorderedPlayers =
+    game.players
+    ->listIndexOf(item => Player.equals(item, player))
+    ->Option.flatMap(index => List.splitAt(game.players, index))
+    ->Option.map(((before, after)) => List.concat(after, before))
+    ->Option.map(players => List.keep(players, p => !Player.equals(p, player)))
+    ->Option.getWithDefault(game.players)
 
   <div>
     <div className="flex">
@@ -172,25 +177,21 @@ let make = (~game, ~player, ~onMessage) => {
           }
         }
       </div>
-      <div className="flex m-2 w-full justify-around">
-        <div className="flex flex-wrap">
-          {game.players
-          ->List.keep(p => !Player.equals(p, player))
-          ->uiList(p =>
-            <OpponentUI
-              isDefender={GameUtils.isDefender(game, p)}
-              isAttacker={GameUtils.isAttacker(game, p)}
-              key={p.id}
-              className="m-1 flex flex-col"
-              player={p}
-            />
-          )}
-        </div>
+      <div className="flex m-2 w-full justify-evenly">
+        {uiList(reorderedPlayers, player =>
+          <OpponentUI
+            key={player.id}
+            isDefender={GameUtils.isDefender(game, player)}
+            isAttacker={GameUtils.isAttacker(game, player)}
+            className="m-1 flex flex-col"
+            player
+          />
+        )}
       </div>
     </div>
     <ReactDnd.DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className="m-1"> <PlayerTableUI draggedCard game player /> </div>
-      <ClientUI className="m-1 flex flex-col" player={currentPlayer} game onMessage />
+      <ClientUI className="m-1 flex flex-col" player game onMessage />
     </ReactDnd.DragDropContext>
   </div>
 }

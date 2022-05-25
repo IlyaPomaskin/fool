@@ -24,6 +24,18 @@ $$Storage.PlayersMap.set(players, "p2")({
       cards: /* [] */0
     });
 
+$$Storage.PlayersMap.set(players, "p3")({
+      id: "p3",
+      sessionId: "session:p3",
+      cards: /* [] */0
+    });
+
+$$Storage.PlayersMap.set(players, "p4")({
+      id: "p4",
+      sessionId: "session:p4",
+      cards: /* [] */0
+    });
+
 function registerPlayer(playerId) {
   var player = $$Storage.PlayersMap.get(players, playerId);
   if (player.TAG === /* Ok */0) {

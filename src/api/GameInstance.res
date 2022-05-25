@@ -8,6 +8,8 @@ let players = PlayersMap.empty()
 // FIXME remove debug code
 PlayersMap.set(players, "p1", {id: "p1", sessionId: "session:p1", cards: list{}})
 PlayersMap.set(players, "p2", {id: "p2", sessionId: "session:p2", cards: list{}})
+PlayersMap.set(players, "p3", {id: "p3", sessionId: "session:p3", cards: list{}})
+PlayersMap.set(players, "p4", {id: "p4", sessionId: "session:p4", cards: list{}})
 
 let registerPlayer = (playerId: playerId): result<player, string> => {
   let player = players->PlayersMap.get(playerId)
