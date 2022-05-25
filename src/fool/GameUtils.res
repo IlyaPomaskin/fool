@@ -79,17 +79,23 @@ let isAllPassed = game => {
 let getPlayerGameState = (game, player) => {
   let isThereCardsInDeck = !Deck.isEmpty(game.deck)
   let isPlayerHasCards = !Deck.isEmpty(player.cards)
-  let isOtherPlayersHasCards =
+  let hasCardsForNextRound = isPlayerHasCards || isThereCardsInDeck
+  let otherPlayersWithCardsAmount =
     game.players
     ->List.keep(p => !Utils.equals(p, player))
     ->List.keep(p => !Deck.isEmpty(p.cards))
-    ->List.length > 0
+    ->List.length
 
-  switch (isThereCardsInDeck, isOtherPlayersHasCards, isPlayerHasCards) {
-  | (false, false, true) => Lose
-  | (false, true, false) => Done
-  | (false, false, false) => Draw
-  | _ => Playing
+  if hasCardsForNextRound {
+    switch (otherPlayersWithCardsAmount, isThereCardsInDeck) {
+    | (0, false) => Lose
+    | _ => Playing
+    }
+  } else {
+    switch otherPlayersWithCardsAmount {
+    | 0 => Won
+    | _ => Done
+    }
   }
 }
 

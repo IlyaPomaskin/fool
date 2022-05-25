@@ -44,7 +44,7 @@ module PlayerTableUI = {
           | None => true
           }
         }}
-        className="my-1"
+        className="my-1 h-16"
         table={game.table}
       />
     | false =>
@@ -90,6 +90,7 @@ module ClientUI = {
     <div className={cx([className, "p-1 border rounded-md border-solid border-slate-500"])}>
       {switch GameUtils.getPlayerGameState(game, player) {
       | Done => uiStr("Done")
+      | Won => uiStr("Won")
       | Lose => uiStr("Lose")
       | Draw => uiStr("Draw")
       | Playing =>

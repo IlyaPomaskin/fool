@@ -9,6 +9,7 @@ import * as Utils from "../Utils.mjs";
 import * as React from "react";
 import * as CardUI from "../components/CardUI.mjs";
 import * as DeckUI from "../components/DeckUI.mjs";
+import * as Player from "../fool/Player.mjs";
 import * as TableUI from "../components/TableUI.mjs";
 import * as PlayerUI from "../components/PlayerUI.mjs";
 import * as Belt_List from "rescript/lib/es6/belt_List.js";
@@ -66,7 +67,7 @@ function InProgressScreen$PlayerTableUI(Props) {
   var isDefender = GameUtils.isDefender(game, player);
   if (isDefender) {
     return React.createElement(TableUI.make, {
-                className: "my-1",
+                className: "my-1 h-16",
                 isDropDisabled: (function (toCard) {
                     if (draggedCard !== undefined) {
                       return !Card.isValidBeat(toCard, draggedCard, game.trump);
@@ -149,10 +150,13 @@ function InProgressScreen$ClientUI(Props) {
     case /* Done */1 :
         tmp = Utils.uiStr("Done");
         break;
-    case /* Lose */2 :
+    case /* Won */2 :
+        tmp = Utils.uiStr("Won");
+        break;
+    case /* Lose */3 :
         tmp = Utils.uiStr("Lose");
         break;
-    case /* Draw */3 :
+    case /* Draw */4 :
         tmp = Utils.uiStr("Draw");
         break;
     

@@ -116,23 +116,22 @@ function isAllPassed(game) {
 function getPlayerGameState(game, player) {
   var isThereCardsInDeck = !Deck.isEmpty(game.deck);
   var isPlayerHasCards = !Deck.isEmpty(player.cards);
-  var isOtherPlayersHasCards = Belt_List.length(Belt_List.keep(Belt_List.keep(game.players, (function (p) {
+  var hasCardsForNextRound = isPlayerHasCards || isThereCardsInDeck;
+  var otherPlayersWithCardsAmount = Belt_List.length(Belt_List.keep(Belt_List.keep(game.players, (function (p) {
                   return !Utils.equals(p, player);
                 })), (function (p) {
               return !Deck.isEmpty(p.cards);
-            }))) > 0;
-  if (isThereCardsInDeck) {
-    return /* Playing */0;
-  } else if (isOtherPlayersHasCards) {
-    if (isPlayerHasCards) {
+            })));
+  if (hasCardsForNextRound) {
+    if (otherPlayersWithCardsAmount !== 0 || isThereCardsInDeck) {
       return /* Playing */0;
     } else {
-      return /* Done */1;
+      return /* Lose */3;
     }
-  } else if (isPlayerHasCards) {
-    return /* Lose */2;
+  } else if (otherPlayersWithCardsAmount !== 0) {
+    return /* Done */1;
   } else {
-    return /* Draw */3;
+    return /* Won */2;
   }
 }
 
