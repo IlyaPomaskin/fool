@@ -108,13 +108,13 @@ module ClientUI = {
 module OpponentUI = {
   @react.component
   let make = (~player, ~className, ~isDefender, ~isAttacker) => {
-    <div className={cx(["flex flex-col", className])}>
+    <div className={cx(["flex flex-col gap-2", className])}>
+      <DeckUI.hidden deck={player.cards} />
       <div className="vertial-align">
         <PlayerUI.Short player className="inline-block" />
         {uiStr(isDefender ? ` 🛡️` : "")}
         {uiStr(isAttacker ? ` 🔪` : "")}
       </div>
-      <DeckUI.hidden deck={player.cards} />
     </div>
   }
 }
@@ -152,39 +152,45 @@ let make = (~game, ~player, ~onMessage) => {
   // FIXME remove getExn
   let currentPlayer = game.players->List.getBy(p => p.id === player.id)->Option.getExn
 
-  <ReactDnd.DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-    <div className="m-1 inline-block">
-      {
-        let trumpCard = lastListItem(game.deck)
+  <div>
+    <div className="flex">
+      <div className="flex m-2 flex-row">
+        {
+          let trumpCard = lastListItem(game.deck)
 
-        switch trumpCard {
-        | Some(Visible(card)) =>
-          <div className="relative">
-            <DeckUI.hidden className="z-10" deck={game.deck} />
-            <div className="z-0 absolute top-1 left-10 rotate-90">
-              <CardUI.VisibleCard card />
+          switch trumpCard {
+          | Some(Visible(card)) =>
+            <div className="relative flex h-min">
+              <DeckUI.hidden className="z-10" deck={game.deck} />
+              <div className="z-0 relative top-1 -left-2 rotate-90">
+                <CardUI.VisibleCard card />
+              </div>
             </div>
-          </div>
-        | Some(Hidden) =>
-          <div> <DeckUI.hidden deck={game.deck} /> <CardUI.trump suit={game.trump} /> </div>
-        | None => <CardUI.EmptyCard> <CardUI.trump suit={game.trump} /> </CardUI.EmptyCard>
+          | Some(Hidden) =>
+            <div> <DeckUI.hidden deck={game.deck} /> <CardUI.trump suit={game.trump} /> </div>
+          | None => <CardUI.EmptyCard> <CardUI.trump suit={game.trump} /> </CardUI.EmptyCard>
+          }
         }
-      }
+      </div>
+      <div className="flex m-2 w-full justify-around">
+        <div className="flex flex-wrap">
+          {game.players
+          ->List.keep(p => !Player.equals(p, player))
+          ->uiList(p =>
+            <OpponentUI
+              isDefender={GameUtils.isDefender(game, p)}
+              isAttacker={GameUtils.isAttacker(game, p)}
+              key={p.id}
+              className="m-1 flex flex-col"
+              player={p}
+            />
+          )}
+        </div>
+      </div>
     </div>
-    <div className="flex flex-wrap">
-      {game.players
-      ->List.keep(p => !Player.equals(p, player))
-      ->uiList(p =>
-        <OpponentUI
-          isDefender={GameUtils.isDefender(game, p)}
-          isAttacker={GameUtils.isAttacker(game, p)}
-          key={p.id}
-          className="m-1 flex flex-col"
-          player={p}
-        />
-      )}
-    </div>
-    <div className="m-1"> <PlayerTableUI draggedCard game player /> </div>
-    <ClientUI className="m-1 flex flex-col" player={currentPlayer} game onMessage />
-  </ReactDnd.DragDropContext>
+    <ReactDnd.DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+      <div className="m-1"> <PlayerTableUI draggedCard game player /> </div>
+      <ClientUI className="m-1 flex flex-col" player={currentPlayer} game onMessage />
+    </ReactDnd.DragDropContext>
+  </div>
 }
