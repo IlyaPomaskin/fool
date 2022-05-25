@@ -30,52 +30,48 @@ module PlayerActionsUI = {
   }
 }
 
+@val @scope("document")
+external body: Dom.element = "body"
+
 module PlayerTableUI = {
   @react.component
   let make = (~game, ~draggedCard, ~player) => {
     let isDefender = GameUtils.isDefender(game, player)
+    let draggedCard = Utils.toResult(draggedCard, "No card")
 
-    switch isDefender {
-    | true =>
-      <TableUI
-        isDefender
-        isDropDisabled={toCard => {
-          switch draggedCard {
-          | Some(byCard) => !Card.isValidBeat(toCard, byCard, game.trump)
-          | None => true
-          }
-        }}
-        className="my-1 h-16"
-        table={game.table}
-      />
-    | false =>
-      <div className="flex flex-row gap-1">
-        {switch game.table {
-        | list{} => <div className="h-16" />
-        | table => <TableUI isDefender className="my-1" table={table} />
-        }}
-        <ReactDnd.Droppable
-          droppableId="table"
-          isDropDisabled={draggedCard
-          ->Utils.toResult("No card")
-          ->Result.flatMap(card => Game.isValidMove(game, player, card))
-          ->Result.isError}>
-          {(provided, snapshot) => {
+    <div className="relative">
+      <ReactDnd.Droppable
+        droppableId="table"
+        direction="horizontal"
+        isDropDisabled={isDefender ||
+        draggedCard->Result.flatMap(card => Game.isValidMove(game, player, card))->Result.isError}>
+        {(provided, snapshot) => {
+          let container =
             <div
               ref={provided.innerRef}
               className={cx([
-                "w-full flex flex-row",
-                game.table->List.length === 0 ? "bg-pink-200" : "",
+                "w-full flex flex-row bg-pink-200",
                 snapshot.isDraggingOver
                   ? "bg-gradient-to-tl from-purple-200 to-pink-200 opacity-70"
-                  : "",
+                  : "opacity-20",
               ])}>
-              provided.placeholder
+              <TableUI
+                isDefender
+                isDropDisabled={toCard =>
+                  !isDefender ||
+                  draggedCard
+                  ->Result.flatMap(byCard => Game.isValidBeat(game, player, toCard, byCard))
+                  ->Result.isError}
+                className="my-1 h-16"
+                table={game.table}
+                placeholder={provided.placeholder}
+              />
             </div>
-          }}
-        </ReactDnd.Droppable>
-      </div>
-    }
+
+          React.cloneElement(container, provided.droppableProps)
+        }}
+      </ReactDnd.Droppable>
+    </div>
   }
 }
 

@@ -65,43 +65,38 @@ function InProgressScreen$PlayerTableUI(Props) {
   var draggedCard = Props.draggedCard;
   var player = Props.player;
   var isDefender = GameUtils.isDefender(game, player);
-  if (isDefender) {
-    return React.createElement(TableUI.make, {
-                className: "my-1 h-16",
-                isDefender: isDefender,
-                isDropDisabled: (function (toCard) {
-                    if (draggedCard !== undefined) {
-                      return !Card.isValidBeat(toCard, draggedCard, game.trump);
-                    } else {
-                      return true;
-                    }
-                  }),
-                table: game.table
-              });
-  }
-  var table = game.table;
+  var draggedCard$1 = Utils.toResult(draggedCard, "No card");
   return React.createElement("div", {
-              className: "flex flex-row gap-1"
-            }, table ? React.createElement(TableUI.make, {
-                    className: "my-1",
-                    isDefender: isDefender,
-                    table: table
-                  }) : React.createElement("div", {
-                    className: "h-16"
-                  }), React.createElement(ReactBeautifulDnd.Droppable, {
+              className: "relative"
+            }, React.createElement(ReactBeautifulDnd.Droppable, {
                   droppableId: "table",
-                  isDropDisabled: Belt_Result.isError(Belt_Result.flatMap(Utils.toResult(draggedCard, "No card"), (function (card) {
+                  isDropDisabled: isDefender || Belt_Result.isError(Belt_Result.flatMap(draggedCard$1, (function (card) {
                               return Game.isValidMove(game, player, card);
                             }))),
+                  direction: "horizontal",
                   children: (function (provided, snapshot) {
-                      return React.createElement("div", {
-                                  ref: provided.innerRef,
-                                  className: Utils.cx([
-                                        "w-full flex flex-row",
-                                        Belt_List.length(game.table) === 0 ? "bg-pink-200" : "",
-                                        snapshot.isDraggingOver ? "bg-gradient-to-tl from-purple-200 to-pink-200 opacity-70" : ""
-                                      ])
-                                }, provided.placeholder);
+                      var container = React.createElement("div", {
+                            ref: provided.innerRef,
+                            className: Utils.cx([
+                                  "w-full flex flex-row bg-pink-200",
+                                  snapshot.isDraggingOver ? "bg-gradient-to-tl from-purple-200 to-pink-200 opacity-70" : "opacity-20"
+                                ])
+                          }, React.createElement(TableUI.make, {
+                                className: "my-1 h-16",
+                                isDefender: isDefender,
+                                isDropDisabled: (function (toCard) {
+                                    if (isDefender) {
+                                      return Belt_Result.isError(Belt_Result.flatMap(draggedCard$1, (function (byCard) {
+                                                        return Game.isValidBeat(game, player, toCard, byCard);
+                                                      })));
+                                    } else {
+                                      return true;
+                                    }
+                                  }),
+                                table: game.table,
+                                placeholder: provided.placeholder
+                              }));
+                      return React.cloneElement(container, provided.droppableProps);
                     })
                 }));
 }

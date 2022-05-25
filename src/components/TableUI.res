@@ -83,7 +83,13 @@ module CardsPair = {
 }
 
 @react.component
-let make = (~className: string="", ~isDefender=false, ~isDropDisabled=_ => true, ~table: table) => {
+let make = (
+  ~className: string="",
+  ~isDefender=false,
+  ~isDropDisabled=_ => true,
+  ~table: table,
+  ~placeholder=React.null,
+) => {
   let transitions = makeTransitions(table->List.toArray->Array.reverse)
 
   <div className={cx(["flex gap-1 flex-row", className])}>
@@ -98,5 +104,6 @@ let make = (~className: string="", ~isDefender=false, ~isDropDisabled=_ => true,
       </Spring.Div>
     )
     ->React.array}
+    <div className="bg-slate-600"> placeholder </div>
   </div>
 }

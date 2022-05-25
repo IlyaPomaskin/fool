@@ -9,6 +9,7 @@ import * as Spring from "bs-react-spring/src/Spring.mjs";
 import * as Belt_List from "rescript/lib/es6/belt_List.js";
 import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
+import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as ReactSpring from "react-spring";
 import * as ReactBeautifulDnd from "react-beautiful-dnd";
 
@@ -129,11 +130,13 @@ function TableUI(Props) {
   var isDefenderOpt = Props.isDefender;
   var isDropDisabledOpt = Props.isDropDisabled;
   var table = Props.table;
+  var placeholderOpt = Props.placeholder;
   var className = classNameOpt !== undefined ? classNameOpt : "";
   var isDefender = isDefenderOpt !== undefined ? isDefenderOpt : false;
   var isDropDisabled = isDropDisabledOpt !== undefined ? isDropDisabledOpt : (function (param) {
         return true;
       });
+  var placeholder = placeholderOpt !== undefined ? Caml_option.valFromOption(placeholderOpt) : null;
   var transitions = makeTransitions(Belt_Array.reverse(Belt_List.toArray(table)));
   return React.createElement("div", {
               className: Utils.cx([
@@ -156,7 +159,9 @@ function TableUI(Props) {
                                       }),
                                 key: param.key
                               });
-                  })));
+                  })), React.createElement("div", {
+                  className: "bg-slate-600"
+                }, placeholder));
 }
 
 var make = TableUI;
