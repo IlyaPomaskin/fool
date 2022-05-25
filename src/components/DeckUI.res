@@ -29,36 +29,39 @@ let getAnimationClassNames = (snapshot: ReactDnd.draggableStateSnapshot) => {
   }
 }
 
+module EmptyDndDroppable = {
+  @react.component
+  let make = (~id, ~children) =>
+    <ReactDnd.Droppable direction="horizontal" isDropDisabled={true} droppableId={id}>
+      {(droppableProvided, _) =>
+        <div ref={droppableProvided.innerRef}> children droppableProvided.placeholder </div>}
+    </ReactDnd.Droppable>
+}
+
 module DndWrapper = {
   @react.component
   let make = (~card, ~index, ~children) => {
     let id = Card.cardToString(card)
 
-    <ReactDnd.Droppable direction="horizontal" isDropDisabled={true} droppableId={id}>
-      {(droppableProvided, _) => {
-        <div ref={droppableProvided.innerRef}>
-          <ReactDnd.Draggable draggableId={id} index>
-            {(provided, snapshot, _) => {
-              React.cloneElement(
-                <div ref={provided.innerRef}> children </div>,
-                spread3(
-                  provided.draggableProps,
-                  provided.dragHandleProps,
-                  {
-                    "className": cx([
-                      "transition duration-150 ease-in-out",
-                      getAnimationClassNames(snapshot),
-                    ]),
-                    "style": getDropAnimation(provided.draggableProps["style"], snapshot),
-                  },
-                ),
-              )
-            }}
-          </ReactDnd.Draggable>
-          droppableProvided.placeholder
-        </div>
-      }}
-    </ReactDnd.Droppable>
+    <EmptyDndDroppable id>
+      <ReactDnd.Draggable draggableId={id} index>
+        {(provided, snapshot, _) => {
+          let props = spread3(
+            provided.draggableProps,
+            provided.dragHandleProps,
+            {
+              "className": cx([
+                "transition duration-150 ease-in-out",
+                getAnimationClassNames(snapshot),
+              ]),
+              "style": getDropAnimation(provided.draggableProps["style"], snapshot),
+            },
+          )
+
+          React.cloneElement(<div ref={provided.innerRef}> children </div>, props)
+        }}
+      </ReactDnd.Draggable>
+    </EmptyDndDroppable>
   }
 }
 

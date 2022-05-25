@@ -42,11 +42,9 @@ function getAnimationClassNames(snapshot) {
   }
 }
 
-function DeckUI$DndWrapper(Props) {
-  var card = Props.card;
-  var index = Props.index;
+function DeckUI$EmptyDndDroppable(Props) {
+  var id = Props.id;
   var children = Props.children;
-  var id = Card.cardToString(card);
   return React.createElement(ReactBeautifulDnd.Droppable, {
               droppableId: id,
               isDropDisabled: true,
@@ -54,22 +52,38 @@ function DeckUI$DndWrapper(Props) {
               children: (function (droppableProvided, param) {
                   return React.createElement("div", {
                               ref: droppableProvided.innerRef
-                            }, React.createElement(ReactBeautifulDnd.Draggable, {
-                                  draggableId: id,
-                                  index: index,
-                                  children: (function (provided, snapshot, param) {
-                                      return React.cloneElement(React.createElement("div", {
-                                                      ref: provided.innerRef
-                                                    }, children), spread3(provided.draggableProps, provided.dragHandleProps, {
-                                                      className: Utils.cx([
-                                                            "transition duration-150 ease-in-out",
-                                                            getAnimationClassNames(snapshot)
-                                                          ]),
-                                                      style: getDropAnimation(provided.draggableProps.style, snapshot)
-                                                    }));
-                                    })
-                                }), droppableProvided.placeholder);
+                            }, children, droppableProvided.placeholder);
                 })
+            });
+}
+
+var EmptyDndDroppable = {
+  make: DeckUI$EmptyDndDroppable
+};
+
+function DeckUI$DndWrapper(Props) {
+  var card = Props.card;
+  var index = Props.index;
+  var children = Props.children;
+  var id = Card.cardToString(card);
+  return React.createElement(DeckUI$EmptyDndDroppable, {
+              id: id,
+              children: React.createElement(ReactBeautifulDnd.Draggable, {
+                    draggableId: id,
+                    index: index,
+                    children: (function (provided, snapshot, param) {
+                        var props = spread3(provided.draggableProps, provided.dragHandleProps, {
+                              className: Utils.cx([
+                                    "transition duration-150 ease-in-out",
+                                    getAnimationClassNames(snapshot)
+                                  ]),
+                              style: getDropAnimation(provided.draggableProps.style, snapshot)
+                            });
+                        return React.cloneElement(React.createElement("div", {
+                                        ref: provided.innerRef
+                                      }, children), props);
+                      })
+                  })
             });
 }
 
@@ -165,6 +179,7 @@ export {
   spread3 ,
   getDropAnimation ,
   getAnimationClassNames ,
+  EmptyDndDroppable ,
   DndWrapper ,
   hidden ,
   make ,
