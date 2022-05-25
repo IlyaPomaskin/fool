@@ -33,9 +33,7 @@ module TransitionHookTableCards = Spring.MakeTransition({
 
 module CardsPair = {
   @react.component
-  let wAnimation = (~to, ~by, ~isDropDisabled, ()) => {
-    let beatByClassName = `${Utils.rightRotationClassName} absolute left-1 top-1`
-
+  let attacker = (~to, ~by, ()) => {
     let transitions = TransitionHookBeatBy.use(
       [by],
       card => card->Option.map(Card.cardToString)->Option.getWithDefault(""),
@@ -64,17 +62,13 @@ module CardsPair = {
           })
           ->React.array}
         </React.Fragment>
-      | None =>
-        <React.Fragment>
-          <CardUI className={Utils.leftRotationClassName} card={to} />
-          <DndBeatableCard isDropDisabled beatByClassName card={to} />
-        </React.Fragment>
+      | None => <CardUI className={Utils.leftRotationClassName} card={to} />
       }}
     </div>
   }
 
   @react.component
-  let woAnimation = (~to, ~by, ~isDropDisabled, ()) => {
+  let defender = (~to, ~by, ~isDropDisabled, ()) => {
     let beatByClassName = `${Utils.rightRotationClassName} absolute left-1 top-1`
 
     <div className="flex flex-col gap-3 relative">
@@ -116,8 +110,8 @@ let make = (~className: string="", ~isDefender=false, ~isDropDisabled=_ => true,
       <Spring.Div
         key style={ReactDOM.Style.make(~opacity=props.opacity, ~transform=props.transform, ())}>
         {switch isDefender {
-        | true => <CardsPair.woAnimation to by isDropDisabled />
-        | false => <CardsPair.wAnimation to by isDropDisabled />
+        | true => <CardsPair.defender to by isDropDisabled />
+        | false => <CardsPair.attacker to by />
         }}
       </Spring.Div>
     )

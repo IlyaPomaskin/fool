@@ -43,11 +43,9 @@ var TransitionHookBeatBy = Spring.MakeTransition({});
 
 var TransitionHookTableCards = Spring.MakeTransition({});
 
-function TableUI$CardsPair$wAnimation(Props) {
+function TableUI$CardsPair$attacker(Props) {
   var to = Props.to;
   var by = Props.by;
-  var isDropDisabled = Props.isDropDisabled;
-  var beatByClassName = Utils.rightRotationClassName + " absolute left-1 top-1";
   var transitions = ReactSpring.useTransition([by], (function (card) {
           return Belt_Option.getWithDefault(Belt_Option.map(card, Card.cardToString), "");
         }), {
@@ -88,19 +86,13 @@ function TableUI$CardsPair$wAnimation(Props) {
                                           }),
                                       key: param.key
                                     });
-                        }))) : React.createElement(React.Fragment, {
-                    children: null
-                  }, React.createElement(CardUI.make, {
-                        card: to,
-                        className: Utils.leftRotationClassName
-                      }), React.createElement(TableUI$DndBeatableCard, {
-                        card: to,
-                        isDropDisabled: isDropDisabled,
-                        beatByClassName: beatByClassName
-                      })));
+                        }))) : React.createElement(CardUI.make, {
+                    card: to,
+                    className: Utils.leftRotationClassName
+                  }));
 }
 
-function TableUI$CardsPair$woAnimation(Props) {
+function TableUI$CardsPair$defender(Props) {
   var to = Props.to;
   var by = Props.by;
   var isDropDisabled = Props.isDropDisabled;
@@ -129,8 +121,8 @@ function TableUI$CardsPair$woAnimation(Props) {
 }
 
 var CardsPair = {
-  wAnimation: TableUI$CardsPair$wAnimation,
-  woAnimation: TableUI$CardsPair$woAnimation
+  attacker: TableUI$CardsPair$attacker,
+  defender: TableUI$CardsPair$defender
 };
 
 function tableCardToKey(param) {
@@ -179,14 +171,13 @@ function TableUI(Props) {
                                   opacity: props.opacity,
                                   transform: props.transform
                                 },
-                                children: isDefender ? React.createElement(TableUI$CardsPair$woAnimation, {
+                                children: isDefender ? React.createElement(TableUI$CardsPair$defender, {
                                         to: to,
                                         by: by,
                                         isDropDisabled: isDropDisabled
-                                      }) : React.createElement(TableUI$CardsPair$wAnimation, {
+                                      }) : React.createElement(TableUI$CardsPair$attacker, {
                                         to: to,
-                                        by: by,
-                                        isDropDisabled: isDropDisabled
+                                        by: by
                                       }),
                                 key: param.key
                               });
