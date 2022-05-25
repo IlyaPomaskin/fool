@@ -66,6 +66,8 @@ let isPlayerExists = (players, player) => {
   List.has(players, player, Utils.equals)
 }
 
+let equals = (a, b) => a.id === b.id
+
 let mask = (playerId, player) => {
   ...player,
   sessionId: "masked",

@@ -116,8 +116,8 @@ module HiddenCard = {
 
 module EmptyCard = {
   @react.component
-  let make = (~className: string="") => {
-    <Base className={cx([className, "overflow-hidden"])} />
+  let make = (~className: string="", ~children=React.null) => {
+    <Base className={cx([className, "overflow-hidden"])}> children </Base>
   }
 }
 

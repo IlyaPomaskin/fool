@@ -153,16 +153,27 @@ let make = (~game, ~player, ~onMessage) => {
 
   <ReactDnd.DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
     <div className="m-1 inline-block">
-      <DeckUI.hidden
-        deck={game.deck}
-        text={switch lastListItem(game.deck) {
-        | Some(card) => <CardUI.Short card />
-        | None => <CardUI.trump className="inline-block" suit={game.trump} />
-        }}
-      />
+      {
+        let trumpCard = lastListItem(game.deck)
+
+        switch trumpCard {
+        | Some(Visible(card)) =>
+          <div className="relative">
+            <DeckUI.hidden className="z-10" deck={game.deck} />
+            <div className="z-0 absolute top-1 left-10 rotate-90">
+              <CardUI.VisibleCard card />
+            </div>
+          </div>
+        | Some(Hidden) =>
+          <div> <DeckUI.hidden deck={game.deck} /> <CardUI.trump suit={game.trump} /> </div>
+        | None => <CardUI.EmptyCard> <CardUI.trump suit={game.trump} /> </CardUI.EmptyCard>
+        }
+      }
     </div>
     <div className="flex flex-wrap">
-      {game.players->uiList(p =>
+      {game.players
+      ->List.keep(p => !Player.equals(p, player))
+      ->uiList(p =>
         <OpponentUI
           isDefender={GameUtils.isDefender(game, p)}
           isAttacker={GameUtils.isAttacker(game, p)}

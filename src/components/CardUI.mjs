@@ -153,12 +153,15 @@ var HiddenCard = {
 
 function CardUI$EmptyCard(Props) {
   var classNameOpt = Props.className;
+  var childrenOpt = Props.children;
   var className = classNameOpt !== undefined ? classNameOpt : "";
+  var children = childrenOpt !== undefined ? Caml_option.valFromOption(childrenOpt) : null;
   return React.createElement(CardUI$Base, {
               className: Utils.cx([
                     className,
                     "overflow-hidden"
-                  ])
+                  ]),
+              children: children
             });
 }
 

@@ -63,7 +63,7 @@ module DndWrapper = {
 }
 
 @react.component
-let hidden = (~deck, ~text: option<React.element>=?) => {
+let hidden = (~className="", ~deck, ~text: option<React.element>=?) => {
   let cardsAmount = deck->List.length
   let cardsList =
     deck->List.keepWithIndex((_, index) => index <= 2)->List.mapWithIndex((index, _) => index)
@@ -73,7 +73,7 @@ let hidden = (~deck, ~text: option<React.element>=?) => {
   | (_, amount) => uiStr(string_of_int(amount))
   }
 
-  <div className="relative">
+  <div className={cx(["relative", className])}>
     {switch cardsAmount {
     | 0 => <CardUI.EmptyCard />
     | _ =>

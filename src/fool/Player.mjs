@@ -91,6 +91,10 @@ function isPlayerExists(players, player) {
   return Belt_List.has(players, player, Utils.equals);
 }
 
+function equals(a, b) {
+  return a.id === b.id;
+}
+
 function mask(playerId, player) {
   return {
           id: player.id,
@@ -128,6 +132,7 @@ export {
   dealDeckToPlayers ,
   removeCard ,
   isPlayerExists ,
+  equals ,
   mask ,
   toObject ,
   toStringShort ,

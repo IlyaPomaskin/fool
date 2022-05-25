@@ -78,8 +78,10 @@ var DndWrapper = {
 };
 
 function DeckUI$hidden(Props) {
+  var classNameOpt = Props.className;
   var deck = Props.deck;
   var text = Props.text;
+  var className = classNameOpt !== undefined ? classNameOpt : "";
   var cardsAmount = Belt_List.length(deck);
   var cardsList = Belt_List.mapWithIndex(Belt_List.keepWithIndex(deck, (function (param, index) {
               return index <= 2;
@@ -90,7 +92,10 @@ function DeckUI$hidden(Props) {
       cardsAmount !== 0 ? Utils.uiStr(String(cardsAmount)) : Utils.uiStr("0")
     );
   return React.createElement("div", {
-              className: "relative"
+              className: Utils.cx([
+                    "relative",
+                    className
+                  ])
             }, cardsAmount !== 0 ? Utils.uiList(cardsList, (function (index) {
                       var offset = String((index << 1)) + "px";
                       return React.createElement("div", {

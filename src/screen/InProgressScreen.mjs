@@ -254,24 +254,35 @@ function InProgressScreen(Props) {
   var currentPlayer = Belt_Option.getExn(Belt_List.getBy(game.players, (function (p) {
               return p.id === player.id;
             })));
-  var card = Utils.lastListItem(game.deck);
+  var trumpCard = Utils.lastListItem(game.deck);
   return React.createElement(ReactBeautifulDnd.DragDropContext, {
               onDragStart: handleDragStart,
               onDragEnd: handleDragEnd,
               children: null
             }, React.createElement("div", {
                   className: "m-1 inline-block"
-                }, React.createElement(DeckUI.hidden, {
-                      deck: game.deck,
-                      text: card !== undefined ? React.createElement(CardUI.Short.make, {
-                              card: card
-                            }) : React.createElement(CardUI.trump, {
-                              suit: game.trump,
-                              className: "inline-block"
+                }, trumpCard !== undefined ? (
+                    trumpCard ? React.createElement("div", {
+                            className: "relative"
+                          }, React.createElement(DeckUI.hidden, {
+                                className: "z-10",
+                                deck: game.deck
+                              }), React.createElement("div", {
+                                className: "z-0 absolute top-1 left-10 rotate-90"
+                              }, React.createElement(CardUI.VisibleCard.make, CardUI.VisibleCard.makeProps(trumpCard._0, undefined, undefined, undefined, undefined)))) : React.createElement("div", undefined, React.createElement(DeckUI.hidden, {
+                                deck: game.deck
+                              }), React.createElement(CardUI.trump, {
+                                suit: game.trump
+                              }))
+                  ) : React.createElement(CardUI.EmptyCard.make, {
+                        children: React.createElement(CardUI.trump, {
+                              suit: game.trump
                             })
-                    })), React.createElement("div", {
+                      })), React.createElement("div", {
                   className: "flex flex-wrap"
-                }, Utils.uiList(game.players, (function (p) {
+                }, Utils.uiList(Belt_List.keep(game.players, (function (p) {
+                            return !Player.equals(p, player);
+                          })), (function (p) {
                         return React.createElement(InProgressScreen$OpponentUI, {
                                     player: p,
                                     className: "m-1 flex flex-col",
