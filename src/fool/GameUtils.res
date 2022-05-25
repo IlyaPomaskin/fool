@@ -46,7 +46,7 @@ let getTrump = (deck, players) => {
 }
 
 let isPlayerDone = (game, player) => {
-  Deck.isEmpty(game.deck) && Deck.isEmpty(player.cards)
+  Utils.isEmpty(game.deck) && Utils.isEmpty(player.cards)
 }
 
 let isPlayerLose = (game, player) => {
@@ -67,7 +67,7 @@ let isCanPass = (game, player) => {
 
 let isPassed = (game, player) => {
   let inPassedList = game.pass->List.has(player, Utils.equals)
-  let hasCards = !Deck.isEmpty(player.cards)
+  let hasCards = !Utils.isEmpty(player.cards)
 
   hasCards ? inPassedList : true
 }
@@ -76,25 +76,38 @@ let isAllPassed = game => {
   game.players->List.keep(p => !isDefender(game, p))->List.every(isPassed(game))
 }
 
+let isPlayerCanBeat = (game, player) => {
+  let isThereCardsOnTable = !Utils.isEmpty(game.table)
+  let unbeatedCards = Table.getUnbeatedCards(game.table)
+  let isSameAmountOfCards = List.length(unbeatedCards) === List.length(player.cards)
+  let canBeatEveryCard = List.every(unbeatedCards, toCard =>
+    List.some(player.cards, byCard => Card.isValidBeat(toCard, byCard, game.trump))
+  )
+
+  isThereCardsOnTable && isSameAmountOfCards && canBeatEveryCard
+}
+
 let getPlayerGameState = (game, player) => {
-  let isThereCardsInDeck = !Deck.isEmpty(game.deck)
-  let isPlayerHasCards = !Deck.isEmpty(player.cards)
-  let hasCardsForNextRound = isPlayerHasCards || isThereCardsInDeck
+  let isPlayerHasCards = !Utils.isEmpty(player.cards)
+  let isThereCardsInDeck = !Utils.isEmpty(game.deck)
+  let hasCardsForRound = isPlayerHasCards || isThereCardsInDeck
   let otherPlayersWithCardsAmount =
     game.players
     ->List.keep(p => !Utils.equals(p, player))
-    ->List.keep(p => !Deck.isEmpty(p.cards))
+    ->List.keep(p => !Utils.isEmpty(p.cards))
     ->List.length
+  let isThereArePlayersWithCards = otherPlayersWithCardsAmount > 0
 
-  if hasCardsForNextRound {
-    switch (otherPlayersWithCardsAmount, isThereCardsInDeck) {
-    | (0, false) => Lose
-    | _ => Playing
+  if hasCardsForRound {
+    if isThereArePlayersWithCards || isPlayerCanBeat(game, player) {
+      Playing
+    } else {
+      Lose
     }
   } else {
-    switch otherPlayersWithCardsAmount {
-    | 0 => Won
-    | _ => Done
+    switch isThereArePlayersWithCards {
+    | true => Won
+    | false => Draw
     }
   }
 }
@@ -118,18 +131,6 @@ let isCanStart = (game: inLobby, player) => {
     Error("Not enough players")
   } else if !isAllPlayersAreReady {
     Error("Not all players are ready")
-  } else {
-    Ok(game)
-  }
-}
-
-let isValidMove = (game, player) => {
-  if isDefender(game, player) {
-    Error("Defender can't make move")
-  } else if !Table.hasCards(game.table) && !isAttacker(game, player) {
-    Error("First move made not by attacker")
-  } else if Table.isMaximumCards(game.table) {
-    Error("Maximum cards on table")
   } else {
     Ok(game)
   }

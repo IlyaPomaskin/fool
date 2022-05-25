@@ -125,25 +125,45 @@ function startGame(game) {
 }
 
 function isValidMove(game, player, card) {
-  var isValidByUtils = GameUtils.isValidMove(game, player);
-  if (Belt_Result.isError(isValidByUtils)) {
-    return isValidByUtils;
-  } else if (GameUtils.isPlayerHasCard(player, card)) {
-    if (Table.hasCards(game.table) && !GameUtils.isCorrectAdditionalCard(game, card)) {
-      return {
-              TAG: /* Error */1,
-              _0: "Incorrect card"
-            };
+  var isDefenderHasEnoughCards = Belt_List.length(game.defender.cards) >= (Belt_List.length(game.table) + 1 | 0);
+  if (GameUtils.isDefender(game, player)) {
+    return {
+            TAG: /* Error */1,
+            _0: "Defender can't make move"
+          };
+  } else if (!Table.hasCards(game.table) && !GameUtils.isAttacker(game, player)) {
+    return {
+            TAG: /* Error */1,
+            _0: "First move made not by attacker"
+          };
+  } else if (Table.isMaximumCards(game.table)) {
+    return {
+            TAG: /* Error */1,
+            _0: "Maximum cards on table"
+          };
+  } else if (isDefenderHasEnoughCards) {
+    if (GameUtils.isPlayerHasCard(player, card)) {
+      if (Table.hasCards(game.table) && !GameUtils.isCorrectAdditionalCard(game, card)) {
+        return {
+                TAG: /* Error */1,
+                _0: "Incorrect card"
+              };
+      } else {
+        return {
+                TAG: /* Ok */0,
+                _0: game
+              };
+      }
     } else {
       return {
-              TAG: /* Ok */0,
-              _0: game
+              TAG: /* Error */1,
+              _0: "Player don't have card"
             };
     }
   } else {
     return {
             TAG: /* Error */1,
-            _0: "Player don't have card"
+            _0: "Defender don't have enough cards"
           };
   }
 }
@@ -284,40 +304,47 @@ function beat(game, player, to, by) {
   var isValid = isValidBeat(game, player, to, by);
   if (Belt_Result.isError(isValid)) {
     return isValid;
-  } else {
-    return {
-            TAG: /* Ok */0,
-            _0: {
-              gameId: game.gameId,
-              attacker: game.attacker,
-              defender: game.defender,
-              players: Belt_List.map(game.players, (function (p) {
-                      return {
-                              id: p.id,
-                              sessionId: p.sessionId,
-                              cards: Player.removeCard(p, by)
-                            };
-                    })),
-              trump: game.trump,
-              deck: game.deck,
-              table: Belt_List.map(game.table, (function (param) {
-                      var firstCard = param[0];
-                      if (Card.isEquals(firstCard, to)) {
-                        return [
-                                firstCard,
-                                by
-                              ];
-                      } else {
-                        return [
-                                firstCard,
-                                param[1]
-                              ];
-                      }
-                    })),
-              pass: /* [] */0
-            }
-          };
   }
+  var playerWithoutCard_id = player.id;
+  var playerWithoutCard_sessionId = player.sessionId;
+  var playerWithoutCard_cards = Player.removeCard(player, by);
+  var playerWithoutCard = {
+    id: playerWithoutCard_id,
+    sessionId: playerWithoutCard_sessionId,
+    cards: playerWithoutCard_cards
+  };
+  return {
+          TAG: /* Ok */0,
+          _0: {
+            gameId: game.gameId,
+            attacker: game.attacker,
+            defender: game.defender,
+            players: Belt_List.map(game.players, (function (p) {
+                    if (Player.equals(p, player)) {
+                      return playerWithoutCard;
+                    } else {
+                      return p;
+                    }
+                  })),
+            trump: game.trump,
+            deck: game.deck,
+            table: Belt_List.map(game.table, (function (param) {
+                    var firstCard = param[0];
+                    if (Card.isEquals(firstCard, to)) {
+                      return [
+                              firstCard,
+                              by
+                            ];
+                    } else {
+                      return [
+                              firstCard,
+                              param[1]
+                            ];
+                    }
+                  })),
+            pass: /* [] */0
+          }
+        };
 }
 
 function isValidTake(game, player) {

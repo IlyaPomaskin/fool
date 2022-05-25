@@ -68,6 +68,7 @@ function InProgressScreen$PlayerTableUI(Props) {
   if (isDefender) {
     return React.createElement(TableUI.make, {
                 className: "my-1 h-16",
+                isDefender: isDefender,
                 isDropDisabled: (function (toCard) {
                     if (draggedCard !== undefined) {
                       return !Card.isValidBeat(toCard, draggedCard, game.trump);
@@ -131,32 +132,15 @@ function InProgressScreen$ClientUI(Props) {
   var tmp;
   switch (match) {
     case /* Playing */0 :
-        tmp = React.createElement("div", undefined, React.createElement(DeckUI.make, {
-                  deck: player.cards,
-                  disabled: !isDeckEnabled,
-                  isDraggable: true
-                }), React.createElement(InProgressScreen$PlayerActionsUI, {
-                  className: "py-2",
-                  game: game,
-                  player: player,
-                  onPass: (function (param) {
-                      return onMove(/* Pass */1);
-                    }),
-                  onTake: (function (param) {
-                      return onMove(/* Take */0);
-                    })
-                }));
+        tmp = Utils.uiStr("Playing");
         break;
-    case /* Done */1 :
-        tmp = Utils.uiStr("Done");
-        break;
-    case /* Won */2 :
+    case /* Won */1 :
         tmp = Utils.uiStr("Won");
         break;
-    case /* Lose */3 :
+    case /* Lose */2 :
         tmp = Utils.uiStr("Lose");
         break;
-    case /* Draw */4 :
+    case /* Draw */3 :
         tmp = Utils.uiStr("Draw");
         break;
     
@@ -166,7 +150,21 @@ function InProgressScreen$ClientUI(Props) {
                     className,
                     "p-1 border rounded-md border-solid border-slate-500"
                   ])
-            }, tmp);
+            }, tmp, React.createElement("div", undefined, React.createElement(DeckUI.make, {
+                      deck: player.cards,
+                      disabled: !isDeckEnabled,
+                      isDraggable: true
+                    }), React.createElement(InProgressScreen$PlayerActionsUI, {
+                      className: "py-2",
+                      game: game,
+                      player: player,
+                      onPass: (function (param) {
+                          return onMove(/* Pass */1);
+                        }),
+                      onTake: (function (param) {
+                          return onMove(/* Take */0);
+                        })
+                    })));
 }
 
 var ClientUI = {

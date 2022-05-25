@@ -68,7 +68,6 @@ type move =
 
 type playerWinState =
   | Playing
-  | Done
   | Won
   | Lose
   | Draw

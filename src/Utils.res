@@ -79,3 +79,5 @@ let listIndexOf = (list, equalsFn) =>
       acc
     }
   })
+
+let isEmpty = list => List.length(list) == 0

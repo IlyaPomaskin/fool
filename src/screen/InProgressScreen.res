@@ -38,6 +38,7 @@ module PlayerTableUI = {
     switch isDefender {
     | true =>
       <TableUI
+        isDefender
         isDropDisabled={toCard => {
           switch draggedCard {
           | Some(byCard) => !Card.isValidBeat(toCard, byCard, game.trump)
@@ -89,18 +90,17 @@ module ClientUI = {
 
     <div className={cx([className, "p-1 border rounded-md border-solid border-slate-500"])}>
       {switch GameUtils.getPlayerGameState(game, player) {
-      | Done => uiStr("Done")
       | Won => uiStr("Won")
       | Lose => uiStr("Lose")
       | Draw => uiStr("Draw")
-      | Playing =>
-        <div>
-          <DeckUI disabled={!isDeckEnabled} isDraggable={true} deck={player.cards} />
-          <PlayerActionsUI
-            className="py-2" game player onPass={_ => onMove(Pass)} onTake={_ => onMove(Take)}
-          />
-        </div>
+      | Playing => uiStr("Playing")
       }}
+      <div>
+        <DeckUI disabled={!isDeckEnabled} isDraggable={true} deck={player.cards} />
+        <PlayerActionsUI
+          className="py-2" game player onPass={_ => onMove(Pass)} onTake={_ => onMove(Take)}
+        />
+      </div>
     </div>
   }
 }

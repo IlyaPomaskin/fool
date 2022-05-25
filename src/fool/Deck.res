@@ -5,7 +5,7 @@ let suitsList = list{Spades, Hearts, Diamonds, Clubs}
 let ranksList = list{Six, Seven, Eight, Nine, Ten, Jack, Queen, King, Ace}
 
 let makeShuffled = () => {
-  let suits = suitsList->List.make(9, _)->List.flatten
+  let suits = suitsList->List.make(3, _)->List.flatten
   let ranks = ranksList->List.make(4, _)->List.flatten
 
   List.shuffle(
@@ -34,8 +34,6 @@ let getSmallestValuableCard = (trump, deck) =>
     | (_, Some(_)) => nextSmallestCard
     }
   })
-
-let isEmpty = deck => List.length(deck) == 0
 
 let mask = deck => deck->List.map(_ => Hidden)
 

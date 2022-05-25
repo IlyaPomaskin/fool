@@ -128,6 +128,10 @@ function listIndexOf(list, equalsFn) {
               }));
 }
 
+function isEmpty(list) {
+  return Belt_List.length(list) === 0;
+}
+
 var leftRotationClassName = "-rotate-12 -translate-x-1.5";
 
 var rightRotationClassName = "rotate-12 translate-x-1.5";
@@ -152,6 +156,7 @@ export {
   leftRotationClassName ,
   rightRotationClassName ,
   listIndexOf ,
+  isEmpty ,
   
 }
 /* No side effect */

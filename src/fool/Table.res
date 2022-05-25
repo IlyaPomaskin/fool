@@ -16,6 +16,9 @@ let getFlatCards = table => {
   ->List.keepMap(Utils.identity)
 }
 
+let getUnbeatedCards = table =>
+  table->List.keep(((_, by)) => Option.isNone(by))->List.map(((to, _)) => to)
+
 let toObject = table =>
   table
   ->List.map(((to, by)) => [

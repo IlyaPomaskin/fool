@@ -37,6 +37,14 @@ function getFlatCards(table) {
                       }))), Utils.identity);
 }
 
+function getUnbeatedCards(table) {
+  return Belt_List.map(Belt_List.keep(table, (function (param) {
+                    return Belt_Option.isNone(param[1]);
+                  })), (function (param) {
+                return param[0];
+              }));
+}
+
 function toObject(table) {
   return Belt_List.toArray(Belt_List.map(table, (function (param) {
                     return [
@@ -51,6 +59,7 @@ export {
   isAllBeaten ,
   isMaximumCards ,
   getFlatCards ,
+  getUnbeatedCards ,
   toObject ,
   
 }

@@ -73,10 +73,16 @@ let startGame = (game: inLobby) => {
 }
 
 let isValidMove = (game, player, card) => {
-  let isValidByUtils = GameUtils.isValidMove(game, player)
+  let isDefenderHasEnoughCards = List.length(game.defender.cards) >= List.length(game.table) + 1
 
-  if Result.isError(isValidByUtils) {
-    isValidByUtils
+  if isDefender(game, player) {
+    Error("Defender can't make move")
+  } else if !Table.hasCards(game.table) && !isAttacker(game, player) {
+    Error("First move made not by attacker")
+  } else if Table.isMaximumCards(game.table) {
+    Error("Maximum cards on table")
+  } else if !isDefenderHasEnoughCards {
+    Error("Defender don't have enough cards")
   } else if !isPlayerHasCard(player, card) {
     Error("Player don't have card")
   } else if Table.hasCards(game.table) && !isCorrectAdditionalCard(game, card) {
@@ -162,6 +168,11 @@ let beat = (game, player, to, by) => {
   if Result.isError(isValid) {
     isValid
   } else {
+    let playerWithoutCard = {
+      ...player,
+      cards: Player.removeCard(player, by),
+    }
+
     Ok({
       {
         ...game,
@@ -173,7 +184,13 @@ let beat = (game, player, to, by) => {
             (firstCard, secondCard)
           }
         }),
-        players: List.map(game.players, p => {...p, cards: Player.removeCard(p, by)}),
+        players: List.map(game.players, p => {
+          if Player.equals(p, player) {
+            playerWithoutCard
+          } else {
+            p
+          }
+        }),
       }
     })
   }
