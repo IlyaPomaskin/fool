@@ -120,8 +120,30 @@ type destination =
   | ToTable
   | ToCard(card)
 
+let useOptimisticGame = (~gameProp, ~player, ~onMessage) => {
+  let (game, setGame) = React.useState(_ => gameProp)
+  React.useEffect1(() => {
+    setGame(_ => gameProp)
+    None
+  }, [gameProp])
+
+  let handleOptimisticMessage = msg => {
+    switch msg {
+    | Progress(move, _, _) =>
+      Game.dispatch(game, player, move)->tapResult(game => setGame(_ => game))->ignore
+    | _ => ()
+    }->ignore
+
+    onMessage(msg)
+  }
+
+  (game, handleOptimisticMessage)
+}
+
 @react.component
-let make = (~game, ~player, ~onMessage) => {
+let make = (~game as gameProp, ~player, ~onMessage) => {
+  let (game, handleOptimisticMessage) = useOptimisticGame(~gameProp, ~player, ~onMessage)
+
   let (draggedCard, setDraggedCard) = React.useState(_ => None)
 
   let handleDragStart = (beforeCapture: ReactDnd.dragStartBeforeCapture, _) => {
@@ -135,9 +157,9 @@ let make = (~game, ~player, ~onMessage) => {
     let toCard = dst->Option.flatMap(Card.stringToCard)
 
     switch (isTable, toCard, byCard) {
-    | (true, _, Some(card)) => onMessage(Progress(Move(card), player.id, game.gameId))
+    | (true, _, Some(card)) => handleOptimisticMessage(Progress(Move(card), player.id, game.gameId))
     | (false, Some(toCard), Some(byCard)) =>
-      onMessage(Progress(Beat(toCard, byCard), player.id, game.gameId))
+      handleOptimisticMessage(Progress(Beat(toCard, byCard), player.id, game.gameId))
     | (false, None, _) => Js.log("No destination")
     | _ => Js.log("unknown move")
     }
@@ -187,7 +209,7 @@ let make = (~game, ~player, ~onMessage) => {
     </div>
     <ReactDnd.DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className="m-1"> <PlayerTableUI draggedCard game player /> </div>
-      <ClientUI className="m-1 flex flex-col" player game onMessage />
+      <ClientUI className="m-1 flex flex-col" player game onMessage={handleOptimisticMessage} />
     </ReactDnd.DragDropContext>
   </div>
 }

@@ -190,14 +190,45 @@ var OpponentUI = {
   make: InProgressScreen$OpponentUI
 };
 
+function useOptimisticGame(gameProp, player, onMessage) {
+  var match = React.useState(function () {
+        return gameProp;
+      });
+  var setGame = match[1];
+  var game = match[0];
+  React.useEffect((function () {
+          Curry._1(setGame, (function (param) {
+                  return gameProp;
+                }));
+          
+        }), [gameProp]);
+  var handleOptimisticMessage = function (msg) {
+    if (msg.TAG === /* Progress */4) {
+      Utils.tapResult(Game.dispatch(game, player, msg._0), (function (game) {
+              return Curry._1(setGame, (function (param) {
+                            return game;
+                          }));
+            }));
+    }
+    return Curry._1(onMessage, msg);
+  };
+  return [
+          game,
+          handleOptimisticMessage
+        ];
+}
+
 function InProgressScreen(Props) {
-  var game = Props.game;
+  var gameProp = Props.game;
   var player = Props.player;
   var onMessage = Props.onMessage;
-  var match = React.useState(function () {
+  var match = useOptimisticGame(gameProp, player, onMessage);
+  var handleOptimisticMessage = match[1];
+  var game = match[0];
+  var match$1 = React.useState(function () {
         
       });
-  var setDraggedCard = match[1];
+  var setDraggedCard = match$1[1];
   var handleDragStart = function (beforeCapture, param) {
     return Curry._1(setDraggedCard, (function (param) {
                   return Card.stringToCard(beforeCapture.draggableId);
@@ -214,7 +245,7 @@ function InProgressScreen(Props) {
     var toCard = Belt_Option.flatMap(dst, Card.stringToCard);
     if (isTable) {
       if (byCard !== undefined) {
-        Curry._1(onMessage, {
+        Curry._1(handleOptimisticMessage, {
               TAG: /* Progress */4,
               _0: {
                 TAG: /* Move */1,
@@ -228,7 +259,7 @@ function InProgressScreen(Props) {
       }
     } else if (toCard !== undefined) {
       if (byCard !== undefined) {
-        Curry._1(onMessage, {
+        Curry._1(handleOptimisticMessage, {
               TAG: /* Progress */4,
               _0: {
                 TAG: /* Beat */0,
@@ -299,13 +330,13 @@ function InProgressScreen(Props) {
                       className: "m-1"
                     }, React.createElement(InProgressScreen$PlayerTableUI, {
                           game: game,
-                          draggedCard: match[0],
+                          draggedCard: match$1[0],
                           player: player
                         })), React.createElement(InProgressScreen$ClientUI, {
                       className: "m-1 flex flex-col",
                       player: player,
                       game: game,
-                      onMessage: onMessage
+                      onMessage: handleOptimisticMessage
                     })));
 }
 
@@ -316,6 +347,7 @@ export {
   PlayerTableUI ,
   ClientUI ,
   OpponentUI ,
+  useOptimisticGame ,
   make ,
   
 }
