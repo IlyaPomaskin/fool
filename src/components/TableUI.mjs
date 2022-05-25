@@ -8,7 +8,6 @@ import * as CardUI from "./CardUI.mjs";
 import * as Spring from "bs-react-spring/src/Spring.mjs";
 import * as Belt_List from "rescript/lib/es6/belt_List.js";
 import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
-import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as ReactSpring from "react-spring";
 import * as ReactBeautifulDnd from "react-beautiful-dnd";
 
@@ -46,9 +45,7 @@ var TransitionHookTableCards = Spring.MakeTransition({});
 function TableUI$CardsPair$attacker(Props) {
   var to = Props.to;
   var by = Props.by;
-  var transitions = ReactSpring.useTransition([by], (function (card) {
-          return Belt_Option.getWithDefault(Belt_Option.map(card, Card.cardToString), "");
-        }), {
+  var transitions = ReactSpring.useTransition(Belt_Array.keepMap([by], Utils.identity), Card.cardToString, {
         from: {
           opacity: "0",
           transform: "scale(1.5)"
@@ -62,34 +59,30 @@ function TableUI$CardsPair$attacker(Props) {
           transform: "scale(1.5)"
         },
         config: {
-          tension: 200
+          tension: 200,
+          delay: 5000
         }
       });
   return React.createElement("div", {
               className: "flex flex-col gap-3 relative"
-            }, by !== undefined ? React.createElement(React.Fragment, {
-                    children: null
-                  }, React.createElement(CardUI.make, {
-                        card: to,
-                        className: Utils.leftRotationClassName
-                      }), Belt_Array.map(transitions, (function (param) {
-                          var props = param.props;
-                          return React.createElement(Spring.Div.make, {
-                                      className: "absolute left-1 top-1",
-                                      style: {
-                                        opacity: props.opacity,
-                                        transform: props.transform
-                                      },
-                                      children: React.createElement(CardUI.make, {
-                                            card: by,
-                                            className: Utils.rightRotationClassName
-                                          }),
-                                      key: param.key
-                                    });
-                        }))) : React.createElement(CardUI.make, {
-                    card: to,
-                    className: Utils.leftRotationClassName
-                  }));
+            }, React.createElement(CardUI.make, {
+                  card: to,
+                  className: Utils.leftRotationClassName
+                }), Belt_Array.map(transitions, (function (param) {
+                    var props = param.props;
+                    return React.createElement(Spring.Div.make, {
+                                className: "absolute left-1 top-1",
+                                style: {
+                                  opacity: props.opacity,
+                                  transform: props.transform
+                                },
+                                children: React.createElement(CardUI.make, {
+                                      card: param.item,
+                                      className: Utils.rightRotationClassName
+                                    }),
+                                key: param.key
+                              });
+                  })));
 }
 
 function TableUI$CardsPair$defender(Props) {
@@ -153,7 +146,7 @@ function TableUI(Props) {
           transform: "scale(1.5)"
         },
         config: {
-          tension: 200
+          tension: 100
         }
       });
   return React.createElement("div", {

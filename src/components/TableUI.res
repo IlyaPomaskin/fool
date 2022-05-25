@@ -23,7 +23,7 @@ type prop = {opacity: string, transform: string}
 
 module TransitionHookBeatBy = Spring.MakeTransition({
   type t = prop
-  type item = option<card>
+  type item = card
 })
 
 module TransitionHookTableCards = Spring.MakeTransition({
@@ -35,35 +35,29 @@ module CardsPair = {
   @react.component
   let attacker = (~to, ~by, ()) => {
     let transitions = TransitionHookBeatBy.use(
-      [by],
-      card => card->Option.map(Card.cardToString)->Option.getWithDefault(""),
+      Array.keepMap([by], identity),
+      Card.cardToString,
       TransitionHookBeatBy.config(
         ~from={opacity: "0", transform: "scale(1.5)"},
         ~enter={opacity: "1", transform: "scale(1)"},
         ~leave={opacity: "0", transform: "scale(1.5)"},
-        ~config=Spring.config(~tension=200., ()),
+        ~config=Spring.config(~tension=200., ~delay=5000., ()),
         (),
       ),
     )
 
     <div className="flex flex-col gap-3 relative">
-      {switch by {
-      | Some(byCard) =>
-        <React.Fragment>
-          <CardUI className={Utils.leftRotationClassName} card={to} />
-          {transitions
-          ->Array.map(({props, key}) => {
-            <Spring.Div
-              key
-              className="absolute left-1 top-1"
-              style={ReactDOM.Style.make(~opacity=props.opacity, ~transform=props.transform, ())}>
-              <CardUI className=Utils.rightRotationClassName card={byCard} />
-            </Spring.Div>
-          })
-          ->React.array}
-        </React.Fragment>
-      | None => <CardUI className={Utils.leftRotationClassName} card={to} />
-      }}
+      <CardUI className={Utils.leftRotationClassName} card={to} />
+      {transitions
+      ->Array.map(({item, props, key}) => {
+        <Spring.Div
+          key
+          className="absolute left-1 top-1"
+          style={ReactDOM.Style.make(~opacity=props.opacity, ~transform=props.transform, ())}>
+          <CardUI className=Utils.rightRotationClassName card={item} />
+        </Spring.Div>
+      })
+      ->React.array}
     </div>
   }
 
@@ -99,7 +93,7 @@ let make = (~className: string="", ~isDefender=false, ~isDropDisabled=_ => true,
       ~from={opacity: "0", transform: "scale(1.5)"},
       ~enter={opacity: "1", transform: "scale(1)"},
       ~leave={opacity: "0", transform: "scale(1.5)"},
-      ~config=Spring.config(~tension=200., ()),
+      ~config=Spring.config(~tension=100., ()),
       (),
     ),
   )
