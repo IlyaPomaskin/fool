@@ -20,41 +20,40 @@ module DndBeatableCard = {
 }
 
 type prop = {opacity: string, transform: string}
-
-module TransitionHookBeatBy = Spring.MakeTransition({
-  type t = prop
-  type item = card
-})
-
-module TransitionHookTableCards = Spring.MakeTransition({
+module CardTransition = Spring.MakeTransition({
   type t = prop
   type item = tableCards
 })
 
+let makeTransitions = cards =>
+  CardTransition.use(
+    cards,
+    ((to, _)) => Card.cardToString(to),
+    CardTransition.config(
+      ~from={opacity: "0", transform: "scale(1.5)"},
+      ~enter={opacity: "1", transform: "scale(1)"},
+      ~leave={opacity: "0", transform: "scale(1.5)"},
+      ~config=Spring.config(~tension=100., ()),
+      (),
+    ),
+  )
+
 module CardsPair = {
   @react.component
-  let attacker = (~to, ~by, ()) => {
-    let transitions = TransitionHookBeatBy.use(
-      Array.keepMap([by], identity),
-      Card.cardToString,
-      TransitionHookBeatBy.config(
-        ~from={opacity: "0", transform: "scale(1.5)"},
-        ~enter={opacity: "1", transform: "scale(1)"},
-        ~leave={opacity: "0", transform: "scale(1.5)"},
-        ~config=Spring.config(~tension=200., ~delay=5000., ()),
-        (),
-      ),
-    )
+  let attacker = (~pair, ()) => {
+    let transitions = makeTransitions(Array.keep([pair], ((_, by)) => Option.isSome(by)))
 
     <div className="flex flex-col gap-3 relative">
-      <CardUI className={Utils.leftRotationClassName} card={to} />
+      <CardUI className={Utils.leftRotationClassName} card={fst(pair)} />
       {transitions
       ->Array.map(({item, props, key}) => {
         <Spring.Div
           key
           className="absolute left-1 top-1"
           style={ReactDOM.Style.make(~opacity=props.opacity, ~transform=props.transform, ())}>
-          <CardUI className=Utils.rightRotationClassName card={item} />
+          <CardUI
+            className=Utils.rightRotationClassName card={Option.getWithDefault(snd(item), Hidden)}
+          />
         </Spring.Div>
       })
       ->React.array}
@@ -62,7 +61,8 @@ module CardsPair = {
   }
 
   @react.component
-  let defender = (~to, ~by, ~isDropDisabled, ()) => {
+  let defender = (~pair, ~isDropDisabled, ()) => {
+    let (to, by) = pair
     let beatByClassName = `${Utils.rightRotationClassName} absolute left-1 top-1`
 
     <div className="flex flex-col gap-3 relative">
@@ -82,30 +82,18 @@ module CardsPair = {
   }
 }
 
-let tableCardToKey = ((to, _)) => Card.cardToString(to)
-
 @react.component
 let make = (~className: string="", ~isDefender=false, ~isDropDisabled=_ => true, ~table: table) => {
-  let transitions = TransitionHookTableCards.use(
-    table->List.toArray->Array.reverse,
-    tableCardToKey,
-    TransitionHookTableCards.config(
-      ~from={opacity: "0", transform: "scale(1.5)"},
-      ~enter={opacity: "1", transform: "scale(1)"},
-      ~leave={opacity: "0", transform: "scale(1.5)"},
-      ~config=Spring.config(~tension=100., ()),
-      (),
-    ),
-  )
+  let transitions = makeTransitions(table->List.toArray->Array.reverse)
 
   <div className={cx(["flex gap-1 flex-row", className])}>
     {transitions
-    ->Array.map(({TransitionHookTableCards.item: (to, by), props, key}) =>
+    ->Array.map(({CardTransition.item: pair, props, key}) =>
       <Spring.Div
         key style={ReactDOM.Style.make(~opacity=props.opacity, ~transform=props.transform, ())}>
         {switch isDefender {
-        | true => <CardsPair.defender to by isDropDisabled />
-        | false => <CardsPair.attacker to by />
+        | true => <CardsPair.defender pair isDropDisabled />
+        | false => <CardsPair.attacker pair />
         }}
       </Spring.Div>
     )

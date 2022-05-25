@@ -8,6 +8,7 @@ import * as CardUI from "./CardUI.mjs";
 import * as Spring from "bs-react-spring/src/Spring.mjs";
 import * as Belt_List from "rescript/lib/es6/belt_List.js";
 import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
+import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as ReactSpring from "react-spring";
 import * as ReactBeautifulDnd from "react-beautiful-dnd";
 
@@ -38,35 +39,39 @@ var DndBeatableCard = {
   make: TableUI$DndBeatableCard
 };
 
-var TransitionHookBeatBy = Spring.MakeTransition({});
+var CardTransition = Spring.MakeTransition({});
 
-var TransitionHookTableCards = Spring.MakeTransition({});
+function makeTransitions(cards) {
+  return ReactSpring.useTransition(cards, (function (param) {
+                return Card.cardToString(param[0]);
+              }), {
+              from: {
+                opacity: "0",
+                transform: "scale(1.5)"
+              },
+              enter: {
+                opacity: "1",
+                transform: "scale(1)"
+              },
+              leave: {
+                opacity: "0",
+                transform: "scale(1.5)"
+              },
+              config: {
+                tension: 100
+              }
+            });
+}
 
 function TableUI$CardsPair$attacker(Props) {
-  var to = Props.to;
-  var by = Props.by;
-  var transitions = ReactSpring.useTransition(Belt_Array.keepMap([by], Utils.identity), Card.cardToString, {
-        from: {
-          opacity: "0",
-          transform: "scale(1.5)"
-        },
-        enter: {
-          opacity: "1",
-          transform: "scale(1)"
-        },
-        leave: {
-          opacity: "0",
-          transform: "scale(1.5)"
-        },
-        config: {
-          tension: 200,
-          delay: 5000
-        }
-      });
+  var pair = Props.pair;
+  var transitions = makeTransitions(Belt_Array.keep([pair], (function (param) {
+              return Belt_Option.isSome(param[1]);
+            })));
   return React.createElement("div", {
               className: "flex flex-col gap-3 relative"
             }, React.createElement(CardUI.make, {
-                  card: to,
+                  card: pair[0],
                   className: Utils.leftRotationClassName
                 }), Belt_Array.map(transitions, (function (param) {
                     var props = param.props;
@@ -77,7 +82,7 @@ function TableUI$CardsPair$attacker(Props) {
                                   transform: props.transform
                                 },
                                 children: React.createElement(CardUI.make, {
-                                      card: param.item,
+                                      card: Belt_Option.getWithDefault(param.item[1], /* Hidden */0),
                                       className: Utils.rightRotationClassName
                                     }),
                                 key: param.key
@@ -86,9 +91,10 @@ function TableUI$CardsPair$attacker(Props) {
 }
 
 function TableUI$CardsPair$defender(Props) {
-  var to = Props.to;
-  var by = Props.by;
+  var pair = Props.pair;
   var isDropDisabled = Props.isDropDisabled;
+  var by = pair[1];
+  var to = pair[0];
   var beatByClassName = Utils.rightRotationClassName + " absolute left-1 top-1";
   return React.createElement("div", {
               className: "flex flex-col gap-3 relative"
@@ -118,10 +124,6 @@ var CardsPair = {
   defender: TableUI$CardsPair$defender
 };
 
-function tableCardToKey(param) {
-  return Card.cardToString(param[0]);
-}
-
 function TableUI(Props) {
   var classNameOpt = Props.className;
   var isDefenderOpt = Props.isDefender;
@@ -132,23 +134,7 @@ function TableUI(Props) {
   var isDropDisabled = isDropDisabledOpt !== undefined ? isDropDisabledOpt : (function (param) {
         return true;
       });
-  var transitions = ReactSpring.useTransition(Belt_Array.reverse(Belt_List.toArray(table)), tableCardToKey, {
-        from: {
-          opacity: "0",
-          transform: "scale(1.5)"
-        },
-        enter: {
-          opacity: "1",
-          transform: "scale(1)"
-        },
-        leave: {
-          opacity: "0",
-          transform: "scale(1.5)"
-        },
-        config: {
-          tension: 100
-        }
-      });
+  var transitions = makeTransitions(Belt_Array.reverse(Belt_List.toArray(table)));
   return React.createElement("div", {
               className: Utils.cx([
                     "flex gap-1 flex-row",
@@ -156,21 +142,17 @@ function TableUI(Props) {
                   ])
             }, Belt_Array.map(transitions, (function (param) {
                     var props = param.props;
-                    var match = param.item;
-                    var by = match[1];
-                    var to = match[0];
+                    var pair = param.item;
                     return React.createElement(Spring.Div.make, {
                                 style: {
                                   opacity: props.opacity,
                                   transform: props.transform
                                 },
                                 children: isDefender ? React.createElement(TableUI$CardsPair$defender, {
-                                        to: to,
-                                        by: by,
+                                        pair: pair,
                                         isDropDisabled: isDropDisabled
                                       }) : React.createElement(TableUI$CardsPair$attacker, {
-                                        to: to,
-                                        by: by
+                                        pair: pair
                                       }),
                                 key: param.key
                               });
@@ -181,11 +163,10 @@ var make = TableUI;
 
 export {
   DndBeatableCard ,
-  TransitionHookBeatBy ,
-  TransitionHookTableCards ,
+  CardTransition ,
+  makeTransitions ,
   CardsPair ,
-  tableCardToKey ,
   make ,
   
 }
-/* TransitionHookBeatBy Not a pure module */
+/* CardTransition Not a pure module */
