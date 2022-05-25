@@ -120,29 +120,31 @@ type destination =
   | ToTable
   | ToCard(card)
 
-let useOptimisticGame = (~gameProp, ~player, ~onMessage) => {
-  let (game, setGame) = React.useState(_ => gameProp)
+let useOptimisticGame = (~game, ~player, ~onMessage) => {
+  let (optimisticGame, setOptimisticGame) = React.useState(_ => game)
   React.useEffect1(() => {
-    setGame(_ => gameProp)
+    setOptimisticGame(_ => game)
     None
-  }, [gameProp])
+  }, [game])
 
   let handleOptimisticMessage = msg => {
     switch msg {
     | Progress(move, _, _) =>
-      Game.dispatch(game, player, move)->tapResult(game => setGame(_ => game))->ignore
+      setOptimisticGame(prevGame =>
+        Game.dispatch(prevGame, player, move)->Result.getWithDefault(prevGame)
+      )
     | _ => ()
     }->ignore
 
     onMessage(msg)
   }
 
-  (game, handleOptimisticMessage)
+  (optimisticGame, handleOptimisticMessage)
 }
 
 @react.component
-let make = (~game as gameProp, ~player, ~onMessage) => {
-  let (game, handleOptimisticMessage) = useOptimisticGame(~gameProp, ~player, ~onMessage)
+let make = (~game as realGame, ~player, ~onMessage) => {
+  let (game, handleOptimisticMessage) = useOptimisticGame(~game=realGame, ~player, ~onMessage)
 
   let (draggedCard, setDraggedCard) = React.useState(_ => None)
 

@@ -190,39 +190,37 @@ var OpponentUI = {
   make: InProgressScreen$OpponentUI
 };
 
-function useOptimisticGame(gameProp, player, onMessage) {
+function useOptimisticGame(game, player, onMessage) {
   var match = React.useState(function () {
-        return gameProp;
+        return game;
       });
-  var setGame = match[1];
-  var game = match[0];
+  var setOptimisticGame = match[1];
   React.useEffect((function () {
-          Curry._1(setGame, (function (param) {
-                  return gameProp;
+          Curry._1(setOptimisticGame, (function (param) {
+                  return game;
                 }));
           
-        }), [gameProp]);
+        }), [game]);
   var handleOptimisticMessage = function (msg) {
     if (msg.TAG === /* Progress */4) {
-      Utils.tapResult(Game.dispatch(game, player, msg._0), (function (game) {
-              return Curry._1(setGame, (function (param) {
-                            return game;
-                          }));
+      var move = msg._0;
+      Curry._1(setOptimisticGame, (function (prevGame) {
+              return Belt_Result.getWithDefault(Game.dispatch(prevGame, player, move), prevGame);
             }));
     }
     return Curry._1(onMessage, msg);
   };
   return [
-          game,
+          match[0],
           handleOptimisticMessage
         ];
 }
 
 function InProgressScreen(Props) {
-  var gameProp = Props.game;
+  var realGame = Props.game;
   var player = Props.player;
   var onMessage = Props.onMessage;
-  var match = useOptimisticGame(gameProp, player, onMessage);
+  var match = useOptimisticGame(realGame, player, onMessage);
   var handleOptimisticMessage = match[1];
   var game = match[0];
   var match$1 = React.useState(function () {
