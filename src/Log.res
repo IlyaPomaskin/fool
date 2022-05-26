@@ -48,5 +48,8 @@ let serverMsgToString = msg =>
   | ServerError(msg) => `ServerError: ${msg}`
   }
 
-let logMessageFromServer = (msg, playerId) =>
+let logMessageFromServer = (msg, player) => {
+  let playerId = player->Option.map(p => p.id)->Option.getWithDefault("No player")
+
   info([`[server] [${playerId}]`, serverMsgToString(msg)])
+}

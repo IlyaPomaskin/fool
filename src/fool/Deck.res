@@ -5,7 +5,7 @@ let suitsList = list{Spades, Hearts, Diamonds, Clubs}
 let ranksList = list{Six, Seven, Eight, Nine, Ten, Jack, Queen, King, Ace}
 
 let makeShuffled = () => {
-  let suits = suitsList->List.make(3, _)->List.flatten
+  let suits = suitsList->List.make(9, _)->List.flatten
   let ranks = ranksList->List.make(4, _)->List.flatten
 
   List.shuffle(

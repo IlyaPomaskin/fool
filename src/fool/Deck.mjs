@@ -47,7 +47,7 @@ var ranksList = {
 };
 
 function makeShuffled(param) {
-  var suits = Belt_List.flatten(Belt_List.make(3, suitsList));
+  var suits = Belt_List.flatten(Belt_List.make(9, suitsList));
   var ranks = Belt_List.flatten(Belt_List.make(4, ranksList));
   return Belt_List.shuffle(Belt_List.reduce2(suits, ranks, /* [] */0, (function (acc, suit, rank) {
                     return Belt_List.add(acc, /* Visible */{

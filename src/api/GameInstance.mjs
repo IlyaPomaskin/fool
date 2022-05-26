@@ -14,25 +14,25 @@ var players = $$Storage.PlayersMap.empty(undefined);
 
 $$Storage.PlayersMap.set(players, "p1")({
       id: "p1",
-      sessionId: "session:p1",
+      sessionId: "s:p1",
       cards: /* [] */0
     });
 
 $$Storage.PlayersMap.set(players, "p2")({
       id: "p2",
-      sessionId: "session:p2",
+      sessionId: "s:p2",
       cards: /* [] */0
     });
 
 $$Storage.PlayersMap.set(players, "p3")({
       id: "p3",
-      sessionId: "session:p3",
+      sessionId: "s:p3",
       cards: /* [] */0
     });
 
 $$Storage.PlayersMap.set(players, "p4")({
       id: "p4",
-      sessionId: "session:p4",
+      sessionId: "s:p4",
       cards: /* [] */0
     });
 

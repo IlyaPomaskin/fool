@@ -4,62 +4,77 @@ open Utils
 let delay = (send, msg, ~timeout=100, ()) =>
   Promise.make((resolve, _) => Js.Global.setTimeout(() => resolve(. send(msg)), timeout)->ignore)
 
+let useDebugActions = (~sendMessage, ~playerId, ~sessionId, ~gameId, ~isOwner=false, ()) => {
+  let (isLoaded, setIsLoaded) = React.useState(_ => false)
+
+  React.useEffect2(() => {
+    if !isLoaded {
+      open Promise
+
+      let delayM = delay(sendMessage)
+
+      if isOwner {
+        delayM(Login(sessionId), ())
+        ->then(() => delayM(Lobby(Create, playerId, ""), ()))
+        ->then(() => delayM(Lobby(Enter, playerId, gameId), ()))
+        ->then(() => delayM(Lobby(Ready, playerId, gameId), ()))
+        ->then(() => delayM(Lobby(Start, playerId, gameId), ~timeout=300, ()))
+        ->ignore
+      } else {
+        delayM(Login(sessionId), ())
+        ->then(() => delayM(Lobby(Enter, playerId, gameId), ~timeout=250, ()))
+        ->then(() => delayM(Lobby(Ready, playerId, gameId), ()))
+        ->ignore
+      }
+
+      setIsLoaded(_ => true)
+    }
+
+    None
+  }, (sendMessage, isLoaded))
+}
+
 module PlayerScreen = {
   @react.component
-  let make = (~playerId, ~sessionId) => {
+  let make = () => {
     let (player, setPlayer) = React.useState(_ => None)
     let (screen, setScreen) = React.useState(_ => AuthorizationScreen)
-    let (isLoaded, setIsLoaded) = React.useState(_ => false)
 
     let onMessage = React.useCallback1(message => {
-      Log.logMessageFromServer(message, playerId)
+      Log.logMessageFromServer(message, player)
 
-      switch message {
-      | Connected(player) => {
+      switch (message, player) {
+      | (Connected(player), _) => {
           setPlayer(_ => Some(player))
           setScreen(_ => LobbySetupScreen)
         }
-      | LobbyCreated(game)
-      | LobbyUpdated(game) => {
+      | (LobbyCreated(game), Some(player))
+      | (LobbyUpdated(game), Some(player)) => {
           setScreen(_ => InLobbyScreen(game))
-          setPlayer(_ => game.players->List.getBy(player => player.id == playerId))
+          setPlayer(_ => game.players->List.getBy(p => p.id == player.id))
         }
-      | ProgressCreated(game)
-      | ProgressUpdated(game) =>
+      | (ProgressCreated(game), Some(player))
+      | (ProgressUpdated(game), Some(player)) =>
         setScreen(_ => InProgressScreen(game))
-        setPlayer(_ => game.players->List.getBy(player => player.id == playerId))
-      | ServerError(msg) => Log.info(["ServerError", msg])
+        setPlayer(_ => game.players->List.getBy(p => p.id == player.id))
+      | (ServerError(msg), _) => Log.info(["ServerError", msg])
+      | _ => ignore()
       }
-    }, [playerId])
+    }, [player])
 
     let {error, sendMessage} = UseWs.hook(onMessage)
 
-    // FIXME remove debug code
-    React.useEffect2(() => {
-      if !isLoaded {
-        open Promise
-
-        let delayM = delay(sendMessage)
-
-        if playerId === "p1" {
-          delayM(Login(sessionId), ())
-          ->then(() => delayM(~timeout=100, Lobby(Create, "p1", ""), ()))
-          ->then(() => delayM(~timeout=100, Lobby(Enter, "p1", "g1"), ()))
-          ->then(() => delayM(~timeout=100, Lobby(Ready, "p1", "g1"), ()))
-          ->then(() => delayM(~timeout=300, Lobby(Start, "p1", "g1"), ()))
-          ->ignore
-        } else {
-          delayM(Login(sessionId), ())
-          ->then(() => delayM(~timeout=250, Lobby(Enter, playerId, "g1"), ()))
-          ->then(() => delayM(~timeout=100, Lobby(Ready, playerId, "g1"), ()))
-          ->ignore
-        }
-
-        setIsLoaded(_ => true)
-      }
-
-      None
-    }, (sendMessage, isLoaded))
+    // useDebugActions(
+    //   ~sendMessage,
+    //   ~playerId="p1",
+    //   ~gameId="g1",
+    //   ~sessionId="s:p1",
+    //   ~isOwner=true,
+    //   (),
+    // )
+    // useDebugActions(~sendMessage, ~playerId="p2", ~gameId="g1", ~sessionId="s:p2", ())
+    // useDebugActions(~sendMessage, ~playerId="p3", ~gameId="g1", ~sessionId="s:p3", ())
+    // useDebugActions(~sendMessage, ~playerId="p4", ~gameId="g1", ~sessionId="s:p4", ())
 
     <div className="w-96 h-128 border rounded-md border-solid border-slate-500">
       <div>
@@ -107,10 +122,12 @@ let default = () => {
     <div> {React.string("Loading...")} </div>
   } else {
     <div className="flex flex-row flex-wrap w-full">
-      <PlayerScreen playerId="p1" sessionId="session:p1" />
-      <PlayerScreen playerId="p2" sessionId="session:p2" />
-      <PlayerScreen playerId="p3" sessionId="session:p3" />
-      <PlayerScreen playerId="p4" sessionId="session:p4" />
+      <PlayerScreen />
+      <PlayerScreen />
+      // <PlayerScreen playerId="p1" sessionId="session:p1" />
+      // <PlayerScreen playerId="p2" sessionId="session:p2" />
+      // <PlayerScreen playerId="p3" sessionId="session:p3" />
+      // <PlayerScreen playerId="p4" sessionId="session:p4" />
     </div>
   }
 }

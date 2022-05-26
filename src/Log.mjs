@@ -3,6 +3,7 @@
 import * as Card from "./fool/Card.mjs";
 import * as Curry from "rescript/lib/es6/curry.js";
 import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
+import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Caml_splice_call from "rescript/lib/es6/caml_splice_call.js";
 
 function createLogger(prefix, logFn, list) {
@@ -107,7 +108,10 @@ function serverMsgToString(msg) {
   }
 }
 
-function logMessageFromServer(msg, playerId) {
+function logMessageFromServer(msg, player) {
+  var playerId = Belt_Option.getWithDefault(Belt_Option.map(player, (function (p) {
+              return p.id;
+            })), "No player");
   return info([
               "[server] [" + playerId + "]",
               serverMsgToString(msg)
