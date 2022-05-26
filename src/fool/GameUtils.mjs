@@ -157,8 +157,8 @@ function findPlayerById(game, playerId) {
               }));
 }
 
-function isFirstPlayerAddedToList(players, player) {
-  return Belt_Option.getWithDefault(Belt_Option.map(Belt_List.get(players, Belt_List.length(players) - 1 | 0), (function (p) {
+function isOwner(game, player) {
+  return Belt_Option.getWithDefault(Belt_Option.map(Belt_List.get(game.players, Belt_List.length(game.players) - 1 | 0), (function (p) {
                     return p.id === player.id;
                   })), false);
 }
@@ -166,8 +166,8 @@ function isFirstPlayerAddedToList(players, player) {
 function isCanStart(game, player) {
   var isEnoughPlayers = Belt_List.length(game.players) > 1;
   var isAllPlayersAreReady = Belt_List.cmpByLength(game.players, game.ready) === 0;
-  var isOwner = isFirstPlayerAddedToList(game.players, player);
-  if (isOwner) {
+  var isOwner$1 = isOwner(game, player);
+  if (isOwner$1) {
     if (isEnoughPlayers) {
       if (isAllPlayersAreReady) {
         return {
@@ -210,7 +210,7 @@ export {
   isPlayerCanBeat ,
   getPlayerGameState ,
   findPlayerById ,
-  isFirstPlayerAddedToList ,
+  isOwner ,
   isCanStart ,
   
 }

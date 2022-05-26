@@ -114,16 +114,16 @@ let getPlayerGameState = (game, player) => {
 
 let findPlayerById = (game, playerId) => game.players->List.getBy(p => p.id === playerId)
 
-let isFirstPlayerAddedToList = (players: list<player>, player) =>
-  players
-  ->List.get(List.length(players) - 1)
+let isOwner = (game: inLobby, player) =>
+  game.players
+  ->List.get(List.length(game.players) - 1)
   ->Option.map(p => p.id === player.id)
   ->Option.getWithDefault(false)
 
 let isCanStart = (game: inLobby, player) => {
   let isEnoughPlayers = List.length(game.players) > 1
   let isAllPlayersAreReady = List.cmpByLength(game.players, game.ready) === 0
-  let isOwner = isFirstPlayerAddedToList(game.players, player)
+  let isOwner = isOwner(game, player)
 
   if !isOwner {
     Error("Only owner can start game")

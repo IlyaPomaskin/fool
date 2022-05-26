@@ -19,7 +19,10 @@ function makeGameInLobby(player) {
               hd: player,
               tl: /* [] */0
             },
-            ready: /* [] */0
+            ready: {
+              hd: player,
+              tl: /* [] */0
+            }
           }
         };
 }
