@@ -104,6 +104,6 @@ let make = (
       </Spring.Div>
     )
     ->React.array}
-    <div className="bg-slate-600"> placeholder </div>
+    placeholder
   </div>
 }

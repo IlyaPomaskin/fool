@@ -53,7 +53,7 @@ module PlayerTableUI = {
                 "w-full flex flex-row bg-pink-200",
                 snapshot.isDraggingOver
                   ? "bg-gradient-to-tl from-purple-200 to-pink-200 opacity-70"
-                  : "opacity-20",
+                  : "opacity-100",
               ])}>
               <TableUI
                 isDefender

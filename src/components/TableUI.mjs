@@ -159,9 +159,7 @@ function TableUI(Props) {
                                       }),
                                 key: param.key
                               });
-                  })), React.createElement("div", {
-                  className: "bg-slate-600"
-                }, placeholder));
+                  })), placeholder);
 }
 
 var make = TableUI;

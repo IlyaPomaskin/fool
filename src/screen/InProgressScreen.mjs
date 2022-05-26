@@ -79,7 +79,7 @@ function InProgressScreen$PlayerTableUI(Props) {
                             ref: provided.innerRef,
                             className: Utils.cx([
                                   "w-full flex flex-row bg-pink-200",
-                                  snapshot.isDraggingOver ? "bg-gradient-to-tl from-purple-200 to-pink-200 opacity-70" : "opacity-20"
+                                  snapshot.isDraggingOver ? "bg-gradient-to-tl from-purple-200 to-pink-200 opacity-70" : "opacity-100"
                                 ])
                           }, React.createElement(TableUI.make, {
                                 className: "my-1 h-16",
