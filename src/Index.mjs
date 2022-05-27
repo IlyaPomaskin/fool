@@ -134,7 +134,7 @@ function Index$PlayerScreen(Props) {
                           })) : Utils.uiStr("No player")), React.createElement("div", undefined, error !== undefined ? React.createElement("div", undefined, Utils.uiStr("error: " + error)) : React.createElement("div", undefined, Utils.uiStr("No error"))), tmp);
 }
 
-function $$default(param) {
+function useDebugStartServer(param) {
   var match = React.useState(function () {
         return false;
       });
@@ -151,6 +151,11 @@ function $$default(param) {
           }
           
         }), [isLoaded]);
+  return isLoaded;
+}
+
+function $$default(param) {
+  var isLoaded = useDebugStartServer(undefined);
   if (isLoaded) {
     return React.createElement("div", {
                 className: "flex flex-row flex-wrap w-full"

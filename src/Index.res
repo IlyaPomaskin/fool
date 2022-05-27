@@ -102,8 +102,7 @@ module PlayerScreen = {
   }
 }
 
-let default = () => {
-  // FIXME remove debug code
+let useDebugStartServer = () => {
   let (isLoaded, setIsLoaded) = React.useState(_ => false)
   React.useEffect1(() => {
     if !isLoaded {
@@ -117,6 +116,13 @@ let default = () => {
 
     None
   }, [isLoaded])
+
+  isLoaded
+}
+
+let default = () => {
+  // FIXME remove debug code
+  let isLoaded = useDebugStartServer()
 
   if !isLoaded {
     <div> {React.string("Loading...")} </div>
