@@ -70,7 +70,7 @@ let equals = (a, b) => a.id === b.id
 
 let mask = (playerId, player) => {
   ...player,
-  sessionId: "masked",
+  sessionId: playerId === player.id ? player.sessionId : "masked",
   cards: player.cards->List.map(card => player.id == playerId ? card : Hidden),
 }
 

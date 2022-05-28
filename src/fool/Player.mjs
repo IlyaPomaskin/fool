@@ -98,7 +98,7 @@ function equals(a, b) {
 function mask(playerId, player) {
   return {
           id: player.id,
-          sessionId: "masked",
+          sessionId: playerId === player.id ? player.sessionId : "masked",
           cards: Belt_List.map(player.cards, (function (card) {
                   if (player.id === playerId) {
                     return card;
