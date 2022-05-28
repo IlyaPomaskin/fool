@@ -8,21 +8,28 @@ module type GameType = {
   let getId: t => gameId
 }
 
+module PlayerId = Id.MakeHashable({
+  type t = playerId
+  let hash = Hashtbl.hash
+  let eq = (a, b) => a === b
+})
+
+module GameId = Id.MakeHashable({
+  type t = gameId
+  let hash = Hashtbl.hash
+  let eq = (a, b) => a === b
+})
+
 module MakeGameMap = (Item: GameType) => {
-  module GameId = Id.MakeComparable({
-    type t = gameId
-    let cmp: (gameId, gameId) => int = Pervasives.compare
-  })
+  type t = Belt.HashMap.t<GameId.t, Item.t, GameId.identity>
 
-  type t = Belt.MutableMap.t<GameId.t, Item.t, GameId.identity>
-
-  let empty = (): t => Belt.MutableMap.make(~id=module(GameId))
+  let empty = (): t => Belt.HashMap.make(~id=module(GameId), ~hintSize=10)
 
   let get = (map, gameId): result<Item.t, string> =>
-    map->MutableMap.get(gameId)->Utils.toResult(`Game "${gameId}" not found`)
+    map->HashMap.get(gameId)->Utils.toResult(`Game "${gameId}" not found`)
 
   let set = (map, gameId, game) => {
-    MutableMap.set(map, gameId, game)
+    HashMap.set(map, gameId, game)
     Ok(game)
   }
 
@@ -37,7 +44,7 @@ module MakeGameMap = (Item: GameType) => {
     }
   }
 
-  let remove = (map, gameId) => map->MutableMap.remove(gameId)
+  let remove = (map, gameId) => map->HashMap.remove(gameId)
 
   let update = (map, gameId, fn: Item.t => Item.t) =>
     map->get(gameId)->Result.flatMap(game => set(map, gameId, fn(game)))
@@ -60,55 +67,47 @@ module ProgressGameMap = MakeGameMap({
 })
 
 module PlayersMap = {
-  module PlayerId = Id.MakeComparable({
-    type t = playerId
-    let cmp: (playerId, playerId) => int = Pervasives.compare
-  })
+  type t = Belt.HashMap.t<PlayerId.t, player, PlayerId.identity>
 
-  type t = Belt.MutableMap.t<PlayerId.t, player, PlayerId.identity>
-
-  let empty = (): t => Belt.MutableMap.make(~id=module(PlayerId))
+  let empty = (): t => Belt.HashMap.make(~id=module(PlayerId), ~hintSize=10)
 
   let get = (map, playerId): result<player, string> =>
-    map->MutableMap.get(playerId)->Utils.toResult(`Player "${playerId}" not found`)
+    map->HashMap.get(playerId)->Utils.toResult(`Player "${playerId}" not found`)
 
-  let findBySessionId = (map, sessionId: sessionId): result<player, string> =>
+  let findBySessionId = (map, sessionId: sessionId): result<player, string> => {
+    Js.log2("playersMap", map->HashMap.toArray)
     map
-    ->MutableMap.reduce(None, (acc, _, value) => {
+    ->HashMap.reduce(None, (acc, _, value) => {
       switch acc {
       | Some(_) => acc
       | None => value.sessionId === sessionId ? Some(value) : None
       }
     })
-    ->Utils.toResult("Player not found")
+    ->Utils.toResult(`Player ${sessionId} not found`)
+  }
 
-  let set = (map, game) => map->MutableMap.set(game)
+  let set = (map, game) => map->HashMap.set(game)
 
   let create = (map, playerId): result<player, string> =>
-    switch MutableMap.get(map, playerId) {
+    switch HashMap.get(map, playerId) {
     | Some(_) => Error(`Player ${playerId} already exists`)
     | None => {
         let player = Player.make(playerId)
-        MutableMap.set(map, playerId, player)
+        HashMap.set(map, playerId, player)
         Ok(player)
       }
     }
 }
 
 module PlayersSocketMap = {
-  module PlayerId = Id.MakeComparable({
-    type t = playerId
-    let cmp: (playerId, playerId) => int = Pervasives.compare
-  })
+  type t = Belt.HashMap.t<PlayerId.t, WsWebSocket.t, PlayerId.identity>
 
-  type t = Belt.MutableMap.t<PlayerId.t, WsWebSocket.t, PlayerId.identity>
-
-  let empty = (): t => Belt.MutableMap.make(~id=module(PlayerId))
+  let empty = (): t => Belt.HashMap.make(~id=module(PlayerId), ~hintSize=10)
 
   let get = (map, playerId) =>
-    map->MutableMap.get(playerId)->Utils.toResult(`Player "${playerId}" socket not found`)
+    map->HashMap.get(playerId)->Utils.toResult(`Player "${playerId}" socket not found`)
 
-  let set = (map, playerId, socket) => map->MutableMap.set(playerId, socket)
+  let set = (map, playerId, socket) => map->HashMap.set(playerId, socket)
 
-  let remove = (map, playerId) => map->MutableMap.remove(playerId)
+  let remove = (map, playerId) => map->HashMap.remove(playerId)
 }
