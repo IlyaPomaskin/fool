@@ -9,7 +9,7 @@ import * as Serializer from "../Serializer.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Belt_Result from "rescript/lib/es6/belt_Result.js";
 
-function hook(onMessage, player) {
+function hook(onMessage, player, onConnect) {
   var match = React.useState(function () {
         
       });
@@ -18,20 +18,13 @@ function hook(onMessage, player) {
               return player.sessionId;
             })), "");
   var match$1 = React.useMemo((function () {
-          console.log("usews sessionId", sessionId);
+          if (sessionId === "") {
+            return [
+                    undefined,
+                    Utils.noop
+                  ];
+          }
           var ws = new WebSocket("ws://localhost:3001/ws?sessionId=" + sessionId);
-          ws.addEventListener("close", (function ($$event) {
-                  console.log("close", $$event);
-                  
-                }));
-          ws.addEventListener("error", (function ($$event) {
-                  console.log("error", $$event);
-                  
-                }));
-          ws.addEventListener("open", (function ($$event) {
-                  console.log("open", $$event);
-                  
-                }));
           var sendMessage = function (message) {
             if ($$WebSocket.isOpen(ws)) {
               Log.logMessageFromClient(message);
@@ -44,6 +37,18 @@ function hook(onMessage, player) {
                         ]);
             }
           };
+          ws.addEventListener("close", (function ($$event) {
+                  console.log("close", $$event);
+                  
+                }));
+          ws.addEventListener("error", (function ($$event) {
+                  console.log("error", $$event);
+                  
+                }));
+          ws.addEventListener("open", (function ($$event) {
+                  console.log("open", $$event);
+                  return Curry._1(onConnect, sendMessage);
+                }));
           return [
                   ws,
                   sendMessage
@@ -70,11 +75,14 @@ function hook(onMessage, player) {
                   }));
             
           };
-          ws.addEventListener("message", handleMessage);
-          return (function (param) {
-                    ws.removeEventListener("message", handleMessage);
-                    
-                  });
+          if (ws !== undefined) {
+            ws.addEventListener("message", handleMessage);
+            return (function (param) {
+                      ws.removeEventListener("message", handleMessage);
+                      
+                    });
+          }
+          
         }), [
         ws,
         onMessage
