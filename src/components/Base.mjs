@@ -112,8 +112,10 @@ var Switch = {
 
 function Base$Input(Props) {
   var value = Props.value;
+  var disabledOpt = Props.disabled;
   var onChange = Props.onChange;
   var classNameOpt = Props.className;
+  var disabled = disabledOpt !== undefined ? disabledOpt : false;
   var className = classNameOpt !== undefined ? classNameOpt : "";
   return React.createElement("input", {
               className: Utils.cx([
@@ -125,6 +127,7 @@ function Base$Input(Props) {
                     "focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none",
                     className
                   ]),
+              disabled: disabled,
               type: "text",
               value: value,
               onChange: (function (e) {

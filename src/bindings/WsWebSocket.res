@@ -100,7 +100,7 @@ external off: (t, EventWithThis.t<@this 'f, t>, @this 'f) => t = "off"
 @val external url: string = "url"
 
 @send
-external close: unit => unit = "close"
+external close: t => unit = "close"
 @send
 external closeWithCode: (t, int) => unit = "close"
 @send

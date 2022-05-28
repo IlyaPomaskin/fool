@@ -33,11 +33,7 @@ function info(param) {
 
 function clientMsgToString(msg) {
   switch (msg.TAG | 0) {
-    case /* Register */0 :
-        return "Register " + msg._0;
-    case /* Login */1 :
-        return "Login " + msg._0;
-    case /* Player */2 :
+    case /* Player */0 :
         var tmp;
         switch (msg._0) {
           case /* Disconnect */0 :
@@ -52,7 +48,7 @@ function clientMsgToString(msg) {
           
         }
         return "player [" + msg._1 + "] " + tmp;
-    case /* Lobby */3 :
+    case /* Lobby */1 :
         var tmp$1;
         switch (msg._0) {
           case /* Create */0 :
@@ -70,7 +66,7 @@ function clientMsgToString(msg) {
           
         }
         return "lobby [" + msg._2 + "][" + msg._1 + "] " + tmp$1;
-    case /* Progress */4 :
+    case /* Progress */2 :
         var game = msg._0;
         var tmp$2;
         tmp$2 = typeof game === "number" ? (

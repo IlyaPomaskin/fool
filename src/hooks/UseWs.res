@@ -5,23 +5,29 @@ type hookReturn = {
   sendMessage: gameMessageFromClient => unit,
 }
 
-let hook = (onMessage): hookReturn => {
+let hook = (~onMessage, ~player): hookReturn => {
   let (error, setError) = React.useState(_ => None)
 
-  let ws = React.useMemo0(_ => WebSocket.make("ws://localhost:3001/ws"))
+  let sessionId = player->Option.map(player => player.sessionId)->Option.getWithDefault("")
+  let (ws, sendMessage) = React.useMemo1(_ => {
+    Js.log2("usews sessionId", sessionId)
+    let ws = WebSocket.make(`ws://localhost:3001/ws?sessionId=${sessionId}`)
 
-  WebSocket.addCloseListener(ws, event => Js.log2("close", event))
-  WebSocket.addErrorListener(ws, event => Js.log2("error", event))
-  WebSocket.addOpenListener(ws, event => Js.log2("open", event))
+    WebSocket.addCloseListener(ws, event => Js.log2("close", event))
+    WebSocket.addErrorListener(ws, event => Js.log2("error", event))
+    WebSocket.addOpenListener(ws, event => Js.log2("open", event))
 
-  let sendMessage = React.useCallback1(message => {
-    if ws->WebSocket.isOpen {
-      Log.logMessageFromClient(message)
-      ws->WebSocket.sendText(Serializer.serializeClientMessage(message))
-    } else {
-      Log.error(["Not connected", Log.clientMsgToString(message)])
+    let sendMessage = message => {
+      if ws->WebSocket.isOpen {
+        Log.logMessageFromClient(message)
+        ws->WebSocket.sendText(Serializer.serializeClientMessage(message))
+      } else {
+        Log.error(["Not connected", Log.clientMsgToString(message)])
+      }
     }
-  }, [ws])
+
+    (ws, sendMessage)
+  }, [sessionId])
 
   React.useEffect2(() => {
     let handleMessage = event => {

@@ -277,35 +277,21 @@ var progressMsg = Jzon.object2((function (kind) {
 
 var gameMsg = Jzon.object4((function (kind) {
         switch (kind.TAG | 0) {
-          case /* Register */0 :
-              return [
-                      "register",
-                      Jzon.encodeWith(kind._0, Jzon.string),
-                      "",
-                      undefined
-                    ];
-          case /* Login */1 :
-              return [
-                      "login",
-                      Jzon.encodeWith(kind._0, Jzon.string),
-                      "",
-                      undefined
-                    ];
-          case /* Player */2 :
+          case /* Player */0 :
               return [
                       "player",
                       Jzon.encodeWith(kind._0, playerMsg),
                       kind._1,
                       undefined
                     ];
-          case /* Lobby */3 :
+          case /* Lobby */1 :
               return [
                       "lobby",
                       Jzon.encodeWith(kind._0, lobbyMsg),
                       kind._1,
                       kind._2
                     ];
-          case /* Progress */4 :
+          case /* Progress */2 :
               return [
                       "progress",
                       Jzon.encodeWith(kind._0, progressMsg),
@@ -335,7 +321,7 @@ var gameMsg = Jzon.object4((function (kind) {
                                           return {
                                                   TAG: /* Ok */0,
                                                   _0: {
-                                                    TAG: /* Lobby */3,
+                                                    TAG: /* Lobby */1,
                                                     _0: lobbyMessage,
                                                     _1: playerId,
                                                     _2: gameId
@@ -343,17 +329,10 @@ var gameMsg = Jzon.object4((function (kind) {
                                                 };
                                         }));
                           }));
-          case "login" :
-              return Belt_Result.map(Jzon.decodeWith(msg, Jzon.string), (function (sessionId) {
-                            return {
-                                    TAG: /* Login */1,
-                                    _0: sessionId
-                                  };
-                          }));
           case "player" :
               return Belt_Result.map(Jzon.decodeWith(msg, playerMsg), (function (msg) {
                             return {
-                                    TAG: /* Player */2,
+                                    TAG: /* Player */0,
                                     _0: msg,
                                     _1: playerId
                                   };
@@ -373,20 +352,13 @@ var gameMsg = Jzon.object4((function (kind) {
                                           return {
                                                   TAG: /* Ok */0,
                                                   _0: {
-                                                    TAG: /* Progress */4,
+                                                    TAG: /* Progress */2,
                                                     _0: move,
                                                     _1: playerId,
                                                     _2: gameId
                                                   }
                                                 };
                                         }));
-                          }));
-          case "register" :
-              return Belt_Result.map(Jzon.decodeWith(msg, Jzon.string), (function (playerId) {
-                            return {
-                                    TAG: /* Register */0,
-                                    _0: playerId
-                                  };
                           }));
           default:
             return {

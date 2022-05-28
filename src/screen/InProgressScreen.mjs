@@ -117,7 +117,7 @@ function InProgressScreen$ClientUI(Props) {
   var isDeckEnabled = isDefender ? isThereCardsOnTable : isPlayerCanMove;
   var onMove = function (move) {
     return Curry._1(onMessage, {
-                TAG: /* Progress */4,
+                TAG: /* Progress */2,
                 _0: move,
                 _1: player.id,
                 _2: game.gameId
@@ -202,11 +202,17 @@ function useOptimisticGame(game, player, onMessage) {
           
         }), [game]);
   var handleOptimisticMessage = function (msg) {
-    if (msg.TAG === /* Progress */4) {
-      var move = msg._0;
-      Curry._1(setOptimisticGame, (function (prevGame) {
-              return Belt_Result.getWithDefault(Game.dispatch(prevGame, player, move), prevGame);
-            }));
+    switch (msg.TAG | 0) {
+      case /* Player */0 :
+      case /* Lobby */1 :
+          break;
+      case /* Progress */2 :
+          var move = msg._0;
+          Curry._1(setOptimisticGame, (function (prevGame) {
+                  return Belt_Result.getWithDefault(Game.dispatch(prevGame, player, move), prevGame);
+                }));
+          break;
+      
     }
     return Curry._1(onMessage, msg);
   };
@@ -244,7 +250,7 @@ function InProgressScreen(Props) {
     if (isTable) {
       if (byCard !== undefined) {
         Curry._1(handleOptimisticMessage, {
-              TAG: /* Progress */4,
+              TAG: /* Progress */2,
               _0: {
                 TAG: /* Move */1,
                 _0: byCard
@@ -258,7 +264,7 @@ function InProgressScreen(Props) {
     } else if (toCard !== undefined) {
       if (byCard !== undefined) {
         Curry._1(handleOptimisticMessage, {
-              TAG: /* Progress */4,
+              TAG: /* Progress */2,
               _0: {
                 TAG: /* Beat */0,
                 _0: toCard,

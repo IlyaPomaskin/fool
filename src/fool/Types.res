@@ -91,8 +91,6 @@ type beatPayload = {
 type movePayload = {card: card}
 
 type gameMessageFromClient =
-  | Register(playerId)
-  | Login(sessionId)
   | Player(clientPlayerMessage, playerId)
   | Lobby(clientLobbyMessage, playerId, gameId)
   | Progress(move, playerId, gameId)

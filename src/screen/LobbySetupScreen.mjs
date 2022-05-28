@@ -21,7 +21,7 @@ function LobbySetupScreen(Props) {
                 }), React.createElement(Base.Button.make, {
                   onClick: (function (param) {
                       return Curry._1(onMessage, {
-                                  TAG: /* Lobby */3,
+                                  TAG: /* Lobby */1,
                                   _0: /* Create */0,
                                   _1: player.id,
                                   _2: ""
@@ -39,7 +39,7 @@ function LobbySetupScreen(Props) {
                 }), React.createElement(Base.Button.make, {
                   onClick: (function (param) {
                       return Curry._1(onMessage, {
-                                  TAG: /* Lobby */3,
+                                  TAG: /* Lobby */1,
                                   _0: /* Enter */1,
                                   _1: player.id,
                                   _2: gameId

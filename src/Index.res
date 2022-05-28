@@ -29,7 +29,7 @@ module PlayerScreen = {
     }, [player])
 
     // let {player, screen, onMessage} = useMessageHandler()
-    let {error, sendMessage} = UseWs.hook(onMessage)
+    let {error, sendMessage} = UseWs.hook(~onMessage, ~player)
 
     // UseDebug.autologin(
     //   ~sendMessage,
@@ -42,6 +42,11 @@ module PlayerScreen = {
     // useDebugActions(~sendMessage, ~playerId="p2", ~gameId="g1", ~sessionId="s:p2", ())
     // useDebugActions(~sendMessage, ~playerId="p3", ~gameId="g1", ~sessionId="s:p3", ())
     // useDebugActions(~sendMessage, ~playerId="p4", ~gameId="g1", ~sessionId="s:p4", ())
+
+    let handleLogin = player => {
+      setPlayer(_ => Some(player))
+      setScreen(_ => LobbySetupScreen)
+    }
 
     <div className="w-96 h-128 border rounded-md border-solid border-slate-500">
       <div>
@@ -58,7 +63,7 @@ module PlayerScreen = {
         }}
       </div>
       {switch (screen, player) {
-      | (AuthorizationScreen, _) => <AuthorizationScreen onMessage={sendMessage} />
+      | (AuthorizationScreen, _) => <AuthorizationScreen onLogin={handleLogin} />
       | (LobbySetupScreen, Some(player)) => <LobbySetupScreen player onMessage={sendMessage} />
       | (InLobbyScreen(game), Some(player)) => <InLobbyScreen player game onMessage={sendMessage} />
       | (InProgressScreen(game), Some(player)) =>
@@ -78,7 +83,7 @@ let default = () => {
   } else {
     <div className="flex flex-row flex-wrap w-full">
       <PlayerScreen />
-      <PlayerScreen />
+      // <PlayerScreen />
       // <PlayerScreen playerId="p1" sessionId="session:p1" />
       // <PlayerScreen playerId="p2" sessionId="session:p2" />
       // <PlayerScreen playerId="p3" sessionId="session:p3" />

@@ -12,19 +12,19 @@ let autologin = (~sendMessage, ~playerId, ~sessionId, ~gameId, ~isOwner=false, (
 
       let delayM = delay(sendMessage)
 
-      if isOwner {
-        delayM(Login(sessionId), ())
-        ->then(() => delayM(Lobby(Create, playerId, ""), ()))
-        ->then(() => delayM(Lobby(Enter, playerId, gameId), ()))
-        ->then(() => delayM(Lobby(Ready, playerId, gameId), ()))
-        ->then(() => delayM(Lobby(Start, playerId, gameId), ~timeout=300, ()))
-        ->ignore
-      } else {
-        delayM(Login(sessionId), ())
-        ->then(() => delayM(Lobby(Enter, playerId, gameId), ~timeout=250, ()))
-        ->then(() => delayM(Lobby(Ready, playerId, gameId), ()))
-        ->ignore
-      }
+      // if isOwner {
+      //   delayM(Login(sessionId), ())
+      //   ->then(() => delayM(Lobby(Create, playerId, ""), ()))
+      //   ->then(() => delayM(Lobby(Enter, playerId, gameId), ()))
+      //   ->then(() => delayM(Lobby(Ready, playerId, gameId), ()))
+      //   ->then(() => delayM(Lobby(Start, playerId, gameId), ~timeout=300, ()))
+      //   ->ignore
+      // } else {
+      //   delayM(Login(sessionId), ())
+      //   ->then(() => delayM(Lobby(Enter, playerId, gameId), ~timeout=250, ()))
+      //   ->then(() => delayM(Lobby(Ready, playerId, gameId), ()))
+      //   ->ignore
+      // }
 
       setIsLoaded(_ => true)
     }

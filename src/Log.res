@@ -9,8 +9,6 @@ let info = createLogger("debug", Js.Console.infoMany)
 
 let clientMsgToString = msg =>
   switch msg {
-  | Register(playerId) => `Register ${playerId}`
-  | Login(sessionId) => `Login ${sessionId}`
   | Player(event, pId) =>
     `player [${pId}] ` ++
     switch event {

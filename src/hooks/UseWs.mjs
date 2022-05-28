@@ -6,40 +6,50 @@ import * as Utils from "../Utils.mjs";
 import * as React from "react";
 import * as $$WebSocket from "../bindings/WebSocket.mjs";
 import * as Serializer from "../Serializer.mjs";
+import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Belt_Result from "rescript/lib/es6/belt_Result.js";
 
-function hook(onMessage) {
+function hook(onMessage, player) {
   var match = React.useState(function () {
         
       });
   var setError = match[1];
-  var ws = React.useMemo((function () {
-          return new WebSocket("ws://localhost:3001/ws");
-        }), []);
-  ws.addEventListener("close", (function ($$event) {
-          console.log("close", $$event);
-          
-        }));
-  ws.addEventListener("error", (function ($$event) {
-          console.log("error", $$event);
-          
-        }));
-  ws.addEventListener("open", (function ($$event) {
-          console.log("open", $$event);
-          
-        }));
-  var sendMessage = React.useCallback((function (message) {
-          if ($$WebSocket.isOpen(ws)) {
-            Log.logMessageFromClient(message);
-            ws.send(Serializer.serializeClientMessage(message));
-            return ;
-          } else {
-            return Log.error([
-                        "Not connected",
-                        Log.clientMsgToString(message)
-                      ]);
-          }
-        }), [ws]);
+  var sessionId = Belt_Option.getWithDefault(Belt_Option.map(player, (function (player) {
+              return player.sessionId;
+            })), "");
+  var match$1 = React.useMemo((function () {
+          console.log("usews sessionId", sessionId);
+          var ws = new WebSocket("ws://localhost:3001/ws?sessionId=" + sessionId);
+          ws.addEventListener("close", (function ($$event) {
+                  console.log("close", $$event);
+                  
+                }));
+          ws.addEventListener("error", (function ($$event) {
+                  console.log("error", $$event);
+                  
+                }));
+          ws.addEventListener("open", (function ($$event) {
+                  console.log("open", $$event);
+                  
+                }));
+          var sendMessage = function (message) {
+            if ($$WebSocket.isOpen(ws)) {
+              Log.logMessageFromClient(message);
+              ws.send(Serializer.serializeClientMessage(message));
+              return ;
+            } else {
+              return Log.error([
+                          "Not connected",
+                          Log.clientMsgToString(message)
+                        ]);
+            }
+          };
+          return [
+                  ws,
+                  sendMessage
+                ];
+        }), [sessionId]);
+  var ws = match$1[0];
   React.useEffect((function () {
           var handleMessage = function ($$event) {
             Belt_Result.map(Belt_Result.flatMap(Utils.toResult($$WebSocket.messageAsText($$event), {
@@ -71,7 +81,7 @@ function hook(onMessage) {
       ]);
   return {
           error: match[0],
-          sendMessage: sendMessage
+          sendMessage: match$1[1]
         };
 }
 

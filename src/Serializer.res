@@ -136,8 +136,6 @@ let progressMsg = Jzon.object2(
 let gameMsg = Jzon.object4(
   kind =>
     switch kind {
-    | Register(playerId) => ("register", Jzon.encodeWith(playerId, Jzon.string), "", None)
-    | Login(sessionId) => ("login", Jzon.encodeWith(sessionId, Jzon.string), "", None)
     | Player(msg, playerId) => ("player", Jzon.encodeWith(msg, playerMsg), playerId, None)
     | Lobby(msg, playerId, gameId) => (
         "lobby",
@@ -154,8 +152,6 @@ let gameMsg = Jzon.object4(
     },
   ((kind, msg, playerId, gameId)) => {
     switch kind {
-    | "register" => Jzon.decodeWith(msg, Jzon.string)->Result.map(playerId => Register(playerId))
-    | "login" => Jzon.decodeWith(msg, Jzon.string)->Result.map(sessionId => Login(sessionId))
     | "player" => Jzon.decodeWith(msg, playerMsg)->Result.map(msg => Player(msg, playerId))
     | "lobby" =>
       gameId

@@ -14,7 +14,6 @@ function delay(send, msg, timeoutOpt, param) {
 }
 
 function autologin(sendMessage, playerId, sessionId, gameId, isOwnerOpt, param) {
-  var isOwner = isOwnerOpt !== undefined ? isOwnerOpt : false;
   var match = React.useState(function () {
         return false;
       });
@@ -22,62 +21,6 @@ function autologin(sendMessage, playerId, sessionId, gameId, isOwnerOpt, param) 
   var isLoaded = match[0];
   React.useEffect((function () {
           if (!isLoaded) {
-            var delayM = function (param, param$1, param$2) {
-              return delay(sendMessage, param, param$1, param$2);
-            };
-            if (isOwner) {
-              delayM({
-                            TAG: /* Login */1,
-                            _0: sessionId
-                          }, undefined, undefined).then(function (param) {
-                          return delayM({
-                                      TAG: /* Lobby */3,
-                                      _0: /* Create */0,
-                                      _1: playerId,
-                                      _2: ""
-                                    }, undefined, undefined);
-                        }).then(function (param) {
-                        return delayM({
-                                    TAG: /* Lobby */3,
-                                    _0: /* Enter */1,
-                                    _1: playerId,
-                                    _2: gameId
-                                  }, undefined, undefined);
-                      }).then(function (param) {
-                      return delayM({
-                                  TAG: /* Lobby */3,
-                                  _0: /* Ready */2,
-                                  _1: playerId,
-                                  _2: gameId
-                                }, undefined, undefined);
-                    }).then(function (param) {
-                    return delayM({
-                                TAG: /* Lobby */3,
-                                _0: /* Start */3,
-                                _1: playerId,
-                                _2: gameId
-                              }, 300, undefined);
-                  });
-            } else {
-              delayM({
-                        TAG: /* Login */1,
-                        _0: sessionId
-                      }, undefined, undefined).then(function (param) {
-                      return delayM({
-                                  TAG: /* Lobby */3,
-                                  _0: /* Enter */1,
-                                  _1: playerId,
-                                  _2: gameId
-                                }, 250, undefined);
-                    }).then(function (param) {
-                    return delayM({
-                                TAG: /* Lobby */3,
-                                _0: /* Ready */2,
-                                _1: playerId,
-                                _2: gameId
-                              }, undefined, undefined);
-                  });
-            }
             Curry._1(setIsLoaded, (function (param) {
                     return true;
                   }));

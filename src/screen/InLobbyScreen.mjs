@@ -23,7 +23,7 @@ function InLobbyScreen(Props) {
                     disabled: !isCanStart,
                     onClick: (function (param) {
                         return Curry._1(onMessage, {
-                                    TAG: /* Lobby */3,
+                                    TAG: /* Lobby */1,
                                     _0: /* Start */3,
                                     _1: player.id,
                                     _2: game.gameId
@@ -36,7 +36,7 @@ function InLobbyScreen(Props) {
                           })),
                     onClick: (function (param) {
                         return Curry._1(onMessage, {
-                                    TAG: /* Lobby */3,
+                                    TAG: /* Lobby */1,
                                     _0: /* Ready */2,
                                     _1: player.id,
                                     _2: game.gameId

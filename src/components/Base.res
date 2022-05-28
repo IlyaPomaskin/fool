@@ -89,9 +89,10 @@ module Switch = {
 
 module Input = {
   @react.component
-  let make = (~value: string, ~onChange: string => unit, ~className: string="") =>
+  let make = (~value, ~disabled=false, ~onChange: string => unit, ~className: string="") =>
     <input
       value
+      disabled
       onChange={e => onChange(ReactEvent.Form.target(e)["value"])}
       type_="text"
       className={cx([

@@ -91,15 +91,23 @@ function Index$PlayerScreen(Props) {
             
           }
         }), [player]);
-  var match$2 = UseWs.hook(onMessage);
+  var match$2 = UseWs.hook(onMessage, player);
   var sendMessage = match$2.sendMessage;
   var error = match$2.error;
+  var handleLogin = function (player) {
+    Curry._1(setPlayer, (function (param) {
+            return player;
+          }));
+    return Curry._1(setScreen, (function (param) {
+                  return /* LobbySetupScreen */1;
+                }));
+  };
   var tmp;
   var exit = 0;
   if (typeof screen === "number") {
     if (screen === /* AuthorizationScreen */0) {
       tmp = React.createElement(AuthorizationScreen.make, {
-            onMessage: sendMessage
+            onLogin: handleLogin
           });
     } else if (player !== undefined) {
       tmp = React.createElement(LobbySetupScreen.make, {
@@ -144,7 +152,7 @@ function $$default(param) {
   if (isStarted) {
     return React.createElement("div", {
                 className: "flex flex-row flex-wrap w-full"
-              }, React.createElement(Index$PlayerScreen, {}), React.createElement(Index$PlayerScreen, {}));
+              }, React.createElement(Index$PlayerScreen, {}));
   } else {
     return React.createElement("div", undefined, "Loading...");
   }
