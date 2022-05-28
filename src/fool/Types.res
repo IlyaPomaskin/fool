@@ -103,10 +103,18 @@ type gameMessageFromServer =
   | LobbyUpdated(inLobby)
   | ProgressCreated(inProgress)
   | ProgressUpdated(inProgress)
+
   | ServerError(string)
+  | LoginError(string)
+  | RegisterError(string)
 
 type clientScreen =
   | AuthorizationScreen
   | LobbySetupScreen
   | InLobbyScreen(inLobby)
   | InProgressScreen(inProgress)
+
+type userApiResponse =
+  | Registered(player)
+  | LoggedIn(player)
+  | UserError(string)

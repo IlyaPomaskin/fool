@@ -118,6 +118,13 @@ function tapResult(result, fn) {
               }));
 }
 
+function tapErrorResult(result, fn) {
+  if (result.TAG !== /* Ok */0) {
+    Curry._1(fn, result._0);
+  }
+  return result;
+}
+
 function listIndexOf(list, equalsFn) {
   return Belt_List.reduceWithIndex(list, undefined, (function (acc, item, index) {
                 if (Curry._1(equalsFn, item)) {
@@ -153,6 +160,7 @@ export {
   toResult ,
   Classify ,
   tapResult ,
+  tapErrorResult ,
   leftRotationClassName ,
   rightRotationClassName ,
   listIndexOf ,

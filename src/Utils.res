@@ -62,11 +62,21 @@ module Classify = {
     }`)
 }
 
-let tapResult = (result: result<'a, 'b>, fn: 'a => unit): result<'a, 'b> =>
+let tapResult = (result: result<'a, 'b>, fn: 'a => unit): result<'a, 'b> => {
   Result.map(result, content => {
     fn(content)
     content
   })
+}
+
+let tapErrorResult = (result: result<'a, 'b>, fn: 'b => unit): result<'a, 'b> => {
+  switch result {
+  | Error(err) => fn(err)
+  | _ => ignore()
+  }
+
+  result
+}
 
 let leftRotationClassName = "-rotate-12 -translate-x-1.5"
 let rightRotationClassName = "rotate-12 translate-x-1.5"

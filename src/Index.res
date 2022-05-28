@@ -6,7 +6,6 @@ module PlayerScreen = {
   let make = () => {
     let (player, setPlayer) = React.useState(_ => None)
     let (screen, setScreen) = React.useState(_ => AuthorizationScreen)
-
     let onMessage = React.useCallback1(message => {
       Log.logMessageFromServer(message, player)
 
@@ -18,17 +17,18 @@ module PlayerScreen = {
       | (LobbyCreated(game), Some(player))
       | (LobbyUpdated(game), Some(player)) => {
           setScreen(_ => InLobbyScreen(game))
-          setPlayer(_ => game.players->List.getBy(p => p.id == player.id))
+          setPlayer(_ => game.players->List.getBy(Player.equals(player)))
         }
       | (ProgressCreated(game), Some(player))
       | (ProgressUpdated(game), Some(player)) =>
         setScreen(_ => InProgressScreen(game))
-        setPlayer(_ => game.players->List.getBy(p => p.id == player.id))
+        setPlayer(_ => game.players->List.getBy(Player.equals(player)))
       | (ServerError(msg), _) => Log.info(["ServerError", msg])
       | _ => ignore()
       }
     }, [player])
 
+    // let {player, screen, onMessage} = useMessageHandler()
     let {error, sendMessage} = UseWs.hook(onMessage)
 
     // UseDebug.autologin(

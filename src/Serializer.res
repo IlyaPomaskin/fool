@@ -254,6 +254,8 @@ let serverGameMsg = Jzon.object2(
     | LobbyUpdated(game) => ("lobbyUpdated", Jzon.encodeWith(game, inLobbyMsg))
     | ProgressCreated(game) => ("progressCreated", Jzon.encodeWith(game, inProgressMsg))
     | ProgressUpdated(game) => ("progressUpdated", Jzon.encodeWith(game, inProgressMsg))
+    | LoginError(err) => ("loginError", Jzon.encodeWith(err, Jzon.string))
+    | RegisterError(err) => ("registerError", Jzon.encodeWith(err, Jzon.string))
     | ServerError(msg) => ("error", Jzon.encodeWith(msg, Jzon.string))
     },
   ((kind, payload)) => {
@@ -280,3 +282,30 @@ let serializeServerMessage = (msg: gameMessageFromServer) =>
   Jzon.encodeStringWith(msg, serverGameMsg)
 
 let deserializeServerMessage = (msg: string) => Jzon.decodeStringWith(msg, serverGameMsg)
+
+let userApiResponseMsg = Jzon.object2(
+  kind =>
+    switch kind {
+    | LoggedIn(player) => ("loggedin", Jzon.encodeWith(player, playerMsg))
+    | Registered(player) => ("registered", Jzon.encodeWith(player, playerMsg))
+    | UserError(err) => ("userError", Jzon.encodeWith(err, Jzon.string))
+    },
+  ((kind, payload)) => {
+    switch (kind, payload) {
+    | ("loggedin", player) =>
+      Jzon.decodeWith(player, playerMsg)->Result.map(player => LoggedIn(player))
+    | ("registered", player) =>
+      Jzon.decodeWith(player, playerMsg)->Result.map(player => Registered(player))
+    | ("userError", err) => Jzon.decodeWith(err, Jzon.string)->Result.map(err => UserError(err))
+    | (x, _) => Error(#UnexpectedJsonValue([Field("kind")], x))
+    }
+  },
+  Jzon.field("kind", Jzon.string),
+  Jzon.field("payload", Jzon.json),
+)
+
+let serializeUserApiResponse = (response: userApiResponse) =>
+  Jzon.encodeStringWith(response, userApiResponseMsg)
+
+let deserializeUserApiResponse = (response: string) =>
+  Jzon.decodeStringWith(response, userApiResponseMsg)

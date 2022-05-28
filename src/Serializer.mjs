@@ -516,6 +516,16 @@ var serverGameMsg = Jzon.object2((function (kind) {
                       "error",
                       Jzon.encodeWith(kind._0, Jzon.string)
                     ];
+          case /* LoginError */6 :
+              return [
+                      "loginError",
+                      Jzon.encodeWith(kind._0, Jzon.string)
+                    ];
+          case /* RegisterError */7 :
+              return [
+                      "registerError",
+                      Jzon.encodeWith(kind._0, Jzon.string)
+                    ];
           
         }
       }), (function (param) {
@@ -589,6 +599,75 @@ function deserializeServerMessage(msg) {
   return Jzon.decodeStringWith(msg, serverGameMsg);
 }
 
+var userApiResponseMsg = Jzon.object2((function (kind) {
+        switch (kind.TAG | 0) {
+          case /* Registered */0 :
+              return [
+                      "registered",
+                      Jzon.encodeWith(kind._0, playerMsg$1)
+                    ];
+          case /* LoggedIn */1 :
+              return [
+                      "loggedin",
+                      Jzon.encodeWith(kind._0, playerMsg$1)
+                    ];
+          case /* UserError */2 :
+              return [
+                      "userError",
+                      Jzon.encodeWith(kind._0, Jzon.string)
+                    ];
+          
+        }
+      }), (function (param) {
+        var payload = param[1];
+        var kind = param[0];
+        switch (kind) {
+          case "loggedin" :
+              return Belt_Result.map(Jzon.decodeWith(payload, playerMsg$1), (function (player) {
+                            return {
+                                    TAG: /* LoggedIn */1,
+                                    _0: player
+                                  };
+                          }));
+          case "registered" :
+              return Belt_Result.map(Jzon.decodeWith(payload, playerMsg$1), (function (player) {
+                            return {
+                                    TAG: /* Registered */0,
+                                    _0: player
+                                  };
+                          }));
+          case "userError" :
+              return Belt_Result.map(Jzon.decodeWith(payload, Jzon.string), (function (err) {
+                            return {
+                                    TAG: /* UserError */2,
+                                    _0: err
+                                  };
+                          }));
+          default:
+            return {
+                    TAG: /* Error */1,
+                    _0: {
+                      NAME: "UnexpectedJsonValue",
+                      VAL: [
+                        [{
+                            TAG: /* Field */0,
+                            _0: "kind"
+                          }],
+                        kind
+                      ]
+                    }
+                  };
+        }
+      }), Jzon.field("kind", Jzon.string), Jzon.field("payload", Jzon.json));
+
+function serializeUserApiResponse(response) {
+  return Jzon.encodeStringWith(response, userApiResponseMsg);
+}
+
+function deserializeUserApiResponse(response) {
+  return Jzon.decodeStringWith(response, userApiResponseMsg);
+}
+
 export {
   card ,
   suit ,
@@ -608,6 +687,9 @@ export {
   serverGameMsg ,
   serializeServerMessage ,
   deserializeServerMessage ,
+  userApiResponseMsg ,
+  serializeUserApiResponse ,
+  deserializeUserApiResponse ,
   
 }
 /* card Not a pure module */

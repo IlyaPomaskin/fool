@@ -104,6 +104,10 @@ function serverMsgToString(msg) {
         return "[" + msg._0.gameId + "] ProgressUpdated";
     case /* ServerError */5 :
         return "ServerError: " + msg._0;
+    case /* LoginError */6 :
+        return "LoginError: " + msg._0;
+    case /* RegisterError */7 :
+        return "RegisterError: " + msg._0;
     
   }
 }

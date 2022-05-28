@@ -5,6 +5,7 @@ import * as Curry from "rescript/lib/es6/curry.js";
 import * as UseWs from "./hooks/UseWs.mjs";
 import * as Utils from "./Utils.mjs";
 import * as React from "react";
+import * as Player from "./fool/Player.mjs";
 import * as PlayerUI from "./components/PlayerUI.mjs";
 import * as UseDebug from "./hooks/UseDebug.mjs";
 import * as Belt_List from "rescript/lib/es6/belt_List.js";
@@ -49,6 +50,9 @@ function Index$PlayerScreen(Props) {
                             "ServerError",
                             message._0
                           ]);
+            case /* LoginError */6 :
+            case /* RegisterError */7 :
+                return ;
             
           }
           switch (exit) {
@@ -64,8 +68,8 @@ function Index$PlayerScreen(Props) {
                               };
                       }));
                 return Curry._1(setPlayer, (function (param) {
-                              return Belt_List.getBy(game.players, (function (p) {
-                                            return p.id === player.id;
+                              return Belt_List.getBy(game.players, (function (param) {
+                                            return Player.equals(player, param);
                                           }));
                             }));
             case 2 :
@@ -80,8 +84,8 @@ function Index$PlayerScreen(Props) {
                               };
                       }));
                 return Curry._1(setPlayer, (function (param) {
-                              return Belt_List.getBy(game$1.players, (function (p) {
-                                            return p.id === player.id;
+                              return Belt_List.getBy(game$1.players, (function (param) {
+                                            return Player.equals(player, param);
                                           }));
                             }));
             

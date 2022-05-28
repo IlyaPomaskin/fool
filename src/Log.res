@@ -45,6 +45,8 @@ let serverMsgToString = msg =>
   | LobbyUpdated(g) => `[${g.gameId}] LobbyUpdated`
   | ProgressCreated(g) => `[${g.gameId}] ProgressCreated`
   | ProgressUpdated(g) => `[${g.gameId}] ProgressUpdated`
+  | LoginError(err) => `LoginError: ${err}`
+  | RegisterError(err) => `RegisterError: ${err}`
   | ServerError(msg) => `ServerError: ${msg}`
   }
 

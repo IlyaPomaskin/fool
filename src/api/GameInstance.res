@@ -25,7 +25,7 @@ let loginPlayer = sessionId => PlayersMap.findBySessionId(players, sessionId)
 let createLobby = playerId => {
   players
   ->PlayersMap.get(playerId)
-  ->Result.flatMap(player => gamesInLobby->LobbyGameMap.create(player))
+  ->Result.flatMap(player => LobbyGameMap.create(gamesInLobby, player))
 }
 
 let enterGame = (playerId, gameId) => {
@@ -34,7 +34,7 @@ let enterGame = (playerId, gameId) => {
   ->Result.flatMap(player => {
     gamesInLobby->LobbyGameMap.get(gameId)->Result.flatMap(lobby => Game.enterGame(lobby, player))
   })
-  ->Result.flatMap(game => gamesInLobby->LobbyGameMap.set(game.gameId, game))
+  ->Result.flatMap(game => LobbyGameMap.set(gamesInLobby, game.gameId, game))
 }
 
 let toggleReady = (playerId, gameId) => {
@@ -57,8 +57,8 @@ let startGame = (playerId, gameId) => {
   )
   ->Result.flatMap(game => Game.startGame(game))
   ->Result.flatMap(game => {
-    gamesInLobby->LobbyGameMap.remove(gameId)
-    gamesInProgress->ProgressGameMap.set(gameId, game)
+    LobbyGameMap.remove(gamesInLobby, gameId)
+    ProgressGameMap.set(gamesInProgress, gameId, game)
   })
 }
 

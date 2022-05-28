@@ -16,6 +16,18 @@ function hook(onMessage) {
   var ws = React.useMemo((function () {
           return new WebSocket("ws://localhost:3001/ws");
         }), []);
+  ws.addEventListener("close", (function ($$event) {
+          console.log("close", $$event);
+          
+        }));
+  ws.addEventListener("error", (function ($$event) {
+          console.log("error", $$event);
+          
+        }));
+  ws.addEventListener("open", (function ($$event) {
+          console.log("open", $$event);
+          
+        }));
   var sendMessage = React.useCallback((function (message) {
           if ($$WebSocket.isOpen(ws)) {
             Log.logMessageFromClient(message);
