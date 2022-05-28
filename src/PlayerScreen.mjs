@@ -14,7 +14,8 @@ import * as LobbySetupScreen from "./screen/LobbySetupScreen.mjs";
 import * as AuthorizationScreen from "./screen/AuthorizationScreen.mjs";
 
 function PlayerScreen(Props) {
-  var onConnect = Props.onConnect;
+  var onConnectOpt = Props.onConnect;
+  var onConnect = onConnectOpt !== undefined ? onConnectOpt : Utils.noop2;
   var match = React.useState(function () {
         
       });

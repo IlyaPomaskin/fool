@@ -2,7 +2,7 @@ open Types
 open Utils
 
 @react.component
-let make = (~onConnect) => {
+let make = (~onConnect=noop2) => {
   let (player, setPlayer) = React.useState(_ => None)
   let (screen, setScreen) = React.useState(_ => AuthorizationScreen)
   let onMessage = React.useCallback1(message => {

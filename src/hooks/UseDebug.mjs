@@ -13,26 +13,6 @@ function delay(send, msg, timeoutOpt, param) {
               }));
 }
 
-function autologin(sendMessage, playerId, sessionId, gameId, isOwnerOpt, param) {
-  var match = React.useState(function () {
-        return false;
-      });
-  var setIsLoaded = match[1];
-  var isLoaded = match[0];
-  React.useEffect((function () {
-          if (!isLoaded) {
-            Curry._1(setIsLoaded, (function (param) {
-                    return true;
-                  }));
-          }
-          
-        }), [
-        sendMessage,
-        isLoaded
-      ]);
-  
-}
-
 function startServer(param) {
   var match = React.useState(function () {
         return false;
@@ -55,7 +35,6 @@ function startServer(param) {
 
 export {
   delay ,
-  autologin ,
   startServer ,
   
 }
