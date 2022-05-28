@@ -22,14 +22,14 @@ let make = (~onLogin) => {
           onLogin(player)
         }
       | Ok(UserError(err)) => setError(_ => Some(err))
-      | Error(err) => setError(_ => Some(Jzon.DecodingError.toString(err)))
+      | Error(err) => {
+          LocalStorage.setItem("sessionId", "")
+          setError(_ => Some(Jzon.DecodingError.toString(err)))
+        }
       }->resolve
     })
-    |> catch(_ => resolve(ignore()))
-    |> then_(_ => {
-      setIsLoading(_ => false)
-      resolve(ignore())
-    })
+    |> catch(_ => resolve())
+    |> then_(_ => setIsLoading(_ => false)->resolve)
     |> ignore
   }
 

@@ -45,9 +45,8 @@ function hook(onMessage, player, onConnect) {
                   console.log("error", $$event);
                   
                 }));
-          ws.addEventListener("open", (function ($$event) {
-                  console.log("open", $$event);
-                  return Curry._1(onConnect, sendMessage);
+          ws.addEventListener("open", (function (param) {
+                  return Curry._2(onConnect, sendMessage, player);
                 }));
           return [
                   ws,

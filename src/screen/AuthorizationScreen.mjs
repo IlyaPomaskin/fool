@@ -60,6 +60,7 @@ function AuthorizationScreen(Props) {
                 
               } else {
                 var err$2 = response._0;
+                localStorage.setItem("sessionId", "");
                 tmp = Curry._1(setError, (function (param) {
                         return Jzon.DecodingError.toString(err$2);
                       }));
@@ -68,10 +69,9 @@ function AuthorizationScreen(Props) {
             }).catch(function (param) {
             return Promise.resolve(undefined);
           }).then(function (param) {
-          Curry._1(setIsLoading, (function (param) {
-                  return false;
-                }));
-          return Promise.resolve(undefined);
+          return Promise.resolve(Curry._1(setIsLoading, (function (param) {
+                            return false;
+                          })));
         });
     
   };

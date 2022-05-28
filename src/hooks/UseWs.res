@@ -24,10 +24,8 @@ let hook = (~onMessage, ~player, ~onConnect): hookReturn => {
 
       WebSocket.addCloseListener(ws, event => Js.log2("close", event))
       WebSocket.addErrorListener(ws, event => Js.log2("error", event))
-      WebSocket.addOpenListener(ws, event => {
-        Js.log2("open", event)
-        onConnect(sendMessage)
-      })
+      WebSocket.addOpenListener(ws, _ => onConnect(sendMessage, player))
+
       (Some(ws), sendMessage)
     } else {
       (None, Utils.noop)
