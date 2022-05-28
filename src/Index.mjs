@@ -6,6 +6,7 @@ import * as UseWs from "./hooks/UseWs.mjs";
 import * as Utils from "./Utils.mjs";
 import * as React from "react";
 import * as PlayerUI from "./components/PlayerUI.mjs";
+import * as UseDebug from "./hooks/UseDebug.mjs";
 import * as Belt_List from "rescript/lib/es6/belt_List.js";
 import * as InLobbyScreen from "./screen/InLobbyScreen.mjs";
 import * as InProgressScreen from "./screen/InProgressScreen.mjs";
@@ -134,29 +135,9 @@ function Index$PlayerScreen(Props) {
                           })) : Utils.uiStr("No player")), React.createElement("div", undefined, error !== undefined ? React.createElement("div", undefined, Utils.uiStr("error: " + error)) : React.createElement("div", undefined, Utils.uiStr("No error"))), tmp);
 }
 
-function useDebugStartServer(param) {
-  var match = React.useState(function () {
-        return false;
-      });
-  var setIsLoaded = match[1];
-  var isLoaded = match[0];
-  React.useEffect((function () {
-          if (!isLoaded) {
-            fetch("/api/server").then(function (param) {
-                  Curry._1(setIsLoaded, (function (param) {
-                          return true;
-                        }));
-                  return Promise.resolve(1);
-                });
-          }
-          
-        }), [isLoaded]);
-  return isLoaded;
-}
-
 function $$default(param) {
-  var isLoaded = useDebugStartServer(undefined);
-  if (isLoaded) {
+  var isStarted = UseDebug.startServer(undefined);
+  if (isStarted) {
     return React.createElement("div", {
                 className: "flex flex-row flex-wrap w-full"
               }, React.createElement(Index$PlayerScreen, {}), React.createElement(Index$PlayerScreen, {}));

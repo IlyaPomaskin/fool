@@ -1,39 +1,6 @@
 open Types
 open Utils
 
-let delay = (send, msg, ~timeout=100, ()) =>
-  Promise.make((resolve, _) => Js.Global.setTimeout(() => resolve(. send(msg)), timeout)->ignore)
-
-let useDebugActions = (~sendMessage, ~playerId, ~sessionId, ~gameId, ~isOwner=false, ()) => {
-  let (isLoaded, setIsLoaded) = React.useState(_ => false)
-
-  React.useEffect2(() => {
-    if !isLoaded {
-      open Promise
-
-      let delayM = delay(sendMessage)
-
-      if isOwner {
-        delayM(Login(sessionId), ())
-        ->then(() => delayM(Lobby(Create, playerId, ""), ()))
-        ->then(() => delayM(Lobby(Enter, playerId, gameId), ()))
-        ->then(() => delayM(Lobby(Ready, playerId, gameId), ()))
-        ->then(() => delayM(Lobby(Start, playerId, gameId), ~timeout=300, ()))
-        ->ignore
-      } else {
-        delayM(Login(sessionId), ())
-        ->then(() => delayM(Lobby(Enter, playerId, gameId), ~timeout=250, ()))
-        ->then(() => delayM(Lobby(Ready, playerId, gameId), ()))
-        ->ignore
-      }
-
-      setIsLoaded(_ => true)
-    }
-
-    None
-  }, (sendMessage, isLoaded))
-}
-
 module PlayerScreen = {
   @react.component
   let make = () => {
@@ -64,7 +31,7 @@ module PlayerScreen = {
 
     let {error, sendMessage} = UseWs.hook(onMessage)
 
-    // useDebugActions(
+    // UseDebug.autologin(
     //   ~sendMessage,
     //   ~playerId="p1",
     //   ~gameId="g1",
@@ -102,29 +69,11 @@ module PlayerScreen = {
   }
 }
 
-let useDebugStartServer = () => {
-  let (isLoaded, setIsLoaded) = React.useState(_ => false)
-  React.useEffect1(() => {
-    if !isLoaded {
-      Fetch.fetch("/api/server")
-      |> Js.Promise.then_(_ => {
-        setIsLoaded(_ => true)
-        Js.Promise.resolve(1)
-      })
-      |> ignore
-    }
-
-    None
-  }, [isLoaded])
-
-  isLoaded
-}
-
 let default = () => {
   // FIXME remove debug code
-  let isLoaded = useDebugStartServer()
+  let isStarted = UseDebug.startServer()
 
-  if !isLoaded {
+  if !isStarted {
     <div> {React.string("Loading...")} </div>
   } else {
     <div className="flex flex-row flex-wrap w-full">
