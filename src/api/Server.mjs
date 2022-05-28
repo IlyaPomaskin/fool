@@ -72,89 +72,101 @@ function broadcastToPlayers(players, $$event) {
 }
 
 wsServer.on(WsWebSocketServer.ServerEvents.connection, (function (ws, req) {
-        var playerId = Belt_Result.map(Belt_Result.flatMap(Utils.toResult(ServerUtils.getParam(ServerUtils.getSearchParams(ServerUtils.getUrl(req, "ws")), "sessionId"), "No sessionId"), GameInstance.loginPlayer), (function (player) {
+        var sessionId = ServerUtils.getParam(ServerUtils.getSearchParams(ServerUtils.getUrl(req, "ws")), "sessionId");
+        var playerId = Belt_Result.map(Belt_Result.flatMap(Utils.toResult(sessionId, "No sessionId"), GameInstance.loginPlayer), (function (player) {
                 return player.id;
               }));
-        console.log("playerId", playerId);
+        if (sessionId !== undefined) {
+          if (sessionId === "") {
+            ws.close();
+            return Log.error(["No sessionId"]);
+          }
+          if (playerId.TAG === /* Ok */0) {
+            var playerId$1 = playerId._0;
+            $$Storage.PlayersSocketMap.set(playersSocket, playerId$1, ws);
+            ws.on(WsWebSocket.ClientEvents.close, (function (param, param$1) {
+                      return $$Storage.PlayersSocketMap.remove(playersSocket, playerId$1);
+                    })).on(WsWebSocket.ClientEvents.message, (function (msg, param) {
+                    var ws = this ;
+                    Belt_Result.map(Utils.tapResult(Serializer.deserializeClientMessage(Belt_Option.getWithDefault(WsWebSocket.RawData.toString(msg), "")), Log.logMessageFromClient), (function (msg) {
+                            var tmp;
+                            switch (msg.TAG | 0) {
+                              case /* Player */0 :
+                                  tmp = {
+                                    TAG: /* Error */1,
+                                    _0: "Message from server cannot be parsed as text"
+                                  };
+                                  break;
+                              case /* Lobby */1 :
+                                  switch (msg._0) {
+                                    case /* Create */0 :
+                                        tmp = Belt_Result.map(GameInstance.createLobby(msg._1), (function (lobby) {
+                                                return broadcastToPlayers(lobby.players, {
+                                                            TAG: /* LobbyCreated */1,
+                                                            _0: lobby
+                                                          });
+                                              }));
+                                        break;
+                                    case /* Enter */1 :
+                                        tmp = Belt_Result.map(GameInstance.enterGame(msg._1, msg._2), (function (lobby) {
+                                                return broadcastToPlayers(lobby.players, {
+                                                            TAG: /* LobbyUpdated */2,
+                                                            _0: lobby
+                                                          });
+                                              }));
+                                        break;
+                                    case /* Ready */2 :
+                                        tmp = Belt_Result.map(GameInstance.toggleReady(msg._1, msg._2), (function (lobby) {
+                                                return broadcastToPlayers(lobby.players, {
+                                                            TAG: /* LobbyUpdated */2,
+                                                            _0: lobby
+                                                          });
+                                              }));
+                                        break;
+                                    case /* Start */3 :
+                                        tmp = Belt_Result.map(GameInstance.startGame(msg._1, msg._2), (function (progress) {
+                                                return broadcastToPlayers(progress.players, {
+                                                            TAG: /* ProgressCreated */3,
+                                                            _0: progress
+                                                          });
+                                              }));
+                                        break;
+                                    
+                                  }
+                                  break;
+                              case /* Progress */2 :
+                                  tmp = Belt_Result.map(GameInstance.move(msg._1, msg._2, msg._0), (function (progress) {
+                                          return broadcastToPlayers(progress.players, {
+                                                      TAG: /* ProgressUpdated */4,
+                                                      _0: progress
+                                                    });
+                                        }));
+                                  break;
+                              
+                            }
+                            return Utils.tapErrorResult(tmp, (function (msg) {
+                                          return sendToWs(ws, {
+                                                      TAG: /* ServerError */5,
+                                                      _0: msg
+                                                    });
+                                        }));
+                          }));
+                    
+                  }));
+            return ;
+          }
+          
+        }
         if (playerId.TAG === /* Ok */0) {
-          var playerId$1 = playerId._0;
-          $$Storage.PlayersSocketMap.set(playersSocket, playerId$1, ws);
-          ws.on(WsWebSocket.ClientEvents.close, (function (param, param$1) {
-                    return $$Storage.PlayersSocketMap.remove(playersSocket, playerId$1);
-                  })).on(WsWebSocket.ClientEvents.message, (function (msg, param) {
-                  var ws = this ;
-                  Belt_Result.map(Utils.tapResult(Serializer.deserializeClientMessage(Belt_Option.getWithDefault(WsWebSocket.RawData.toString(msg), "")), Log.logMessageFromClient), (function (msg) {
-                          var tmp;
-                          switch (msg.TAG | 0) {
-                            case /* Player */0 :
-                                tmp = {
-                                  TAG: /* Error */1,
-                                  _0: "Message from server cannot be parsed as text"
-                                };
-                                break;
-                            case /* Lobby */1 :
-                                switch (msg._0) {
-                                  case /* Create */0 :
-                                      tmp = Belt_Result.map(GameInstance.createLobby(msg._1), (function (lobby) {
-                                              return broadcastToPlayers(lobby.players, {
-                                                          TAG: /* LobbyCreated */1,
-                                                          _0: lobby
-                                                        });
-                                            }));
-                                      break;
-                                  case /* Enter */1 :
-                                      tmp = Belt_Result.map(GameInstance.enterGame(msg._1, msg._2), (function (lobby) {
-                                              return broadcastToPlayers(lobby.players, {
-                                                          TAG: /* LobbyUpdated */2,
-                                                          _0: lobby
-                                                        });
-                                            }));
-                                      break;
-                                  case /* Ready */2 :
-                                      tmp = Belt_Result.map(GameInstance.toggleReady(msg._1, msg._2), (function (lobby) {
-                                              return broadcastToPlayers(lobby.players, {
-                                                          TAG: /* LobbyUpdated */2,
-                                                          _0: lobby
-                                                        });
-                                            }));
-                                      break;
-                                  case /* Start */3 :
-                                      tmp = Belt_Result.map(GameInstance.startGame(msg._1, msg._2), (function (progress) {
-                                              return broadcastToPlayers(progress.players, {
-                                                          TAG: /* ProgressCreated */3,
-                                                          _0: progress
-                                                        });
-                                            }));
-                                      break;
-                                  
-                                }
-                                break;
-                            case /* Progress */2 :
-                                tmp = Belt_Result.map(GameInstance.move(msg._1, msg._2, msg._0), (function (progress) {
-                                        return broadcastToPlayers(progress.players, {
-                                                    TAG: /* ProgressUpdated */4,
-                                                    _0: progress
-                                                  });
-                                      }));
-                                break;
-                            
-                          }
-                          return Utils.tapErrorResult(tmp, (function (msg) {
-                                        return sendToWs(ws, {
-                                                    TAG: /* ServerError */5,
-                                                    _0: msg
-                                                  });
-                                      }));
-                        }));
-                  
-                }));
-          return ;
+          ws.close();
+          return Log.error(["Connection error"]);
         }
         ws.close();
-        return Log.error(["PlayerId not found"]);
+        return Log.error([
+                    "PlayerId not found",
+                    playerId._0
+                  ]);
       }));
-
-console.log("START");
 
 function $$default(param, res) {
   res.end(Buffer.from("response"));
