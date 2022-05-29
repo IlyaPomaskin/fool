@@ -33,20 +33,31 @@ let make = (~gameId=None) => {
 
   let handleLogin = player => setPlayer(Some(player))
 
-  let sendMessage = UseWs.hook(~onMessage, ~player)
+  let (isConnected, setIsConnected) = useStateValue(false)
 
-  <div className="w-96 h-128 border rounded-md border-solid border-slate-500">
+  let sendMessage = UseWs.hook(
+    ~onMessage,
+    ~player,
+    ~onConnect=_ => setIsConnected(true),
+    ~onDisconnect=_ => setIsConnected(false),
+    ~onError=_ => setIsConnected(false),
+  )
+
+  <div className="w-96 h-128 border rounded-md border-solid border-slate-500 p-2">
     <div>
       {switch player {
-      | Some(player) =>
-        <div> {uiStr("Player: ")} <PlayerUI.Short className="inline-block" player /> </div>
-      | None => uiStr("No player")
+      | Some(player) => <>
+          {uiStr("Player: ")}
+          <PlayerUI.Short className="inline" player />
+          <span className="px-1"> {uiStr(isConnected ? `🟢` : `🔴`)} </span>
+        </>
+      | None => React.null
       }}
     </div>
     <div>
       {switch error {
-      | Some(err) => <div> {uiStr("error: " ++ err)} </div>
-      | None => <div> {uiStr("No error")} </div>
+      | Some(err) => <div> {uiStr("ServerError: " ++ err)} </div>
+      | None => React.null
       }}
     </div>
     {switch (screen, player) {

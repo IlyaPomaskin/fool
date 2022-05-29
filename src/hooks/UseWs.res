@@ -1,6 +1,7 @@
 open Types
+open Utils
 
-let hook = (~onMessage, ~player) => {
+let hook = (~player, ~onMessage, ~onConnect=noop, ~onDisconnect=noop, ~onError=noop) => {
   let sessionId = player->Option.map(player => player.sessionId)->Option.getWithDefault("")
   let (ws, sendMessage) = React.useMemo1(_ => {
     if sessionId != "" {
@@ -15,9 +16,9 @@ let hook = (~onMessage, ~player) => {
         }
       }
 
-      WebSocket.addCloseListener(ws, event => Js.log2("close", event))
-      WebSocket.addErrorListener(ws, event => Js.log2("error", event))
-      WebSocket.addOpenListener(ws, event => Js.log2("open", event))
+      WebSocket.addCloseListener(ws, onDisconnect)
+      WebSocket.addErrorListener(ws, onError)
+      WebSocket.addOpenListener(ws, onConnect)
 
       (Some(ws), sendMessage)
     } else {

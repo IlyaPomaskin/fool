@@ -8,7 +8,10 @@ import * as Serializer from "../Serializer.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Belt_Result from "rescript/lib/es6/belt_Result.js";
 
-function hook(onMessage, player) {
+function hook(player, onMessage, onConnectOpt, onDisconnectOpt, onErrorOpt) {
+  var onConnect = onConnectOpt !== undefined ? onConnectOpt : Utils.noop;
+  var onDisconnect = onDisconnectOpt !== undefined ? onDisconnectOpt : Utils.noop;
+  var onError = onErrorOpt !== undefined ? onErrorOpt : Utils.noop;
   var sessionId = Belt_Option.getWithDefault(Belt_Option.map(player, (function (player) {
               return player.sessionId;
             })), "");
@@ -32,18 +35,9 @@ function hook(onMessage, player) {
                         ]);
             }
           };
-          ws.addEventListener("close", (function ($$event) {
-                  console.log("close", $$event);
-                  
-                }));
-          ws.addEventListener("error", (function ($$event) {
-                  console.log("error", $$event);
-                  
-                }));
-          ws.addEventListener("open", (function ($$event) {
-                  console.log("open", $$event);
-                  
-                }));
+          ws.addEventListener("close", onDisconnect);
+          ws.addEventListener("error", onError);
+          ws.addEventListener("open", onConnect);
           return [
                   ws,
                   sendMessage

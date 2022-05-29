@@ -84,7 +84,15 @@ function PlayerScreen(Props) {
   var handleLogin = function (player) {
     return Curry._1(setPlayer, player);
   };
-  var sendMessage = UseWs.hook(onMessage, player);
+  var match$3 = Utils.useStateValue(false);
+  var setIsConnected = match$3[1];
+  var sendMessage = UseWs.hook(player, onMessage, (function (param) {
+          return Curry._1(setIsConnected, true);
+        }), (function (param) {
+          return Curry._1(setIsConnected, false);
+        }), (function (param) {
+          return Curry._1(setIsConnected, false);
+        }));
   var tmp;
   var exit = 0;
   if (typeof screen === "number") {
@@ -124,11 +132,13 @@ function PlayerScreen(Props) {
     tmp = React.createElement("div", undefined, Utils.uiStr("unhandled case"));
   }
   return React.createElement("div", {
-              className: "w-96 h-128 border rounded-md border-solid border-slate-500"
-            }, React.createElement("div", undefined, player !== undefined ? React.createElement("div", undefined, Utils.uiStr("Player: "), React.createElement(PlayerUI.Short.make, {
-                            className: "inline-block",
+              className: "w-96 h-128 border rounded-md border-solid border-slate-500 p-2"
+            }, React.createElement("div", undefined, player !== undefined ? React.createElement(React.Fragment, undefined, Utils.uiStr("Player: "), React.createElement(PlayerUI.Short.make, {
+                            className: "inline",
                             player: player
-                          })) : Utils.uiStr("No player")), React.createElement("div", undefined, error !== undefined ? React.createElement("div", undefined, Utils.uiStr("error: " + error)) : React.createElement("div", undefined, Utils.uiStr("No error"))), tmp);
+                          }), React.createElement("span", {
+                            className: "px-1"
+                          }, Utils.uiStr(match$3[0] ? "🟢" : "🔴"))) : null), React.createElement("div", undefined, error !== undefined ? React.createElement("div", undefined, Utils.uiStr("ServerError: " + error)) : null), tmp);
 }
 
 var make = PlayerScreen;
