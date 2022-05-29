@@ -46,6 +46,7 @@ let broadcastToPlayers = (players, event) =>
 wsServer
 ->WsWebSocketServer.on(WsWebSocketServer.ServerEvents.connection, @this (_, ws, req) => {
   let sessionId = getUrl(req, "ws")->ServerUtils.getSearchParams->ServerUtils.getParam("sessionId")
+  Js.log(`/ws login ${sessionId->Option.getWithDefault("No sessionId")}`)
   let player = sessionId->Utils.toResult("No sessionId")->Result.flatMap(GameInstance.loginPlayer)
 
   switch (sessionId, player) {

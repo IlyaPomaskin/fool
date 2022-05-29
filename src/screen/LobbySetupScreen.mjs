@@ -27,11 +27,9 @@ function LobbySetupScreen(Props) {
               });
   };
   var match$1 = Utils.useStateValue(false);
-  var setIsWaiting = match$1[1];
   var isWaiting = match$1[0];
   React.useEffect((function () {
           if (gameId !== undefined) {
-            Curry._1(setIsWaiting, true);
             handleConnect(gameId);
           }
           

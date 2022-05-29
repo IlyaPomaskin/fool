@@ -76,6 +76,7 @@ function broadcastToPlayers(players, $$event) {
 
 wsServer.on(WsWebSocketServer.ServerEvents.connection, (function (ws, req) {
         var sessionId = ServerUtils.getParam(ServerUtils.getSearchParams(ServerUtils.getUrl(req, "ws")), "sessionId");
+        console.log("/ws login " + Belt_Option.getWithDefault(sessionId, "No sessionId"));
         var player = Belt_Result.flatMap(Utils.toResult(sessionId, "No sessionId"), GameInstance.loginPlayer);
         if (sessionId !== undefined) {
           if (sessionId === "") {

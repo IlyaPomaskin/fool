@@ -9,18 +9,18 @@ function $$default(req, res) {
   var searchParams = ServerUtils.getSearchParams(ServerUtils.getUrl(req, "http"));
   var playerId = ServerUtils.getParam(searchParams, "playerId");
   var sessionId = ServerUtils.getParam(searchParams, "sessionId");
-  var response = sessionId !== undefined ? Belt_Result.map(GameInstance.loginPlayer(sessionId), (function (player) {
-            return {
-                    TAG: /* LoggedIn */1,
-                    _0: player
-                  };
-          })) : (
-      playerId !== undefined ? Belt_Result.map(GameInstance.registerPlayer(playerId), (function (player) {
-                return {
-                        TAG: /* Registered */0,
-                        _0: player
-                      };
-              })) : ({
+  var response = sessionId !== undefined ? (console.log("/api/user login " + sessionId), Belt_Result.map(GameInstance.loginPlayer(sessionId), (function (player) {
+              return {
+                      TAG: /* LoggedIn */1,
+                      _0: player
+                    };
+            }))) : (
+      playerId !== undefined ? (console.log("/api/user register " + playerId), Belt_Result.map(GameInstance.registerPlayer(playerId), (function (player) {
+                  return {
+                          TAG: /* Registered */0,
+                          _0: player
+                        };
+                }))) : ({
             TAG: /* Error */1,
             _0: "No way to authorize"
           })

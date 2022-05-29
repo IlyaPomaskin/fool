@@ -8,10 +8,14 @@ let default = (req: Http.IncomingMessage.t, res: Http.ServerResponse.t) => {
   let sessionId = getParam(searchParams, "sessionId")
 
   let response = switch (playerId, sessionId) {
-  | (_, Some(sessionId)) =>
-    GameInstance.loginPlayer(sessionId)->Result.map(player => LoggedIn(player))
-  | (Some(playerId), _) =>
-    GameInstance.registerPlayer(playerId)->Result.map(player => Registered(player))
+  | (_, Some(sessionId)) => {
+      Js.log(`/api/user login ${sessionId}`)
+      GameInstance.loginPlayer(sessionId)->Result.map(player => LoggedIn(player))
+    }
+  | (Some(playerId), _) => {
+      Js.log(`/api/user register ${playerId}`)
+      GameInstance.registerPlayer(playerId)->Result.map(player => Registered(player))
+    }
   | _ => Error("No way to authorize")
   }
 

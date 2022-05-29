@@ -12,13 +12,10 @@ let make = (~player, ~gameId, ~onMessage) => {
 
   let handleConnect = gameId => onMessage(Lobby(Enter, player.id, gameId))
 
-  let (isWaiting, setIsWaiting) = useStateValue(false)
+  let (isWaiting, _) = useStateValue(false)
   React.useEffect1(() => {
     switch gameId {
-    | Some(gameId) => {
-        setIsWaiting(true)
-        handleConnect(gameId)
-      }
+    | Some(gameId) => handleConnect(gameId)
     | _ => ignore()
     }
 
