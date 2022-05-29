@@ -30,21 +30,3 @@ let delay = (send, msg, ~timeout=100, ()) =>
 //     None
 //   }, (sendMessage, isLoaded))
 // }
-
-let startServer = () => {
-  let (isLoaded, setIsLoaded) = React.useState(_ => false)
-  React.useEffect1(() => {
-    if !isLoaded {
-      Fetch.fetch("/api/server")
-      |> Js.Promise.then_(_ => {
-        setIsLoaded(_ => true)
-        Js.Promise.resolve(1)
-      })
-      |> ignore
-    }
-
-    None
-  }, [isLoaded])
-
-  isLoaded
-}

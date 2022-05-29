@@ -1,4 +1,4 @@
-import "styles/main.css";
+import "../styles/main.css";
 
 import ResApp from "src/App.mjs";
 

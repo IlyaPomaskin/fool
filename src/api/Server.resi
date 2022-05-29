@@ -1,1 +1,1 @@
-let default: (NodeJs.Http.ClientRequest.t, NodeJs.Http.ServerResponse.t) => unit
+let createServer: NodeJs.Http.Server.t => unit

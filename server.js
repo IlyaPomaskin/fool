@@ -1,6 +1,8 @@
-const { createServer } = require("http");
-const { parse } = require("url");
-const next = require("next");
+import { createServer } from "http";
+import { parse } from "url";
+import next from "next";
+
+import * as wsServer from "./src/api/Server.mjs";
 
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "localhost";
@@ -9,12 +11,16 @@ const port = 3000;
 const app = next({ dev: true, hostname, port });
 const handle = app.getRequestHandler();
 
-require("./test");
-
 app.prepare().then(() => {
-  createServer(async (req, res) => {
+  const server = createServer(async (req, res) => {
     try {
       const parsedUrl = parse(req.url, true);
+
+      if (parsedUrl.pathname === "/_next/webpack-hmr") {
+        console.log("WEBPACK");
+        handle(req, res);
+        return;
+      }
 
       await handle(req, res, parsedUrl);
     } catch (err) {
@@ -22,7 +28,11 @@ app.prepare().then(() => {
       res.statusCode = 500;
       res.end("internal server error");
     }
-  }).listen(port, (err) => {
+  });
+
+  // wsServer.createServer(server);
+
+  server.listen(port, (err) => {
     if (err) throw err;
     console.log(`> Ready on http://${hostname}:${port}`);
   });
