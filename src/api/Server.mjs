@@ -31,61 +31,67 @@ function sendToWs(ws, $$event) {
   
 }
 
+function sendToPlayer(playerId, $$event) {
+  var result = Belt_Result.map($$Storage.PlayersSocketMap.get(playersSocket, playerId), (function (socket) {
+          var tmp;
+          switch ($$event.TAG | 0) {
+            case /* ProgressCreated */3 :
+                tmp = {
+                  TAG: /* ProgressCreated */3,
+                  _0: Game.maskForPlayer($$event._0, playerId)
+                };
+                break;
+            case /* ProgressUpdated */4 :
+                tmp = {
+                  TAG: /* ProgressUpdated */4,
+                  _0: Game.maskForPlayer($$event._0, playerId)
+                };
+                break;
+            default:
+              tmp = $$event;
+          }
+          return sendToWs(socket, tmp);
+        }));
+  if (result.TAG === /* Ok */0) {
+    Log.info([
+          "[server]",
+          "sent to " + playerId + ":",
+          Log.serverMsgToString($$event)
+        ]);
+  } else {
+    Log.error([
+          "[server]",
+          "Unable to send to player " + playerId + ":",
+          result._0
+        ]);
+  }
+  
+}
+
 function broadcastToPlayers(players, $$event) {
   return Belt_List.forEach(players, (function (player) {
-                var playerId = player.id;
-                var result = Belt_Result.map($$Storage.PlayersSocketMap.get(playersSocket, playerId), (function (socket) {
-                        var tmp;
-                        switch ($$event.TAG | 0) {
-                          case /* ProgressCreated */3 :
-                              tmp = {
-                                TAG: /* ProgressCreated */3,
-                                _0: Game.maskForPlayer($$event._0, playerId)
-                              };
-                              break;
-                          case /* ProgressUpdated */4 :
-                              tmp = {
-                                TAG: /* ProgressUpdated */4,
-                                _0: Game.maskForPlayer($$event._0, playerId)
-                              };
-                              break;
-                          default:
-                            tmp = $$event;
-                        }
-                        return sendToWs(socket, tmp);
-                      }));
-                if (result.TAG === /* Ok */0) {
-                  Log.info([
-                        "[server]",
-                        "sent to " + playerId + ":",
-                        Log.serverMsgToString($$event)
-                      ]);
-                } else {
-                  Log.error([
-                        "[server]",
-                        "Unable to send to player " + playerId + ":",
-                        result._0
-                      ]);
-                }
-                
+                return sendToPlayer(player.id, $$event);
               }));
 }
 
 wsServer.on(WsWebSocketServer.ServerEvents.connection, (function (ws, req) {
         var sessionId = ServerUtils.getParam(ServerUtils.getSearchParams(ServerUtils.getUrl(req, "ws")), "sessionId");
-        var playerId = Belt_Result.map(Belt_Result.flatMap(Utils.toResult(sessionId, "No sessionId"), GameInstance.loginPlayer), (function (player) {
-                return player.id;
-              }));
+        var player = Belt_Result.flatMap(Utils.toResult(sessionId, "No sessionId"), GameInstance.loginPlayer);
         if (sessionId !== undefined) {
           if (sessionId === "") {
             ws.close();
             return Log.error(["No sessionId"]);
           }
-          if (playerId.TAG === /* Ok */0) {
-            var playerId$1 = playerId._0;
-            $$Storage.PlayersSocketMap.set(playersSocket, playerId$1, ws);
+          if (player.TAG === /* Ok */0) {
+            var player$1 = player._0;
+            var playerId = player$1.id;
+            $$Storage.PlayersSocketMap.set(playersSocket, playerId, ws);
+            sendToPlayer(playerId, {
+                  TAG: /* Connected */0,
+                  _0: player$1
+                });
             ws.on(WsWebSocket.ClientEvents.close, (function (param, param$1) {
-                      return $$Storage.PlayersSocketMap.remove(playersSocket, playerId$1);
+                      return $$Storage.PlayersSocketMap.remove(playersSocket, playerId);
                     })).on(WsWebSocket.ClientEvents.message, (function (msg, param) {
                     var ws = this ;
                     Belt_Result.map(Utils.tapResult(Serializer.deserializeClientMessage(Belt_Option.getWithDefault(WsWebSocket.RawData.toString(msg), "")), Log.logMessageFromClient), (function (msg) {
@@ -157,14 +163,14 @@ wsServer.on(WsWebSocketServer.ServerEvents.connection, (function (ws, req) {
           }
           
         }
-        if (playerId.TAG === /* Ok */0) {
+        if (player.TAG === /* Ok */0) {
           ws.close();
           return Log.error(["Connection error"]);
         }
         ws.close();
         return Log.error([
-                    "PlayerId not found",
-                    playerId._0
+                    "Error:",
+                    player._0
                   ]);
       }));
 

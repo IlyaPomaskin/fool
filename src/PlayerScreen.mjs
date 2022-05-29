@@ -8,36 +8,31 @@ import * as React from "react";
 import * as Player from "./fool/Player.mjs";
 import * as PlayerUI from "./components/PlayerUI.mjs";
 import * as Belt_List from "rescript/lib/es6/belt_List.js";
+import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as InLobbyScreen from "./screen/InLobbyScreen.mjs";
 import * as InProgressScreen from "./screen/InProgressScreen.mjs";
 import * as LobbySetupScreen from "./screen/LobbySetupScreen.mjs";
 import * as AuthorizationScreen from "./screen/AuthorizationScreen.mjs";
 
 function PlayerScreen(Props) {
-  var onConnectOpt = Props.onConnect;
-  var onConnect = onConnectOpt !== undefined ? onConnectOpt : Utils.noop2;
-  var match = React.useState(function () {
-        
-      });
+  var gameIdOpt = Props.gameId;
+  var gameId = gameIdOpt !== undefined ? Caml_option.valFromOption(gameIdOpt) : undefined;
+  var match = Utils.useStateValue(undefined);
   var setPlayer = match[1];
   var player = match[0];
-  var match$1 = React.useState(function () {
-        return /* AuthorizationScreen */0;
-      });
+  var match$1 = Utils.useStateValue(/* AuthorizationScreen */0);
   var setScreen = match$1[1];
   var screen = match$1[0];
+  var match$2 = Utils.useStateValue(undefined);
+  var setError = match$2[1];
+  var error = match$2[0];
   var onMessage = React.useCallback((function (message) {
           Log.logMessageFromServer(message, player);
           var exit = 0;
           switch (message.TAG | 0) {
             case /* Connected */0 :
-                var player$1 = message._0;
-                Curry._1(setPlayer, (function (param) {
-                        return player$1;
-                      }));
-                return Curry._1(setScreen, (function (param) {
-                              return /* LobbySetupScreen */1;
-                            }));
+                Curry._1(setPlayer, message._0);
+                return Curry._1(setScreen, /* LobbySetupScreen */1);
             case /* LobbyCreated */1 :
             case /* LobbyUpdated */2 :
                 exit = 1;
@@ -47,9 +42,11 @@ function PlayerScreen(Props) {
                 exit = 2;
                 break;
             case /* ServerError */5 :
+                var err = message._0;
+                Curry._1(setError, err);
                 return Log.info([
                             "ServerError",
-                            message._0
+                            err
                           ]);
             case /* LoginError */6 :
             case /* RegisterError */7 :
@@ -62,44 +59,32 @@ function PlayerScreen(Props) {
                   return ;
                 }
                 var game = message._0;
-                Curry._1(setScreen, (function (param) {
-                        return {
-                                TAG: /* InLobbyScreen */0,
-                                _0: game
-                              };
-                      }));
-                return Curry._1(setPlayer, (function (param) {
-                              return Belt_List.getBy(game.players, (function (param) {
-                                            return Player.equals(player, param);
-                                          }));
-                            }));
+                Curry._1(setScreen, {
+                      TAG: /* InLobbyScreen */0,
+                      _0: game
+                    });
+                return Curry._1(setPlayer, Belt_List.getBy(game.players, (function (param) {
+                                  return Player.equals(player, param);
+                                })));
             case 2 :
                 if (player === undefined) {
                   return ;
                 }
                 var game$1 = message._0;
-                Curry._1(setScreen, (function (param) {
-                        return {
-                                TAG: /* InProgressScreen */1,
-                                _0: game$1
-                              };
-                      }));
-                return Curry._1(setPlayer, (function (param) {
-                              return Belt_List.getBy(game$1.players, (function (param) {
-                                            return Player.equals(player, param);
-                                          }));
-                            }));
+                Curry._1(setScreen, {
+                      TAG: /* InProgressScreen */1,
+                      _0: game$1
+                    });
+                return Curry._1(setPlayer, Belt_List.getBy(game$1.players, (function (param) {
+                                  return Player.equals(player, param);
+                                })));
             
           }
         }), [player]);
   var handleLogin = function (player) {
-    return Curry._1(setPlayer, (function (param) {
-                  return player;
-                }));
+    return Curry._1(setPlayer, player);
   };
-  var match$2 = UseWs.hook(onMessage, player, onConnect);
-  var sendMessage = match$2.sendMessage;
-  var error = match$2.error;
+  var sendMessage = UseWs.hook(onMessage, player);
   var tmp;
   var exit = 0;
   if (typeof screen === "number") {
@@ -110,6 +95,7 @@ function PlayerScreen(Props) {
     } else if (player !== undefined) {
       tmp = React.createElement(LobbySetupScreen.make, {
             player: player,
+            gameId: gameId,
             onMessage: sendMessage
           });
     } else {

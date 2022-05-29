@@ -7,12 +7,35 @@ import * as React from "react";
 
 function LobbySetupScreen(Props) {
   var player = Props.player;
+  var gameId = Props.gameId;
   var onMessage = Props.onMessage;
   var match = React.useState(function () {
-        return "";
+        if (gameId !== undefined) {
+          return gameId;
+        } else {
+          return "";
+        }
       });
-  var setGameId = match[1];
-  var gameId = match[0];
+  var setInputGameId = match[1];
+  var inputGameId = match[0];
+  var handleConnect = function (gameId) {
+    return Curry._1(onMessage, {
+                TAG: /* Lobby */1,
+                _0: /* Enter */1,
+                _1: player.id,
+                _2: gameId
+              });
+  };
+  var match$1 = Utils.useStateValue(false);
+  var setIsWaiting = match$1[1];
+  var isWaiting = match$1[0];
+  React.useEffect((function () {
+          if (gameId !== undefined) {
+            Curry._1(setIsWaiting, true);
+            handleConnect(gameId);
+          }
+          
+        }), [gameId]);
   return React.createElement("div", {
               className: "m-2"
             }, React.createElement(Base.Heading.make, {
@@ -29,21 +52,18 @@ function LobbySetupScreen(Props) {
                     }),
                   children: Utils.uiStr("New")
                 }), React.createElement("br", undefined), React.createElement("br", undefined), React.createElement("span", undefined, Utils.uiStr("Connect:")), React.createElement(Base.Input.make, {
-                  value: gameId,
+                  value: inputGameId,
+                  disabled: isWaiting,
                   onChange: (function (value) {
-                      return Curry._1(setGameId, (function (param) {
+                      return Curry._1(setInputGameId, (function (param) {
                                     return value;
                                   }));
                     }),
                   className: "my-2"
                 }), React.createElement(Base.Button.make, {
+                  disabled: isWaiting,
                   onClick: (function (param) {
-                      return Curry._1(onMessage, {
-                                  TAG: /* Lobby */1,
-                                  _0: /* Enter */1,
-                                  _1: player.id,
-                                  _2: gameId
-                                });
+                      return handleConnect(inputGameId);
                     }),
                   children: Utils.uiStr("Connect")
                 }));

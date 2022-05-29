@@ -46,19 +46,17 @@ let broadcastToPlayers = (players, event) =>
 wsServer
 ->WsWebSocketServer.on(WsWebSocketServer.ServerEvents.connection, @this (_, ws, req) => {
   let sessionId = getUrl(req, "ws")->ServerUtils.getSearchParams->ServerUtils.getParam("sessionId")
-  let playerId =
-    sessionId
-    ->Utils.toResult("No sessionId")
-    ->Result.flatMap(GameInstance.loginPlayer)
-    ->Result.map(player => player.id)
+  let player = sessionId->Utils.toResult("No sessionId")->Result.flatMap(GameInstance.loginPlayer)
 
-  switch (sessionId, playerId) {
+  switch (sessionId, player) {
   | (Some(""), _) => {
       WsWebSocket.close(ws)
       Log.error(["No sessionId"])
     }
-  | (Some(_), Ok(playerId)) => {
+  | (Some(_), Ok(player)) => {
+      let playerId = player.id
       playersSocket->PlayersSocketMap.set(playerId, ws)
+      sendToPlayer(playerId, Connected(player))
 
       ws
       ->WsWebSocket.on(WsWebSocket.ClientEvents.close, @this (_, _, _) => {
@@ -105,7 +103,7 @@ wsServer
     }
   | (_, Error(err)) => {
       WsWebSocket.close(ws)
-      Log.error(["PlayerId not found", err])
+      Log.error(["Error:", err])
     }
   | _ => {
       WsWebSocket.close(ws)

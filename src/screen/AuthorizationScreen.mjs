@@ -54,13 +54,13 @@ function AuthorizationScreen(Props) {
                 }
                 if (exit === 1) {
                   var player = err._0;
-                  localStorage.setItem("sessionId", player.sessionId);
+                  sessionStorage.setItem("sessionId", player.sessionId);
                   tmp = Curry._1(onLogin, player);
                 }
                 
               } else {
                 var err$2 = response._0;
-                localStorage.setItem("sessionId", "");
+                sessionStorage.setItem("sessionId", "");
                 tmp = Curry._1(setError, (function (param) {
                         return Jzon.DecodingError.toString(err$2);
                       }));
@@ -76,7 +76,7 @@ function AuthorizationScreen(Props) {
     
   };
   React.useEffect((function () {
-          var sessionId = Belt_Option.getWithDefault(Caml_option.nullable_to_opt(localStorage.getItem("sessionId")), "");
+          var sessionId = Belt_Option.getWithDefault(Caml_option.nullable_to_opt(sessionStorage.getItem("sessionId")), "");
           if (sessionId !== "") {
             makeRequest("sessionId", sessionId);
           }

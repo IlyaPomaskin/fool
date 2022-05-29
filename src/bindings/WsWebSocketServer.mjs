@@ -38,4 +38,4 @@ export {
   ServerEvents ,
   
 }
-/* No side effect */
+/* WsWebSocket Not a pure module */

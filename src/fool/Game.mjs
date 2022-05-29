@@ -506,4 +506,4 @@ export {
   actionToObject ,
   
 }
-/* No side effect */
+/* Table Not a pure module */

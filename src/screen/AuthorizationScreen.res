@@ -18,12 +18,12 @@ let make = (~onLogin) => {
       switch response {
       | Ok(LoggedIn(player))
       | Ok(Registered(player)) => {
-          LocalStorage.setItem("sessionId", player.sessionId)
+          LocalStorage.SessionStorage.setItem("sessionId", player.sessionId)
           onLogin(player)
         }
       | Ok(UserError(err)) => setError(_ => Some(err))
       | Error(err) => {
-          LocalStorage.setItem("sessionId", "")
+          LocalStorage.SessionStorage.setItem("sessionId", "")
           setError(_ => Some(Jzon.DecodingError.toString(err)))
         }
       }->resolve
@@ -35,7 +35,9 @@ let make = (~onLogin) => {
 
   React.useEffect0(() => {
     let sessionId =
-      LocalStorage.getItem("sessionId")->Js.Nullable.toOption->Option.getWithDefault("")
+      LocalStorage.SessionStorage.getItem("sessionId")
+      ->Js.Nullable.toOption
+      ->Option.getWithDefault("")
 
     if sessionId != "" {
       makeRequest("sessionId", sessionId)

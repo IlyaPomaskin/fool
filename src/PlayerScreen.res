@@ -2,34 +2,38 @@ open Types
 open Utils
 
 @react.component
-let make = (~onConnect=noop2) => {
-  let (player, setPlayer) = React.useState(_ => None)
-  let (screen, setScreen) = React.useState(_ => AuthorizationScreen)
+let make = (~gameId=None) => {
+  let (player, setPlayer) = useStateValue(None)
+  let (screen, setScreen) = useStateValue(AuthorizationScreen)
+  let (error, setError) = useStateValue(None)
   let onMessage = React.useCallback1(message => {
     Log.logMessageFromServer(message, player)
 
     switch (message, player) {
     | (Connected(player), _) => {
-        setPlayer(_ => Some(player))
-        setScreen(_ => LobbySetupScreen)
+        setPlayer(Some(player))
+        setScreen(LobbySetupScreen)
       }
     | (LobbyCreated(game), Some(player))
     | (LobbyUpdated(game), Some(player)) => {
-        setScreen(_ => InLobbyScreen(game))
-        setPlayer(_ => game.players->List.getBy(Player.equals(player)))
+        setScreen(InLobbyScreen(game))
+        setPlayer(game.players->List.getBy(Player.equals(player)))
       }
     | (ProgressCreated(game), Some(player))
     | (ProgressUpdated(game), Some(player)) =>
-      setScreen(_ => InProgressScreen(game))
-      setPlayer(_ => game.players->List.getBy(Player.equals(player)))
-    | (ServerError(msg), _) => Log.info(["ServerError", msg])
+      setScreen(InProgressScreen(game))
+      setPlayer(game.players->List.getBy(Player.equals(player)))
+    | (ServerError(err), _) => {
+        setError(Some(err))
+        Log.info(["ServerError", err])
+      }
     | _ => ignore()
     }
   }, [player])
 
-  let handleLogin = player => setPlayer(_ => Some(player))
+  let handleLogin = player => setPlayer(Some(player))
 
-  let {error, sendMessage} = UseWs.hook(~onMessage, ~onConnect, ~player)
+  let sendMessage = UseWs.hook(~onMessage, ~player)
 
   <div className="w-96 h-128 border rounded-md border-solid border-slate-500">
     <div>
@@ -47,7 +51,7 @@ let make = (~onConnect=noop2) => {
     </div>
     {switch (screen, player) {
     | (AuthorizationScreen, _) => <AuthorizationScreen onLogin={handleLogin} />
-    | (LobbySetupScreen, Some(player)) => <LobbySetupScreen player onMessage={sendMessage} />
+    | (LobbySetupScreen, Some(player)) => <LobbySetupScreen gameId player onMessage={sendMessage} />
     | (InLobbyScreen(game), Some(player)) => <InLobbyScreen player game onMessage={sendMessage} />
     | (InProgressScreen(game), Some(player)) =>
       <InProgressScreen player game onMessage={sendMessage} />

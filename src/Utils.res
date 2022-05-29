@@ -91,3 +91,10 @@ let listIndexOf = (list, equalsFn) =>
   })
 
 let isEmpty = list => List.length(list) == 0
+
+let useStateValue = (initialValue: 'a) => {
+  let (value, setValue) = React.useState(_ => initialValue)
+  let handleSetValue = React.useCallback1(nextValue => setValue(_ => nextValue), [setValue])
+
+  (value, handleSetValue)
+}

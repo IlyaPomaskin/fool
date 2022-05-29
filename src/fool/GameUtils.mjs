@@ -214,4 +214,4 @@ export {
   isCanStart ,
   
 }
-/* No side effect */
+/* Table Not a pure module */

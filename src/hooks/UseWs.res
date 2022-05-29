@@ -1,13 +1,6 @@
 open Types
 
-type hookReturn = {
-  error: option<string>,
-  sendMessage: gameMessageFromClient => unit,
-}
-
-let hook = (~onMessage, ~player, ~onConnect): hookReturn => {
-  let (error, setError) = React.useState(_ => None)
-
+let hook = (~onMessage, ~player) => {
   let sessionId = player->Option.map(player => player.sessionId)->Option.getWithDefault("")
   let (ws, sendMessage) = React.useMemo1(_ => {
     if sessionId != "" {
@@ -24,7 +17,7 @@ let hook = (~onMessage, ~player, ~onConnect): hookReturn => {
 
       WebSocket.addCloseListener(ws, event => Js.log2("close", event))
       WebSocket.addErrorListener(ws, event => Js.log2("error", event))
-      WebSocket.addOpenListener(ws, _ => onConnect(sendMessage, player))
+      WebSocket.addOpenListener(ws, event => Js.log2("open", event))
 
       (Some(ws), sendMessage)
     } else {
@@ -38,14 +31,7 @@ let hook = (~onMessage, ~player, ~onConnect): hookReturn => {
       ->WebSocket.messageAsText
       ->Utils.toResult(#SyntaxError("Message from server cannot be parsed as text"))
       ->Result.flatMap(Serializer.deserializeServerMessage)
-      ->Result.map(message => {
-        switch message {
-        | ServerError(msg) => setError(_ => Some(msg))
-        | _ => setError(_ => None)
-        }
-
-        onMessage(message)
-      })
+      ->Result.map(onMessage)
       ->ignore
     }
 
@@ -58,8 +44,5 @@ let hook = (~onMessage, ~player, ~onConnect): hookReturn => {
     }
   }, (ws, onMessage))
 
-  {
-    error: error,
-    sendMessage: sendMessage,
-  }
+  sendMessage
 }
