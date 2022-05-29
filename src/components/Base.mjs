@@ -13,16 +13,16 @@ function Base$Heading(Props) {
   var sizeClassName;
   switch (size) {
     case /* H2 */0 :
-        sizeClassName = "text-4xl";
+        sizeClassName = "text-4xl my-2";
         break;
     case /* H3 */1 :
-        sizeClassName = "text-3xl";
+        sizeClassName = "text-3xl my-2";
         break;
     case /* H4 */2 :
-        sizeClassName = "text-2xl";
+        sizeClassName = "text-2xl my-1";
         break;
     case /* H5 */3 :
-        sizeClassName = "text-xl";
+        sizeClassName = "text-xl my-1";
         break;
     
   }

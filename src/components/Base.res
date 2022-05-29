@@ -10,10 +10,10 @@ module Heading = {
   @react.component
   let make = (~className: string="", ~size: size, ~children: React.element) => {
     let sizeClassName = switch size {
-    | H2 => "text-4xl"
-    | H3 => "text-3xl"
-    | H4 => "text-2xl"
-    | H5 => "text-xl"
+    | H2 => "text-4xl my-2"
+    | H3 => "text-3xl my-2"
+    | H4 => "text-2xl my-1"
+    | H5 => "text-xl my-1"
     }
 
     <h1 className={cx(["font-medium leading-tight", sizeClassName, className])}> children </h1>

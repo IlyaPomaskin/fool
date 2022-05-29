@@ -8,7 +8,7 @@ let make = (~onLogin) => {
   let (error, setError) = React.useState(_ => None)
   let (isLoading, setIsLoading) = React.useState(_ => false)
 
-  let makeRequest = (arg, sessionId) => {
+  let makeAuthRequest = (arg, sessionId) => {
     setIsLoading(_ => true)
 
     Fetch.fetch(`http://localhost:3000/api/user?${arg}=${sessionId}`)
@@ -40,24 +40,21 @@ let make = (~onLogin) => {
       ->Option.getWithDefault("")
 
     if sessionId != "" {
-      makeRequest("sessionId", sessionId)
+      makeAuthRequest("sessionId", sessionId)
     }
 
     None
   })
 
-  let handleRegistrationClick = _ => makeRequest("playerId", login)
+  let handleRegistrationClick = _ => makeAuthRequest("playerId", login)
 
-  <div className="m-2">
+  <div className="flex flex-col gap-2">
     <Base.Heading size={Base.Heading.H5}> {uiStr("Authorization")} </Base.Heading>
-    <span> {uiStr("Login:")} </span>
     {switch error {
     | Some(err) => <span> {uiStr(`Error: ${err}`)} </span>
     | _ => React.null
     }}
-    <Base.Input
-      disabled={isLoading} className="my-2" value={login} onChange={value => setLogin(_ => value)}
-    />
+    <Base.Input disabled={isLoading} value={login} onChange={value => setLogin(_ => value)} />
     <Base.Button disabled={isLoading} onClick={handleRegistrationClick}>
       {uiStr("Register")}
     </Base.Button>

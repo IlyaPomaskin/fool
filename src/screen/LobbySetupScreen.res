@@ -25,22 +25,21 @@ let make = (~player, ~gameId, ~onMessage) => {
     None
   }, [gameId])
 
-  <div className="m-2">
-    <Base.Heading size={Base.Heading.H5}> {uiStr("Lobby select")} </Base.Heading>
-    <Base.Button onClick={_ => onMessage(Lobby(Create, player.id, ""))}>
-      {uiStr("New")}
-    </Base.Button>
-    <br />
-    <br />
-    <span> {uiStr("Connect:")} </span>
-    <Base.Input
-      disabled={isWaiting}
-      className="my-2"
-      value={inputGameId}
-      onChange={value => setInputGameId(_ => value)}
-    />
-    <Base.Button disabled={isWaiting} onClick={_ => handleConnect(inputGameId)}>
-      {uiStr("Connect")}
-    </Base.Button>
+  <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2">
+      <Base.Heading size={Base.Heading.H5}> {uiStr("Create new game")} </Base.Heading>
+      <Base.Button onClick={_ => onMessage(Lobby(Create, player.id, ""))}>
+        {uiStr("New")}
+      </Base.Button>
+    </div>
+    <div className="flex flex-col gap-2">
+      <Base.Heading size={Base.Heading.H5}> {uiStr("Connect to game")} </Base.Heading>
+      <Base.Input
+        disabled={isWaiting} value={inputGameId} onChange={value => setInputGameId(_ => value)}
+      />
+      <Base.Button disabled={isWaiting} onClick={_ => handleConnect(inputGameId)}>
+        {uiStr("Connect")}
+      </Base.Button>
+    </div>
   </div>
 }

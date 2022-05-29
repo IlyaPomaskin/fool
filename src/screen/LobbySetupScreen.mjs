@@ -37,36 +37,42 @@ function LobbySetupScreen(Props) {
           
         }), [gameId]);
   return React.createElement("div", {
-              className: "m-2"
-            }, React.createElement(Base.Heading.make, {
-                  size: /* H5 */3,
-                  children: Utils.uiStr("Lobby select")
-                }), React.createElement(Base.Button.make, {
-                  onClick: (function (param) {
-                      return Curry._1(onMessage, {
-                                  TAG: /* Lobby */1,
-                                  _0: /* Create */0,
-                                  _1: player.id,
-                                  _2: ""
-                                });
-                    }),
-                  children: Utils.uiStr("New")
-                }), React.createElement("br", undefined), React.createElement("br", undefined), React.createElement("span", undefined, Utils.uiStr("Connect:")), React.createElement(Base.Input.make, {
-                  value: inputGameId,
-                  disabled: isWaiting,
-                  onChange: (function (value) {
-                      return Curry._1(setInputGameId, (function (param) {
-                                    return value;
-                                  }));
-                    }),
-                  className: "my-2"
-                }), React.createElement(Base.Button.make, {
-                  disabled: isWaiting,
-                  onClick: (function (param) {
-                      return handleConnect(inputGameId);
-                    }),
-                  children: Utils.uiStr("Connect")
-                }));
+              className: "flex flex-col gap-2"
+            }, React.createElement("div", {
+                  className: "flex flex-col gap-2"
+                }, React.createElement(Base.Heading.make, {
+                      size: /* H5 */3,
+                      children: Utils.uiStr("Create new game")
+                    }), React.createElement(Base.Button.make, {
+                      onClick: (function (param) {
+                          return Curry._1(onMessage, {
+                                      TAG: /* Lobby */1,
+                                      _0: /* Create */0,
+                                      _1: player.id,
+                                      _2: ""
+                                    });
+                        }),
+                      children: Utils.uiStr("New")
+                    })), React.createElement("div", {
+                  className: "flex flex-col gap-2"
+                }, React.createElement(Base.Heading.make, {
+                      size: /* H5 */3,
+                      children: Utils.uiStr("Connect to game")
+                    }), React.createElement(Base.Input.make, {
+                      value: inputGameId,
+                      disabled: isWaiting,
+                      onChange: (function (value) {
+                          return Curry._1(setInputGameId, (function (param) {
+                                        return value;
+                                      }));
+                        })
+                    }), React.createElement(Base.Button.make, {
+                      disabled: isWaiting,
+                      onClick: (function (param) {
+                          return handleConnect(inputGameId);
+                        }),
+                      children: Utils.uiStr("Connect")
+                    })));
 }
 
 var make = LobbySetupScreen;

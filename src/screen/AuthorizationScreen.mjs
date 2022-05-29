@@ -26,7 +26,7 @@ function AuthorizationScreen(Props) {
       });
   var setIsLoading = match$2[1];
   var isLoading = match$2[0];
-  var makeRequest = function (arg, sessionId) {
+  var makeAuthRequest = function (arg, sessionId) {
     Curry._1(setIsLoading, (function (param) {
             return true;
           }));
@@ -78,27 +78,26 @@ function AuthorizationScreen(Props) {
   React.useEffect((function () {
           var sessionId = Belt_Option.getWithDefault(Caml_option.nullable_to_opt(sessionStorage.getItem("sessionId")), "");
           if (sessionId !== "") {
-            makeRequest("sessionId", sessionId);
+            makeAuthRequest("sessionId", sessionId);
           }
           
         }), []);
   var handleRegistrationClick = function (param) {
-    return makeRequest("playerId", login);
+    return makeAuthRequest("playerId", login);
   };
   return React.createElement("div", {
-              className: "m-2"
+              className: "flex flex-col gap-2"
             }, React.createElement(Base.Heading.make, {
                   size: /* H5 */3,
                   children: Utils.uiStr("Authorization")
-                }), React.createElement("span", undefined, Utils.uiStr("Login:")), error !== undefined ? React.createElement("span", undefined, Utils.uiStr("Error: " + error)) : null, React.createElement(Base.Input.make, {
+                }), error !== undefined ? React.createElement("span", undefined, Utils.uiStr("Error: " + error)) : null, React.createElement(Base.Input.make, {
                   value: login,
                   disabled: isLoading,
                   onChange: (function (value) {
                       return Curry._1(setLogin, (function (param) {
                                     return value;
                                   }));
-                    }),
-                  className: "my-2"
+                    })
                 }), React.createElement(Base.Button.make, {
                   disabled: isLoading,
                   onClick: handleRegistrationClick,
