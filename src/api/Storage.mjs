@@ -254,6 +254,12 @@ var PlayersSocketMap = {
   remove: remove$2
 };
 
+var gamesInLobby = Belt_HashMap.make(10, GameId);
+
+var gamesInProgress = Belt_HashMap.make(10, GameId);
+
+var players = Belt_HashMap.make(10, PlayerId);
+
 export {
   PlayerId ,
   GameId ,
@@ -262,6 +268,9 @@ export {
   ProgressGameMap ,
   PlayersMap ,
   PlayersSocketMap ,
+  gamesInLobby ,
+  gamesInProgress ,
+  players ,
   
 }
 /* PlayerId Not a pure module */

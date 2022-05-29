@@ -111,3 +111,7 @@ module PlayersSocketMap = {
 
   let remove = (map, playerId) => map->HashMap.remove(playerId)
 }
+
+let gamesInLobby = LobbyGameMap.empty()
+let gamesInProgress = ProgressGameMap.empty()
+let players = PlayersMap.empty()

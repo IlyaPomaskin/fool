@@ -1,10 +1,6 @@
 open Types
 open Storage
 
-let gamesInLobby = LobbyGameMap.empty()
-let gamesInProgress = ProgressGameMap.empty()
-let players = PlayersMap.empty()
-
 // FIXME remove debug code
 PlayersMap.set(players, "p1", {id: "p1", sessionId: "s:p1", cards: list{}})
 PlayersMap.set(players, "p2", {id: "p2", sessionId: "s:p2", cards: list{}})
