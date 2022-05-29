@@ -9,6 +9,8 @@ let make = (~gameId=None) => {
   let onMessage = React.useCallback1(message => {
     Log.logMessageFromServer(message, player)
 
+    setError(None)
+
     switch (message, player) {
     | (Connected(player), _) => {
         setPlayer(Some(player))

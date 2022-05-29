@@ -28,6 +28,7 @@ function PlayerScreen(Props) {
   var error = match$2[0];
   var onMessage = React.useCallback((function (message) {
           Log.logMessageFromServer(message, player);
+          Curry._1(setError, undefined);
           var exit = 0;
           switch (message.TAG | 0) {
             case /* Connected */0 :

@@ -25,7 +25,6 @@ function AuthorizationScreen(Props) {
         return false;
       });
   var setIsLoading = match$2[1];
-  var isLoading = match$2[0];
   var makeAuthRequest = function (arg, sessionId) {
     Curry._1(setIsLoading, (function (param) {
             return true;
@@ -92,14 +91,14 @@ function AuthorizationScreen(Props) {
                   children: Utils.uiStr("Authorization")
                 }), error !== undefined ? React.createElement("span", undefined, Utils.uiStr("Error: " + error)) : null, React.createElement(Base.Input.make, {
                   value: login,
-                  disabled: isLoading,
+                  disabled: match$2[0],
                   onChange: (function (value) {
                       return Curry._1(setLogin, (function (param) {
                                     return value;
                                   }));
                     })
                 }), React.createElement(Base.Button.make, {
-                  disabled: isLoading,
+                  disabled: login === "",
                   onClick: handleRegistrationClick,
                   children: Utils.uiStr("Register")
                 }));

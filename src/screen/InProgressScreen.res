@@ -15,7 +15,7 @@ module PlayerActionsUI = {
     let isTakeDisabled = !GameUtils.isCanTake(game, player)
     let isDefender = GameUtils.isDefender(game, player)
     let isDuel =
-      game.players->List.keep(player => !GameUtils.isPlayerDone(game, player))->List.length === 2
+      game.players->List.keep(player => !GameUtils.isPlayerDone(game, player))->List.length <= 2
 
     <div className={cx(["grid grid-flow-col gap-1", className])}>
       {switch (isDefender, isDuel) {

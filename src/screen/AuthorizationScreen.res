@@ -55,7 +55,7 @@ let make = (~onLogin) => {
     | _ => React.null
     }}
     <Base.Input disabled={isLoading} value={login} onChange={value => setLogin(_ => value)} />
-    <Base.Button disabled={isLoading} onClick={handleRegistrationClick}>
+    <Base.Button disabled={login === ""} onClick={handleRegistrationClick}>
       {uiStr("Register")}
     </Base.Button>
   </div>

@@ -32,7 +32,7 @@ function InProgressScreen$PlayerActionsUI(Props) {
   var isDefender = GameUtils.isDefender(game, player);
   var isDuel = Belt_List.length(Belt_List.keep(game.players, (function (player) {
               return !GameUtils.isPlayerDone(game, player);
-            }))) === 2;
+            }))) <= 2;
   return React.createElement("div", {
               className: Utils.cx([
                     "grid grid-flow-col gap-1",
