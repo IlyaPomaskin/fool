@@ -14,7 +14,7 @@ module Make = {
     // perMessageDeflate {Boolean|Object} Enable/disable permessage-deflate.
     // host: string, // The hostname where to bind the server.
     // port: int, // The port where to bind the server.
-    server: NodeJs.Http.Server.t, // {http.Server|https.Server} A pre-created Node.js HTTP/S server.
+    // server: NodeJs.Http.Server.t, // {http.Server|https.Server} A pre-created Node.js HTTP/S server.
     skipUTF8Validation: bool, // Specifies whether or not to skip UTF-8 validation for text and close messages. Defaults to false. Set to true only if clients are trusted.
     // verifyClient {Function} A function which can be used to validate incoming connections. See description below. (Usage is discouraged: see Issue #337)
   }
@@ -49,9 +49,10 @@ external address: t => Js.Nullable.t<{"port": int, "family": string, "address": 
 external close: t => unit = "close"
 @send
 external handleUpgrade: (
+  t,
   Http.IncomingMessage.t,
-  Net.Socket.t,
-  Buffer.t,
+  Net.TcpSocket.t,
+  Js.nullable<Buffer.t>,
   (WsWebSocket.t, Http.IncomingMessage.t) => unit,
 ) => unit = "handleUpgrade"
 @send
@@ -59,3 +60,6 @@ external shouldHandle: Http.IncomingMessage.t => bool = "shouldHandle"
 
 // FIXME Remove debug fn
 @val external restartServer: unit => Http.Server.t = "restartServer"
+
+@get
+external getServerFromSocket: NodeJs.Net.TcpSocket.t => NodeJs.Http.Server.t = "server"

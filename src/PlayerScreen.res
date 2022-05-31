@@ -6,6 +6,7 @@ let make = (~gameId=None) => {
   let (player, setPlayer) = useStateValue(None)
   let (screen, setScreen) = useStateValue(AuthorizationScreen)
   let (error, setError) = useStateValue(None)
+  let (isConnected, setIsConnected) = useStateValue(false)
   let onMessage = React.useCallback1(message => {
     Log.logMessageFromServer(message, player)
 
@@ -15,6 +16,7 @@ let make = (~gameId=None) => {
     | (Connected(player), _) => {
         setPlayer(Some(player))
         setScreen(LobbySetupScreen)
+        setIsConnected(true)
       }
     | (LobbyCreated(game), Some(player))
     | (LobbyUpdated(game), Some(player)) => {
@@ -35,12 +37,10 @@ let make = (~gameId=None) => {
 
   let handleLogin = player => setPlayer(Some(player))
 
-  let (isConnected, setIsConnected) = useStateValue(false)
-
   let sendMessage = UseWs.hook(
     ~onMessage,
     ~player,
-    ~onConnect=_ => setIsConnected(true),
+    ~onConnect=_ => ignore(),
     ~onDisconnect=_ => setIsConnected(false),
     ~onError=_ => setIsConnected(false),
   )

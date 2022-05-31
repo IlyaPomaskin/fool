@@ -26,6 +26,8 @@ function PlayerScreen(Props) {
   var match$2 = Utils.useStateValue(undefined);
   var setError = match$2[1];
   var error = match$2[0];
+  var match$3 = Utils.useStateValue(false);
+  var setIsConnected = match$3[1];
   var onMessage = React.useCallback((function (message) {
           Log.logMessageFromServer(message, player);
           Curry._1(setError, undefined);
@@ -33,7 +35,8 @@ function PlayerScreen(Props) {
           switch (message.TAG | 0) {
             case /* Connected */0 :
                 Curry._1(setPlayer, message._0);
-                return Curry._1(setScreen, /* LobbySetupScreen */1);
+                Curry._1(setScreen, /* LobbySetupScreen */1);
+                return Curry._1(setIsConnected, true);
             case /* LobbyCreated */1 :
             case /* LobbyUpdated */2 :
                 exit = 1;
@@ -85,10 +88,8 @@ function PlayerScreen(Props) {
   var handleLogin = function (player) {
     return Curry._1(setPlayer, player);
   };
-  var match$3 = Utils.useStateValue(false);
-  var setIsConnected = match$3[1];
   var sendMessage = UseWs.hook(player, onMessage, (function (param) {
-          return Curry._1(setIsConnected, true);
+          
         }), (function (param) {
           return Curry._1(setIsConnected, false);
         }), (function (param) {

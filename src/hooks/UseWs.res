@@ -5,7 +5,7 @@ let hook = (~player, ~onMessage, ~onConnect=noop, ~onDisconnect=noop, ~onError=n
   let sessionId = player->Option.map(player => player.sessionId)->Option.getWithDefault("")
   let (ws, sendMessage) = React.useMemo1(_ => {
     if sessionId != "" {
-      let ws = WebSocket.make(`ws://localhost:3001/ws?sessionId=${sessionId}`)
+      let ws = WebSocket.make(`ws://localhost:3000/ws?sessionId=${sessionId}`)
 
       let sendMessage = message => {
         if ws->WebSocket.isOpen {

@@ -38,6 +38,10 @@ function noop2(param, param$1) {
   
 }
 
+function noop3(param, param$1, param$2) {
+  
+}
+
 var equals = Caml_obj.caml_equal;
 
 function toggleArrayItem(list, item) {
@@ -168,6 +172,7 @@ export {
   uiStr ,
   noop ,
   noop2 ,
+  noop3 ,
   equals ,
   toggleArrayItem ,
   lastListItem ,

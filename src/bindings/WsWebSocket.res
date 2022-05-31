@@ -91,6 +91,12 @@ module ClientEvents = {
 external on: (t, EventWithThis.t<@this 'f, t>, @this 'f) => t = "on"
 @send
 external off: (t, EventWithThis.t<@this 'f, t>, @this 'f) => t = "off"
+@send
+external emit: (t, EventWithThis.t<@this 'f, t>) => t = "emit"
+@send
+external emit1: (t, EventWithThis.t<@this 'f, t>, 'a) => t = "emit"
+@send
+external emit2: (t, EventWithThis.t<@this 'f, t>, 'a1, 'a2) => t = "emit"
 
 @val external bufferedAmount: int = "bufferedAmount"
 @val external extensions: string = "extensions"
