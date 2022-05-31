@@ -3,6 +3,8 @@ open NodeJs
 open ServerUtils
 
 let default = (req: Http.IncomingMessage.t, res: Http.ServerResponse.t) => {
+  WsServer.setWsServer(res)
+
   let searchParams = req->getUrl("http")->getSearchParams
   let playerId = getParam(searchParams, "playerId")
   let sessionId = getParam(searchParams, "sessionId")

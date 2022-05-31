@@ -81,9 +81,8 @@ wsServer.on(WsWebSocketServer.ServerEvents.connection, (function (ws, req) {
                       return sessionId;
                     }
                   })), "No sessionId");
-        console.log("/ws login " + Belt_Result.getWithDefault(sessionId, "No sessionId"));
+        Log.info(["/ws login " + Belt_Result.getWithDefault(sessionId, "No sessionId")]);
         var player = Belt_Result.flatMap(sessionId, GameInstance.loginPlayer);
-        console.log("connected", sessionId, player);
         if (sessionId.TAG === /* Ok */0) {
           if (player.TAG === /* Ok */0) {
             var player$1 = player._0;
@@ -183,10 +182,8 @@ var isSet = {
   contents: false
 };
 
-function $$default(param, res) {
-  if (isSet.contents) {
-    res.end(Buffer.from("Already started"));
-  } else {
+function setWsServer(res) {
+  if (!isSet.contents) {
     res.socket.server.on("listening", (function () {
                 wsServer.emit(WsWebSocketServer.ServerEvents.listening);
                 
@@ -205,14 +202,19 @@ function $$default(param, res) {
             
           }));
     isSet.contents = true;
-    res.end(Buffer.from("Start"));
+    return ;
   }
   
 }
 
 export {
-  $$default ,
-  $$default as default,
+  playersSocket ,
+  wsServer ,
+  sendToWs ,
+  sendToPlayer ,
+  broadcastToPlayers ,
+  isSet ,
+  setWsServer ,
   
 }
 /* playersSocket Not a pure module */

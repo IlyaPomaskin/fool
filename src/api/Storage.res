@@ -75,7 +75,7 @@ module PlayersMap = {
     map->HashMap.get(playerId)->Utils.toResult(`Player "${playerId}" not found`)
 
   let findBySessionId = (map, sessionId: sessionId): result<player, string> => {
-    Js.log2("playersMap", map->HashMap.toArray)
+    Log.info(["[PlayersMap] findBySessionId", sessionId, map->HashMap.toArray->Js.Array.toString])
     map
     ->HashMap.reduce(None, (acc, _, value) => {
       switch acc {
@@ -86,14 +86,17 @@ module PlayersMap = {
     ->Utils.toResult(`Player ${sessionId} not found`)
   }
 
-  let set = (map, game) => map->HashMap.set(game)
+  let set = (map, key, nextValue) => {
+    map->HashMap.set(key, nextValue)
+    Log.info(["[PlayersMap] set", key, map->HashMap.toArray->Js.Array.toString])
+  }
 
   let create = (map, playerId): result<player, string> =>
     switch HashMap.get(map, playerId) {
     | Some(_) => Error(`Player ${playerId} already exists`)
     | None => {
         let player = Player.make(playerId)
-        HashMap.set(map, playerId, player)
+        set(map, playerId, player)
         Ok(player)
       }
     }

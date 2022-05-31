@@ -9,6 +9,7 @@
     "bs-fetch": "0.6.2",
     "bs-react-spring": "0.4.2",
     "next": "^12.1.6",
+    "nodemon": "^2.0.16",
     "react": "^17.0.2",
     "react-beautiful-dnd": "13.1.0",
     "react-dom": "^17.0.2",
@@ -22,7 +23,7 @@
   },
   "repository": "https://github.com/IlyaPomaskin/fool",
   "scripts": {
-    "dev": "next",
+    "dev": "nodemon --watch 'src/api/*.mjs' --exec 'next'",
     "debug": "NODE_OPTIONS='--inspect' next",
     "build": "rescript && next build",
     "now-build": "rescript && next build",

@@ -56,11 +56,9 @@ wsServer
     })
     ->Utils.toResult("No sessionId")
 
-  Js.log(`/ws login ${sessionId->Result.getWithDefault("No sessionId")}`)
+  Log.info([`/ws login ${sessionId->Result.getWithDefault("No sessionId")}`])
 
-  let player = sessionId->Result.flatMap(GameInstance.loginPlayer)
-
-  Js.log3("connected", sessionId, player)
+  let player = sessionId->Result.flatMap(p => GameInstance.loginPlayer(p))
 
   switch (sessionId, player) {
   | (Error(err), _) => {
@@ -125,7 +123,7 @@ wsServer
 
 let isSet = ref(false)
 
-let default = (_: Http.IncomingMessage.t, res: Http.ServerResponse.t) => {
+let setWsServer = res => {
   if !isSet.contents {
     res
     ->Http.ServerResponse.socket
@@ -150,9 +148,5 @@ let default = (_: Http.IncomingMessage.t, res: Http.ServerResponse.t) => {
     ->ignore
 
     isSet := true
-
-    res->Http.ServerResponse.endWithData(Buffer.fromString("Start"))
-  } else {
-    res->Http.ServerResponse.endWithData(Buffer.fromString("Already started"))
   }
 }
