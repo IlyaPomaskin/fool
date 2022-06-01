@@ -23,7 +23,7 @@ let loginPlayer = sessionId => {
     instanceId := Js.Math.random()
   }
 
-  Log.debug(LoginPlayer, ["Login Player", string_of_float(instanceId.contents)])
+  Log.debug(LoginPlayer, ["GameInstance", string_of_float(instanceId.contents)])
 
   PlayersMap.findBySessionId(players, sessionId)
 }

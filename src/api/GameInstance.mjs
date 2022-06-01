@@ -52,8 +52,8 @@ function loginPlayer(sessionId) {
   if (instanceId.contents === 0) {
     instanceId.contents = Math.random();
   }
-  Log.debug(/* LoginPlayer */0, [
-        "Login Player",
+  Log.debug(/* LoginPlayer */2, [
+        "GameInstance",
         Pervasives.string_of_float(instanceId.contents)
       ]);
   return $$Storage.PlayersMap.findBySessionId($$Storage.players, sessionId);
