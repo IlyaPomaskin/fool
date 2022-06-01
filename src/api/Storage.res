@@ -69,13 +69,24 @@ module ProgressGameMap = MakeGameMap({
 module PlayersMap = {
   type t = Belt.HashMap.t<PlayerId.t, player, PlayerId.identity>
 
+  let log = (map: t) => {
+    Js.Json.stringifyWithSpace(
+      Js.Json.array(
+        map
+        ->HashMap.toArray
+        ->Array.map(((k, v)) => Js.Json.array([Js.Json.string(k), v->Obj.magic])),
+      ),
+      2,
+    )
+  }
+
   let empty = (): t => Belt.HashMap.make(~id=module(PlayerId), ~hintSize=10)
 
   let get = (map, playerId): result<player, string> =>
     map->HashMap.get(playerId)->Utils.toResult(`Player "${playerId}" not found`)
 
-  let findBySessionId = (map, sessionId: sessionId): result<player, string> => {
-    Log.info(["[PlayersMap] findBySessionId", sessionId, map->HashMap.toArray->Js.Array.toString])
+  let findBySessionId = (map: t, sessionId: sessionId): result<player, string> => {
+    Log.debug(PlayersMap, ["findBySessionId", log(map)])
     map
     ->HashMap.reduce(None, (acc, _, value) => {
       switch acc {
@@ -88,7 +99,7 @@ module PlayersMap = {
 
   let set = (map, key, nextValue) => {
     map->HashMap.set(key, nextValue)
-    Log.info(["[PlayersMap] set", key, map->HashMap.toArray->Js.Array.toString])
+    Log.debug(PlayersMap, ["set", key, log(map)])
   }
 
   let create = (map, playerId): result<player, string> =>

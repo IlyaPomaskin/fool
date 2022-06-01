@@ -7,6 +7,7 @@ import * as Utils from "../Utils.mjs";
 import * as Player from "../fool/Player.mjs";
 import * as Belt_Id from "rescript/lib/es6/belt_Id.js";
 import * as Hashtbl from "rescript/lib/es6/hashtbl.js";
+import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
 import * as Belt_Result from "rescript/lib/es6/belt_Result.js";
 import * as Belt_HashMap from "rescript/lib/es6/belt_HashMap.js";
 
@@ -185,6 +186,15 @@ var ProgressGameMap = {
   update: update$1
 };
 
+function log(map) {
+  return JSON.stringify(Belt_Array.map(Belt_HashMap.toArray(map), (function (param) {
+                    return [
+                            param[0],
+                            param[1]
+                          ];
+                  })), null, 2);
+}
+
 function empty$2(param) {
   return Belt_HashMap.make(10, PlayerId);
 }
@@ -194,10 +204,9 @@ function get$2(map, playerId) {
 }
 
 function findBySessionId(map, sessionId) {
-  Log.info([
-        "[PlayersMap] findBySessionId",
-        sessionId,
-        Belt_HashMap.toArray(map).toString()
+  Log.debug(/* PlayersMap */0, [
+        "findBySessionId",
+        log(map)
       ]);
   return Utils.toResult(Belt_HashMap.reduce(map, undefined, (function (acc, param, value) {
                     if (acc !== undefined) {
@@ -212,10 +221,10 @@ function findBySessionId(map, sessionId) {
 
 function set$2(map, key, nextValue) {
   Belt_HashMap.set(map, key, nextValue);
-  return Log.info([
-              "[PlayersMap] set",
+  return Log.debug(/* PlayersMap */0, [
+              "set",
               key,
-              Belt_HashMap.toArray(map).toString()
+              log(map)
             ]);
 }
 
@@ -236,6 +245,7 @@ function create$2(map, playerId) {
 }
 
 var PlayersMap = {
+  log: log,
   empty: empty$2,
   get: get$2,
   findBySessionId: findBySessionId,
