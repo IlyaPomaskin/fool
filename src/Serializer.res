@@ -200,12 +200,14 @@ let playerMsg = Jzon.object3(
   Jzon.field("cards", listViaArray(card)),
 )
 
-let inLobbyMsg = Jzon.object3(
-  ({gameId, players, ready}) => (gameId, players, ready),
-  ((gameId, players, ready)) => {gameId: gameId, players: players, ready: ready}->Ok,
+let inLobbyMsg = Jzon.object4(
+  ({gameId, players, ready, owner}) => (gameId, players, ready, owner),
+  ((gameId, players, ready, owner)) =>
+    {gameId: gameId, players: players, ready: ready, owner: owner}->Ok,
   Jzon.field("gameId", Jzon.string),
   Jzon.field("players", listViaArray(playerMsg)),
   Jzon.field("ready", listViaArray(playerMsg)),
+  Jzon.field("owner", Jzon.string),
 )
 
 let tableCards = listViaArray(tablePair)

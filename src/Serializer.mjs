@@ -410,22 +410,24 @@ var playerMsg$1 = Jzon.object3((function (param) {
               };
       }), Jzon.field("id", Jzon.string), Jzon.field("sessionId", Jzon.string), Jzon.field("cards", listViaArray(card)));
 
-var inLobbyMsg = Jzon.object3((function (param) {
+var inLobbyMsg = Jzon.object4((function (param) {
         return [
                 param.gameId,
                 param.players,
-                param.ready
+                param.ready,
+                param.owner
               ];
       }), (function (param) {
         return {
                 TAG: /* Ok */0,
                 _0: {
+                  owner: param[3],
                   gameId: param[0],
                   players: param[1],
                   ready: param[2]
                 }
               };
-      }), Jzon.field("gameId", Jzon.string), Jzon.field("players", listViaArray(playerMsg$1)), Jzon.field("ready", listViaArray(playerMsg$1)));
+      }), Jzon.field("gameId", Jzon.string), Jzon.field("players", listViaArray(playerMsg$1)), Jzon.field("ready", listViaArray(playerMsg$1)), Jzon.field("owner", Jzon.string));
 
 var tableCards = listViaArray(tablePair);
 

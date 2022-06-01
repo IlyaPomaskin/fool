@@ -40,6 +40,7 @@ type player = {
 type gameId = string
 
 type inLobby = {
+  owner: playerId,
   gameId: gameId,
   players: list<player>,
   ready: list<player>,
