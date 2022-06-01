@@ -10,7 +10,18 @@ function createLogger(prefix, logFn, list) {
   return Curry._1(logFn, Belt_Array.concat(["[" + prefix + "]"], list));
 }
 
-var loggingLevels = [/* PlayersMap */0];
+var enabledLoggers = [
+  /* PlayersMap */1,
+  /* LoginPlayer */0
+];
+
+function loggerToString(level) {
+  if (level) {
+    return "PlayersMap";
+  } else {
+    return "LoginPlayer";
+  }
+}
 
 function error(param) {
   return createLogger("error", (function (prim) {
@@ -40,12 +51,14 @@ function debugLogger(param) {
               }), param);
 }
 
-function debug(level, msgs) {
-  var isShouldBeLogged = Belt_Array.some(loggingLevels, (function (item) {
-          return item === level;
+function debug(logger, msgs) {
+  var isShouldBeLogged = Belt_Array.some(enabledLoggers, (function (item) {
+          return item === logger;
         }));
   if (isShouldBeLogged) {
-    return debugLogger(msgs);
+    return debugLogger(Belt_Array.concat(["[" + (
+                      logger ? "PlayersMap" : "LoginPlayer"
+                    ) + "]"], msgs));
   }
   
 }
@@ -139,7 +152,8 @@ function logMessageFromServer(msg, player) {
 
 export {
   createLogger ,
-  loggingLevels ,
+  enabledLoggers ,
+  loggerToString ,
   error ,
   log ,
   info ,

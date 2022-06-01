@@ -4,20 +4,26 @@ let createLogger = (prefix: string, logFn, list: array<'a>) =>
   logFn(Array.concat([`[${prefix}]`], list))
 
 type loggers =
+  | LoginPlayer
   | PlayersMap
-  | Common
 
-let loggingLevels = [PlayersMap]
+let enabledLoggers = [PlayersMap, LoginPlayer]
+
+let loggerToString = level =>
+  switch level {
+  | LoginPlayer => "LoginPlayer"
+  | PlayersMap => "PlayersMap"
+  }
 
 let error = createLogger("error", Js.Console.errorMany)
 let log = createLogger("log", Js.Console.logMany)
 let info = createLogger("info", Js.Console.infoMany)
 let debugLogger = createLogger("debug", Js.Console.infoMany)
-let debug = (level, msgs) => {
-  let isShouldBeLogged = Array.some(loggingLevels, item => item === level)
+let debug = (logger, msgs) => {
+  let isShouldBeLogged = Array.some(enabledLoggers, item => item === logger)
 
   if isShouldBeLogged {
-    debugLogger(msgs)
+    debugLogger(Array.concat([`[${loggerToString(logger)}]`], msgs))
   }
 }
 
