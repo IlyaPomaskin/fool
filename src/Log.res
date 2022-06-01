@@ -4,13 +4,17 @@ let createLogger = (prefix: string, logFn, list: array<'a>) =>
   logFn(Array.concat([`[${prefix}]`], list))
 
 type loggers =
+  | Ws
+  | User
   | LoginPlayer
   | PlayersMap
 
-let enabledLoggers = [PlayersMap, LoginPlayer]
+let enabledLoggers = [LoginPlayer]
 
 let loggerToString = level =>
   switch level {
+  | Ws => "Ws"
+  | User => "User"
   | LoginPlayer => "LoginPlayer"
   | PlayersMap => "PlayersMap"
   }

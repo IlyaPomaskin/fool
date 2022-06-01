@@ -11,11 +11,11 @@ let default = (req: Http.IncomingMessage.t, res: Http.ServerResponse.t) => {
 
   let response = switch (playerId, sessionId) {
   | (_, Some(sessionId)) => {
-      Js.log(`/api/user login ${sessionId}`)
+      Log.debug(User, ["login", sessionId])
       GameInstance.loginPlayer(sessionId)->Result.map(player => LoggedIn(player))
     }
   | (Some(playerId), _) => {
-      Js.log(`/api/user register ${playerId}`)
+      Log.debug(User, ["register", playerId])
       GameInstance.registerPlayer(playerId)->Result.map(player => Registered(player))
     }
   | _ => Error("No way to authorize")

@@ -10,16 +10,19 @@ function createLogger(prefix, logFn, list) {
   return Curry._1(logFn, Belt_Array.concat(["[" + prefix + "]"], list));
 }
 
-var enabledLoggers = [
-  /* PlayersMap */1,
-  /* LoginPlayer */0
-];
+var enabledLoggers = [/* LoginPlayer */2];
 
 function loggerToString(level) {
-  if (level) {
-    return "PlayersMap";
-  } else {
-    return "LoginPlayer";
+  switch (level) {
+    case /* Ws */0 :
+        return "Ws";
+    case /* User */1 :
+        return "User";
+    case /* LoginPlayer */2 :
+        return "LoginPlayer";
+    case /* PlayersMap */3 :
+        return "PlayersMap";
+    
   }
 }
 
@@ -56,9 +59,7 @@ function debug(logger, msgs) {
           return item === logger;
         }));
   if (isShouldBeLogged) {
-    return debugLogger(Belt_Array.concat(["[" + (
-                      logger ? "PlayersMap" : "LoginPlayer"
-                    ) + "]"], msgs));
+    return debugLogger(Belt_Array.concat(["[" + loggerToString(logger) + "]"], msgs));
   }
   
 }

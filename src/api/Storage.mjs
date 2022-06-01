@@ -204,7 +204,7 @@ function get$2(map, playerId) {
 }
 
 function findBySessionId(map, sessionId) {
-  Log.debug(/* PlayersMap */1, [
+  Log.debug(/* PlayersMap */3, [
         "findBySessionId",
         log(map)
       ]);
@@ -221,7 +221,7 @@ function findBySessionId(map, sessionId) {
 
 function set$2(map, key, nextValue) {
   Belt_HashMap.set(map, key, nextValue);
-  return Log.debug(/* PlayersMap */1, [
+  return Log.debug(/* PlayersMap */3, [
               "set",
               key,
               log(map)
