@@ -5,6 +5,7 @@ import * as Deck from "./Deck.mjs";
 import * as Table from "./Table.mjs";
 import * as Utils from "../Utils.mjs";
 import * as Player from "./Player.mjs";
+import * as Js_math from "rescript/lib/es6/js_math.js";
 import * as Belt_List from "rescript/lib/es6/belt_List.js";
 import * as GameUtils from "./GameUtils.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
@@ -14,7 +15,8 @@ function makeGameInLobby(player) {
   return {
           TAG: /* Ok */0,
           _0: {
-            gameId: "g1",
+            owner: player.id,
+            gameId: "g" + String(Js_math.random_int(0, 100)),
             players: {
               hd: player,
               tl: /* [] */0
@@ -29,6 +31,7 @@ function makeGameInLobby(player) {
 
 function logoutPlayer(game, player) {
   return {
+          owner: game.owner,
           gameId: game.gameId,
           players: Belt_List.keep(game.players, (function (item) {
                   return item !== player;
@@ -44,6 +47,7 @@ function enterGame(game, player) {
   return {
           TAG: /* Ok */0,
           _0: {
+            owner: game.owner,
             gameId: game.gameId,
             players: isPlayerInGame ? game.players : Belt_List.add(game.players, player),
             ready: game.ready
@@ -78,6 +82,7 @@ function toggleReady(game, player) {
   return {
           TAG: /* Ok */0,
           _0: {
+            owner: game.owner,
             gameId: game.gameId,
             players: game.players,
             ready: inList ? Belt_List.keep(game.ready, (function (p) {
