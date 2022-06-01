@@ -16,7 +16,17 @@ let registerPlayer = (playerId: playerId): result<player, string> => {
   }
 }
 
-let loginPlayer = sessionId => PlayersMap.findBySessionId(players, sessionId)
+let instanceId = ref(0.)
+
+let loginPlayer = sessionId => {
+  if instanceId.contents === 0. {
+    instanceId := Js.Math.random()
+  }
+
+  Log.debug(LoginPlayer, ["Login Player", string_of_float(instanceId.contents)])
+
+  PlayersMap.findBySessionId(players, sessionId)
+}
 
 let createLobby = playerId => {
   players
