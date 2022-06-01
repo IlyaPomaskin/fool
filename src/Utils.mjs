@@ -160,6 +160,21 @@ function useStateValue(initialValue) {
         ];
 }
 
+function getServerUrl(param) {
+  var hostname = document.location.hostname;
+  var port = document.location.port;
+  return hostname + ":" + port;
+}
+
+function getProtocolSuffix(param) {
+  var match = getServerUrl(undefined);
+  if (match === "localhost") {
+    return "";
+  } else {
+    return "s";
+  }
+}
+
 var leftRotationClassName = "-rotate-12 -translate-x-1.5";
 
 var rightRotationClassName = "rotate-12 translate-x-1.5";
@@ -188,6 +203,8 @@ export {
   listIndexOf ,
   isEmpty ,
   useStateValue ,
+  getServerUrl ,
+  getProtocolSuffix ,
   
 }
 /* react Not a pure module */

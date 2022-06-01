@@ -100,3 +100,18 @@ let useStateValue = (initialValue: 'a) => {
 
   (value, handleSetValue)
 }
+
+@val external document: 'a = "document"
+
+let getServerUrl = () => {
+  let hostname = document["location"]["hostname"]
+  let port = document["location"]["port"]
+
+  `${hostname}:${port}`
+}
+
+let getProtocolSuffix = () =>
+  switch getServerUrl() {
+  | "localhost" => ""
+  | _ => "s"
+  }
