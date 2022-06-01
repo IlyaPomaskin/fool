@@ -3,9 +3,23 @@ open Types
 let createLogger = (prefix: string, logFn, list: array<'a>) =>
   logFn(Array.concat([`[${prefix}]`], list))
 
+type loggers =
+  | PlayersMap
+  | Common
+
+let loggingLevels = [PlayersMap]
+
 let error = createLogger("error", Js.Console.errorMany)
 let log = createLogger("log", Js.Console.logMany)
-let info = createLogger("debug", Js.Console.infoMany)
+let info = createLogger("info", Js.Console.infoMany)
+let debugLogger = createLogger("debug", Js.Console.infoMany)
+let debug = (level, msgs) => {
+  let isShouldBeLogged = Array.some(loggingLevels, item => item === level)
+
+  if isShouldBeLogged {
+    debugLogger(msgs)
+  }
+}
 
 let clientMsgToString = msg =>
   switch msg {

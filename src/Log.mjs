@@ -10,6 +10,8 @@ function createLogger(prefix, logFn, list) {
   return Curry._1(logFn, Belt_Array.concat(["[" + prefix + "]"], list));
 }
 
+var loggingLevels = [/* PlayersMap */0];
+
 function error(param) {
   return createLogger("error", (function (prim) {
                 Caml_splice_call.spliceApply(console.error, [prim]);
@@ -25,10 +27,27 @@ function log(param) {
 }
 
 function info(param) {
+  return createLogger("info", (function (prim) {
+                Caml_splice_call.spliceApply(console.info, [prim]);
+                
+              }), param);
+}
+
+function debugLogger(param) {
   return createLogger("debug", (function (prim) {
                 Caml_splice_call.spliceApply(console.info, [prim]);
                 
               }), param);
+}
+
+function debug(level, msgs) {
+  var isShouldBeLogged = Belt_Array.some(loggingLevels, (function (item) {
+          return item === level;
+        }));
+  if (isShouldBeLogged) {
+    return debugLogger(msgs);
+  }
+  
 }
 
 function clientMsgToString(msg) {
@@ -120,9 +139,12 @@ function logMessageFromServer(msg, player) {
 
 export {
   createLogger ,
+  loggingLevels ,
   error ,
   log ,
   info ,
+  debugLogger ,
+  debug ,
   clientMsgToString ,
   logMessageFromClient ,
   serverMsgToString ,
