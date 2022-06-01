@@ -125,42 +125,13 @@ let createServer = server => {
 }
 
 let isWsServerSet = ref(false)
-let isHandlerSet = ref(false)
 
 let setWsServer = res => {
   if !isWsServerSet.contents {
     Js.log("Set handlers")
 
-    createServer(res->Http.ServerResponse.socket->WsWebSocketServer.getServerFromSocket)
-
-    // res
-    // ->Http.ServerResponse.socket
-    // ->WsWebSocketServer.getServerFromSocket
-    // ->Http.Server.onListening(() =>
-    //   wsServer->WsWebSocketServer.emit(WsWebSocketServer.ServerEvents.listening)->ignore
-    // )
-    // ->Http.Server.onError(() =>
-    //   wsServer->WsWebSocketServer.emit(WsWebSocketServer.ServerEvents.error)->ignore
-    // )
-    // ->Http.Server.onUpgrade((req, socket, head) => {
-    //   let isWs = Js.String.startsWith("/ws", Http.IncomingMessage.url(req))
-
-    //   Js.log3("on upgrade ws", isWs, isHandlerSet.contents)
-
-    //   if isWs && !isHandlerSet.contents {
-    //     Js.log3("upgrade ws", isWs, isHandlerSet.contents)
-
-    //     isHandlerSet := true
-
-    //     WsWebSocketServer.handleUpgrade(wsServer, req, socket, head, (ws, req) =>
-    //       wsServer
-    //       ->WsWebSocketServer.emit2(WsWebSocketServer.ServerEvents.connection, ws, req)
-    //       ->ignore
-    //     )
-    //   }
-    // })
-    // ->ignore
-
     isWsServerSet := true
+
+    createServer(res->Http.ServerResponse.socket->WsWebSocketServer.getServerFromSocket)
   }
 }

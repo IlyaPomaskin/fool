@@ -182,16 +182,11 @@ var isWsServerSet = {
   contents: false
 };
 
-var isHandlerSet = {
-  contents: false
-};
-
 function setWsServer(res) {
   if (!isWsServerSet.contents) {
     console.log("Set handlers");
-    createServer(res.socket.server);
     isWsServerSet.contents = true;
-    return ;
+    return createServer(res.socket.server);
   }
   
 }
@@ -200,7 +195,6 @@ export {
   playersSocket ,
   createServer ,
   isWsServerSet ,
-  isHandlerSet ,
   setWsServer ,
   
 }
