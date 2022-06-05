@@ -38,24 +38,17 @@ module Item = {
       [box.left, box.top],
     )
 
-    if cProps.isDragging {
-      <div ref />
-    } else {
-      <div
-        ref
-        style={ReactDOMStyle.make(
-          ~position="absolute",
-          ~border="1px dashed gray",
-          ~backgroundColor="white",
-          ~padding="0.5rem 1rem",
-          ~cursor="move",
-          ~left=Belt.Float.toString(box.left) ++ "px",
-          ~top=Belt.Float.toString(box.top) ++ "px",
-          (),
-        )}>
-        {uiStr(box.title)}
-      </div>
-    }
+    <div
+      ref
+      className="select-none absolute cursor-move p-2 bg-slate-100 border border-dashed border-gray-300 rounded-md"
+      style={ReactDOMStyle.make(
+        ~left=Belt.Float.toString(box.left) ++ "px",
+        ~top=Belt.Float.toString(box.top) ++ "px",
+        ~visibility=cProps.isDragging ? "hidden" : "visible",
+        (),
+      )}>
+      {uiStr(box.title)}
+    </div>
   }
 }
 
@@ -91,11 +84,14 @@ module Container = {
       UseDrop.makeConfig(
         ~accept="box",
         ~drop=(item, monitor) => {
-          let delta = DragSourceMonitor.getDifferenceFromInitialOffset(monitor)
-          switch delta->Js.Nullable.toOption {
+          let delta =
+            monitor->DragSourceMonitor.getDifferenceFromInitialOffset->Js.Nullable.toOption
+
+          switch delta {
           | Some(delta) => {
               let left = Js.Math.round(item.left +. delta.x)
               let top = Pervasives.floor(item.top +. delta.y)
+
               moveBox(item.id, left, top)
             }
           | _ => ignore()

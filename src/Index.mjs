@@ -29,25 +29,15 @@ function Index$Item(Props) {
         box.left,
         box.top
       ]);
-  var ref = match[1];
-  if (match[0].isDragging) {
-    return React.createElement("div", {
-                ref: ref
-              });
-  } else {
-    return React.createElement("div", {
-                ref: ref,
-                style: {
-                  backgroundColor: "white",
-                  border: "1px dashed gray",
-                  cursor: "move",
-                  left: String(box.left) + "px",
-                  padding: "0.5rem 1rem",
-                  position: "absolute",
-                  top: String(box.top) + "px"
-                }
-              }, Utils.uiStr(box.title));
-  }
+  return React.createElement("div", {
+              ref: match[1],
+              className: "select-none absolute cursor-move p-2 bg-slate-100 border border-dashed border-gray-300 rounded-md",
+              style: {
+                left: String(box.left) + "px",
+                top: String(box.top) + "px",
+                visibility: match[0].isDragging ? "hidden" : "visible"
+              }
+            }, Utils.uiStr(box.title));
 }
 
 function Index$Container(Props) {

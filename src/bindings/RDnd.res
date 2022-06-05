@@ -75,14 +75,27 @@ module MakeDnd = (DO: DragObject, DR: DropResult, CP: CollectedProps) => {
   module UseDrag = {
     type options
     type config
+    type previewOptions
 
     type dragSourceOptions = {dropEffect: option<string>}
+
+    @obj
+    external makePreviewOptions: (
+      ~captureDraggingState: bool=?,
+      ~anchorX: int=?,
+      ~anchorY: int=?,
+      ~offsetX: int=?,
+      ~offsetY: int=?,
+    ) => previewOptions = ""
 
     @obj
     external makeConfig: (
       ~\"type": identifier,
       ~item: DO.t=?,
       ~options: options=?,
+      ~previewOptions: previewOptions=?,
+      ~end: (DO.t, DragSourceMonitor.t) => unit=?,
+      ~canDrag: DragSourceMonitor.t => bool=?,
       ~isDragging: DragSourceMonitor.t => bool=?,
       ~collect: DragSourceMonitor.t => CP.t=?,
       unit,
