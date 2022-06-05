@@ -25,11 +25,11 @@ function AuthorizationScreen(Props) {
         return false;
       });
   var setIsLoading = match$2[1];
-  var makeAuthRequest = function (arg, sessionId) {
+  var makeAuthRequest = function (arg, value) {
     Curry._1(setIsLoading, (function (param) {
             return true;
           }));
-    fetch(Utils.getFullUrl(undefined, undefined) + "/api/user?" + arg + "=" + sessionId).then(function (prim) {
+    fetch(Utils.getFullUrl(false, undefined) + "/api/user?" + arg + "=" + value).then(function (prim) {
                   return prim.text();
                 }).then(function (json) {
                 return Promise.resolve(Serializer.deserializeUserApiResponse(json));

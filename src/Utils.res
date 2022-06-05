@@ -108,10 +108,10 @@ let getFullUrl = (~isWs=false, ()) => {
   let hostname = document["location"]["hostname"]
   let port = document["location"]["port"]
   let protocol = switch (isWs, protocol) {
-  | (true, "https") => "wss"
-  | (false, "http") => "ws"
+  | (true, "https:") => "wss:"
+  | (true, "http:") => "ws:"
   | _ => protocol
   }
 
-  `${protocol}://${hostname}:${port}`
+  `${protocol}//${hostname}:${port}`
 }

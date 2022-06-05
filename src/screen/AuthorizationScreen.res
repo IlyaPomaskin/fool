@@ -8,10 +8,10 @@ let make = (~onLogin) => {
   let (error, setError) = React.useState(_ => None)
   let (isLoading, setIsLoading) = React.useState(_ => false)
 
-  let makeAuthRequest = (arg, sessionId) => {
+  let makeAuthRequest = (arg, value) => {
     setIsLoading(_ => true)
 
-    Fetch.fetch(`${getFullUrl()}/api/user?${arg}=${sessionId}`)
+    Fetch.fetch(`${getFullUrl(~isWs=false, ())}/api/user?${arg}=${value}`)
     |> then_(Fetch.Response.text)
     |> then_(json => Serializer.deserializeUserApiResponse(json)->resolve)
     |> then_(response => {

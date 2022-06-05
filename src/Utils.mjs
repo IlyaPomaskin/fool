@@ -165,12 +165,22 @@ function getFullUrl(isWsOpt, param) {
   var protocol = document.location.protocol;
   var hostname = document.location.hostname;
   var port = document.location.port;
-  var protocol$1 = isWs ? (
-      protocol === "https" ? "wss" : protocol
-    ) : (
-      protocol === "http" ? "ws" : protocol
-    );
-  return protocol$1 + "://" + hostname + ":" + port;
+  var protocol$1;
+  if (isWs) {
+    switch (protocol) {
+      case "http:" :
+          protocol$1 = "ws:";
+          break;
+      case "https:" :
+          protocol$1 = "wss:";
+          break;
+      default:
+        protocol$1 = protocol;
+    }
+  } else {
+    protocol$1 = protocol;
+  }
+  return protocol$1 + "//" + hostname + ":" + port;
 }
 
 var leftRotationClassName = "-rotate-12 -translate-x-1.5";
