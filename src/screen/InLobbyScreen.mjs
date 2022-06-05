@@ -29,7 +29,9 @@ function InLobbyScreen(Props) {
                                 return Caml_obj.caml_equal(p, player);
                               }));
                         var readyEmoji = isReady ? "✅" : "❌";
-                        return React.createElement("div", undefined, React.createElement("span", {
+                        return React.createElement("div", {
+                                    key: player.id
+                                  }, React.createElement("span", {
                                         className: "pr-2"
                                       }, Utils.uiStr(readyEmoji)), React.createElement(PlayerUI.Short.make, {
                                         className: "inline-block",

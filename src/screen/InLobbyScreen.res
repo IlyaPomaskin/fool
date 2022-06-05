@@ -17,7 +17,7 @@ let make = (~game: inLobby, ~onMessage, ~player) => {
         | false => `❌`
         }
 
-        <div>
+        <div key={player.id}>
           <span className="pr-2"> {uiStr(readyEmoji)} </span>
           <PlayerUI.Short player className="inline-block" />
         </div>
