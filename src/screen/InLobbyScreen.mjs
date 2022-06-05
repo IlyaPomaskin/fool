@@ -4,6 +4,8 @@ import * as Base from "../components/Base.mjs";
 import * as Curry from "rescript/lib/es6/curry.js";
 import * as Utils from "../Utils.mjs";
 import * as React from "react";
+import * as Caml_obj from "rescript/lib/es6/caml_obj.js";
+import * as PlayerUI from "../components/PlayerUI.mjs";
 import * as Belt_List from "rescript/lib/es6/belt_List.js";
 import * as GameUtils from "../fool/GameUtils.mjs";
 import * as Belt_Result from "rescript/lib/es6/belt_Result.js";
@@ -15,11 +17,25 @@ function InLobbyScreen(Props) {
   var isOwner = GameUtils.isOwner(game, player);
   var isCanStart = Belt_Result.isOk(GameUtils.isCanStart(game, player));
   return React.createElement("div", {
-              className: "m-2"
+              className: "flex flex-col gap-2"
             }, React.createElement(Base.Heading.make, {
                   size: /* H5 */3,
                   children: Utils.uiStr("Lobby Id: " + game.gameId)
-                }), isOwner ? React.createElement(Base.Button.make, {
+                }), React.createElement("div", undefined, React.createElement(Base.Heading.make, {
+                      size: /* H5 */3,
+                      children: Utils.uiStr("Players:")
+                    }), Utils.uiReverseList(game.players, (function (player) {
+                        var isReady = Belt_List.some(game.ready, (function (p) {
+                                return Caml_obj.caml_equal(p, player);
+                              }));
+                        var readyEmoji = isReady ? "✅" : "❌";
+                        return React.createElement("div", undefined, React.createElement("span", {
+                                        className: "pr-2"
+                                      }, Utils.uiStr(readyEmoji)), React.createElement(PlayerUI.Short.make, {
+                                        className: "inline-block",
+                                        player: player
+                                      }));
+                      }))), isOwner ? React.createElement(Base.Button.make, {
                     disabled: !isCanStart,
                     onClick: (function (param) {
                         return Curry._1(onMessage, {
