@@ -11,6 +11,8 @@ import * as Caml_option from "rescript/lib/es6/caml_option.js";
 
 function AuthorizationScreen(Props) {
   var onLogin = Props.onLogin;
+  var sessionIdOpt = Props.sessionId;
+  var sessionId = sessionIdOpt !== undefined ? Caml_option.valFromOption(sessionIdOpt) : undefined;
   var match = React.useState(function () {
         return "";
       });
@@ -53,7 +55,9 @@ function AuthorizationScreen(Props) {
                 }
                 if (exit === 1) {
                   var player = err._0;
-                  sessionStorage.setItem("sessionId", player.sessionId);
+                  if (Belt_Option.isNone(sessionId)) {
+                    sessionStorage.setItem("sessionId", player.sessionId);
+                  }
                   tmp = Curry._1(onLogin, player);
                 }
                 
@@ -75,9 +79,12 @@ function AuthorizationScreen(Props) {
     
   };
   React.useEffect((function () {
-          var sessionId = Belt_Option.getWithDefault(Caml_option.nullable_to_opt(sessionStorage.getItem("sessionId")), "");
-          if (sessionId !== "") {
-            makeAuthRequest("sessionId", sessionId);
+          var lsSessionId = sessionStorage.getItem("sessionId");
+          var sessionId$1 = sessionId !== undefined ? sessionId : (
+              (lsSessionId == null) ? "" : lsSessionId
+            );
+          if (sessionId$1 !== "") {
+            makeAuthRequest("sessionId", sessionId$1);
           }
           
         }), []);

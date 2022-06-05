@@ -8,28 +8,39 @@ import * as GameUtils from "../fool/GameUtils.mjs";
 import * as Pervasives from "rescript/lib/es6/pervasives.js";
 import * as Belt_Result from "rescript/lib/es6/belt_Result.js";
 
-$$Storage.PlayersMap.set($$Storage.players, "p1", {
-      id: "p1",
-      sessionId: "s:p1",
-      cards: /* [] */0
-    });
+var p1 = {
+  id: "p1",
+  sessionId: "s:p1",
+  cards: /* [] */0
+};
 
-$$Storage.PlayersMap.set($$Storage.players, "p2", {
-      id: "p2",
-      sessionId: "s:p2",
-      cards: /* [] */0
-    });
+var p2 = {
+  id: "p2",
+  sessionId: "s:p2",
+  cards: /* [] */0
+};
 
-$$Storage.PlayersMap.set($$Storage.players, "p3", {
-      id: "p3",
-      sessionId: "s:p3",
-      cards: /* [] */0
-    });
+$$Storage.PlayersMap.set($$Storage.players, "p1", p1);
 
-$$Storage.PlayersMap.set($$Storage.players, "p4", {
-      id: "p4",
-      sessionId: "s:p4",
-      cards: /* [] */0
+$$Storage.PlayersMap.set($$Storage.players, "p2", p2);
+
+$$Storage.LobbyGameMap.set($$Storage.gamesInLobby, "g1", {
+      owner: "p1",
+      gameId: "g1",
+      players: {
+        hd: p1,
+        tl: {
+          hd: p2,
+          tl: /* [] */0
+        }
+      },
+      ready: {
+        hd: p1,
+        tl: {
+          hd: p2,
+          tl: /* [] */0
+        }
+      }
     });
 
 function registerPlayer(playerId) {
@@ -110,6 +121,8 @@ function move(playerId, gameId, action) {
 }
 
 export {
+  p1 ,
+  p2 ,
   registerPlayer ,
   instanceId ,
   loginPlayer ,

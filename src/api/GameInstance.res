@@ -2,10 +2,13 @@ open Types
 open Storage
 
 // FIXME remove debug code
-PlayersMap.set(players, "p1", {id: "p1", sessionId: "s:p1", cards: list{}})
-PlayersMap.set(players, "p2", {id: "p2", sessionId: "s:p2", cards: list{}})
-PlayersMap.set(players, "p3", {id: "p3", sessionId: "s:p3", cards: list{}})
-PlayersMap.set(players, "p4", {id: "p4", sessionId: "s:p4", cards: list{}})
+let p1 = {id: "p1", sessionId: "s:p1", cards: list{}}
+let p2 = {id: "p2", sessionId: "s:p2", cards: list{}}
+players->PlayersMap.set("p1", p1)->ignore
+players->PlayersMap.set("p2", p2)->ignore
+gamesInLobby
+->LobbyGameMap.set("g1", {gameId: "g1", owner: "p1", players: list{p1, p2}, ready: list{p1, p2}})
+->ignore
 
 let registerPlayer = (playerId: playerId): result<player, string> => {
   let player = players->PlayersMap.get(playerId)

@@ -2,7 +2,7 @@ open Types
 open Utils
 
 @react.component
-let make = (~gameId=None) => {
+let make = (~gameId=None, ~sessionId=None) => {
   let (player, setPlayer) = useStateValue(None)
   let (screen, setScreen) = useStateValue(AuthorizationScreen)
   let (error, setError) = useStateValue(None)
@@ -60,7 +60,7 @@ let make = (~gameId=None) => {
     | None => React.null
     }}
     {switch (screen, player) {
-    | (AuthorizationScreen, _) => <AuthorizationScreen onLogin={handleLogin} />
+    | (AuthorizationScreen, _) => <AuthorizationScreen sessionId onLogin={handleLogin} />
     | (LobbySetupScreen, Some(player)) => <LobbySetupScreen gameId player onMessage={sendMessage} />
     | (InLobbyScreen(game), Some(player)) => <InLobbyScreen player game onMessage={sendMessage} />
     | (InProgressScreen(game), Some(player)) =>

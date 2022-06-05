@@ -16,7 +16,9 @@ import * as AuthorizationScreen from "./screen/AuthorizationScreen.mjs";
 
 function PlayerScreen(Props) {
   var gameIdOpt = Props.gameId;
+  var sessionIdOpt = Props.sessionId;
   var gameId = gameIdOpt !== undefined ? Caml_option.valFromOption(gameIdOpt) : undefined;
+  var sessionId = sessionIdOpt !== undefined ? Caml_option.valFromOption(sessionIdOpt) : undefined;
   var match = Utils.useStateValue(undefined);
   var setPlayer = match[1];
   var player = match[0];
@@ -100,7 +102,8 @@ function PlayerScreen(Props) {
   if (typeof screen === "number") {
     if (screen === /* AuthorizationScreen */0) {
       tmp = React.createElement(AuthorizationScreen.make, {
-            onLogin: handleLogin
+            onLogin: handleLogin,
+            sessionId: sessionId
           });
     } else if (player !== undefined) {
       tmp = React.createElement(LobbySetupScreen.make, {

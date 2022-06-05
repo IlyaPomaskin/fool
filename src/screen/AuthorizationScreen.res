@@ -3,7 +3,7 @@ open Utils
 open Js.Promise
 
 @react.component
-let make = (~onLogin) => {
+let make = (~onLogin, ~sessionId=None) => {
   let (login, setLogin) = React.useState(_ => "")
   let (error, setError) = React.useState(_ => None)
   let (isLoading, setIsLoading) = React.useState(_ => false)
@@ -18,7 +18,10 @@ let make = (~onLogin) => {
       switch response {
       | Ok(LoggedIn(player))
       | Ok(Registered(player)) => {
-          LocalStorage.SessionStorage.setItem("sessionId", player.sessionId)
+          if Option.isNone(sessionId) {
+            LocalStorage.SessionStorage.setItem("sessionId", player.sessionId)
+          }
+
           onLogin(player)
         }
       | Ok(UserError(err)) => setError(_ => Some(err))
@@ -34,10 +37,12 @@ let make = (~onLogin) => {
   }
 
   React.useEffect0(() => {
-    let sessionId =
-      LocalStorage.SessionStorage.getItem("sessionId")
-      ->Js.Nullable.toOption
-      ->Option.getWithDefault("")
+    let lsSessionId = LocalStorage.SessionStorage.getItem("sessionId")->Js.Nullable.toOption
+    let sessionId = switch (sessionId, lsSessionId) {
+    | (Some(x), _) => x
+    | (None, Some(x)) => x
+    | _ => ""
+    }
 
     if sessionId != "" {
       makeAuthRequest("sessionId", sessionId)
