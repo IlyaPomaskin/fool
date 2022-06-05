@@ -183,6 +183,7 @@ var isWsServerSet = {
 };
 
 function setWsServer(res) {
+  console.log("isWsServerSet", isWsServerSet.contents);
   if (!isWsServerSet.contents) {
     console.log("Set handlers");
     isWsServerSet.contents = true;

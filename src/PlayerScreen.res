@@ -45,23 +45,20 @@ let make = (~gameId=None) => {
     ~onError=_ => setIsConnected(false),
   )
 
-  <div className="w-96 h-128 border rounded-md border-solid border-slate-500 p-2">
-    <div>
-      {switch player {
-      | Some(player) => <>
-          {uiStr("Player: ")}
-          <PlayerUI.Short className="inline" player />
-          <span className="px-1"> {uiStr(isConnected ? `🟢` : `🔴`)} </span>
-        </>
-      | None => React.null
-      }}
-    </div>
-    <div>
-      {switch error {
-      | Some(err) => <div> {uiStr("ServerError: " ++ err)} </div>
-      | None => React.null
-      }}
-    </div>
+  <div className="mx-auto max-w-sm w-full">
+    {switch player {
+    | Some(player) =>
+      <div>
+        {uiStr("Player: ")}
+        <PlayerUI.Short className="inline break-all" player />
+        <span className="px-1"> {uiStr(isConnected ? `🟢` : `🔴`)} </span>
+      </div>
+    | None => React.null
+    }}
+    {switch error {
+    | Some(err) => <p className="break-all"> {uiStr("ServerError: " ++ err)} </p>
+    | None => React.null
+    }}
     {switch (screen, player) {
     | (AuthorizationScreen, _) => <AuthorizationScreen onLogin={handleLogin} />
     | (LobbySetupScreen, Some(player)) => <LobbySetupScreen gameId player onMessage={sendMessage} />

@@ -35,7 +35,7 @@ function LobbySetupScreen(Props) {
           
         }), [gameId]);
   return React.createElement("div", {
-              className: "flex flex-col gap-2"
+              className: "flex flex-col gap-4"
             }, React.createElement("div", {
                   className: "flex flex-col gap-2"
                 }, React.createElement(Base.Heading.make, {

@@ -127,6 +127,8 @@ let createServer = server => {
 let isWsServerSet = ref(false)
 
 let setWsServer = res => {
+  Js.log2("isWsServerSet", isWsServerSet.contents)
+
   if !isWsServerSet.contents {
     Js.log("Set handlers")
 

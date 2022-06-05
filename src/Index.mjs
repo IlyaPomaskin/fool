@@ -5,7 +5,7 @@ import * as PlayerScreen from "./PlayerScreen.mjs";
 
 function $$default(param) {
   return React.createElement("div", {
-              className: "flex flex-row flex-wrap w-full"
+              className: "flex flex-row flex-wrap justify-items-center w-full container px-12 py-6"
             }, React.createElement(PlayerScreen.make, {}));
 }
 

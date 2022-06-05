@@ -134,13 +134,15 @@ function PlayerScreen(Props) {
     tmp = React.createElement("div", undefined, Utils.uiStr("unhandled case"));
   }
   return React.createElement("div", {
-              className: "w-96 h-128 border rounded-md border-solid border-slate-500 p-2"
-            }, React.createElement("div", undefined, player !== undefined ? React.createElement(React.Fragment, undefined, Utils.uiStr("Player: "), React.createElement(PlayerUI.Short.make, {
-                            className: "inline",
-                            player: player
-                          }), React.createElement("span", {
-                            className: "px-1"
-                          }, Utils.uiStr(match$3[0] ? "🟢" : "🔴"))) : null), React.createElement("div", undefined, error !== undefined ? React.createElement("div", undefined, Utils.uiStr("ServerError: " + error)) : null), tmp);
+              className: "mx-auto max-w-sm w-full"
+            }, player !== undefined ? React.createElement("div", undefined, Utils.uiStr("Player: "), React.createElement(PlayerUI.Short.make, {
+                        className: "inline break-all",
+                        player: player
+                      }), React.createElement("span", {
+                        className: "px-1"
+                      }, Utils.uiStr(match$3[0] ? "🟢" : "🔴"))) : null, error !== undefined ? React.createElement("p", {
+                    className: "break-all"
+                  }, Utils.uiStr("ServerError: " + error)) : null, tmp);
 }
 
 var make = PlayerScreen;

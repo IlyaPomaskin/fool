@@ -22,7 +22,7 @@ let make = (~player, ~gameId, ~onMessage) => {
     None
   }, [gameId])
 
-  <div className="flex flex-col gap-2">
+  <div className="flex flex-col gap-4">
     <div className="flex flex-col gap-2">
       <Base.Heading size={Base.Heading.H5}> {uiStr("Create new game")} </Base.Heading>
       <Base.Button onClick={_ => onMessage(Lobby(Create, player.id, ""))}>
