@@ -11,7 +11,7 @@ let make = (~onLogin) => {
   let makeAuthRequest = (arg, sessionId) => {
     setIsLoading(_ => true)
 
-    Fetch.fetch(`http${getProtocolSuffix()}://${getServerUrl()}/api/user?${arg}=${sessionId}`) //
+    Fetch.fetch(`${getFullUrl()}/api/user?${arg}=${sessionId}`)
     |> then_(Fetch.Response.text)
     |> then_(json => Serializer.deserializeUserApiResponse(json)->resolve)
     |> then_(response => {

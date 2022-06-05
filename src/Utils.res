@@ -103,15 +103,15 @@ let useStateValue = (initialValue: 'a) => {
 
 @val external document: 'a = "document"
 
-let getServerUrl = () => {
+let getFullUrl = (~isWs=false, ()) => {
+  let protocol = document["location"]["protocol"]
   let hostname = document["location"]["hostname"]
   let port = document["location"]["port"]
-
-  `${hostname}:${port}`
-}
-
-let getProtocolSuffix = () =>
-  switch getServerUrl() {
-  | "localhost" => ""
-  | _ => "s"
+  let protocol = switch (isWs, protocol) {
+  | (true, "https") => "wss"
+  | (false, "http") => "ws"
+  | _ => protocol
   }
+
+  `${protocol}://${hostname}:${port}`
+}

@@ -29,7 +29,7 @@ function AuthorizationScreen(Props) {
     Curry._1(setIsLoading, (function (param) {
             return true;
           }));
-    fetch("http" + Utils.getProtocolSuffix(undefined) + "://" + Utils.getServerUrl(undefined) + "/api/user?" + arg + "=" + sessionId).then(function (prim) {
+    fetch(Utils.getFullUrl(undefined, undefined) + "/api/user?" + arg + "=" + sessionId).then(function (prim) {
                   return prim.text();
                 }).then(function (json) {
                 return Promise.resolve(Serializer.deserializeUserApiResponse(json));

@@ -22,7 +22,7 @@ function hook(player, onMessage, onConnectOpt, onDisconnectOpt, onErrorOpt) {
                     Utils.noop
                   ];
           }
-          var ws = new WebSocket("ws" + Utils.getProtocolSuffix(undefined) + "://" + Utils.getServerUrl(undefined) + "/ws?sessionId=" + sessionId);
+          var ws = new WebSocket(Utils.getFullUrl(true, undefined) + "/ws?sessionId=" + sessionId);
           var sendMessage = function (message) {
             if ($$WebSocket.isOpen(ws)) {
               Log.logMessageFromClient(message);

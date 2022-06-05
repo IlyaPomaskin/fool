@@ -160,19 +160,17 @@ function useStateValue(initialValue) {
         ];
 }
 
-function getServerUrl(param) {
+function getFullUrl(isWsOpt, param) {
+  var isWs = isWsOpt !== undefined ? isWsOpt : false;
+  var protocol = document.location.protocol;
   var hostname = document.location.hostname;
   var port = document.location.port;
-  return hostname + ":" + port;
-}
-
-function getProtocolSuffix(param) {
-  var match = getServerUrl(undefined);
-  if (match === "localhost") {
-    return "";
-  } else {
-    return "s";
-  }
+  var protocol$1 = isWs ? (
+      protocol === "https" ? "wss" : protocol
+    ) : (
+      protocol === "http" ? "ws" : protocol
+    );
+  return protocol$1 + "://" + hostname + ":" + port;
 }
 
 var leftRotationClassName = "-rotate-12 -translate-x-1.5";
@@ -203,8 +201,7 @@ export {
   listIndexOf ,
   isEmpty ,
   useStateValue ,
-  getServerUrl ,
-  getProtocolSuffix ,
+  getFullUrl ,
   
 }
 /* react Not a pure module */
