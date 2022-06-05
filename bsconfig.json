@@ -7,7 +7,6 @@
     "@ryyppy/rescript-promise",
     "rescript-jzon",
     "rescript-nodejs",
-    "rescript-dnd",
     "bs-react-spring",
     "bs-fetch"
   ],

@@ -1,17 +1,19 @@
+import React, { StrictMode } from "react";
+import dynamic from "next/dynamic";
+
 import "../styles/main.css";
 
-import ResApp from "src/App.mjs";
-
-const SafeHydrate = ({ children }) => (
-  <div suppressHydrationWarning>
-    {typeof window === "undefined" ? null : children}
-  </div>
-);
+const ResAppLazy = dynamic({
+  loader: () => import("src/App.mjs"),
+  loading: () => <div>App Loading...</div>,
+  ssr: false,
+  suspense: true,
+});
 
 export default function App(props) {
   return (
-    <SafeHydrate>
-      <ResApp {...props} />
-    </SafeHydrate>
+    <StrictMode>
+      <ResAppLazy {...props} />
+    </StrictMode>
   );
 }
