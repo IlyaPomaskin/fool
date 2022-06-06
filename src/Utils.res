@@ -30,6 +30,15 @@ let toggleArrayItem = (list: list<'a>, item: 'a): list<'a> => {
 
 let lastListItem = (list: list<'a>) => list->List.get(List.size(list) - 1)
 
+let findInList = (list: list<'a>, fn: 'a => bool) =>
+  List.reduce(list, None, (acc, item) => {
+    switch (acc, fn(item)) {
+    | (Some(_), _) => acc
+    | (_, true) => Some(item)
+    | _ => None
+    }
+  })
+
 let identity = (a: 'a) => a
 
 let rec numbersToEmoji = (number: int) =>

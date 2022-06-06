@@ -96,10 +96,10 @@ function startGame(game) {
   var players = match[0];
   var trump = GameUtils.getTrump(deck, players);
   var attacker = Belt_Option.flatMap(trump, (function (tr) {
-          return Player.findFirstAttacker(tr, players);
+          return Player.findFirstAttackerId(tr, players);
         }));
   var defender = Belt_Option.flatMap(attacker, (function (at) {
-          return Player.getNextPlayer(at, players);
+          return Player.getNextPlayerId(at, players);
         }));
   if (trump !== undefined) {
     if (attacker !== undefined && defender !== undefined) {
@@ -131,7 +131,9 @@ function startGame(game) {
 }
 
 function isValidMove(game, player, card) {
-  var isDefenderHasEnoughCards = Belt_List.length(game.defender.cards) >= (Belt_List.length(game.table) + 1 | 0);
+  var isDefenderHasEnoughCards = Belt_Option.getWithDefault(Belt_Option.map(Player.getById(game.players, game.defender), (function (defender) {
+              return Belt_List.length(defender.cards) >= (Belt_List.length(game.table) + 1 | 0);
+            })), false);
   if (GameUtils.isDefender(game, player)) {
     return {
             TAG: /* Error */1,
@@ -219,9 +221,9 @@ function isValidPass(game, player) {
 }
 
 function finishRound(game) {
-  var nextAttacker = Player.getNextPlayer(game.attacker, game.players);
+  var nextAttacker = Player.getNextPlayerId(game.attacker, game.players);
   var nextDefender = Belt_Option.flatMap(nextAttacker, (function (p) {
-          return Player.getNextPlayer(p, game.players);
+          return Player.getNextPlayerId(p, game.players);
         }));
   var match = Player.dealDeckToPlayers(game.deck, game.players);
   if (nextAttacker !== undefined && nextDefender !== undefined) {
@@ -379,9 +381,9 @@ function take(game, player) {
   if (Belt_Result.isError(isValid)) {
     return isValid;
   }
-  var nextAttacker = Player.getNextPlayer(game.defender, game.players);
+  var nextAttacker = Player.getNextPlayerId(game.defender, game.players);
   var nextDefender = Belt_Option.flatMap(nextAttacker, (function (p) {
-          return Player.getNextPlayer(p, game.players);
+          return Player.getNextPlayerId(p, game.players);
         }));
   var nextPlayers = Belt_List.map(game.players, (function (p) {
           if (GameUtils.isDefender(game, p)) {
@@ -445,8 +447,8 @@ function maskGameDeck(deck) {
 function maskForPlayer(game, playerId) {
   return {
           gameId: game.gameId,
-          attacker: Player.mask(playerId, game.attacker),
-          defender: Player.mask(playerId, game.defender),
+          attacker: game.attacker,
+          defender: game.defender,
           players: Belt_List.map(game.players, (function (param) {
                   return Player.mask(playerId, param);
                 })),
@@ -464,8 +466,8 @@ function toObject(game) {
           gameId: game.gameId,
           table: Table.toObject(game.table),
           trump: Card.suitToString(game.trump),
-          attacker: Player.toStringShort(game.attacker),
-          defender: Player.toStringShort(game.defender),
+          attacker: game.attacker,
+          defender: game.defender,
           players: Belt_List.toArray(Belt_List.map(game.players, Player.toObject)),
           deck: Deck.toObject(game.deck),
           pass: Belt_List.toArray(Belt_List.map(game.pass, Player.toStringShort))

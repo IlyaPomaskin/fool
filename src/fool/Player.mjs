@@ -17,37 +17,43 @@ function make(login) {
         };
 }
 
-function getNextPlayer(p, players) {
+function getNextPlayerId(playerId, players) {
   var playersWithCards = Belt_List.keep(players, (function (p) {
           return Belt_List.length(p.cards) !== 0;
         }));
   var foundPlayerIndex = Belt_List.reduceWithIndex(playersWithCards, -1, (function (prev, item, index) {
-          if (item.id === p.id) {
+          if (item.id === playerId) {
             return index;
           } else {
             return prev;
           }
         }));
-  var nextPlayer = Belt_List.get(playersWithCards, foundPlayerIndex + 1 | 0);
-  if (nextPlayer !== undefined) {
-    return nextPlayer;
+  var nextPlayerId = Belt_Option.map(Belt_List.get(playersWithCards, foundPlayerIndex + 1 | 0), (function (p) {
+          return p.id;
+        }));
+  if (nextPlayerId !== undefined) {
+    return nextPlayerId;
   } else {
-    return Belt_List.get(playersWithCards, 0);
+    return Belt_Option.map(Belt_List.get(playersWithCards, 0), (function (p) {
+                  return p.id;
+                }));
   }
 }
 
-function findFirstAttacker(trump, players) {
-  return Belt_List.reduce(players, Belt_List.get(players, 0), (function (prev, next) {
-                var prevSmallestCard = Deck.getSmallestValuableCard(trump, Belt_Option.getWithDefault(Belt_Option.map(prev, (function (a) {
-                                return a.cards;
-                              })), /* [] */0));
-                var nextSmallestCard = Deck.getSmallestValuableCard(trump, next.cards);
-                var smallestCard = Card.getSmallest(trump, prevSmallestCard, nextSmallestCard);
-                if (smallestCard === nextSmallestCard) {
-                  return next;
-                } else {
-                  return prev;
-                }
+function findFirstAttackerId(trump, players) {
+  return Belt_Option.map(Belt_List.reduce(players, Belt_List.get(players, 0), (function (prev, next) {
+                    var prevSmallestCard = Deck.getSmallestValuableCard(trump, Belt_Option.getWithDefault(Belt_Option.map(prev, (function (a) {
+                                    return a.cards;
+                                  })), /* [] */0));
+                    var nextSmallestCard = Deck.getSmallestValuableCard(trump, next.cards);
+                    var smallestCard = Card.getSmallest(trump, prevSmallestCard, nextSmallestCard);
+                    if (smallestCard === nextSmallestCard) {
+                      return next;
+                    } else {
+                      return prev;
+                    }
+                  })), (function (p) {
+                return p.id;
               }));
 }
 
@@ -124,10 +130,16 @@ function toStringShort(player) {
         };
 }
 
+function getById(list, id) {
+  return Utils.findInList(list, (function (player) {
+                return player.id === id;
+              }));
+}
+
 export {
   make ,
-  getNextPlayer ,
-  findFirstAttacker ,
+  getNextPlayerId ,
+  findFirstAttackerId ,
   dealToPlayer ,
   dealDeckToPlayers ,
   removeCard ,
@@ -136,6 +148,7 @@ export {
   mask ,
   toObject ,
   toStringShort ,
+  getById ,
   
 }
 /* Utils Not a pure module */

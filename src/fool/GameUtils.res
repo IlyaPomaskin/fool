@@ -1,11 +1,11 @@
 open Types
 
 let isDefender = (game, player) => {
-  game.defender.id === player.id
+  game.defender === player.id
 }
 
 let isAttacker = (game, player) => {
-  game.attacker.id === player.id
+  game.attacker === player.id
 }
 
 let isPlayerHasCard = (player, card) => {

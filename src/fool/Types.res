@@ -48,8 +48,8 @@ type inLobby = {
 
 type inProgress = {
   gameId: gameId,
-  attacker: player,
-  defender: player,
+  attacker: playerId,
+  defender: playerId,
   players: list<player>,
   trump: suit,
   deck: deck,

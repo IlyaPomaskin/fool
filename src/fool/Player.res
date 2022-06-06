@@ -6,27 +6,25 @@ let make = login => {
   cards: list{},
 }
 
-let getNextPlayer = (p, players) => {
+let getNextPlayerId = (playerId, players) => {
   let playersWithCards = players->List.keep(p => List.length(p.cards) != 0)
   let nonExistingPlayerIndex = -1
-  let foundPlayerIndex = playersWithCards->List.reduceWithIndex(nonExistingPlayerIndex, (
-    prev,
-    item,
-    index,
-  ) => {
-    item.id === p.id ? index : prev
-  })
+  let foundPlayerIndex =
+    playersWithCards->List.reduceWithIndex(nonExistingPlayerIndex, (prev, item, index) =>
+      item.id === playerId ? index : prev
+    )
 
-  let nextPlayer = List.get(playersWithCards, foundPlayerIndex + 1)
+  let nextPlayerId = List.get(playersWithCards, foundPlayerIndex + 1)->Option.map(p => p.id)
 
-  switch nextPlayer {
-  | Some(_) => nextPlayer
-  | None => List.get(playersWithCards, 0)
+  switch nextPlayerId {
+  | Some(_) => nextPlayerId
+  | None => playersWithCards->List.get(0)->Option.map(p => p.id)
   }
 }
 
-let findFirstAttacker = (trump, players) => {
-  List.reduce(players, List.get(players, 0), (prev, next) => {
+let findFirstAttackerId = (trump, players) => {
+  players
+  ->List.reduce(List.get(players, 0), (prev, next) => {
     let prevSmallestCard = Deck.getSmallestValuableCard(
       trump,
       Belt.Option.getWithDefault(Belt.Option.map(prev, a => a.cards), list{}),
@@ -36,6 +34,7 @@ let findFirstAttacker = (trump, players) => {
 
     smallestCard === nextSmallestCard ? Some(next) : prev
   })
+  ->Option.map(p => p.id)
 }
 
 let dealToPlayer = (deck, player) => {
@@ -86,3 +85,5 @@ let toStringShort = player =>
     "id": player.id,
     "sessionId": player.sessionId,
   }
+
+let getById = (list, id) => Utils.findInList(list, player => player.id === id)

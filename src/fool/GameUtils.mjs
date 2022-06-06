@@ -7,11 +7,11 @@ import * as Belt_List from "rescript/lib/es6/belt_List.js";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 
 function isDefender(game, player) {
-  return game.defender.id === player.id;
+  return game.defender === player.id;
 }
 
 function isAttacker(game, player) {
-  return game.attacker.id === player.id;
+  return game.attacker === player.id;
 }
 
 function isPlayerHasCard(player, card) {

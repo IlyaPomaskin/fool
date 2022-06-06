@@ -52,15 +52,15 @@ let startGame = (game: inLobby) => {
   let (players, deck) = Deck.makeShuffled()->Player.dealDeckToPlayers(game.players)
 
   let trump = getTrump(deck, players)
-  let attacker = trump->Option.flatMap(tr => Player.findFirstAttacker(tr, players))
-  let defender = attacker->Option.flatMap(at => Player.getNextPlayer(at, players))
+  let attacker = trump->Option.flatMap(tr => Player.findFirstAttackerId(tr, players))
+  let defender = attacker->Option.flatMap(at => Player.getNextPlayerId(at, players))
 
   switch (trump, attacker, defender) {
-  | (Some(trump), Some(a), Some(d)) =>
+  | (Some(trump), Some(atId), Some(defId)) =>
     Ok({
       gameId: game.gameId,
-      attacker: a,
-      defender: d,
+      attacker: atId,
+      defender: defId,
       table: list{},
       trump: trump,
       pass: list{},
@@ -73,7 +73,10 @@ let startGame = (game: inLobby) => {
 }
 
 let isValidMove = (game, player, card) => {
-  let isDefenderHasEnoughCards = List.length(game.defender.cards) >= List.length(game.table) + 1
+  let isDefenderHasEnoughCards =
+    Player.getById(game.players, game.defender)
+    ->Option.map(defender => List.length(defender.cards) >= List.length(game.table) + 1)
+    ->Option.getWithDefault(false)
 
   if isDefender(game, player) {
     Error("Defender can't make move")
@@ -118,8 +121,8 @@ let isValidPass = (game, player) => {
 }
 
 let finishRound = game => {
-  let nextAttacker = Player.getNextPlayer(game.attacker, game.players)
-  let nextDefender = nextAttacker->Option.flatMap(p => Player.getNextPlayer(p, game.players))
+  let nextAttacker = Player.getNextPlayerId(game.attacker, game.players)
+  let nextDefender = nextAttacker->Option.flatMap(p => Player.getNextPlayerId(p, game.players))
   let (nextPlayers, nextDeck) = Player.dealDeckToPlayers(game.deck, game.players)
 
   switch (nextAttacker, nextDefender) {
@@ -212,8 +215,8 @@ let take = (game, player) => {
   if Result.isError(isValid) {
     isValid
   } else {
-    let nextAttacker = Player.getNextPlayer(game.defender, game.players)
-    let nextDefender = nextAttacker->Option.flatMap(p => Player.getNextPlayer(p, game.players))
+    let nextAttacker = Player.getNextPlayerId(game.defender, game.players)
+    let nextDefender = nextAttacker->Option.flatMap(p => Player.getNextPlayerId(p, game.players))
     let nextPlayers = List.map(game.players, p =>
       if isDefender(game, p) {
         {...p, cards: List.concat(p.cards, Table.getFlatCards(game.table))}
@@ -261,8 +264,6 @@ let maskGameDeck = deck => {
 
 let maskForPlayer = (game, playerId) => {
   ...game,
-  attacker: playerId->Player.mask(game.attacker),
-  defender: playerId->Player.mask(game.defender),
   players: game.players->List.map(Player.mask(playerId)),
   deck: game.deck->maskGameDeck,
   pass: game.pass->List.map(Player.mask(playerId)),
@@ -273,8 +274,8 @@ let toObject = game =>
     "gameId": game.gameId,
     "table": Table.toObject(game.table),
     "trump": Card.suitToString(game.trump),
-    "attacker": Player.toStringShort(game.attacker),
-    "defender": Player.toStringShort(game.defender),
+    "attacker": game.attacker,
+    "defender": game.defender,
     "players": game.players->List.map(Player.toObject)->List.toArray,
     "deck": Deck.toObject(game.deck),
     "pass": game.pass->List.map(Player.toStringShort)->List.toArray,

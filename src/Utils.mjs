@@ -7,6 +7,7 @@ import * as Belt_List from "rescript/lib/es6/belt_List.js";
 import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Belt_Result from "rescript/lib/es6/belt_Result.js";
+import * as Caml_option from "rescript/lib/es6/caml_option.js";
 
 function cx(names) {
   return Belt_Array.reduce(names, "", (function (acc, c) {
@@ -57,6 +58,19 @@ function toggleArrayItem(list, item) {
 
 function lastListItem(list) {
   return Belt_List.get(list, Belt_List.size(list) - 1 | 0);
+}
+
+function findInList(list, fn) {
+  return Belt_List.reduce(list, undefined, (function (acc, item) {
+                var match = Curry._1(fn, item);
+                if (acc !== undefined) {
+                  return acc;
+                } else if (match) {
+                  return Caml_option.some(item);
+                } else {
+                  return ;
+                }
+              }));
 }
 
 function identity(a) {
@@ -199,6 +213,7 @@ export {
   equals ,
   toggleArrayItem ,
   lastListItem ,
+  findInList ,
   identity ,
   numbersToEmoji ,
   makeOk ,
