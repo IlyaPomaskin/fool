@@ -51,6 +51,7 @@ type inProgress = {
   attacker: playerId,
   defender: playerId,
   players: list<player>,
+  disconnected: list<playerId>,
   trump: suit,
   deck: deck,
   table: table,

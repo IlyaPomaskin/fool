@@ -66,6 +66,7 @@ let startGame = (game: inLobby) => {
       pass: list{},
       players: players,
       deck: deck,
+      disconnected: list{},
     })
   | (None, _, _) => Error("Can't find trump")
   | _ => Error("Can't find next attacker/defender")

@@ -110,6 +110,7 @@ function startGame(game) {
                 attacker: attacker,
                 defender: defender,
                 players: players,
+                disconnected: /* [] */0,
                 trump: trump,
                 deck: deck,
                 table: /* [] */0,
@@ -194,6 +195,7 @@ function move(game, player, card) {
                               cards: Player.removeCard(p, card)
                             };
                     })),
+              disconnected: game.disconnected,
               trump: game.trump,
               deck: game.deck,
               table: Belt_List.add(game.table, [
@@ -234,6 +236,7 @@ function finishRound(game) {
               attacker: nextAttacker,
               defender: nextDefender,
               players: match[0],
+              disconnected: game.disconnected,
               trump: game.trump,
               deck: match[1],
               table: /* [] */0,
@@ -254,6 +257,7 @@ function pass(game, player) {
   var nextGameWithPassed_attacker = game.attacker;
   var nextGameWithPassed_defender = game.defender;
   var nextGameWithPassed_players = game.players;
+  var nextGameWithPassed_disconnected = game.disconnected;
   var nextGameWithPassed_trump = game.trump;
   var nextGameWithPassed_deck = game.deck;
   var nextGameWithPassed_table = game.table;
@@ -263,6 +267,7 @@ function pass(game, player) {
     attacker: nextGameWithPassed_attacker,
     defender: nextGameWithPassed_defender,
     players: nextGameWithPassed_players,
+    disconnected: nextGameWithPassed_disconnected,
     trump: nextGameWithPassed_trump,
     deck: nextGameWithPassed_deck,
     table: nextGameWithPassed_table,
@@ -334,6 +339,7 @@ function beat(game, player, to, by) {
                       return p;
                     }
                   })),
+            disconnected: game.disconnected,
             trump: game.trump,
             deck: game.deck,
             table: Belt_List.map(game.table, (function (param) {
@@ -405,6 +411,7 @@ function take(game, player) {
               attacker: nextAttacker,
               defender: nextDefender,
               players: match[0],
+              disconnected: game.disconnected,
               trump: game.trump,
               deck: match[1],
               table: /* [] */0,
@@ -452,6 +459,7 @@ function maskForPlayer(game, playerId) {
           players: Belt_List.map(game.players, (function (param) {
                   return Player.mask(playerId, param);
                 })),
+          disconnected: game.disconnected,
           trump: game.trump,
           deck: maskGameDeck(game.deck),
           table: game.table,

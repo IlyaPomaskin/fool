@@ -393,6 +393,10 @@ function listViaArray(elementCodec) {
               }));
 }
 
+var tableCards = listViaArray(tablePair);
+
+var listOfPlayerIds = listViaArray(Jzon.string);
+
 var playerMsg$1 = Jzon.object3((function (param) {
         return [
                 param.id,
@@ -427,11 +431,9 @@ var inLobbyMsg = Jzon.object4((function (param) {
                   ready: param[2]
                 }
               };
-      }), Jzon.field("gameId", Jzon.string), Jzon.field("players", listViaArray(playerMsg$1)), Jzon.field("ready", listViaArray(Jzon.string)), Jzon.field("owner", Jzon.string));
+      }), Jzon.field("gameId", Jzon.string), Jzon.field("players", listViaArray(playerMsg$1)), Jzon.field("ready", listOfPlayerIds), Jzon.field("owner", Jzon.string));
 
-var tableCards = listViaArray(tablePair);
-
-var inProgressMsg = Jzon.object8((function (param) {
+var inProgressMsg = Jzon.object9((function (param) {
         return [
                 param.gameId,
                 param.attacker,
@@ -440,7 +442,8 @@ var inProgressMsg = Jzon.object8((function (param) {
                 param.trump,
                 param.deck,
                 param.table,
-                param.pass
+                param.pass,
+                param.disconnected
               ];
       }), (function (param) {
         return {
@@ -450,13 +453,14 @@ var inProgressMsg = Jzon.object8((function (param) {
                   attacker: param[1],
                   defender: param[2],
                   players: param[3],
+                  disconnected: param[8],
                   trump: param[4],
                   deck: param[5],
                   table: param[6],
                   pass: param[7]
                 }
               };
-      }), Jzon.field("gameId", Jzon.string), Jzon.field("attacker", Jzon.string), Jzon.field("defender", Jzon.string), Jzon.field("players", listViaArray(playerMsg$1)), Jzon.field("trump", suit), Jzon.field("deck", listViaArray(card)), Jzon.field("table", tableCards), Jzon.field("pass", listViaArray(Jzon.string)));
+      }), Jzon.field("gameId", Jzon.string), Jzon.field("attacker", Jzon.string), Jzon.field("defender", Jzon.string), Jzon.field("players", listViaArray(playerMsg$1)), Jzon.field("trump", suit), Jzon.field("deck", listViaArray(card)), Jzon.field("table", tableCards), Jzon.field("pass", listOfPlayerIds), Jzon.field("disconnected", listOfPlayerIds));
 
 var serverGameMsg = Jzon.object2((function (kind) {
         switch (kind.TAG | 0) {
@@ -654,9 +658,10 @@ export {
   serializeClientMessage ,
   deserializeClientMessage ,
   listViaArray ,
+  tableCards ,
+  listOfPlayerIds ,
   playerMsg$1 as playerMsg,
   inLobbyMsg ,
-  tableCards ,
   inProgressMsg ,
   serverGameMsg ,
   serializeServerMessage ,

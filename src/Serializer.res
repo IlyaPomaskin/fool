@@ -192,6 +192,9 @@ let listViaArray = elementCodec =>
     json => json->Jzon.decodeWith(Jzon.array(elementCodec))->Result.map(List.fromArray),
   )
 
+let tableCards = listViaArray(tablePair)
+let listOfPlayerIds = listViaArray(Jzon.string)
+
 let playerMsg = Jzon.object3(
   ({id, sessionId, cards}) => (id, sessionId, cards),
   ((id, sessionId, cards)) => {id: id, sessionId: sessionId, cards: cards}->Ok,
@@ -206,14 +209,12 @@ let inLobbyMsg = Jzon.object4(
     {gameId: gameId, players: players, ready: ready, owner: owner}->Ok,
   Jzon.field("gameId", Jzon.string),
   Jzon.field("players", listViaArray(playerMsg)),
-  Jzon.field("ready", listViaArray(Jzon.string)),
+  Jzon.field("ready", listOfPlayerIds),
   Jzon.field("owner", Jzon.string),
 )
 
-let tableCards = listViaArray(tablePair)
-
-let inProgressMsg = Jzon.object8(
-  ({gameId, attacker, defender, players, trump, deck, table, pass}) => (
+let inProgressMsg = Jzon.object9(
+  ({gameId, attacker, defender, players, trump, deck, table, pass, disconnected}) => (
     gameId,
     attacker,
     defender,
@@ -222,8 +223,9 @@ let inProgressMsg = Jzon.object8(
     deck,
     table,
     pass,
+    disconnected,
   ),
-  ((gameId, attacker, defender, players, trump, deck, table, pass)) =>
+  ((gameId, attacker, defender, players, trump, deck, table, pass, disconnected)) =>
     {
       gameId: gameId,
       attacker: attacker,
@@ -233,6 +235,7 @@ let inProgressMsg = Jzon.object8(
       deck: deck,
       table: table,
       pass: pass,
+      disconnected: disconnected,
     }->Ok,
   Jzon.field("gameId", Jzon.string),
   Jzon.field("attacker", Jzon.string),
@@ -241,7 +244,8 @@ let inProgressMsg = Jzon.object8(
   Jzon.field("trump", suit),
   Jzon.field("deck", listViaArray(card)),
   Jzon.field("table", tableCards),
-  Jzon.field("pass", listViaArray(Jzon.string)),
+  Jzon.field("pass", listOfPlayerIds),
+  Jzon.field("disconnected", listOfPlayerIds),
 )
 
 let serverGameMsg = Jzon.object2(
