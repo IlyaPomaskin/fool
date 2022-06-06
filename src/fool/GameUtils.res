@@ -65,15 +65,18 @@ let isCanPass = (game, player) => {
   Table.hasCards(game.table) && !isDefender(game, player)
 }
 
-let isPassed = (game, player) => {
-  let inPassedList = game.pass->List.has(player, Utils.equals)
-  let hasCards = !Utils.isEmpty(player.cards)
+let isPassed = (game, playerId): bool => {
+  let inPassedList = game.pass->List.has(playerId, Utils.equals)
+  let hasCards =
+    Player.getById(game.players, playerId)
+    ->Option.map(p => !Utils.isEmpty(p.cards))
+    ->Option.getWithDefault(true)
 
   hasCards ? inPassedList : true
 }
 
 let isAllPassed = game => {
-  game.players->List.keep(p => !isDefender(game, p))->List.every(isPassed(game))
+  game.players->List.keep(p => !isDefender(game, p))->List.every(p => isPassed(game, p.id))
 }
 
 let isPlayerCanBeat = (game, player) => {

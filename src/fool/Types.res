@@ -54,7 +54,7 @@ type inProgress = {
   trump: suit,
   deck: deck,
   table: table,
-  pass: list<player>,
+  pass: list<playerId>,
 }
 
 type state =

@@ -25,7 +25,7 @@ function InProgressScreen$PlayerActionsUI(Props) {
   var onTake = Props.onTake;
   var className = classNameOpt !== undefined ? classNameOpt : "";
   var isPassDisabled = !GameUtils.isCanPass(game, player);
-  var isPassed = GameUtils.isPassed(game, player);
+  var isPassed = GameUtils.isPassed(game, player.id);
   var isTakeDisabled = !GameUtils.isCanTake(game, player);
   var isDefender = GameUtils.isDefender(game, player);
   var isDuel = Belt_List.length(Belt_List.keep(game.players, (function (player) {

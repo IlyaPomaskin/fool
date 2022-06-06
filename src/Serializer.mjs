@@ -456,7 +456,7 @@ var inProgressMsg = Jzon.object8((function (param) {
                   pass: param[7]
                 }
               };
-      }), Jzon.field("gameId", Jzon.string), Jzon.field("attacker", Jzon.string), Jzon.field("defender", Jzon.string), Jzon.field("players", listViaArray(playerMsg$1)), Jzon.field("trump", suit), Jzon.field("deck", listViaArray(card)), Jzon.field("table", tableCards), Jzon.field("pass", listViaArray(playerMsg$1)));
+      }), Jzon.field("gameId", Jzon.string), Jzon.field("attacker", Jzon.string), Jzon.field("defender", Jzon.string), Jzon.field("players", listViaArray(playerMsg$1)), Jzon.field("trump", suit), Jzon.field("deck", listViaArray(card)), Jzon.field("table", tableCards), Jzon.field("pass", listViaArray(Jzon.string)));
 
 var serverGameMsg = Jzon.object2((function (kind) {
         switch (kind.TAG | 0) {

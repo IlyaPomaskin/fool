@@ -3,6 +3,7 @@
 import * as Card from "./Card.mjs";
 import * as Table from "./Table.mjs";
 import * as Utils from "../Utils.mjs";
+import * as Player from "./Player.mjs";
 import * as Belt_List from "rescript/lib/es6/belt_List.js";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 
@@ -94,9 +95,11 @@ function isCanPass(game, player) {
   }
 }
 
-function isPassed(game, player) {
-  var inPassedList = Belt_List.has(game.pass, player, Utils.equals);
-  var hasCards = !Utils.isEmpty(player.cards);
+function isPassed(game, playerId) {
+  var inPassedList = Belt_List.has(game.pass, playerId, Utils.equals);
+  var hasCards = Belt_Option.getWithDefault(Belt_Option.map(Player.getById(game.players, playerId), (function (p) {
+              return !Utils.isEmpty(p.cards);
+            })), true);
   if (hasCards) {
     return inPassedList;
   } else {
@@ -107,8 +110,8 @@ function isPassed(game, player) {
 function isAllPassed(game) {
   return Belt_List.every(Belt_List.keep(game.players, (function (p) {
                     return !isDefender(game, p);
-                  })), (function (param) {
-                return isPassed(game, param);
+                  })), (function (p) {
+                return isPassed(game, p.id);
               }));
 }
 

@@ -257,7 +257,7 @@ function pass(game, player) {
   var nextGameWithPassed_trump = game.trump;
   var nextGameWithPassed_deck = game.deck;
   var nextGameWithPassed_table = game.table;
-  var nextGameWithPassed_pass = Utils.toggleArrayItem(game.pass, player);
+  var nextGameWithPassed_pass = Utils.toggleArrayItem(game.pass, player.id);
   var nextGameWithPassed = {
     gameId: nextGameWithPassed_gameId,
     attacker: nextGameWithPassed_attacker,
@@ -455,9 +455,7 @@ function maskForPlayer(game, playerId) {
           trump: game.trump,
           deck: maskGameDeck(game.deck),
           table: game.table,
-          pass: Belt_List.map(game.pass, (function (param) {
-                  return Player.mask(playerId, param);
-                }))
+          pass: game.pass
         };
 }
 
@@ -470,7 +468,7 @@ function toObject(game) {
           defender: game.defender,
           players: Belt_List.toArray(Belt_List.map(game.players, Player.toObject)),
           deck: Deck.toObject(game.deck),
-          pass: Belt_List.toArray(Belt_List.map(game.pass, Player.toStringShort))
+          pass: Belt_List.toArray(game.pass)
         };
 }
 

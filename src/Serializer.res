@@ -241,7 +241,7 @@ let inProgressMsg = Jzon.object8(
   Jzon.field("trump", suit),
   Jzon.field("deck", listViaArray(card)),
   Jzon.field("table", tableCards),
-  Jzon.field("pass", listViaArray(playerMsg)),
+  Jzon.field("pass", listViaArray(Jzon.string)),
 )
 
 let serverGameMsg = Jzon.object2(

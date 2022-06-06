@@ -142,7 +142,7 @@ let finishRound = game => {
 
 let pass = (game, player) => {
   let isValid = isValidPass(game, player)
-  let nextGameWithPassed = {...game, pass: Utils.toggleArrayItem(game.pass, player)}
+  let nextGameWithPassed = {...game, pass: Utils.toggleArrayItem(game.pass, player.id)}
 
   if Result.isError(isValid) {
     isValid
@@ -266,7 +266,6 @@ let maskForPlayer = (game, playerId) => {
   ...game,
   players: game.players->List.map(Player.mask(playerId)),
   deck: game.deck->maskGameDeck,
-  pass: game.pass->List.map(Player.mask(playerId)),
 }
 
 let toObject = game =>
@@ -278,7 +277,7 @@ let toObject = game =>
     "defender": game.defender,
     "players": game.players->List.map(Player.toObject)->List.toArray,
     "deck": Deck.toObject(game.deck),
-    "pass": game.pass->List.map(Player.toStringShort)->List.toArray,
+    "pass": game.pass->List.toArray,
   }
 
 let actionToObject = (action: move) =>
