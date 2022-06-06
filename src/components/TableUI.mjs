@@ -7,33 +7,49 @@ import * as React from "react";
 import * as CardUI from "./CardUI.mjs";
 import * as Spring from "bs-react-spring/src/Spring.mjs";
 import * as Belt_List from "rescript/lib/es6/belt_List.js";
+import * as ReactDnd from "react-dnd";
 import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
-import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as ReactSpring from "react-spring";
-import * as ReactBeautifulDnd from "react-beautiful-dnd";
 
 function TableUI$DndBeatableCard(Props) {
   var card = Props.card;
   var isDropDisabled = Props.isDropDisabled;
   var beatByClassName = Props.beatByClassName;
-  return React.createElement(ReactBeautifulDnd.Droppable, {
-              droppableId: Card.cardToString(card),
-              isDropDisabled: Curry._1(isDropDisabled, card),
-              direction: "horizontal",
-              children: (function (provided, snapshot) {
-                  return React.createElement("div", {
-                              ref: provided.innerRef,
-                              className: Utils.cx([
-                                    beatByClassName,
-                                    "w-12 h-16"
-                                  ])
-                            }, React.createElement(CardUI.Base.make, {
-                                  className: Utils.cx([snapshot.isDraggingOver ? "bg-pink-200 opacity-50" : ""]),
-                                  children: provided.placeholder
-                                }), React.createElement("div", undefined));
-                })
-            });
+  var onDrop = Props.onDrop;
+  var match = ReactDnd.useDrop({
+        accept: "card",
+        drop: (function (item, param) {
+            Curry._2(onDrop, card, item);
+            
+          }),
+        canDrop: (function (card, param) {
+            return Curry._1(isDropDisabled, card);
+          }),
+        collect: (function (monitor) {
+            return {
+                    isDragging: !monitor.isOver({
+                          shallow: false
+                        }),
+                    draggedCard: monitor.getItem(),
+                    isOver: monitor.isOver({
+                          shallow: false
+                        }),
+                    isOverCurrent: monitor.isOver({
+                          shallow: true
+                        })
+                  };
+          })
+      }, []);
+  return React.createElement("div", {
+              ref: match[1],
+              className: Utils.cx([
+                    beatByClassName,
+                    "w-12 h-16"
+                  ])
+            }, React.createElement(CardUI.EmptyCard.make, {
+                  className: Utils.cx([match[0].isOverCurrent ? "bg-pink-200 opacity-50" : ""])
+                }));
 }
 
 var DndBeatableCard = {
@@ -94,6 +110,7 @@ function TableUI$CardsPair$attacker(Props) {
 function TableUI$CardsPair$defender(Props) {
   var pair = Props.pair;
   var isDropDisabled = Props.isDropDisabled;
+  var onDrop = Props.onDrop;
   var by = pair[1];
   var to = pair[0];
   var beatByClassName = Utils.rightRotationClassName + " absolute left-1 top-1";
@@ -116,7 +133,8 @@ function TableUI$CardsPair$defender(Props) {
                       }), React.createElement(TableUI$DndBeatableCard, {
                         card: to,
                         isDropDisabled: isDropDisabled,
-                        beatByClassName: beatByClassName
+                        beatByClassName: beatByClassName,
+                        onDrop: onDrop
                       })));
 }
 
@@ -130,13 +148,12 @@ function TableUI(Props) {
   var isDefenderOpt = Props.isDefender;
   var isDropDisabledOpt = Props.isDropDisabled;
   var table = Props.table;
-  var placeholderOpt = Props.placeholder;
+  var onDrop = Props.onDrop;
   var className = classNameOpt !== undefined ? classNameOpt : "";
   var isDefender = isDefenderOpt !== undefined ? isDefenderOpt : false;
   var isDropDisabled = isDropDisabledOpt !== undefined ? isDropDisabledOpt : (function (param) {
         return true;
       });
-  var placeholder = placeholderOpt !== undefined ? Caml_option.valFromOption(placeholderOpt) : null;
   var transitions = makeTransitions(Belt_Array.reverse(Belt_List.toArray(table)));
   return React.createElement("div", {
               className: Utils.cx([
@@ -153,13 +170,14 @@ function TableUI(Props) {
                                 },
                                 children: isDefender ? React.createElement(TableUI$CardsPair$defender, {
                                         pair: pair,
-                                        isDropDisabled: isDropDisabled
+                                        isDropDisabled: isDropDisabled,
+                                        onDrop: onDrop
                                       }) : React.createElement(TableUI$CardsPair$attacker, {
                                         pair: pair
                                       }),
                                 key: param.key
                               });
-                  })), placeholder);
+                  })));
 }
 
 var make = TableUI;

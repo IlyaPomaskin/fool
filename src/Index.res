@@ -1,41 +1,23 @@
 // https://codesandbox.io/s/github/react-dnd/react-dnd/tree/gh-pages/examples_ts/02-drag-around/naive?from-embed=&file=/src/Container.tsx:1176-1204
 
 open Utils
-
-type box = {
-  id: string,
-  top: float,
-  left: float,
-  title: string,
-}
-
-module DragObject = {
-  type t = box
-}
-
-module DropResult = {
-  type t = {isDragging: bool}
-}
-
-module CollectedProps = {
-  type t = {isDragging: bool}
-}
-
-module Dnd = RDnd.MakeDnd(DragObject, DropResult, CollectedProps)
-
+/*
 module Item = {
+  open Dnd
+
   @react.component
   let make = (~box) => {
-    let (cProps, ref, _) = Dnd.UseDrag.makeInstance(
-      Dnd.UseDrag.makeConfig(
+    let (cProps, ref, _) = UseDrag.makeInstance(
+      UseDrag.makeConfig(
         ~\"type"="box",
         ~item=box,
         ~collect=monitor => {
-          isDragging: Dnd.DragSourceMonitor.isDragging(monitor),
+          isDragging: DragSourceMonitor.isDragging(monitor),
+          draggedCard: DragSourceMonitor.getItem(monitor),
         },
         (),
       ),
-      [box.left, box.top],
+      [box],
     )
 
     <div
@@ -109,11 +91,14 @@ module Container = {
     </div>
   }
 }
+ */
 
 let default = () => {
   <div className="flex flex-row flex-wrap justify-items-center w-full container px-12 py-6 gap-12">
-    <RDnd.Provider backend={RDnd.Backend.html5}> <Container /> </RDnd.Provider>
-    // <PlayerScreen sessionId={Some("s:p1")} gameId={Some("g1")} />
-    // <PlayerScreen sessionId={Some("s:p2")} gameId={Some("g1")} />
+    // <RDnd.Provider backend={RDnd.Backend.html5}> <Container /> </RDnd.Provider>
+    <Dnd.Provider backend={Dnd.Backend.html5}>
+      <PlayerScreen sessionId={Some("s:p1")} gameId={Some("g1")} />
+      <PlayerScreen sessionId={Some("s:p2")} gameId={Some("g1")} />
+    </Dnd.Provider>
   </div>
 }

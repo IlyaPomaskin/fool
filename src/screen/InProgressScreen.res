@@ -30,47 +30,38 @@ module PlayerActionsUI = {
   }
 }
 
-@val @scope("document")
-external body: Dom.element = "body"
-
 module PlayerTableUI = {
   @react.component
-  let make = (~game, ~draggedCard, ~player) => {
+  let make = (~game, ~draggedCard, ~player, ~onDrop, ~onBeat) => {
     let isDefender = GameUtils.isDefender(game, player)
     let draggedCard = Utils.toResult(draggedCard, "No card")
 
-    <div className="relative">
-      <ReactDnd.Droppable
-        droppableId="table"
-        direction="horizontal"
-        isDropDisabled={isDefender ||
-        draggedCard->Result.flatMap(card => Game.isValidMove(game, player, card))->Result.isError}>
-        {(provided, snapshot) => {
-          let container =
-            <div
-              ref={provided.innerRef}
-              className={cx([
-                "w-full flex flex-row bg-pink-200",
-                snapshot.isDraggingOver
-                  ? "bg-gradient-to-tl from-purple-200 to-pink-200 opacity-70"
-                  : "opacity-100",
-              ])}>
-              <TableUI
-                isDefender
-                isDropDisabled={toCard =>
-                  !isDefender ||
-                  draggedCard
-                  ->Result.flatMap(byCard => Game.isValidBeat(game, player, toCard, byCard))
-                  ->Result.isError}
-                className="my-1 h-16"
-                table={game.table}
-                placeholder={provided.placeholder}
-              />
-            </div>
+    let (cProps, ref) = Dnd.UseDrop.makeInstance(
+      Dnd.UseDrop.makeConfig(~accept="card", ~drop=onDrop, ()),
+      [],
+    )
 
-          React.cloneElement(container, provided.droppableProps)
-        }}
-      </ReactDnd.Droppable>
+    <div className="relative">
+      <div
+        ref
+        className={cx([
+          "w-full flex flex-row bg-pink-200",
+          cProps.isDragging
+            ? "bg-gradient-to-tl from-purple-200 to-pink-200 opacity-70"
+            : "opacity-100",
+        ])}>
+        <TableUI
+          isDefender
+          isDropDisabled={toCard =>
+            !isDefender ||
+            draggedCard
+            ->Result.flatMap(byCard => Game.isValidBeat(game, player, toCard, byCard))
+            ->Result.isError}
+          className="my-1 h-16"
+          table={game.table}
+          onDrop={onBeat}
+        />
+      </div>
     </div>
   }
 }
@@ -148,25 +139,26 @@ let make = (~game as realGame, ~player, ~onMessage) => {
 
   let (draggedCard, setDraggedCard) = React.useState(_ => None)
 
-  let handleDragStart = (beforeCapture: ReactDnd.dragStartBeforeCapture, _) => {
-    setDraggedCard(_ => Card.stringToCard(beforeCapture.draggableId))
+  let handleDrop = (card, monitor) => {
+    Js.log3("PlayerTableUI drop", card, monitor)
+
+    let didDrop = monitor->Dnd.DropTargetMonitor.didDrop
+    let hId = monitor->Dnd.DropTargetMonitor.getHandlerId
+
+    Js.log2("card", card)
+    Js.log2("hId", hId)
+    Js.log2("didDrop", didDrop)
+    Js.log2("monitor", monitor)
+
+    handleOptimisticMessage(Progress(Move(card), player.id, game.gameId))
+
+    None
   }
 
-  let handleDragEnd = (result: ReactDnd.dropResult, _) => {
-    let byCard = Card.stringToCard(result.draggableId)
-    let dst = result.destination->Js.Nullable.toOption->Option.map(d => d.droppableId)
-    let isTable = dst->Option.map(dst => dst === "table")->Option.getWithDefault(false)
-    let toCard = dst->Option.flatMap(Card.stringToCard)
+  let handleBeat = (toCard, byCard) => {
+    handleOptimisticMessage(Progress(Beat(toCard, byCard), player.id, game.gameId))
 
-    switch (isTable, toCard, byCard) {
-    | (true, _, Some(card)) => handleOptimisticMessage(Progress(Move(card), player.id, game.gameId))
-    | (false, Some(toCard), Some(byCard)) =>
-      handleOptimisticMessage(Progress(Beat(toCard, byCard), player.id, game.gameId))
-    | (false, None, _) => Js.log("No destination")
-    | _ => Js.log("unknown move")
-    }
-
-    setDraggedCard(_ => None)
+    ignore()
   }
 
   let reorderedPlayers =
@@ -209,9 +201,11 @@ let make = (~game as realGame, ~player, ~onMessage) => {
         )}
       </div>
     </div>
-    <ReactDnd.DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-      <div className="m-1"> <PlayerTableUI draggedCard game player /> </div>
+    <div>
+      <div className="m-1">
+        <PlayerTableUI draggedCard game player onDrop={handleDrop} onBeat={handleBeat} />
+      </div>
       <ClientUI className="m-1 flex flex-col" player game onMessage={handleOptimisticMessage} />
-    </ReactDnd.DragDropContext>
+    </div>
   </div>
 }

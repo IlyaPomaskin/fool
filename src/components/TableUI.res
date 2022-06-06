@@ -3,20 +3,31 @@ open Utils
 
 module DndBeatableCard = {
   @react.component
-  let make = (~card, ~isDropDisabled, ~beatByClassName) =>
-    <ReactDnd.Droppable
-      isDropDisabled={isDropDisabled(card)}
-      direction="horizontal"
-      droppableId={Card.cardToString(card)}>
-      {(provided, snapshot) => {
-        <div className={cx([beatByClassName, "w-12 h-16"])} ref={provided.innerRef}>
-          <CardUI.Base className={cx([snapshot.isDraggingOver ? "bg-pink-200 opacity-50" : ""])}>
-            provided.placeholder
-          </CardUI.Base>
-          <div />
-        </div>
-      }}
-    </ReactDnd.Droppable>
+  let make = (~card, ~isDropDisabled, ~beatByClassName, ~onDrop) => {
+    let (cProps, ref) = Dnd.UseDrop.makeInstance(
+      Dnd.UseDrop.makeConfig(
+        ~canDrop=(card, _) => isDropDisabled(card),
+        ~accept="card",
+        ~drop=(item, _) => {
+          onDrop(card, item)
+
+          None
+        },
+        ~collect=monitor => {
+          isDragging: !(monitor->Dnd.DropTargetMonitor.isOver({shallow: false})),
+          draggedCard: monitor->Dnd.DropTargetMonitor.getItem,
+          isOver: monitor->Dnd.DropTargetMonitor.isOver({shallow: false}),
+          isOverCurrent: monitor->Dnd.DropTargetMonitor.isOver({shallow: true}),
+        },
+        (),
+      ),
+      [],
+    )
+
+    <div ref className={cx([beatByClassName, "w-12 h-16"])}>
+      <CardUI.EmptyCard className={cx([cProps.isOverCurrent ? "bg-pink-200 opacity-50" : ""])} />
+    </div>
+  }
 }
 
 type prop = {opacity: string, transform: string}
@@ -61,7 +72,7 @@ module CardsPair = {
   }
 
   @react.component
-  let defender = (~pair, ~isDropDisabled, ()) => {
+  let defender = (~pair, ~isDropDisabled, ~onDrop, ()) => {
     let (to, by) = pair
     let beatByClassName = `${Utils.rightRotationClassName} absolute left-1 top-1`
 
@@ -75,7 +86,7 @@ module CardsPair = {
       | None =>
         <React.Fragment>
           <CardUI className={Utils.leftRotationClassName} card={to} />
-          <DndBeatableCard isDropDisabled beatByClassName card={to} />
+          <DndBeatableCard isDropDisabled beatByClassName card={to} onDrop />
         </React.Fragment>
       }}
     </div>
@@ -88,7 +99,7 @@ let make = (
   ~isDefender=false,
   ~isDropDisabled=_ => true,
   ~table: table,
-  ~placeholder=React.null,
+  ~onDrop,
 ) => {
   let transitions = makeTransitions(table->List.toArray->Array.reverse)
 
@@ -98,12 +109,11 @@ let make = (
       <Spring.Div
         key style={ReactDOM.Style.make(~opacity=props.opacity, ~transform=props.transform, ())}>
         {switch isDefender {
-        | true => <CardsPair.defender pair isDropDisabled />
+        | true => <CardsPair.defender pair isDropDisabled onDrop />
         | false => <CardsPair.attacker pair />
         }}
       </Spring.Div>
     )
     ->React.array}
-    placeholder
   </div>
 }

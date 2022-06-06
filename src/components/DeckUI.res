@@ -1,7 +1,7 @@
 open Types
 open Utils
 
-let spread3: ('a1, 'a2, 'a3) => 'b = %raw(`(x1,x2,x3) => ({ ...x1, ...x2, ...x3 })`)
+// let spread3: ('a1, 'a2, 'a3) => 'b = %raw(`(x1,x2,x3) => ({ ...x1, ...x2, ...x3 })`)
 
 let getDropAnimation = (
   style: ReactDnd.draggableStyles,
@@ -29,20 +29,26 @@ let getAnimationClassNames = (snapshot: ReactDnd.draggableStateSnapshot) => {
   }
 }
 
-module EmptyDndDroppable = {
-  @react.component
-  let make = (~id, ~children) =>
-    <ReactDnd.Droppable direction="horizontal" isDropDisabled={true} droppableId={id}>
-      {(droppableProvided, _) =>
-        <div ref={droppableProvided.innerRef}> children droppableProvided.placeholder </div>}
-    </ReactDnd.Droppable>
-}
+// module EmptyDndDroppable = {
+//   @react.component
+//   let make = (~id, ~children) =>
+//     <ReactDnd.Droppable direction="horizontal" isDropDisabled={true} droppableId={id}>
+//       {(droppableProvided, _) =>
+//         <div ref={droppableProvided.innerRef}> children droppableProvided.placeholder </div>}
+//     </ReactDnd.Droppable>
+// }
 
 module DndWrapper = {
   @react.component
   let make = (~card, ~index, ~children) => {
     let id = Card.cardToString(card)
 
+    let (cProps, ref, _) = Dnd.UseDrag.makeInstance(
+      Dnd.UseDrag.makeConfig(~\"type"="card", ~item=card, ()),
+      [],
+    )
+
+    /*
     <EmptyDndDroppable id>
       <ReactDnd.Draggable draggableId={id} index>
         {(provided, snapshot, _) => {
@@ -62,6 +68,9 @@ module DndWrapper = {
         }}
       </ReactDnd.Draggable>
     </EmptyDndDroppable>
+ */
+
+    <div ref className={cx(["transition duration-150 ease-in-out"])}> children </div>
   }
 }
 
