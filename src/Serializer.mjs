@@ -427,7 +427,7 @@ var inLobbyMsg = Jzon.object4((function (param) {
                   ready: param[2]
                 }
               };
-      }), Jzon.field("gameId", Jzon.string), Jzon.field("players", listViaArray(playerMsg$1)), Jzon.field("ready", listViaArray(playerMsg$1)), Jzon.field("owner", Jzon.string));
+      }), Jzon.field("gameId", Jzon.string), Jzon.field("players", listViaArray(playerMsg$1)), Jzon.field("ready", listViaArray(Jzon.string)), Jzon.field("owner", Jzon.string));
 
 var tableCards = listViaArray(tablePair);
 

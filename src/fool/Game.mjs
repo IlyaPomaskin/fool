@@ -22,7 +22,7 @@ function makeGameInLobby(player) {
               tl: /* [] */0
             },
             ready: {
-              hd: player,
+              hd: player.id,
               tl: /* [] */0
             }
           }
@@ -40,7 +40,7 @@ function logoutPlayer(game, player) {
         };
 }
 
-function enterGame(game, player) {
+function enterLobby(game, player) {
   var isPlayerInGame = Belt_List.has(game.players, player, (function (p1, p2) {
           return p1.id === p2.id;
         }));
@@ -76,18 +76,16 @@ function toggleReady(game, player) {
   if (Belt_Result.isError(isValid)) {
     return isValid;
   }
-  var inList = Belt_List.has(game.ready, player, (function (p1, p2) {
-          return p1.id === p2.id;
-        }));
+  var inList = Belt_List.has(game.ready, player.id, Utils.equals);
   return {
           TAG: /* Ok */0,
           _0: {
             owner: game.owner,
             gameId: game.gameId,
             players: game.players,
-            ready: inList ? Belt_List.keep(game.ready, (function (p) {
-                      return p.id !== player.id;
-                    })) : Belt_List.add(game.ready, player)
+            ready: inList ? Belt_List.keep(game.ready, (function (pId) {
+                      return pId !== player.id;
+                    })) : Belt_List.add(game.ready, player.id)
           }
         };
 }
@@ -491,7 +489,7 @@ function actionToObject(action) {
 export {
   makeGameInLobby ,
   logoutPlayer ,
-  enterGame ,
+  enterLobby ,
   isValidToggleReady ,
   toggleReady ,
   startGame ,

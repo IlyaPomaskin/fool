@@ -35,9 +35,9 @@ $$Storage.LobbyGameMap.set($$Storage.gamesInLobby, "g1", {
         }
       },
       ready: {
-        hd: p1,
+        hd: "p1",
         tl: {
-          hd: p2,
+          hd: "p2",
           tl: /* [] */0
         }
       }
@@ -79,7 +79,7 @@ function createLobby(playerId) {
 function enterGame(playerId, gameId) {
   return Belt_Result.flatMap(Belt_Result.flatMap($$Storage.PlayersMap.get($$Storage.players, playerId), (function (player) {
                     return Belt_Result.flatMap($$Storage.LobbyGameMap.get($$Storage.gamesInLobby, gameId), (function (lobby) {
-                                  return Game.enterGame(lobby, player);
+                                  return Game.enterLobby(lobby, player);
                                 }));
                   })), (function (game) {
                 return $$Storage.LobbyGameMap.set($$Storage.gamesInLobby, game.gameId, game);

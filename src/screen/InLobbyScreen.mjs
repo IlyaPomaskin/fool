@@ -4,7 +4,6 @@ import * as Base from "../components/Base.mjs";
 import * as Curry from "rescript/lib/es6/curry.js";
 import * as Utils from "../Utils.mjs";
 import * as React from "react";
-import * as Caml_obj from "rescript/lib/es6/caml_obj.js";
 import * as PlayerUI from "../components/PlayerUI.mjs";
 import * as Belt_List from "rescript/lib/es6/belt_List.js";
 import * as GameUtils from "../fool/GameUtils.mjs";
@@ -25,8 +24,9 @@ function InLobbyScreen(Props) {
                       size: /* H5 */3,
                       children: Utils.uiStr("Players:")
                     }), Utils.uiReverseList(game.players, (function (player) {
-                        var isReady = Belt_List.some(game.ready, (function (p) {
-                                return Caml_obj.caml_equal(p, player);
+                        var partial_arg = player.id;
+                        var isReady = Belt_List.some(game.ready, (function (param) {
+                                return Utils.equals(partial_arg, param);
                               }));
                         var readyEmoji = isReady ? "✅" : "❌";
                         return React.createElement("div", {
@@ -49,9 +49,7 @@ function InLobbyScreen(Props) {
                       }),
                     children: Utils.uiStr("Start")
                   }) : React.createElement(Base.Switch.make, {
-                    checked: Belt_List.has(game.ready, player.id, (function (player, id) {
-                            return player.id === id;
-                          })),
+                    checked: Belt_List.has(game.ready, player.id, Utils.equals),
                     onClick: (function (param) {
                         return Curry._1(onMessage, {
                                     TAG: /* Lobby */1,

@@ -1,11 +1,12 @@
 open Types
+open Utils
 open GameUtils
 
 let makeGameInLobby = player => Ok({
   gameId: "g" ++ string_of_int(Js.Math.random_int(0, 100)),
   owner: player.id,
   players: list{player},
-  ready: list{player},
+  ready: list{player.id},
 })
 
 let logoutPlayer = (game: inLobby, player) => {
@@ -13,7 +14,7 @@ let logoutPlayer = (game: inLobby, player) => {
   players: Belt.List.keep(game.players, item => item !== player),
 }
 
-let enterGame = (game: inLobby, player) => {
+let enterLobby = (game: inLobby, player) => {
   let isPlayerInGame = List.has(game.players, player, (p1, p2) => p1.id == p2.id)
 
   Ok({
@@ -36,13 +37,13 @@ let toggleReady = (game: inLobby, player) => {
   if Result.isError(isValid) {
     isValid
   } else {
-    let inList = List.has(game.ready, player, (p1, p2) => p1.id == p2.id)
+    let inList = List.has(game.ready, player.id, equals)
 
     Ok({
       ...game,
       ready: !inList
-        ? List.add(game.ready, player)
-        : game.ready->List.keep(p => p.id !== player.id),
+        ? List.add(game.ready, player.id)
+        : game.ready->List.keep(pId => pId !== player.id),
     })
   }
 }

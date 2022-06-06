@@ -43,7 +43,6 @@ function getAnimationClassNames(snapshot) {
 function DeckUI$DndWrapper(Props) {
   var card = Props.card;
   var children = Props.children;
-  Card.cardToString(card);
   var match = ReactDnd.useDrag({
         type: "card",
         item: card
@@ -116,7 +115,6 @@ function DeckUI(Props) {
                       if (isDraggable) {
                         return React.createElement(DeckUI$DndWrapper, {
                                     card: card,
-                                    index: index,
                                     children: React.createElement(CardUI.make, {
                                           card: card,
                                           disabled: disabled$1

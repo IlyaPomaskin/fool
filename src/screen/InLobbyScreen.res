@@ -11,7 +11,7 @@ let make = (~game: inLobby, ~onMessage, ~player) => {
     <div>
       <Base.Heading size={H5}> {uiStr("Players:")} </Base.Heading>
       {game.players->uiReverseList(player => {
-        let isReady = game.ready->List.some(p => p == player)
+        let isReady = game.ready->List.some(equals(player.id))
         let readyEmoji = switch isReady {
         | true => `✅`
         | false => `❌`
@@ -31,7 +31,7 @@ let make = (~game: inLobby, ~onMessage, ~player) => {
       : <Base.Switch
           className="my-2"
           text="Ready?"
-          checked={game.ready->List.has(player.id, (player, id) => player.id === id)}
+          checked={game.ready->List.has(player.id, equals)}
           onClick={_ => onMessage(Lobby(Ready, player.id, game.gameId))}
         />}
   </div>

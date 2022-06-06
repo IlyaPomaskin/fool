@@ -137,7 +137,7 @@ let useOptimisticGame = (~game, ~player, ~onMessage) => {
 let make = (~game as realGame, ~player, ~onMessage) => {
   let (game, handleOptimisticMessage) = useOptimisticGame(~game=realGame, ~player, ~onMessage)
 
-  let (draggedCard, setDraggedCard) = React.useState(_ => None)
+  let (draggedCard, _) = React.useState(_ => None)
 
   let handleDrop = (card, monitor) => {
     Js.log3("PlayerTableUI drop", card, monitor)

@@ -40,10 +40,10 @@ let getAnimationClassNames = (snapshot: ReactDnd.draggableStateSnapshot) => {
 
 module DndWrapper = {
   @react.component
-  let make = (~card, ~index, ~children) => {
-    let id = Card.cardToString(card)
+  let make = (~card, ~children) => {
+    // let id = Card.cardToString(card)
 
-    let (cProps, ref, _) = Dnd.UseDrag.makeInstance(
+    let (_, ref, _) = Dnd.UseDrag.makeInstance(
       Dnd.UseDrag.makeConfig(~\"type"="card", ~item=card, ()),
       [],
     )
@@ -124,7 +124,7 @@ let make = (
         let disabled = disabled || isCardDisabled(card)
 
         switch isDraggable {
-        | true => <DndWrapper key card index> <CardUI card disabled /> </DndWrapper>
+        | true => <DndWrapper key card> <CardUI card disabled /> </DndWrapper>
         | false => <CardUI key card disabled />
         }
       })}

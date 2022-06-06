@@ -1,7 +1,8 @@
 // https://codesandbox.io/s/github/react-dnd/react-dnd/tree/gh-pages/examples_ts/02-drag-around/naive?from-embed=&file=/src/Container.tsx:1176-1204
 
-open Utils
 /*
+open Utils
+
 module Item = {
   open Dnd
 

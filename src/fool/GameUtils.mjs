@@ -165,7 +165,7 @@ function isOwner(game, player) {
 
 function isCanStart(game, player) {
   var isEnoughPlayers = Belt_List.length(game.players) > 1;
-  var isAllPlayersAreReady = Belt_List.cmpByLength(game.players, game.ready) === 0;
+  var isAllPlayersAreReady = Belt_List.length(game.players) === Belt_List.length(game.ready);
   var isOwner$1 = isOwner(game, player);
   if (isOwner$1) {
     if (isEnoughPlayers) {

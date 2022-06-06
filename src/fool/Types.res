@@ -43,7 +43,7 @@ type inLobby = {
   owner: playerId,
   gameId: gameId,
   players: list<player>,
-  ready: list<player>,
+  ready: list<playerId>,
 }
 
 type inProgress = {

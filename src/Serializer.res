@@ -206,7 +206,7 @@ let inLobbyMsg = Jzon.object4(
     {gameId: gameId, players: players, ready: ready, owner: owner}->Ok,
   Jzon.field("gameId", Jzon.string),
   Jzon.field("players", listViaArray(playerMsg)),
-  Jzon.field("ready", listViaArray(playerMsg)),
+  Jzon.field("ready", listViaArray(Jzon.string)),
   Jzon.field("owner", Jzon.string),
 )
 

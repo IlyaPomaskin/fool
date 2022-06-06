@@ -7,7 +7,10 @@ let p2 = {id: "p2", sessionId: "s:p2", cards: list{}}
 players->PlayersMap.set("p1", p1)->ignore
 players->PlayersMap.set("p2", p2)->ignore
 gamesInLobby
-->LobbyGameMap.set("g1", {gameId: "g1", owner: "p1", players: list{p1, p2}, ready: list{p1, p2}})
+->LobbyGameMap.set(
+  "g1",
+  {gameId: "g1", owner: "p1", players: list{p1, p2}, ready: list{p1.id, p2.id}},
+)
 ->ignore
 
 let registerPlayer = (playerId: playerId): result<player, string> => {
@@ -41,7 +44,7 @@ let enterGame = (playerId, gameId) => {
   players
   ->PlayersMap.get(playerId)
   ->Result.flatMap(player => {
-    gamesInLobby->LobbyGameMap.get(gameId)->Result.flatMap(lobby => Game.enterGame(lobby, player))
+    gamesInLobby->LobbyGameMap.get(gameId)->Result.flatMap(lobby => Game.enterLobby(lobby, player))
   })
   ->Result.flatMap(game => LobbyGameMap.set(gamesInLobby, game.gameId, game))
 }

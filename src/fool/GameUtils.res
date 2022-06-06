@@ -122,7 +122,7 @@ let isOwner = (game: inLobby, player) =>
 
 let isCanStart = (game: inLobby, player) => {
   let isEnoughPlayers = List.length(game.players) > 1
-  let isAllPlayersAreReady = List.cmpByLength(game.players, game.ready) === 0
+  let isAllPlayersAreReady = List.length(game.players) === List.length(game.ready)
   let isOwner = isOwner(game, player)
 
   if !isOwner {
