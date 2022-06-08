@@ -1,18 +1,6 @@
 open Types
 open Storage
 
-// FIXME remove debug code
-let p1 = {id: "p1", sessionId: "s:p1", cards: list{}}
-let p2 = {id: "p2", sessionId: "s:p2", cards: list{}}
-players->PlayersMap.set("p1", p1)->ignore
-players->PlayersMap.set("p2", p2)->ignore
-games
-->GameMap.set(
-  "g1",
-  InLobby({gameId: "g1", owner: "p1", players: list{p1, p2}, ready: list{p1.id, p2.id}}),
-)
-->ignore
-
 let registerPlayer = (playerId: playerId): result<player, string> => {
   let player = players->PlayersMap.get(playerId)
 
@@ -48,8 +36,23 @@ let createLobby = playerId =>
   ->Result.flatMap(game => GameMap.create(games, game))
 
 let enterGame = (playerId, gameId) =>
-  getPlayerWithGame(playerId, gameId, GameUtils.unpackLobby)
-  ->Result.flatMap(((lobby, player)) => Game.enterLobby(lobby, player))
+  getPlayerWithGame(playerId, gameId, g => Ok(g))
+  ->Result.flatMap(((game, player)) =>
+    switch game {
+    | InLobby(x) => Game.enterLobby(x, player)
+    | InProgress(x) => Game.enterProgress(x, player)
+    }
+  )
+  ->Result.flatMap(lobby => GameMap.set(games, gameId, lobby))
+
+let leaveGame = (playerId, gameId) =>
+  getPlayerWithGame(playerId, gameId, g => Ok(g))
+  ->Result.flatMap(((game, player)) =>
+    switch game {
+    | InLobby(game) => Game.leaveLobby(game, player)
+    | InProgress(game) => Game.disconnectProgress(game, player)
+    }
+  )
   ->Result.flatMap(lobby => GameMap.set(games, gameId, lobby))
 
 let toggleReady = (playerId, gameId) =>
@@ -66,3 +69,20 @@ let move = (playerId, gameId, action) =>
   getPlayerWithGame(playerId, gameId, GameUtils.unpackProgress)
   ->Result.flatMap(((game, player)) => Game.dispatch(game, player, action))
   ->Result.flatMap(game => GameMap.set(games, gameId, game))
+
+// FIXME remove debug code
+let p1 = {id: "p1", sessionId: "s:p1", cards: list{}}
+let p2 = {id: "p2", sessionId: "s:p2", cards: list{}}
+players->PlayersMap.set("p1", p1)->ignore
+players->PlayersMap.set("p2", p2)->ignore
+
+games
+->GameMap.set(
+  "g1",
+  InLobby({gameId: "g1", owner: "p1", players: list{p1, p2}, ready: list{p1.id, p2.id}}),
+)
+->Result.map(game => {
+  startGame("p2", "g1")->MResult.fold(r => Js.log2("ok", r), e => Js.log2("err", e))
+  game
+})
+->ignore

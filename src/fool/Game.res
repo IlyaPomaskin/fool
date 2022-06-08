@@ -10,20 +10,47 @@ let makeGameInLobby = player =>
     ready: list{player.id},
   })->MResult.makeOk
 
-let logoutPlayer = (game, player) => {
-  ...game,
-  players: Belt.List.keep(game.players, item => item !== player),
+let enterLobby = (game: inLobby, player) => {
+  let isPlayerInGame = List.has(game.players, player, Player.equals)
+
+  InLobby({
+    ...game,
+    players: isPlayerInGame ? game.players : List.add(game.players, player),
+  })->MResult.makeOk
 }
 
-let enterLobby = (game: inLobby, player) =>
+let leaveLobby = (game: inLobby, player) => Ok(
+  InLobby({
+    ...game,
+    players: Belt.List.keep(game.players, item => item !== player),
+  }),
+)
+
+let disconnectProgress = (game: inProgress, player) =>
   game
   ->MResult.makeOk
+  ->MResult.validate("Player not in game", g => List.has(g.players, player, Player.equals))
   ->Result.map(game => {
-    let isPlayerInGame = List.has(game.players, player, (p1, p2) => p1.id == p2.id)
+    let isDisconnected = List.has(game.disconnected, player.id, Utils.equals)
 
-    InLobby({
+    InProgress({
       ...game,
-      players: isPlayerInGame ? game.players : List.add(game.players, player),
+      disconnected: isDisconnected ? game.disconnected : List.add(game.disconnected, player.id),
+    })
+  })
+
+let enterProgress = (game: inProgress, player) =>
+  game
+  ->MResult.makeOk
+  ->MResult.validate("Player not in game", g => List.has(g.players, player, Player.equals))
+  ->Result.map(game => {
+    let isDisconnected = List.has(game.disconnected, player.id, Utils.equals)
+
+    InProgress({
+      ...game,
+      disconnected: isDisconnected
+        ? List.keep(game.disconnected, pId => pId !== player.id)
+        : game.disconnected,
     })
   })
 
@@ -133,7 +160,7 @@ let pass = (game, player) =>
   Ok(game)
   ->Result.flatMap(game => isValidPass(game, player))
   ->Result.flatMap(game => {
-    let nextGameWithPassed = {...game, pass: Utils.toggleArrayItem(game.pass, player.id)}
+    let nextGameWithPassed = {...game, pass: Utils.toggleListItem(game.pass, player.id)}
 
     if isAllPassed(nextGameWithPassed) && Table.isAllBeaten(game.table) {
       finishRound(nextGameWithPassed)

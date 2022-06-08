@@ -3,8 +3,6 @@ open Types
 open Storage
 open ServerUtils
 
-let playersSocket = PlayersSocketMap.empty()
-
 let createServer = server => {
   let wsServer = WsWebSocketServer.Make.make({
     backlog: 101,
@@ -72,12 +70,35 @@ let createServer = server => {
       }
     | (Ok(_), Ok(player)) => {
         let playerId = player.id
-        playersSocket->PlayersSocketMap.set(playerId, ws)
+        PlayersSocketMap.set(playersSocket, playerId, ws)
         sendToPlayer(playerId, Connected(player))
 
         ws
         ->WsWebSocket.on(WsWebSocket.ClientEvents.close, @this (_, _, _) => {
-          playersSocket->PlayersSocketMap.remove(playerId)
+          PlayersSocketMap.remove(playersSocket, playerId)
+
+          let game = HashMap.reduce(games, Error("Game not found"), (acc, key, value) => {
+            switch acc {
+            | Ok(_) => acc
+            | Error(_) =>
+              if playerId === key {
+                Ok(value)
+              } else {
+                acc
+              }
+            }
+          })
+
+          game
+          ->Result.flatMap(game => GameInstance.leaveGame(playerId, GameUtils.getGameId(game)))
+          ->Result.flatMap(game => GameMap.set(games, GameUtils.getGameId(game), game))
+          ->Result.map(game =>
+            switch game {
+            | InLobby(g) => broadcast(g.players, LobbyUpdated(g))
+            | InProgress(g) => broadcast(g.players, ProgressUpdated(g))
+            }
+          )
+          ->ignore
         })
         ->WsWebSocket.on(WsWebSocket.ClientEvents.message, @this (ws, msg, _) => {
           msg
@@ -92,9 +113,12 @@ let createServer = server => {
               ->Result.flatMap(GameUtils.unpackLobby)
               ->Result.map(lobby => broadcast(lobby.players, LobbyCreated(lobby)))
             | Lobby(Enter, playerId, gameId) =>
-              GameInstance.enterGame(playerId, gameId)
-              ->Result.flatMap(GameUtils.unpackLobby)
-              ->Result.map(lobby => broadcast(lobby.players, LobbyUpdated(lobby)))
+              GameInstance.enterGame(playerId, gameId)->Result.map(game =>
+                switch game {
+                | InLobby(lobby) => broadcast(lobby.players, LobbyUpdated(lobby))
+                | InProgress(progress) => broadcast(progress.players, ProgressUpdated(progress))
+                }
+              )
             | Lobby(Ready, playerId, gameId) =>
               GameInstance.toggleReady(playerId, gameId)
               ->Result.flatMap(GameUtils.unpackLobby)

@@ -29,6 +29,15 @@ var GameId = Belt_Id.MakeHashable({
       eq: eq$1
     });
 
+function log(map) {
+  return JSON.stringify(Belt_Array.map(Belt_HashMap.toArray(map), (function (param) {
+                    return [
+                            param[0],
+                            param[1]
+                          ];
+                  })), null, 2);
+}
+
 function empty(param) {
   return Belt_HashMap.make(10, GameId);
 }
@@ -66,6 +75,7 @@ function update(map, gameId, fn) {
 }
 
 var GameMap = {
+  log: log,
   empty: empty,
   get: get,
   set: set,
@@ -74,7 +84,7 @@ var GameMap = {
   update: update
 };
 
-function log(map) {
+function log$1(map) {
   return JSON.stringify(Belt_Array.map(Belt_HashMap.toArray(map), (function (param) {
                     return [
                             param[0],
@@ -94,7 +104,7 @@ function get$1(map, playerId) {
 function findBySessionId(map, sessionId) {
   Log.debug(/* PlayersMap */3, [
         "findBySessionId",
-        log(map)
+        log$1(map)
       ]);
   return MOption.toResult(Belt_HashMap.reduce(map, undefined, (function (acc, param, value) {
                     if (acc !== undefined) {
@@ -112,7 +122,7 @@ function set$1(map, key, nextValue) {
   return Log.debug(/* PlayersMap */3, [
               "set",
               key,
-              log(map)
+              log$1(map)
             ]);
 }
 
@@ -133,7 +143,7 @@ function create$1(map, playerId) {
 }
 
 var PlayersMap = {
-  log: log,
+  log: log$1,
   empty: empty$1,
   get: get$1,
   findBySessionId: findBySessionId,
@@ -164,6 +174,8 @@ var games = Belt_HashMap.make(10, GameId);
 
 var players = Belt_HashMap.make(10, PlayerId);
 
+var playersSocket = Belt_HashMap.make(10, PlayerId);
+
 export {
   PlayerId ,
   GameId ,
@@ -172,6 +184,7 @@ export {
   PlayersSocketMap ,
   games ,
   players ,
+  playersSocket ,
   
 }
 /* PlayerId Not a pure module */

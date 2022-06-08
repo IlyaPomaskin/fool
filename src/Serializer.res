@@ -29,58 +29,24 @@ let tablePair = Jzon.object2(
   Jzon.field("by", card)->Jzon.optional,
 )
 
-/*
-let tablePair = Jzon.custom(
-  ((to, by): tableCards) =>
-    Js.Json.array([
-      to->cardToString->Js.Json.string,
-      by->Option.map(cardToString)->Option.getWithDefault("none")->Js.Json.string,
-    ]),
-  json =>
-    switch json->Js.Json.decodeArray {
-    | Some(arr) => {
-        let toCard =
-          arr
-          ->Array.get(0)
-          ->Option.flatMap(Js.Json.decodeString)
-          ->Option.getWithDefault("")
-          ->stringToCard
-
-        let byCardOptional = arr->Array.get(1)->Option.flatMap(Js.Json.decodeString)
-        let byCardValue = byCardOptional->Option.getWithDefault("")
-        let byCard = switch (byCardOptional, byCardValue) {
-        | (Some(card), _) => Ok(Some(card))
-        | (_, "none") => Ok(None)
-        | _ => Error(#UnexpectedJsonValue([Field("second table pair card")], ""))
-        }
-
-        switch (toCard, byCard) {
-        | (Ok(to), Ok(by)) => (to, by)
-        | (Error(_), _) => toCard
-        | (_, Error()) => byCard
-        }
-      }
-    | None => Error(#UnexpectedJsonValue([Field("table pair")], json))
-    },
-) */
-
-let playerMsg = Jzon.object1(
+let playerMsg = Jzon.object2(
   kind =>
     switch kind {
-    // | Connect => "connect"
-    | Disconnect => "disconnect"
-    | Ping => "ping"
-    | Pong => "pong"
+    | Connect(gameId) => ("connect", Some(gameId))
+    | Disconnect => ("disconnect", None)
+    | Ping => ("ping", None)
+    | Pong => ("pong", None)
     },
-  kind =>
-    switch kind {
-    // | "connect" => Ok(Connect)
-    | "disconnect" => Ok(Disconnect)
-    | "ping" => Ok(Ping)
-    | "Pong" => Ok(Pong)
-    | x => Error(#UnexpectedJsonValue([Field("kind")], x))
+  ((kind, gameId)) =>
+    switch (kind, gameId) {
+    | ("connect", Some(gameId)) => Ok(Connect(gameId))
+    | ("disconnect", _) => Ok(Disconnect)
+    | ("ping", _) => Ok(Ping)
+    | ("pong", _) => Ok(Pong)
+    | (x, _) => Error(#UnexpectedJsonValue([Field("kind")], x))
     },
   Jzon.field("kind", Jzon.string),
+  Jzon.field("payload", Jzon.string)->Jzon.optional,
 )
 
 let lobbyMsg = Jzon.object1(

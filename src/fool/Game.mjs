@@ -30,34 +30,77 @@ function makeGameInLobby(player) {
             });
 }
 
-function logoutPlayer(game, player) {
+function enterLobby(game, player) {
+  var isPlayerInGame = Belt_List.has(game.players, player, Player.equals);
+  return MResult.makeOk({
+              TAG: /* InLobby */0,
+              _0: {
+                owner: game.owner,
+                gameId: game.gameId,
+                players: isPlayerInGame ? game.players : Belt_List.add(game.players, player),
+                ready: game.ready
+              }
+            });
+}
+
+function leaveLobby(game, player) {
   return {
-          gameId: game.gameId,
-          attacker: game.attacker,
-          defender: game.defender,
-          players: Belt_List.keep(game.players, (function (item) {
-                  return item !== player;
-                })),
-          disconnected: game.disconnected,
-          trump: game.trump,
-          deck: game.deck,
-          table: game.table,
-          pass: game.pass
+          TAG: /* Ok */0,
+          _0: {
+            TAG: /* InLobby */0,
+            _0: {
+              owner: game.owner,
+              gameId: game.gameId,
+              players: Belt_List.keep(game.players, (function (item) {
+                      return item !== player;
+                    })),
+              ready: game.ready
+            }
+          }
         };
 }
 
-function enterLobby(game, player) {
-  return Belt_Result.map(MResult.makeOk(game), (function (game) {
-                var isPlayerInGame = Belt_List.has(game.players, player, (function (p1, p2) {
-                        return p1.id === p2.id;
-                      }));
+function disconnectProgress(game, player) {
+  return Belt_Result.map(MResult.validate(MResult.makeOk(game), "Player not in game", (function (g) {
+                    return Belt_List.has(g.players, player, Player.equals);
+                  })), (function (game) {
+                var isDisconnected = Belt_List.has(game.disconnected, player.id, Utils.equals);
                 return {
-                        TAG: /* InLobby */0,
+                        TAG: /* InProgress */1,
                         _0: {
-                          owner: game.owner,
                           gameId: game.gameId,
-                          players: isPlayerInGame ? game.players : Belt_List.add(game.players, player),
-                          ready: game.ready
+                          attacker: game.attacker,
+                          defender: game.defender,
+                          players: game.players,
+                          disconnected: isDisconnected ? game.disconnected : Belt_List.add(game.disconnected, player.id),
+                          trump: game.trump,
+                          deck: game.deck,
+                          table: game.table,
+                          pass: game.pass
+                        }
+                      };
+              }));
+}
+
+function enterProgress(game, player) {
+  return Belt_Result.map(MResult.validate(MResult.makeOk(game), "Player not in game", (function (g) {
+                    return Belt_List.has(g.players, player, Player.equals);
+                  })), (function (game) {
+                var isDisconnected = Belt_List.has(game.disconnected, player.id, Utils.equals);
+                return {
+                        TAG: /* InProgress */1,
+                        _0: {
+                          gameId: game.gameId,
+                          attacker: game.attacker,
+                          defender: game.defender,
+                          players: game.players,
+                          disconnected: isDisconnected ? Belt_List.keep(game.disconnected, (function (pId) {
+                                    return pId !== player.id;
+                                  })) : game.disconnected,
+                          trump: game.trump,
+                          deck: game.deck,
+                          table: game.table,
+                          pass: game.pass
                         }
                       };
               }));
@@ -247,7 +290,7 @@ function pass(game, player) {
                 var nextGameWithPassed_trump = game.trump;
                 var nextGameWithPassed_deck = game.deck;
                 var nextGameWithPassed_table = game.table;
-                var nextGameWithPassed_pass = Utils.toggleArrayItem(game.pass, player.id);
+                var nextGameWithPassed_pass = Utils.toggleListItem(game.pass, player.id);
                 var nextGameWithPassed = {
                   gameId: nextGameWithPassed_gameId,
                   attacker: nextGameWithPassed_attacker,
@@ -452,8 +495,10 @@ function actionToObject(action) {
 
 export {
   makeGameInLobby ,
-  logoutPlayer ,
   enterLobby ,
+  leaveLobby ,
+  disconnectProgress ,
+  enterProgress ,
   isValidToggleReady ,
   toggleReady ,
   startGame ,

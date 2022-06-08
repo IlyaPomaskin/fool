@@ -32,17 +32,17 @@ function fold(result, onOk, onError) {
   }
 }
 
-function validate(result, err, isValid) {
+function validate(result, err, isInvalid) {
   return Belt_Result.flatMap(result, (function (content) {
-                if (Curry._1(isValid, content)) {
-                  return {
-                          TAG: /* Ok */0,
-                          _0: content
-                        };
-                } else {
+                if (Curry._1(isInvalid, content)) {
                   return {
                           TAG: /* Error */1,
                           _0: err
+                        };
+                } else {
+                  return {
+                          TAG: /* Ok */0,
+                          _0: content
                         };
                 }
               }));

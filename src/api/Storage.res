@@ -23,6 +23,17 @@ module GameId = Id.MakeHashable({
 module GameMap = {
   type t = Belt.HashMap.t<GameId.t, gameState, GameId.identity>
 
+  let log = (map: t) => {
+    Js.Json.stringifyWithSpace(
+      Js.Json.array(
+        map
+        ->HashMap.toArray
+        ->Array.map(((k, v)) => Js.Json.array([Js.Json.string(k), v->Obj.magic])),
+      ),
+      2,
+    )
+  }
+
   let empty = (): t => Belt.HashMap.make(~id=module(GameId), ~hintSize=10)
 
   let get = (map, gameId): result<gameState, string> =>
@@ -47,22 +58,6 @@ module GameMap = {
   let update = (map, gameId, fn: gameState => gameState) =>
     map->get(gameId)->Result.flatMap(game => set(map, gameId, fn(game)))
 }
-
-// module LobbyGameMap = MakeGameMap({
-//   type t = inLobby
-//   type createGameArg = player
-
-//   let createGame = player => Game.makeGameInLobby(player)
-//   let getId = (game: t) => game.gameId
-// })
-
-// module ProgressGameMap = MakeGameMap({
-//   type t = inProgress
-//   type createGameArg = inLobby
-
-//   let createGame = lobby => Game.startGame(lobby)
-//   let getId = (game: t) => game.gameId
-// })
 
 module PlayersMap = {
   type t = Belt.HashMap.t<PlayerId.t, player, PlayerId.identity>
@@ -126,3 +121,4 @@ module PlayersSocketMap = {
 
 let games = GameMap.empty()
 let players = PlayersMap.empty()
+let playersSocket = PlayersSocketMap.empty()

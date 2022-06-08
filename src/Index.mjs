@@ -10,14 +10,11 @@ function $$default(param) {
               className: "flex flex-row flex-wrap justify-items-center w-full container px-12 py-6 gap-12"
             }, React.createElement(ReactDnd.DndProvider, {
                   backend: ReactDndHtml5Backend.HTML5Backend,
-                  children: null
-                }, React.createElement(PlayerScreen.make, {
-                      gameId: "g1",
-                      sessionId: "s:p1"
-                    }), React.createElement(PlayerScreen.make, {
-                      gameId: "g1",
-                      sessionId: "s:p2"
-                    })));
+                  children: React.createElement(PlayerScreen.make, {
+                        gameId: "g1",
+                        sessionId: "s:p1"
+                      })
+                }));
 }
 
 export {

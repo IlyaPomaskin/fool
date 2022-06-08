@@ -57,6 +57,7 @@ function hook(player, onMessage, onConnectOpt, onDisconnectOpt, onErrorOpt) {
             ws.addEventListener("message", handleMessage);
             return (function (param) {
                       ws.removeEventListener("message", handleMessage);
+                      ws.close();
                       
                     });
           }

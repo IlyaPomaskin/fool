@@ -13,10 +13,9 @@ import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Belt_Result from "rescript/lib/es6/belt_Result.js";
 import * as ServerUtils from "./ServerUtils.mjs";
 import * as WsWebSocket from "../bindings/WsWebSocket.mjs";
+import * as Belt_HashMap from "rescript/lib/es6/belt_HashMap.js";
 import * as GameInstance from "./GameInstance.mjs";
 import * as WsWebSocketServer from "../bindings/WsWebSocketServer.mjs";
-
-var playersSocket = $$Storage.PlayersSocketMap.empty(undefined);
 
 function createServer(server) {
   var wsServer = new Ws.WebSocketServer({
@@ -33,7 +32,7 @@ function createServer(server) {
     
   };
   var sendToPlayer = function (playerId, $$event) {
-    var result = Belt_Result.map($$Storage.PlayersSocketMap.get(playersSocket, playerId), (function (socket) {
+    var result = Belt_Result.map($$Storage.PlayersSocketMap.get($$Storage.playersSocket, playerId), (function (socket) {
             var tmp;
             switch ($$event.TAG | 0) {
               case /* ProgressCreated */3 :
@@ -87,13 +86,45 @@ function createServer(server) {
             if (player.TAG === /* Ok */0) {
               var player$1 = player._0;
               var playerId = player$1.id;
-              $$Storage.PlayersSocketMap.set(playersSocket, playerId, ws);
+              $$Storage.PlayersSocketMap.set($$Storage.playersSocket, playerId, ws);
               sendToPlayer(playerId, {
                     TAG: /* Connected */0,
                     _0: player$1
                   });
               ws.on(WsWebSocket.ClientEvents.close, (function (param, param$1) {
-                        return $$Storage.PlayersSocketMap.remove(playersSocket, playerId);
+                        $$Storage.PlayersSocketMap.remove($$Storage.playersSocket, playerId);
+                        var game = Belt_HashMap.reduce($$Storage.games, {
+                              TAG: /* Error */1,
+                              _0: "Game not found"
+                            }, (function (acc, key, value) {
+                                if (acc.TAG === /* Ok */0 || playerId !== key) {
+                                  return acc;
+                                } else {
+                                  return {
+                                          TAG: /* Ok */0,
+                                          _0: value
+                                        };
+                                }
+                              }));
+                        Belt_Result.map(Belt_Result.flatMap(Belt_Result.flatMap(game, (function (game) {
+                                        return GameInstance.leaveGame(playerId, GameUtils.getGameId(game));
+                                      })), (function (game) {
+                                    return $$Storage.GameMap.set($$Storage.games, GameUtils.getGameId(game), game);
+                                  })), (function (game) {
+                                if (game.TAG === /* InLobby */0) {
+                                  var g = game._0;
+                                  return broadcast(g.players, {
+                                              TAG: /* LobbyUpdated */2,
+                                              _0: g
+                                            });
+                                }
+                                var g$1 = game._0;
+                                return broadcast(g$1.players, {
+                                            TAG: /* ProgressUpdated */4,
+                                            _0: g$1
+                                          });
+                              }));
+                        
                       })).on(WsWebSocket.ClientEvents.message, (function (msg, param) {
                       var ws = this ;
                       Belt_Result.map(MResult.tap(Serializer.deserializeClientMessage(Belt_Option.getWithDefault(WsWebSocket.RawData.toString(msg), "")), Log.logMessageFromClient), (function (msg) {
@@ -116,10 +147,18 @@ function createServer(server) {
                                                 }));
                                           break;
                                       case /* Enter */1 :
-                                          tmp = Belt_Result.map(Belt_Result.flatMap(GameInstance.enterGame(msg._1, msg._2), GameUtils.unpackLobby), (function (lobby) {
-                                                  return broadcast(lobby.players, {
-                                                              TAG: /* LobbyUpdated */2,
-                                                              _0: lobby
+                                          tmp = Belt_Result.map(GameInstance.enterGame(msg._1, msg._2), (function (game) {
+                                                  if (game.TAG === /* InLobby */0) {
+                                                    var lobby = game._0;
+                                                    return broadcast(lobby.players, {
+                                                                TAG: /* LobbyUpdated */2,
+                                                                _0: lobby
+                                                              });
+                                                  }
+                                                  var progress = game._0;
+                                                  return broadcast(progress.players, {
+                                                              TAG: /* ProgressUpdated */4,
+                                                              _0: progress
                                                             });
                                                 }));
                                           break;
@@ -195,10 +234,9 @@ function setWsServer(res) {
 }
 
 export {
-  playersSocket ,
   createServer ,
   isWsServerSet ,
   setWsServer ,
   
 }
-/* playersSocket Not a pure module */
+/* ws Not a pure module */

@@ -72,23 +72,45 @@ var tablePair = Jzon.object2((function (param) {
               };
       }), Jzon.field("to", card), Jzon.optional(Jzon.field("by", card)));
 
-var playerMsg = Jzon.object1((function (kind) {
+var playerMsg = Jzon.object2((function (kind) {
+        if (typeof kind !== "number") {
+          return [
+                  "connect",
+                  kind._0
+                ];
+        }
         switch (kind) {
           case /* Disconnect */0 :
-              return "disconnect";
+              return [
+                      "disconnect",
+                      undefined
+                    ];
           case /* Ping */1 :
-              return "ping";
+              return [
+                      "ping",
+                      undefined
+                    ];
           case /* Pong */2 :
-              return "pong";
+              return [
+                      "pong",
+                      undefined
+                    ];
           
         }
-      }), (function (kind) {
+      }), (function (param) {
+        var gameId = param[1];
+        var kind = param[0];
         switch (kind) {
-          case "Pong" :
-              return {
-                      TAG: /* Ok */0,
-                      _0: /* Pong */2
-                    };
+          case "connect" :
+              if (gameId !== undefined) {
+                return {
+                        TAG: /* Ok */0,
+                        _0: /* Connect */{
+                          _0: gameId
+                        }
+                      };
+              }
+              break;
           case "disconnect" :
               return {
                       TAG: /* Ok */0,
@@ -99,22 +121,28 @@ var playerMsg = Jzon.object1((function (kind) {
                       TAG: /* Ok */0,
                       _0: /* Ping */1
                     };
+          case "pong" :
+              return {
+                      TAG: /* Ok */0,
+                      _0: /* Pong */2
+                    };
           default:
-            return {
-                    TAG: /* Error */1,
-                    _0: {
-                      NAME: "UnexpectedJsonValue",
-                      VAL: [
-                        [{
-                            TAG: /* Field */0,
-                            _0: "kind"
-                          }],
-                        kind
-                      ]
-                    }
-                  };
+            
         }
-      }), Jzon.field("kind", Jzon.string));
+        return {
+                TAG: /* Error */1,
+                _0: {
+                  NAME: "UnexpectedJsonValue",
+                  VAL: [
+                    [{
+                        TAG: /* Field */0,
+                        _0: "kind"
+                      }],
+                    kind
+                  ]
+                }
+              };
+      }), Jzon.field("kind", Jzon.string), Jzon.optional(Jzon.field("payload", Jzon.string)));
 
 var lobbyMsg = Jzon.object1((function (kind) {
         switch (kind) {

@@ -10,7 +10,11 @@ function createLogger(prefix, logFn, list) {
   return Curry._1(logFn, Belt_Array.concat(["[" + prefix + "]"], list));
 }
 
-var enabledLoggers = [/* LoginPlayer */2];
+var enabledLoggers = [
+  /* Ws */0,
+  /* User */1,
+  /* LoginPlayer */2
+];
 
 function loggerToString(level) {
   switch (level) {
@@ -67,18 +71,23 @@ function debug(logger, msgs) {
 function clientMsgToString(msg) {
   switch (msg.TAG | 0) {
     case /* Player */0 :
+        var $$event = msg._0;
         var tmp;
-        switch (msg._0) {
-          case /* Disconnect */0 :
-              tmp = "Disconnect";
-              break;
-          case /* Ping */1 :
-              tmp = "Ping";
-              break;
-          case /* Pong */2 :
-              tmp = "Pong";
-              break;
-          
+        if (typeof $$event === "number") {
+          switch ($$event) {
+            case /* Disconnect */0 :
+                tmp = "Disconnect";
+                break;
+            case /* Ping */1 :
+                tmp = "Ping";
+                break;
+            case /* Pong */2 :
+                tmp = "Pong";
+                break;
+            
+          }
+        } else {
+          tmp = "Connect: " + $$event._0;
         }
         return "player [" + msg._1 + "] " + tmp;
     case /* Lobby */1 :

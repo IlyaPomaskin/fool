@@ -18,7 +18,7 @@ let noop3 = (_: 'a, _: 'a1, _: 'a2) => ()
 
 let equals = (a: 'a, b: 'b) => a == b
 
-let toggleArrayItem = (list: list<'a>, item: 'a): list<'a> => {
+let toggleListItem = (list: list<'a>, item: 'a): list<'a> => {
   let hasItem = List.has(list, item, equals)
 
   if hasItem {

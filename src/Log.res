@@ -9,7 +9,7 @@ type loggers =
   | LoginPlayer
   | PlayersMap
 
-let enabledLoggers = [LoginPlayer]
+let enabledLoggers = [Ws, User, LoginPlayer]
 
 let loggerToString = level =>
   switch level {
@@ -36,6 +36,7 @@ let clientMsgToString = msg =>
   | Player(event, pId) =>
     `player [${pId}] ` ++
     switch event {
+    | Connect(gameId) => `Connect: ${gameId}`
     | Disconnect => "Disconnect"
     | Ping => "Ping"
     | Pong => "Pong"

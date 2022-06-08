@@ -2,48 +2,11 @@
 
 import * as Log from "../Log.mjs";
 import * as Game from "../fool/Game.mjs";
+import * as MResult from "../MResult.mjs";
 import * as $$Storage from "./Storage.mjs";
 import * as GameUtils from "../fool/GameUtils.mjs";
 import * as Pervasives from "rescript/lib/es6/pervasives.js";
 import * as Belt_Result from "rescript/lib/es6/belt_Result.js";
-
-var p1 = {
-  id: "p1",
-  sessionId: "s:p1",
-  cards: /* [] */0
-};
-
-var p2 = {
-  id: "p2",
-  sessionId: "s:p2",
-  cards: /* [] */0
-};
-
-$$Storage.PlayersMap.set($$Storage.players, "p1", p1);
-
-$$Storage.PlayersMap.set($$Storage.players, "p2", p2);
-
-$$Storage.GameMap.set($$Storage.games, "g1", {
-      TAG: /* InLobby */0,
-      _0: {
-        owner: "p1",
-        gameId: "g1",
-        players: {
-          hd: p1,
-          tl: {
-            hd: p2,
-            tl: /* [] */0
-          }
-        },
-        ready: {
-          hd: "p1",
-          tl: {
-            hd: "p2",
-            tl: /* [] */0
-          }
-        }
-      }
-    });
 
 function registerPlayer(playerId) {
   var player = $$Storage.PlayersMap.get($$Storage.players, playerId);
@@ -90,8 +53,38 @@ function createLobby(playerId) {
 }
 
 function enterGame(playerId, gameId) {
-  return Belt_Result.flatMap(Belt_Result.flatMap(getPlayerWithGame(playerId, gameId, GameUtils.unpackLobby), (function (param) {
-                    return Game.enterLobby(param[0], param[1]);
+  return Belt_Result.flatMap(Belt_Result.flatMap(getPlayerWithGame(playerId, gameId, (function (g) {
+                        return {
+                                TAG: /* Ok */0,
+                                _0: g
+                              };
+                      })), (function (param) {
+                    var player = param[1];
+                    var game = param[0];
+                    if (game.TAG === /* InLobby */0) {
+                      return Game.enterLobby(game._0, player);
+                    } else {
+                      return Game.enterProgress(game._0, player);
+                    }
+                  })), (function (lobby) {
+                return $$Storage.GameMap.set($$Storage.games, gameId, lobby);
+              }));
+}
+
+function leaveGame(playerId, gameId) {
+  return Belt_Result.flatMap(Belt_Result.flatMap(getPlayerWithGame(playerId, gameId, (function (g) {
+                        return {
+                                TAG: /* Ok */0,
+                                _0: g
+                              };
+                      })), (function (param) {
+                    var player = param[1];
+                    var game = param[0];
+                    if (game.TAG === /* InLobby */0) {
+                      return Game.leaveLobby(game._0, player);
+                    } else {
+                      return Game.disconnectProgress(game._0, player);
+                    }
                   })), (function (lobby) {
                 return $$Storage.GameMap.set($$Storage.games, gameId, lobby);
               }));
@@ -121,18 +114,66 @@ function move(playerId, gameId, action) {
               }));
 }
 
+var p1 = {
+  id: "p1",
+  sessionId: "s:p1",
+  cards: /* [] */0
+};
+
+var p2 = {
+  id: "p2",
+  sessionId: "s:p2",
+  cards: /* [] */0
+};
+
+$$Storage.PlayersMap.set($$Storage.players, "p1", p1);
+
+$$Storage.PlayersMap.set($$Storage.players, "p2", p2);
+
+Belt_Result.map($$Storage.GameMap.set($$Storage.games, "g1", {
+          TAG: /* InLobby */0,
+          _0: {
+            owner: "p1",
+            gameId: "g1",
+            players: {
+              hd: p1,
+              tl: {
+                hd: p2,
+                tl: /* [] */0
+              }
+            },
+            ready: {
+              hd: "p1",
+              tl: {
+                hd: "p2",
+                tl: /* [] */0
+              }
+            }
+          }
+        }), (function (game) {
+        MResult.fold(startGame("p2", "g1"), (function (r) {
+                console.log("ok", r);
+                
+              }), (function (e) {
+                console.log("err", e);
+                
+              }));
+        return game;
+      }));
+
 export {
-  p1 ,
-  p2 ,
   registerPlayer ,
   instanceId ,
   loginPlayer ,
   getPlayerWithGame ,
   createLobby ,
   enterGame ,
+  leaveGame ,
   toggleReady ,
   startGame ,
   move ,
+  p1 ,
+  p2 ,
   
 }
 /*  Not a pure module */

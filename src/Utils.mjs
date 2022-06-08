@@ -43,7 +43,7 @@ function noop3(param, param$1, param$2) {
 
 var equals = Caml_obj.caml_equal;
 
-function toggleArrayItem(list, item) {
+function toggleListItem(list, item) {
   var hasItem = Belt_List.has(list, item, equals);
   if (hasItem) {
     return Belt_List.keep(list, (function (i) {
@@ -181,7 +181,7 @@ export {
   noop2 ,
   noop3 ,
   equals ,
-  toggleArrayItem ,
+  toggleListItem ,
   lastListItem ,
   findInList ,
   identity ,

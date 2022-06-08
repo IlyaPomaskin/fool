@@ -75,6 +75,7 @@ type playerWinState =
   | Draw
 
 type clientPlayerMessage =
+  | Connect(gameId)
   | Disconnect
   | Ping
   | Pong
