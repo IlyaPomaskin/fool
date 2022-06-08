@@ -68,7 +68,7 @@ function createServer(server) {
     }
     
   };
-  var broadcastToPlayers = function (players, $$event) {
+  var broadcast = function (players, $$event) {
     return Belt_List.forEach(players, (function (player) {
                   return sendToPlayer(player.id, $$event);
                 }));
@@ -109,7 +109,7 @@ function createServer(server) {
                                     switch (msg._0) {
                                       case /* Create */0 :
                                           tmp = Belt_Result.map(Belt_Result.flatMap(GameInstance.createLobby(msg._1), GameUtils.unpackLobby), (function (lobby) {
-                                                  return broadcastToPlayers(lobby.players, {
+                                                  return broadcast(lobby.players, {
                                                               TAG: /* LobbyCreated */1,
                                                               _0: lobby
                                                             });
@@ -117,7 +117,7 @@ function createServer(server) {
                                           break;
                                       case /* Enter */1 :
                                           tmp = Belt_Result.map(Belt_Result.flatMap(GameInstance.enterGame(msg._1, msg._2), GameUtils.unpackLobby), (function (lobby) {
-                                                  return broadcastToPlayers(lobby.players, {
+                                                  return broadcast(lobby.players, {
                                                               TAG: /* LobbyUpdated */2,
                                                               _0: lobby
                                                             });
@@ -125,7 +125,7 @@ function createServer(server) {
                                           break;
                                       case /* Ready */2 :
                                           tmp = Belt_Result.map(Belt_Result.flatMap(GameInstance.toggleReady(msg._1, msg._2), GameUtils.unpackLobby), (function (lobby) {
-                                                  return broadcastToPlayers(lobby.players, {
+                                                  return broadcast(lobby.players, {
                                                               TAG: /* LobbyUpdated */2,
                                                               _0: lobby
                                                             });
@@ -133,7 +133,7 @@ function createServer(server) {
                                           break;
                                       case /* Start */3 :
                                           tmp = Belt_Result.map(Belt_Result.flatMap(GameInstance.startGame(msg._1, msg._2), GameUtils.unpackProgress), (function (progress) {
-                                                  return broadcastToPlayers(progress.players, {
+                                                  return broadcast(progress.players, {
                                                               TAG: /* ProgressCreated */3,
                                                               _0: progress
                                                             });
@@ -144,7 +144,7 @@ function createServer(server) {
                                     break;
                                 case /* Progress */2 :
                                     tmp = Belt_Result.map(Belt_Result.flatMap(GameInstance.move(msg._1, msg._2, msg._0), GameUtils.unpackProgress), (function (progress) {
-                                            return broadcastToPlayers(progress.players, {
+                                            return broadcast(progress.players, {
                                                         TAG: /* ProgressUpdated */4,
                                                         _0: progress
                                                       });

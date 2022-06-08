@@ -40,7 +40,7 @@ let createServer = server => {
     ->ignore
   }
 
-  let broadcastToPlayers = (players, event) =>
+  let broadcast = (players, event) =>
     players->List.forEach(player => sendToPlayer(player.id, event))
 
   wsServer
@@ -88,34 +88,25 @@ let createServer = server => {
           ->Result.map(msg => {
             switch msg {
             | Lobby(Create, playerId, _) =>
-              playerId
-              ->GameInstance.createLobby
+              GameInstance.createLobby(playerId)
               ->Result.flatMap(GameUtils.unpackLobby)
-              ->Result.map(lobby => broadcastToPlayers(lobby.players, LobbyCreated(lobby)))
+              ->Result.map(lobby => broadcast(lobby.players, LobbyCreated(lobby)))
             | Lobby(Enter, playerId, gameId) =>
-              playerId
-              ->GameInstance.enterGame(gameId)
+              GameInstance.enterGame(playerId, gameId)
               ->Result.flatMap(GameUtils.unpackLobby)
-              ->Result.map(lobby => broadcastToPlayers(lobby.players, LobbyUpdated(lobby)))
+              ->Result.map(lobby => broadcast(lobby.players, LobbyUpdated(lobby)))
             | Lobby(Ready, playerId, gameId) =>
-              playerId
-              ->GameInstance.toggleReady(gameId)
+              GameInstance.toggleReady(playerId, gameId)
               ->Result.flatMap(GameUtils.unpackLobby)
-              ->Result.map(lobby => broadcastToPlayers(lobby.players, LobbyUpdated(lobby)))
+              ->Result.map(lobby => broadcast(lobby.players, LobbyUpdated(lobby)))
             | Lobby(Start, playerId, gameId) =>
-              playerId
-              ->GameInstance.startGame(gameId)
+              GameInstance.startGame(playerId, gameId)
               ->Result.flatMap(GameUtils.unpackProgress)
-              ->Result.map(progress =>
-                broadcastToPlayers(progress.players, ProgressCreated(progress))
-              )
+              ->Result.map(progress => broadcast(progress.players, ProgressCreated(progress)))
             | Progress(move, playerId, gameId) =>
-              playerId
-              ->GameInstance.move(gameId, move)
+              GameInstance.move(playerId, gameId, move)
               ->Result.flatMap(GameUtils.unpackProgress)
-              ->Result.map(progress =>
-                broadcastToPlayers(progress.players, ProgressUpdated(progress))
-              )
+              ->Result.map(progress => broadcast(progress.players, ProgressUpdated(progress)))
             | _ => Error("Message from server cannot be parsed as text")
             }->MResult.tapError(msg => sendToWs(ws, ServerError(msg)))
           })
