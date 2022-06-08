@@ -1,5 +1,4 @@
 open NodeJs
-open Utils
 open Types
 open Storage
 open ServerUtils
@@ -56,7 +55,7 @@ let createServer = server => {
         | _ => Some(sessionId)
         }
       })
-      ->Utils.toResult("No sessionId")
+      ->MOption.toResult("No sessionId")
 
     Log.debug(Ws, [`login ${sessionId->Result.getWithDefault("No sessionId")}`])
 
@@ -85,35 +84,40 @@ let createServer = server => {
           ->WsWebSocket.RawData.toString
           ->Option.getWithDefault("")
           ->Serializer.deserializeClientMessage
-          ->Utils.tapResult(Log.logMessageFromClient)
+          ->MResult.tap(Log.logMessageFromClient)
           ->Result.map(msg => {
             switch msg {
             | Lobby(Create, playerId, _) =>
               playerId
               ->GameInstance.createLobby
+              ->Result.flatMap(GameUtils.unpackLobby)
               ->Result.map(lobby => broadcastToPlayers(lobby.players, LobbyCreated(lobby)))
             | Lobby(Enter, playerId, gameId) =>
               playerId
               ->GameInstance.enterGame(gameId)
+              ->Result.flatMap(GameUtils.unpackLobby)
               ->Result.map(lobby => broadcastToPlayers(lobby.players, LobbyUpdated(lobby)))
             | Lobby(Ready, playerId, gameId) =>
               playerId
               ->GameInstance.toggleReady(gameId)
+              ->Result.flatMap(GameUtils.unpackLobby)
               ->Result.map(lobby => broadcastToPlayers(lobby.players, LobbyUpdated(lobby)))
             | Lobby(Start, playerId, gameId) =>
               playerId
               ->GameInstance.startGame(gameId)
+              ->Result.flatMap(GameUtils.unpackProgress)
               ->Result.map(progress =>
                 broadcastToPlayers(progress.players, ProgressCreated(progress))
               )
             | Progress(move, playerId, gameId) =>
               playerId
               ->GameInstance.move(gameId, move)
+              ->Result.flatMap(GameUtils.unpackProgress)
               ->Result.map(progress =>
                 broadcastToPlayers(progress.players, ProgressUpdated(progress))
               )
             | _ => Error("Message from server cannot be parsed as text")
-            }->tapErrorResult(msg => sendToWs(ws, ServerError(msg)))
+            }->MResult.tapError(msg => sendToWs(ws, ServerError(msg)))
           })
           ->ignore
         })

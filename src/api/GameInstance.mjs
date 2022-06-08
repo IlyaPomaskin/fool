@@ -2,7 +2,6 @@
 
 import * as Log from "../Log.mjs";
 import * as Game from "../fool/Game.mjs";
-import * as Utils from "../Utils.mjs";
 import * as $$Storage from "./Storage.mjs";
 import * as GameUtils from "../fool/GameUtils.mjs";
 import * as Pervasives from "rescript/lib/es6/pervasives.js";
@@ -24,21 +23,24 @@ $$Storage.PlayersMap.set($$Storage.players, "p1", p1);
 
 $$Storage.PlayersMap.set($$Storage.players, "p2", p2);
 
-$$Storage.LobbyGameMap.set($$Storage.gamesInLobby, "g1", {
-      owner: "p1",
-      gameId: "g1",
-      players: {
-        hd: p1,
-        tl: {
-          hd: p2,
-          tl: /* [] */0
-        }
-      },
-      ready: {
-        hd: "p1",
-        tl: {
-          hd: "p2",
-          tl: /* [] */0
+$$Storage.GameMap.set($$Storage.games, "g1", {
+      TAG: /* InLobby */0,
+      _0: {
+        owner: "p1",
+        gameId: "g1",
+        players: {
+          hd: p1,
+          tl: {
+            hd: p2,
+            tl: /* [] */0
+          }
+        },
+        ready: {
+          hd: "p1",
+          tl: {
+            hd: "p2",
+            tl: /* [] */0
+          }
         }
       }
     });
@@ -70,53 +72,52 @@ function loginPlayer(sessionId) {
   return $$Storage.PlayersMap.findBySessionId($$Storage.players, sessionId);
 }
 
-function createLobby(playerId) {
+function getPlayerWithGame(playerId, gameId, unpackGame) {
   return Belt_Result.flatMap($$Storage.PlayersMap.get($$Storage.players, playerId), (function (player) {
-                return $$Storage.LobbyGameMap.create($$Storage.gamesInLobby, player);
-              }));
-}
-
-function enterGame(playerId, gameId) {
-  return Belt_Result.flatMap(Belt_Result.flatMap($$Storage.PlayersMap.get($$Storage.players, playerId), (function (player) {
-                    return Belt_Result.flatMap($$Storage.LobbyGameMap.get($$Storage.gamesInLobby, gameId), (function (lobby) {
-                                  return Game.enterLobby(lobby, player);
-                                }));
-                  })), (function (game) {
-                return $$Storage.LobbyGameMap.set($$Storage.gamesInLobby, game.gameId, game);
-              }));
-}
-
-function toggleReady(playerId, gameId) {
-  return Belt_Result.flatMap($$Storage.PlayersMap.get($$Storage.players, playerId), (function (player) {
-                return $$Storage.LobbyGameMap.update($$Storage.gamesInLobby, gameId, (function (game) {
-                              return Belt_Result.getWithDefault(Game.toggleReady(game, player), game);
+                return Belt_Result.map(Belt_Result.flatMap($$Storage.GameMap.get($$Storage.games, gameId), unpackGame), (function (game) {
+                              return [
+                                      game,
+                                      player
+                                    ];
                             }));
               }));
 }
 
+function createLobby(playerId) {
+  return Belt_Result.flatMap(Belt_Result.flatMap($$Storage.PlayersMap.get($$Storage.players, playerId), Game.makeGameInLobby), (function (game) {
+                return $$Storage.GameMap.create($$Storage.games, game);
+              }));
+}
+
+function enterGame(playerId, gameId) {
+  return Belt_Result.flatMap(Belt_Result.flatMap(getPlayerWithGame(playerId, gameId, GameUtils.unpackLobby), (function (param) {
+                    return Game.enterLobby(param[0], param[1]);
+                  })), (function (lobby) {
+                return $$Storage.GameMap.set($$Storage.games, gameId, lobby);
+              }));
+}
+
+function toggleReady(playerId, gameId) {
+  return Belt_Result.flatMap(Belt_Result.flatMap(getPlayerWithGame(playerId, gameId, GameUtils.unpackLobby), (function (param) {
+                    return Game.toggleReady(param[0], param[1]);
+                  })), (function (game) {
+                return $$Storage.GameMap.set($$Storage.games, gameId, game);
+              }));
+}
+
 function startGame(playerId, gameId) {
-  return Belt_Result.flatMap(Belt_Result.flatMap(Belt_Result.flatMap($$Storage.PlayersMap.get($$Storage.players, playerId), (function (player) {
-                        return Belt_Result.flatMap($$Storage.LobbyGameMap.get($$Storage.gamesInLobby, gameId), (function (game) {
-                                      return GameUtils.isCanStart(game, player);
-                                    }));
-                      })), Game.startGame), (function (game) {
-                $$Storage.LobbyGameMap.remove($$Storage.gamesInLobby, gameId);
-                return $$Storage.ProgressGameMap.set($$Storage.gamesInProgress, gameId, game);
+  return Belt_Result.flatMap(Belt_Result.flatMap(getPlayerWithGame(playerId, gameId, GameUtils.unpackLobby), (function (param) {
+                    return Game.startGame(param[0], param[1]);
+                  })), (function (game) {
+                return $$Storage.GameMap.set($$Storage.games, gameId, game);
               }));
 }
 
 function move(playerId, gameId, action) {
-  return Belt_Result.flatMap(Belt_Result.flatMap(Belt_Result.flatMap($$Storage.ProgressGameMap.get($$Storage.gamesInProgress, gameId), (function (game) {
-                        return Belt_Result.map(Utils.toResult(GameUtils.findPlayerById(game, playerId), "Player " + playerId + " not found"), (function (player) {
-                                      return [
-                                              player,
-                                              game
-                                            ];
-                                    }));
-                      })), (function (param) {
-                    return Game.dispatch(param[1], param[0], action);
+  return Belt_Result.flatMap(Belt_Result.flatMap(getPlayerWithGame(playerId, gameId, GameUtils.unpackProgress), (function (param) {
+                    return Game.dispatch(param[0], param[1], action);
                   })), (function (game) {
-                return $$Storage.ProgressGameMap.set($$Storage.gamesInProgress, game.gameId, game);
+                return $$Storage.GameMap.set($$Storage.games, gameId, game);
               }));
 }
 
@@ -126,6 +127,7 @@ export {
   registerPlayer ,
   instanceId ,
   loginPlayer ,
+  getPlayerWithGame ,
   createLobby ,
   enterGame ,
   toggleReady ,

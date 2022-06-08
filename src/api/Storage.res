@@ -20,51 +20,49 @@ module GameId = Id.MakeHashable({
   let eq = (a, b) => a === b
 })
 
-module MakeGameMap = (Item: GameType) => {
-  type t = Belt.HashMap.t<GameId.t, Item.t, GameId.identity>
+module GameMap = {
+  type t = Belt.HashMap.t<GameId.t, gameState, GameId.identity>
 
   let empty = (): t => Belt.HashMap.make(~id=module(GameId), ~hintSize=10)
 
-  let get = (map, gameId): result<Item.t, string> =>
-    map->HashMap.get(gameId)->Utils.toResult(`Game "${gameId}" not found`)
+  let get = (map, gameId): result<gameState, string> =>
+    map->HashMap.get(gameId)->MOption.toResult(`Game "${gameId}" not found`)
 
   let set = (map, gameId, game) => {
     HashMap.set(map, gameId, game)
     Ok(game)
   }
 
-  let create = (map, arg) => {
-    let game = Item.createGame(arg)
-    let gameWithSameIdFound = game->Result.map(Item.getId)->Result.flatMap(id => get(map, id))
+  let create = (map, game) => {
+    let gameWithSameIdFound = get(map, GameUtils.getGameId(game))
 
-    switch (game, gameWithSameIdFound) {
-    | (Error(_), _) => game
-    | (_, Ok(game)) => Error(`Game ${Item.getId(game)} already exists`)
-    | (Ok(game), _) => set(map, Item.getId(game), game)
+    switch gameWithSameIdFound {
+    | Ok(game) => Error(`Game ${GameUtils.getGameId(game)} already exists`)
+    | Error(_) => set(map, GameUtils.getGameId(game), game)
     }
   }
 
   let remove = (map, gameId) => map->HashMap.remove(gameId)
 
-  let update = (map, gameId, fn: Item.t => Item.t) =>
+  let update = (map, gameId, fn: gameState => gameState) =>
     map->get(gameId)->Result.flatMap(game => set(map, gameId, fn(game)))
 }
 
-module LobbyGameMap = MakeGameMap({
-  type t = inLobby
-  type createGameArg = player
+// module LobbyGameMap = MakeGameMap({
+//   type t = inLobby
+//   type createGameArg = player
 
-  let createGame = player => Game.makeGameInLobby(player)
-  let getId = (game: t) => game.gameId
-})
+//   let createGame = player => Game.makeGameInLobby(player)
+//   let getId = (game: t) => game.gameId
+// })
 
-module ProgressGameMap = MakeGameMap({
-  type t = inProgress
-  type createGameArg = inLobby
+// module ProgressGameMap = MakeGameMap({
+//   type t = inProgress
+//   type createGameArg = inLobby
 
-  let createGame = lobby => Game.startGame(lobby)
-  let getId = (game: t) => game.gameId
-})
+//   let createGame = lobby => Game.startGame(lobby)
+//   let getId = (game: t) => game.gameId
+// })
 
 module PlayersMap = {
   type t = Belt.HashMap.t<PlayerId.t, player, PlayerId.identity>
@@ -83,7 +81,7 @@ module PlayersMap = {
   let empty = (): t => Belt.HashMap.make(~id=module(PlayerId), ~hintSize=10)
 
   let get = (map, playerId): result<player, string> =>
-    map->HashMap.get(playerId)->Utils.toResult(`Player "${playerId}" not found`)
+    map->HashMap.get(playerId)->MOption.toResult(`Player "${playerId}" not found`)
 
   let findBySessionId = (map: t, sessionId: sessionId): result<player, string> => {
     Log.debug(PlayersMap, ["findBySessionId", log(map)])
@@ -94,7 +92,7 @@ module PlayersMap = {
       | None => value.sessionId === sessionId ? Some(value) : None
       }
     })
-    ->Utils.toResult(`Player ${sessionId} not found`)
+    ->MOption.toResult(`Player ${sessionId} not found`)
   }
 
   let set = (map, key, nextValue) => {
@@ -119,13 +117,12 @@ module PlayersSocketMap = {
   let empty = (): t => Belt.HashMap.make(~id=module(PlayerId), ~hintSize=10)
 
   let get = (map, playerId) =>
-    map->HashMap.get(playerId)->Utils.toResult(`Player "${playerId}" socket not found`)
+    map->HashMap.get(playerId)->MOption.toResult(`Player "${playerId}" socket not found`)
 
   let set = (map, playerId, socket) => map->HashMap.set(playerId, socket)
 
   let remove = (map, playerId) => map->HashMap.remove(playerId)
 }
 
-let gamesInLobby = LobbyGameMap.empty()
-let gamesInProgress = ProgressGameMap.empty()
+let games = GameMap.empty()
 let players = PlayersMap.empty()

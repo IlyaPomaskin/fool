@@ -56,11 +56,6 @@ let rec numbersToEmoji = (number: int) =>
   | _ => numbersToEmoji(number / 10) ++ numbersToEmoji(mod(number, 10))
   }
 
-let makeOk = (a: 'a) => Ok(a)
-
-let toResult = (a: option<'a>, error: 'b): result<'a, 'b> =>
-  a->Option.map(makeOk)->Option.getWithDefault(Error(error))
-
 module Classify = {
   type unknownType
 
@@ -71,22 +66,6 @@ module Classify = {
 
         return "";
     }`)
-}
-
-let tapResult = (result: result<'a, 'b>, fn: 'a => unit): result<'a, 'b> => {
-  Result.map(result, content => {
-    fn(content)
-    content
-  })
-}
-
-let tapErrorResult = (result: result<'a, 'b>, fn: 'b => unit): result<'a, 'b> => {
-  switch result {
-  | Error(err) => fn(err)
-  | _ => ignore()
-  }
-
-  result
 }
 
 let leftRotationClassName = "-rotate-12 -translate-x-1.5"

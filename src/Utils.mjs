@@ -5,8 +5,6 @@ import * as React from "react";
 import * as Caml_obj from "rescript/lib/es6/caml_obj.js";
 import * as Belt_List from "rescript/lib/es6/belt_List.js";
 import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
-import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
-import * as Belt_Result from "rescript/lib/es6/belt_Result.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
 
 function cx(names) {
@@ -104,20 +102,6 @@ function numbersToEmoji(number) {
   }
 }
 
-function makeOk(a) {
-  return {
-          TAG: /* Ok */0,
-          _0: a
-        };
-}
-
-function toResult(a, error) {
-  return Belt_Option.getWithDefault(Belt_Option.map(a, makeOk), {
-              TAG: /* Error */1,
-              _0: error
-            });
-}
-
 var constructorName = (x => {
         if (x && 'constructor' in x && x.constructor.name) {
           return x.constructor.name;
@@ -129,20 +113,6 @@ var constructorName = (x => {
 var Classify = {
   constructorName: constructorName
 };
-
-function tapResult(result, fn) {
-  return Belt_Result.map(result, (function (content) {
-                Curry._1(fn, content);
-                return content;
-              }));
-}
-
-function tapErrorResult(result, fn) {
-  if (result.TAG !== /* Ok */0) {
-    Curry._1(fn, result._0);
-  }
-  return result;
-}
 
 function listIndexOf(list, equalsFn) {
   return Belt_List.reduceWithIndex(list, undefined, (function (acc, item, index) {
@@ -216,11 +186,7 @@ export {
   findInList ,
   identity ,
   numbersToEmoji ,
-  makeOk ,
-  toResult ,
   Classify ,
-  tapResult ,
-  tapErrorResult ,
   leftRotationClassName ,
   rightRotationClassName ,
   listIndexOf ,

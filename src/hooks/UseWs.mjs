@@ -3,6 +3,7 @@
 import * as Log from "../Log.mjs";
 import * as Utils from "../Utils.mjs";
 import * as React from "react";
+import * as MOption from "../MOption.mjs";
 import * as $$WebSocket from "../bindings/WebSocket.mjs";
 import * as Serializer from "../Serializer.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
@@ -46,7 +47,7 @@ function hook(player, onMessage, onConnectOpt, onDisconnectOpt, onErrorOpt) {
   var ws = match[0];
   React.useEffect((function () {
           var handleMessage = function ($$event) {
-            Belt_Result.map(Belt_Result.flatMap(Utils.toResult($$WebSocket.messageAsText($$event), {
+            Belt_Result.map(Belt_Result.flatMap(MOption.toResult($$WebSocket.messageAsText($$event), {
                           NAME: "SyntaxError",
                           VAL: "Message from server cannot be parsed as text"
                         }), Serializer.deserializeServerMessage), onMessage);

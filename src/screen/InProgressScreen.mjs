@@ -9,6 +9,7 @@ import * as React from "react";
 import * as CardUI from "../components/CardUI.mjs";
 import * as DeckUI from "../components/DeckUI.mjs";
 import * as Player from "../fool/Player.mjs";
+import * as MOption from "../MOption.mjs";
 import * as TableUI from "../components/TableUI.mjs";
 import * as PlayerUI from "../components/PlayerUI.mjs";
 import * as Belt_List from "rescript/lib/es6/belt_List.js";
@@ -65,7 +66,7 @@ function InProgressScreen$PlayerTableUI(Props) {
   var onDrop = Props.onDrop;
   var onBeat = Props.onBeat;
   var isDefender = GameUtils.isDefender(game, player);
-  var draggedCard$1 = Utils.toResult(draggedCard, "No card");
+  var draggedCard$1 = MOption.toResult(draggedCard, "No card");
   var match = ReactDnd.useDrop({
         accept: "card",
         drop: onDrop
@@ -203,7 +204,7 @@ function useOptimisticGame(game, player, onMessage) {
       case /* Progress */2 :
           var move = msg._0;
           Curry._1(setOptimisticGame, (function (prevGame) {
-                  return Belt_Result.getWithDefault(Game.dispatch(prevGame, player, move), prevGame);
+                  return Belt_Result.getWithDefault(Belt_Result.flatMap(Game.dispatch(prevGame, player, move), GameUtils.unpackProgress), prevGame);
                 }));
           break;
       

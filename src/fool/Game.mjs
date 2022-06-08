@@ -6,6 +6,7 @@ import * as Table from "./Table.mjs";
 import * as Utils from "../Utils.mjs";
 import * as Player from "./Player.mjs";
 import * as Js_math from "rescript/lib/es6/js_math.js";
+import * as MResult from "../MResult.mjs";
 import * as Belt_List from "rescript/lib/es6/belt_List.js";
 import * as GameUtils from "./GameUtils.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
@@ -15,15 +16,18 @@ function makeGameInLobby(player) {
   return {
           TAG: /* Ok */0,
           _0: {
-            owner: player.id,
-            gameId: "g" + String(Js_math.random_int(0, 100)),
-            players: {
-              hd: player,
-              tl: /* [] */0
-            },
-            ready: {
-              hd: player.id,
-              tl: /* [] */0
+            TAG: /* InLobby */0,
+            _0: {
+              owner: player.id,
+              gameId: "g" + String(Js_math.random_int(0, 100)),
+              players: {
+                hd: player,
+                tl: /* [] */0
+              },
+              ready: {
+                hd: player.id,
+                tl: /* [] */0
+              }
             }
           }
         };
@@ -31,34 +35,39 @@ function makeGameInLobby(player) {
 
 function logoutPlayer(game, player) {
   return {
-          owner: game.owner,
           gameId: game.gameId,
+          attacker: game.attacker,
+          defender: game.defender,
           players: Belt_List.keep(game.players, (function (item) {
                   return item !== player;
                 })),
-          ready: game.ready
+          disconnected: game.disconnected,
+          trump: game.trump,
+          deck: game.deck,
+          table: game.table,
+          pass: game.pass
         };
 }
 
 function enterLobby(game, player) {
-  var isPlayerInGame = Belt_List.has(game.players, player, (function (p1, p2) {
-          return p1.id === p2.id;
-        }));
-  return {
-          TAG: /* Ok */0,
-          _0: {
-            owner: game.owner,
-            gameId: game.gameId,
-            players: isPlayerInGame ? game.players : Belt_List.add(game.players, player),
-            ready: game.ready
-          }
-        };
+  return Belt_Result.map(MResult.makeOk(game), (function (game) {
+                var isPlayerInGame = Belt_List.has(game.players, player, (function (p1, p2) {
+                        return p1.id === p2.id;
+                      }));
+                return {
+                        TAG: /* InLobby */0,
+                        _0: {
+                          owner: game.owner,
+                          gameId: game.gameId,
+                          players: isPlayerInGame ? game.players : Belt_List.add(game.players, player),
+                          ready: game.ready
+                        }
+                      };
+              }));
 }
 
 function isValidToggleReady(game, player) {
-  if (Belt_List.has(game.players, player, (function (p1, p2) {
-            return p1.id === p2.id;
-          }))) {
+  if (Belt_List.has(game.players, player, Player.equals)) {
     return {
             TAG: /* Ok */0,
             _0: game
@@ -72,63 +81,70 @@ function isValidToggleReady(game, player) {
 }
 
 function toggleReady(game, player) {
-  var isValid = isValidToggleReady(game, player);
-  if (Belt_Result.isError(isValid)) {
-    return isValid;
-  }
-  var inList = Belt_List.has(game.ready, player.id, Utils.equals);
-  return {
-          TAG: /* Ok */0,
-          _0: {
-            owner: game.owner,
-            gameId: game.gameId,
-            players: game.players,
-            ready: inList ? Belt_List.keep(game.ready, (function (pId) {
-                      return pId !== player.id;
-                    })) : Belt_List.add(game.ready, player.id)
-          }
-        };
+  return Belt_Result.map(Belt_Result.flatMap(MResult.makeOk(game), (function (lobby) {
+                    return isValidToggleReady(lobby, player);
+                  })), (function (lobby) {
+                var inList = Belt_List.has(lobby.ready, player.id, Utils.equals);
+                return {
+                        TAG: /* InLobby */0,
+                        _0: {
+                          owner: lobby.owner,
+                          gameId: lobby.gameId,
+                          players: lobby.players,
+                          ready: inList ? Belt_List.keep(lobby.ready, (function (pId) {
+                                    return pId !== player.id;
+                                  })) : Belt_List.add(lobby.ready, player.id)
+                        }
+                      };
+              }));
 }
 
-function startGame(game) {
-  var match = Player.dealDeckToPlayers(Deck.makeShuffled(undefined), game.players);
-  var deck = match[1];
-  var players = match[0];
-  var trump = GameUtils.getTrump(deck, players);
-  var attacker = Belt_Option.flatMap(trump, (function (tr) {
-          return Player.findFirstAttackerId(tr, players);
-        }));
-  var defender = Belt_Option.flatMap(attacker, (function (at) {
-          return Player.getNextPlayerId(at, players);
-        }));
-  if (trump !== undefined) {
-    if (attacker !== undefined && defender !== undefined) {
-      return {
-              TAG: /* Ok */0,
-              _0: {
-                gameId: game.gameId,
-                attacker: attacker,
-                defender: defender,
-                players: players,
-                disconnected: /* [] */0,
-                trump: trump,
-                deck: deck,
-                table: /* [] */0,
-                pass: /* [] */0
-              }
-            };
-    } else {
-      return {
-              TAG: /* Error */1,
-              _0: "Can't find next attacker/defender"
-            };
-    }
-  } else {
-    return {
-            TAG: /* Error */1,
-            _0: "Can't find trump"
-          };
-  }
+function startGame(game, playerId) {
+  return Belt_Result.flatMap(Belt_Result.flatMap(MResult.makeOk(game), (function (lobby) {
+                    return GameUtils.isCanStart(lobby, playerId);
+                  })), (function (game) {
+                var match = Player.dealDeckToPlayers(Deck.makeShuffled(undefined), game.players);
+                var deck = match[1];
+                var players = match[0];
+                var trump = GameUtils.getTrump(deck, players);
+                var attacker = Belt_Option.flatMap(trump, (function (tr) {
+                        return Player.findFirstAttackerId(tr, players);
+                      }));
+                var defender = Belt_Option.flatMap(attacker, (function (at) {
+                        return Player.getNextPlayerId(at, players);
+                      }));
+                if (trump !== undefined) {
+                  if (attacker !== undefined && defender !== undefined) {
+                    return {
+                            TAG: /* Ok */0,
+                            _0: {
+                              TAG: /* InProgress */1,
+                              _0: {
+                                gameId: game.gameId,
+                                attacker: attacker,
+                                defender: defender,
+                                players: players,
+                                disconnected: /* [] */0,
+                                trump: trump,
+                                deck: deck,
+                                table: /* [] */0,
+                                pass: /* [] */0
+                              }
+                            }
+                          };
+                  } else {
+                    return {
+                            TAG: /* Error */1,
+                            _0: "Can't find next attacker/defender"
+                          };
+                  }
+                } else {
+                  return {
+                          TAG: /* Error */1,
+                          _0: "Can't find trump"
+                        };
+                }
+              }));
 }
 
 function isValidMove(game, player, card) {
@@ -427,17 +443,18 @@ function take(game, player) {
 }
 
 function dispatch(game, player, action) {
-  if (typeof action === "number") {
-    if (action === /* Take */0) {
-      return take(game, player);
-    } else {
-      return pass(game, player);
-    }
-  } else if (action.TAG === /* Beat */0) {
-    return beat(game, player, action._0, action._1);
-  } else {
-    return move(game, player, action._0);
-  }
+  var tmp;
+  tmp = typeof action === "number" ? (
+      action === /* Take */0 ? take(game, player) : pass(game, player)
+    ) : (
+      action.TAG === /* Beat */0 ? beat(game, player, action._0, action._1) : move(game, player, action._0)
+    );
+  return Belt_Result.map(tmp, (function (game) {
+                return {
+                        TAG: /* InProgress */1,
+                        _0: game
+                      };
+              }));
 }
 
 function maskGameDeck(deck) {

@@ -155,7 +155,7 @@ let gameMsg = Jzon.object4(
     | "player" => Jzon.decodeWith(msg, playerMsg)->Result.map(msg => Player(msg, playerId))
     | "lobby" =>
       gameId
-      ->Utils.toResult(
+      ->MOption.toResult(
         #UnexpectedJsonValue([Jzon.DecodingError.Field("gameId")], Js.Json.stringify(msg)),
       )
       ->Result.flatMap(gameId =>
@@ -165,7 +165,7 @@ let gameMsg = Jzon.object4(
       )
     | "progress" =>
       gameId
-      ->Utils.toResult(
+      ->MOption.toResult(
         #UnexpectedJsonValue([Jzon.DecodingError.Field("gameId")], Js.Json.stringify(msg)),
       )
       ->Result.flatMap(gameId =>

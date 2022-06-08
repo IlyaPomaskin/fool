@@ -58,7 +58,7 @@ type inProgress = {
   pass: list<playerId>,
 }
 
-type state =
+type gameState =
   | InLobby(inLobby)
   | InProgress(inProgress)
 

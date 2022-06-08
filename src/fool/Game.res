@@ -2,75 +2,85 @@ open Types
 open Utils
 open GameUtils
 
-let makeGameInLobby = player => Ok({
-  gameId: "g" ++ string_of_int(Js.Math.random_int(0, 100)),
-  owner: player.id,
-  players: list{player},
-  ready: list{player.id},
-})
+let makeGameInLobby = player => Ok(
+  InLobby({
+    gameId: "g" ++ string_of_int(Js.Math.random_int(0, 100)),
+    owner: player.id,
+    players: list{player},
+    ready: list{player.id},
+  }),
+)
 
-let logoutPlayer = (game: inLobby, player) => {
+let logoutPlayer = (game, player) => {
   ...game,
   players: Belt.List.keep(game.players, item => item !== player),
 }
 
-let enterLobby = (game: inLobby, player) => {
-  let isPlayerInGame = List.has(game.players, player, (p1, p2) => p1.id == p2.id)
+let enterLobby = (game: inLobby, player) =>
+  game
+  ->MResult.makeOk
+  ->Result.map(game => {
+    let isPlayerInGame = List.has(game.players, player, (p1, p2) => p1.id == p2.id)
 
-  Ok({
-    ...game,
-    players: isPlayerInGame ? game.players : List.add(game.players, player),
+    InLobby({
+      ...game,
+      players: isPlayerInGame ? game.players : List.add(game.players, player),
+    })
   })
-}
 
 let isValidToggleReady = (game: inLobby, player) => {
-  if !List.has(game.players, player, (p1, p2) => p1.id == p2.id) {
+  if !List.has(game.players, player, Player.equals) {
     Error("Player not in game")
   } else {
     Ok(game)
   }
 }
 
-let toggleReady = (game: inLobby, player) => {
-  let isValid = isValidToggleReady(game, player)
+let toggleReady = (game, player) =>
+  game
+  ->MResult.makeOk
+  ->Result.flatMap(lobby => isValidToggleReady(lobby, player))
+  ->Result.map(lobby => {
+    let inList = List.has(lobby.ready, player.id, equals)
 
-  if Result.isError(isValid) {
-    isValid
-  } else {
-    let inList = List.has(game.ready, player.id, equals)
-
-    Ok({
-      ...game,
+    InLobby({
+      ...lobby,
       ready: !inList
-        ? List.add(game.ready, player.id)
-        : game.ready->List.keep(pId => pId !== player.id),
+        ? List.add(lobby.ready, player.id)
+        : lobby.ready->List.keep(pId => pId !== player.id),
     })
-  }
-}
+  })
 
-let startGame = (game: inLobby) => {
-  let (players, deck) = Deck.makeShuffled()->Player.dealDeckToPlayers(game.players)
+let startGame = (game: inLobby, playerId) => {
+  game
+  ->MResult.makeOk
+  ->Result.flatMap(lobby => GameUtils.isCanStart(lobby, playerId))
+  ->Result.flatMap(game => {
+    let (players, deck) = Deck.makeShuffled()->Player.dealDeckToPlayers(game.players)
 
-  let trump = getTrump(deck, players)
-  let attacker = trump->Option.flatMap(tr => Player.findFirstAttackerId(tr, players))
-  let defender = attacker->Option.flatMap(at => Player.getNextPlayerId(at, players))
+    let trump = getTrump(deck, players)
+    let attacker = trump->Option.flatMap(tr => Player.findFirstAttackerId(tr, players))
+    let defender = attacker->Option.flatMap(at => Player.getNextPlayerId(at, players))
 
-  switch (trump, attacker, defender) {
-  | (Some(trump), Some(atId), Some(defId)) =>
-    Ok({
-      gameId: game.gameId,
-      attacker: atId,
-      defender: defId,
-      table: list{},
-      trump: trump,
-      pass: list{},
-      players: players,
-      deck: deck,
-      disconnected: list{},
-    })
-  | (None, _, _) => Error("Can't find trump")
-  | _ => Error("Can't find next attacker/defender")
-  }
+    switch (trump, attacker, defender) {
+    | (Some(trump), Some(atId), Some(defId)) =>
+      Ok(
+        InProgress({
+          gameId: game.gameId,
+          attacker: atId,
+          defender: defId,
+          table: list{},
+          trump: trump,
+          pass: list{},
+          players: players,
+          deck: deck,
+          disconnected: list{},
+        }),
+      )
+    | (None, _, _) => Error("Can't find trump")
+    | _ => Error("Can't find next attacker/defender")
+    }
+  })
 }
 
 let isValidMove = (game, player, card) => {
@@ -243,14 +253,13 @@ let take = (game, player) => {
   }
 }
 
-let dispatch = (game, player, action: move) => {
+let dispatch = (game, player, action: move) =>
   switch action {
   | Take => take(game, player)
   | Beat(to, by) => beat(game, player, to, by)
   | Pass => pass(game, player)
   | Move(card) => move(game, player, card)
-  }
-}
+  }->Result.map(game => InProgress(game))
 
 let maskGameDeck = deck => {
   let lastCardIndex = List.length(deck) - 1

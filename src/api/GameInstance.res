@@ -6,10 +6,10 @@ let p1 = {id: "p1", sessionId: "s:p1", cards: list{}}
 let p2 = {id: "p2", sessionId: "s:p2", cards: list{}}
 players->PlayersMap.set("p1", p1)->ignore
 players->PlayersMap.set("p2", p2)->ignore
-gamesInLobby
-->LobbyGameMap.set(
+games
+->GameMap.set(
   "g1",
-  {gameId: "g1", owner: "p1", players: list{p1, p2}, ready: list{p1.id, p2.id}},
+  InLobby({gameId: "g1", owner: "p1", players: list{p1, p2}, ready: list{p1.id, p2.id}}),
 )
 ->ignore
 
@@ -34,55 +34,35 @@ let loginPlayer = sessionId => {
   PlayersMap.findBySessionId(players, sessionId)
 }
 
-let createLobby = playerId => {
-  players
-  ->PlayersMap.get(playerId)
-  ->Result.flatMap(player => LobbyGameMap.create(gamesInLobby, player))
-}
-
-let enterGame = (playerId, gameId) => {
-  players
-  ->PlayersMap.get(playerId)
-  ->Result.flatMap(player => {
-    gamesInLobby->LobbyGameMap.get(gameId)->Result.flatMap(lobby => Game.enterLobby(lobby, player))
-  })
-  ->Result.flatMap(game => LobbyGameMap.set(gamesInLobby, game.gameId, game))
-}
-
-let toggleReady = (playerId, gameId) => {
+let getPlayerWithGame = (playerId, gameId, unpackGame) =>
   players
   ->PlayersMap.get(playerId)
   ->Result.flatMap(player =>
-    gamesInLobby->LobbyGameMap.update(gameId, game =>
-      Game.toggleReady(game, player)->Result.getWithDefault(game)
-    )
+    games->GameMap.get(gameId)->Result.flatMap(unpackGame)->Result.map(game => (game, player))
   )
-}
 
-let startGame = (playerId, gameId) => {
+let createLobby = playerId =>
   players
   ->PlayersMap.get(playerId)
-  ->Result.flatMap(player =>
-    gamesInLobby
-    ->LobbyGameMap.get(gameId)
-    ->Result.flatMap(game => GameUtils.isCanStart(game, player))
-  )
-  ->Result.flatMap(game => Game.startGame(game))
-  ->Result.flatMap(game => {
-    LobbyGameMap.remove(gamesInLobby, gameId)
-    ProgressGameMap.set(gamesInProgress, gameId, game)
-  })
-}
+  ->Result.flatMap(player => Game.makeGameInLobby(player))
+  ->Result.flatMap(game => GameMap.create(games, game))
 
-let move = (playerId, gameId, action): result<inProgress, string> => {
-  gamesInProgress
-  ->ProgressGameMap.get(gameId)
-  ->Result.flatMap(game =>
-    game
-    ->GameUtils.findPlayerById(playerId)
-    ->Utils.toResult(`Player ${playerId} not found`)
-    ->Result.map(player => (player, game))
-  )
-  ->Result.flatMap(((player, game)) => Game.dispatch(game, player, action))
-  ->Result.flatMap(game => gamesInProgress->ProgressGameMap.set(game.gameId, game))
-}
+let enterGame = (playerId, gameId) =>
+  getPlayerWithGame(playerId, gameId, GameUtils.unpackLobby)
+  ->Result.flatMap(((lobby, player)) => Game.enterLobby(lobby, player))
+  ->Result.flatMap(lobby => GameMap.set(games, gameId, lobby))
+
+let toggleReady = (playerId, gameId) =>
+  getPlayerWithGame(playerId, gameId, GameUtils.unpackLobby)
+  ->Result.flatMap(((game, player)) => Game.toggleReady(game, player))
+  ->Result.flatMap(game => GameMap.set(games, gameId, game))
+
+let startGame = (playerId, gameId) =>
+  getPlayerWithGame(playerId, gameId, GameUtils.unpackLobby)
+  ->Result.flatMap(((game, player)) => Game.startGame(game, player))
+  ->Result.flatMap(game => GameMap.set(games, gameId, game))
+
+let move = (playerId, gameId, action) =>
+  getPlayerWithGame(playerId, gameId, GameUtils.unpackProgress)
+  ->Result.flatMap(((game, player)) => Game.dispatch(game, player, action))
+  ->Result.flatMap(game => GameMap.set(games, gameId, game))

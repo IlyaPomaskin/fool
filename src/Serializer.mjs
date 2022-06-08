@@ -2,8 +2,8 @@
 
 import * as Card from "./fool/Card.mjs";
 import * as Jzon from "rescript-jzon/src/Jzon.mjs";
-import * as Utils from "./Utils.mjs";
 import * as Js_json from "rescript/lib/es6/js_json.js";
+import * as MOption from "./MOption.mjs";
 import * as Belt_List from "rescript/lib/es6/belt_List.js";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Belt_Result from "rescript/lib/es6/belt_Result.js";
@@ -307,7 +307,7 @@ var gameMsg = Jzon.object4((function (kind) {
         var kind = param[0];
         switch (kind) {
           case "lobby" :
-              return Belt_Result.flatMap(Utils.toResult(gameId, {
+              return Belt_Result.flatMap(MOption.toResult(gameId, {
                               NAME: "UnexpectedJsonValue",
                               VAL: [
                                 [{
@@ -338,7 +338,7 @@ var gameMsg = Jzon.object4((function (kind) {
                                   };
                           }));
           case "progress" :
-              return Belt_Result.flatMap(Utils.toResult(gameId, {
+              return Belt_Result.flatMap(MOption.toResult(gameId, {
                               NAME: "UnexpectedJsonValue",
                               VAL: [
                                 [{

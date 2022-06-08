@@ -30,7 +30,7 @@ let hook = (~player, ~onMessage, ~onConnect=noop, ~onDisconnect=noop, ~onError=n
     let handleMessage = event => {
       event
       ->WebSocket.messageAsText
-      ->Utils.toResult(#SyntaxError("Message from server cannot be parsed as text"))
+      ->MOption.toResult(#SyntaxError("Message from server cannot be parsed as text"))
       ->Result.flatMap(Serializer.deserializeServerMessage)
       ->Result.map(onMessage)
       ->ignore

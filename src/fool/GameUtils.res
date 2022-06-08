@@ -138,3 +138,80 @@ let isCanStart = (game: inLobby, player) => {
     Ok(game)
   }
 }
+
+let getGameId = game => {
+  switch game {
+  | InLobby(game) => game.gameId
+  | InProgress(game) => game.gameId
+  }
+}
+
+let mapLobby = (game: gameState, fn: inLobby => inLobby) => {
+  switch game {
+  | InLobby(g) => InLobby(fn(g))
+  | InProgress(g) => {
+      Log.info(["Try to map InProgress with mapLobby", g.gameId])
+      InProgress(g)
+    }
+  }
+}
+
+let flatMapLobbyResult = (game: result<gameState, string>, fn): result<gameState, string> => {
+  switch game {
+  | Ok(InLobby(g)) =>
+    switch fn(g) {
+    | Ok(x) => Ok(InLobby(x))
+    | Error(x) => Error(x)
+    }
+  | x => x
+  }
+}
+
+// ->Result.map(lobby => {
+//   mapLobby(lobby, game => {
+//     let isPlayerInGame = List.has(game.players, player, (p1, p2) => p1.id == p2.id)
+
+//     {
+//       ...game,
+//       players: isPlayerInGame ? game.players : List.add(game.players, player),
+//     }
+//   })
+// })
+
+let unpackLobby = game =>
+  switch game {
+  | InLobby(game) => Ok(game)
+  | InProgress(game) => Error(`Unpack InProgress gameId: ${game.gameId}`)
+  }
+
+let unpackProgress = game =>
+  switch game {
+  | InProgress(game) => Ok(game)
+  | InLobby(game) => Error(`Unpack InLobby gameId: ${game.gameId}`)
+  }
+
+let mapLobbyResult = (game: result<gameState, 'a>, fn: inLobby => inLobby) =>
+  Result.map(game, game => {
+    switch game {
+    | InLobby(g) => InLobby(fn(g))
+    | x => x
+    }
+  })
+
+let fMapLobbyResult = (a: result<gameState, 'a>, fn: inLobby => result<gameState, 'a>) =>
+  Result.flatMap(a, game => {
+    switch game {
+    | InLobby(g) => fn(g)
+    | _ => a
+    }
+  })
+
+let mapProgress = (game, fn) => {
+  switch game {
+  | InProgress(game) => fn(game)
+  | InLobby(game) => {
+      Log.info(["Try to map InLobby with mapOverProgress", game.gameId])
+      InLobby(game)
+    }
+  }
+}

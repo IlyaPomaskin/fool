@@ -3,9 +3,11 @@
 import * as Ws from "ws";
 import * as Log from "../Log.mjs";
 import * as Game from "../fool/Game.mjs";
-import * as Utils from "../Utils.mjs";
+import * as MOption from "../MOption.mjs";
+import * as MResult from "../MResult.mjs";
 import * as $$Storage from "./Storage.mjs";
 import * as Belt_List from "rescript/lib/es6/belt_List.js";
+import * as GameUtils from "../fool/GameUtils.mjs";
 import * as Serializer from "../Serializer.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Belt_Result from "rescript/lib/es6/belt_Result.js";
@@ -72,7 +74,7 @@ function createServer(server) {
                 }));
   };
   wsServer.on(WsWebSocketServer.ServerEvents.connection, (function (ws, req) {
-          var sessionId = Utils.toResult(Belt_Option.flatMap(ServerUtils.getParam(ServerUtils.getSearchParams(ServerUtils.getUrl(req, "ws")), "sessionId"), (function (sessionId) {
+          var sessionId = MOption.toResult(Belt_Option.flatMap(ServerUtils.getParam(ServerUtils.getSearchParams(ServerUtils.getUrl(req, "ws")), "sessionId"), (function (sessionId) {
                       if (sessionId === "") {
                         return ;
                       } else {
@@ -94,7 +96,7 @@ function createServer(server) {
                         return $$Storage.PlayersSocketMap.remove(playersSocket, playerId);
                       })).on(WsWebSocket.ClientEvents.message, (function (msg, param) {
                       var ws = this ;
-                      Belt_Result.map(Utils.tapResult(Serializer.deserializeClientMessage(Belt_Option.getWithDefault(WsWebSocket.RawData.toString(msg), "")), Log.logMessageFromClient), (function (msg) {
+                      Belt_Result.map(MResult.tap(Serializer.deserializeClientMessage(Belt_Option.getWithDefault(WsWebSocket.RawData.toString(msg), "")), Log.logMessageFromClient), (function (msg) {
                               var tmp;
                               switch (msg.TAG | 0) {
                                 case /* Player */0 :
@@ -106,7 +108,7 @@ function createServer(server) {
                                 case /* Lobby */1 :
                                     switch (msg._0) {
                                       case /* Create */0 :
-                                          tmp = Belt_Result.map(GameInstance.createLobby(msg._1), (function (lobby) {
+                                          tmp = Belt_Result.map(Belt_Result.flatMap(GameInstance.createLobby(msg._1), GameUtils.unpackLobby), (function (lobby) {
                                                   return broadcastToPlayers(lobby.players, {
                                                               TAG: /* LobbyCreated */1,
                                                               _0: lobby
@@ -114,7 +116,7 @@ function createServer(server) {
                                                 }));
                                           break;
                                       case /* Enter */1 :
-                                          tmp = Belt_Result.map(GameInstance.enterGame(msg._1, msg._2), (function (lobby) {
+                                          tmp = Belt_Result.map(Belt_Result.flatMap(GameInstance.enterGame(msg._1, msg._2), GameUtils.unpackLobby), (function (lobby) {
                                                   return broadcastToPlayers(lobby.players, {
                                                               TAG: /* LobbyUpdated */2,
                                                               _0: lobby
@@ -122,7 +124,7 @@ function createServer(server) {
                                                 }));
                                           break;
                                       case /* Ready */2 :
-                                          tmp = Belt_Result.map(GameInstance.toggleReady(msg._1, msg._2), (function (lobby) {
+                                          tmp = Belt_Result.map(Belt_Result.flatMap(GameInstance.toggleReady(msg._1, msg._2), GameUtils.unpackLobby), (function (lobby) {
                                                   return broadcastToPlayers(lobby.players, {
                                                               TAG: /* LobbyUpdated */2,
                                                               _0: lobby
@@ -130,7 +132,7 @@ function createServer(server) {
                                                 }));
                                           break;
                                       case /* Start */3 :
-                                          tmp = Belt_Result.map(GameInstance.startGame(msg._1, msg._2), (function (progress) {
+                                          tmp = Belt_Result.map(Belt_Result.flatMap(GameInstance.startGame(msg._1, msg._2), GameUtils.unpackProgress), (function (progress) {
                                                   return broadcastToPlayers(progress.players, {
                                                               TAG: /* ProgressCreated */3,
                                                               _0: progress
@@ -141,7 +143,7 @@ function createServer(server) {
                                     }
                                     break;
                                 case /* Progress */2 :
-                                    tmp = Belt_Result.map(GameInstance.move(msg._1, msg._2, msg._0), (function (progress) {
+                                    tmp = Belt_Result.map(Belt_Result.flatMap(GameInstance.move(msg._1, msg._2, msg._0), GameUtils.unpackProgress), (function (progress) {
                                             return broadcastToPlayers(progress.players, {
                                                         TAG: /* ProgressUpdated */4,
                                                         _0: progress
@@ -150,7 +152,7 @@ function createServer(server) {
                                     break;
                                 
                               }
-                              return Utils.tapErrorResult(tmp, (function (msg) {
+                              return MResult.tapError(tmp, (function (msg) {
                                             return sendToWs(ws, {
                                                         TAG: /* ServerError */5,
                                                         _0: msg

@@ -34,7 +34,7 @@ module PlayerTableUI = {
   @react.component
   let make = (~game, ~draggedCard, ~player, ~onDrop, ~onBeat) => {
     let isDefender = GameUtils.isDefender(game, player)
-    let draggedCard = Utils.toResult(draggedCard, "No card")
+    let draggedCard = MOption.toResult(draggedCard, "No card")
 
     let (cProps, ref) = Dnd.UseDrop.makeInstance(
       Dnd.UseDrop.makeConfig(~accept="card", ~drop=onDrop, ()),
@@ -122,7 +122,9 @@ let useOptimisticGame = (~game, ~player, ~onMessage) => {
     switch msg {
     | Progress(move, _, _) =>
       setOptimisticGame(prevGame =>
-        Game.dispatch(prevGame, player, move)->Result.getWithDefault(prevGame)
+        Game.dispatch(prevGame, player, move)
+        ->Result.flatMap(GameUtils.unpackProgress)
+        ->Result.getWithDefault(prevGame)
       )
     | _ => ()
     }->ignore
