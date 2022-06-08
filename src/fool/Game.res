@@ -2,14 +2,13 @@ open Types
 open Utils
 open GameUtils
 
-let makeGameInLobby = player => Ok(
+let makeGameInLobby = player =>
   InLobby({
     gameId: "g" ++ string_of_int(Js.Math.random_int(0, 100)),
     owner: player.id,
     players: list{player},
     ready: list{player.id},
-  }),
-)
+  })->MResult.makeOk
 
 let logoutPlayer = (game, player) => {
   ...game,
@@ -28,13 +27,8 @@ let enterLobby = (game: inLobby, player) =>
     })
   })
 
-let isValidToggleReady = (game: inLobby, player) => {
-  if !List.has(game.players, player, Player.equals) {
-    Error("Player not in game")
-  } else {
-    Ok(game)
-  }
-}
+let isValidToggleReady = (game: inLobby, player) =>
+  Ok(game)->MResult.validate("Player not in game", g => !List.has(g.players, player, Player.equals))
 
 let toggleReady = (game, player) =>
   game
@@ -83,53 +77,37 @@ let startGame = (game: inLobby, playerId) => {
   })
 }
 
-let isValidMove = (game, player, card) => {
-  let isDefenderHasEnoughCards =
-    Player.getById(game.players, game.defender)
-    ->Option.map(defender => List.length(defender.cards) >= List.length(game.table) + 1)
-    ->Option.getWithDefault(false)
+let isValidMove = (game, player, card) =>
+  Ok(game)
+  ->MResult.validate("Defender can't make move", g => isDefender(g, player))
+  ->MResult.validate("First move made not by attacker", g =>
+    !Table.hasCards(g.table) && !isAttacker(g, player)
+  )
+  ->MResult.validate("Maximum cards on table", g => Table.isMaximumCards(g.table))
+  ->MResult.validate("Defender don't have enough cards", g => {
+    let isDefenderHasEnoughCards =
+      Player.getById(g.players, g.defender)
+      ->Option.map(defender => List.length(defender.cards) >= List.length(g.table) + 1)
+      ->Option.getWithDefault(false)
 
-  if isDefender(game, player) {
-    Error("Defender can't make move")
-  } else if !Table.hasCards(game.table) && !isAttacker(game, player) {
-    Error("First move made not by attacker")
-  } else if Table.isMaximumCards(game.table) {
-    Error("Maximum cards on table")
-  } else if !isDefenderHasEnoughCards {
-    Error("Defender don't have enough cards")
-  } else if !isPlayerHasCard(player, card) {
-    Error("Player don't have card")
-  } else if Table.hasCards(game.table) && !isCorrectAdditionalCard(game, card) {
-    Error("Incorrect card")
-  } else {
-    Ok(game)
-  }
-}
+    !isDefenderHasEnoughCards
+  })
+  ->MResult.validate("Player don't have card", _ => !isPlayerHasCard(player, card))
+  ->MResult.validate("Incorrect card", g =>
+    Table.hasCards(g.table) && !isCorrectAdditionalCard(g, card)
+  )
 
-let move = (game, player, card) => {
-  let isValid = isValidMove(game, player, card)
+let move = (game, player, card) =>
+  Ok(game)
+  ->Result.flatMap(game => isValidMove(game, player, card))
+  ->Result.map(game => {
+    ...game,
+    players: List.map(game.players, p => Player.removeCard(p, card)),
+    table: game.table->List.add((card, None)),
+  })
 
-  if Result.isError(isValid) {
-    isValid
-  } else {
-    Ok({
-      ...game,
-      players: List.map(game.players, p => {
-        ...p,
-        cards: Player.removeCard(p, card),
-      }),
-      table: game.table->List.add((card, None)),
-    })
-  }
-}
-
-let isValidPass = (game, player) => {
-  if !GameUtils.isCanPass(game, player) {
-    Error("Can't pass")
-  } else {
-    Ok(game)
-  }
-}
+let isValidPass = (game, player) =>
+  Ok(game)->MResult.validate("Can't pass", g => !GameUtils.isCanPass(g, player))
 
 let finishRound = game => {
   let nextAttacker = Player.getNextPlayerId(game.attacker, game.players)
@@ -151,81 +129,57 @@ let finishRound = game => {
   }
 }
 
-let pass = (game, player) => {
-  let isValid = isValidPass(game, player)
-  let nextGameWithPassed = {...game, pass: Utils.toggleArrayItem(game.pass, player.id)}
+let pass = (game, player) =>
+  Ok(game)
+  ->Result.flatMap(game => isValidPass(game, player))
+  ->Result.flatMap(game => {
+    let nextGameWithPassed = {...game, pass: Utils.toggleArrayItem(game.pass, player.id)}
 
-  if Result.isError(isValid) {
-    isValid
-  } else if isAllPassed(nextGameWithPassed) && Table.isAllBeaten(game.table) {
-    finishRound(nextGameWithPassed)
-  } else {
-    Ok(nextGameWithPassed)
-  }
-}
+    if isAllPassed(nextGameWithPassed) && Table.isAllBeaten(game.table) {
+      finishRound(nextGameWithPassed)
+    } else {
+      Ok(nextGameWithPassed)
+    }
+  })
 
-let isValidBeat = (game, player, to, by) => {
-  if !isDefender(game, player) {
-    Error("Is not deffender")
-  } else if !isPlayerHasCard(player, by) {
-    Error("Player dont have card")
-  } else if !Card.isValidBeat(to, by, game.trump) {
-    Error("Invalid card beat")
-  } else {
-    Ok(game)
-  }
-}
+let isValidBeat = (game, player, to, by) =>
+  Ok(game)
+  ->MResult.validate("Is not deffender", g => !isDefender(g, player))
+  ->MResult.validate("Player dont have card", _ => !isPlayerHasCard(player, by))
+  ->MResult.validate("Invalid card beat", g => !Card.isValidBeat(to, by, g.trump))
 
 let beat = (game, player, to, by) => {
-  let isValid = isValidBeat(game, player, to, by)
-
-  if Result.isError(isValid) {
-    isValid
-  } else {
-    let playerWithoutCard = {
-      ...player,
-      cards: Player.removeCard(player, by),
-    }
-
-    Ok({
-      {
-        ...game,
-        pass: list{},
-        table: game.table->List.map(((firstCard, secondCard)) => {
-          if Card.isEquals(firstCard, to) {
-            (firstCard, Some(by))
-          } else {
-            (firstCard, secondCard)
-          }
-        }),
-        players: List.map(game.players, p => {
-          if Player.equals(p, player) {
-            playerWithoutCard
-          } else {
-            p
-          }
-        }),
+  Ok(game)
+  ->Result.flatMap(game => isValidBeat(game, player, to, by))
+  ->Result.map(game => {
+    ...game,
+    pass: list{},
+    table: game.table->List.map(((firstCard, secondCard)) => {
+      if Card.isEquals(firstCard, to) {
+        (firstCard, Some(by))
+      } else {
+        (firstCard, secondCard)
       }
-    })
-  }
+    }),
+    players: List.map(game.players, p => {
+      if Player.equals(p, player) {
+        Player.removeCard(player, by)
+      } else {
+        p
+      }
+    }),
+  })
 }
 
-let isValidTake = (game, player) => {
-  if !isDefender(game, player) {
-    Error("Player is not defender")
-  } else if !Table.hasCards(game.table) {
-    Error("Table is empty")
-  } else {
-    Ok(game)
-  }
-}
+let isValidTake = (game, player) =>
+  Ok(game)
+  ->MResult.validate("Player is not defender", g => !isDefender(g, player))
+  ->MResult.validate("Table is empty", g => !Table.hasCards(g.table))
 
-let take = (game, player) => {
-  let isValid = isValidTake(game, player)
-
-  if Result.isError(isValid) {
-    isValid
-  } else {
+let take = (game, player) =>
+  Ok(game)
+  ->Result.flatMap(game => isValidTake(game, player))
+  ->Result.flatMap(game => {
     let nextAttacker = Player.getNextPlayerId(game.defender, game.players)
     let nextDefender = nextAttacker->Option.flatMap(p => Player.getNextPlayerId(p, game.players))
     let nextPlayers = List.map(game.players, p =>
@@ -250,8 +204,7 @@ let take = (game, player) => {
       })
     | _ => Error("Can't find next attacker/defender")
     }
-  }
-}
+  })
 
 let dispatch = (game, player, action: move) =>
   switch action {

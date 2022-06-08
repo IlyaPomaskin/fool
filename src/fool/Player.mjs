@@ -88,9 +88,13 @@ function dealDeckToPlayers(deck, players) {
 }
 
 function removeCard(player, card) {
-  return Belt_List.keep(player.cards, (function (c) {
-                return !Card.isEquals(card, c);
-              }));
+  return {
+          id: player.id,
+          sessionId: player.sessionId,
+          cards: Belt_List.keep(player.cards, (function (c) {
+                  return !Card.isEquals(card, c);
+                }))
+        };
 }
 
 function isPlayerExists(players, player) {

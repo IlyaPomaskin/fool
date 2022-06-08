@@ -32,11 +32,28 @@ function fold(result, onOk, onError) {
   }
 }
 
+function validate(result, err, isValid) {
+  return Belt_Result.flatMap(result, (function (content) {
+                if (Curry._1(isValid, content)) {
+                  return {
+                          TAG: /* Ok */0,
+                          _0: content
+                        };
+                } else {
+                  return {
+                          TAG: /* Error */1,
+                          _0: err
+                        };
+                }
+              }));
+}
+
 export {
   makeOk ,
   tap ,
   tapError ,
   fold ,
+  validate ,
   
 }
 /* No side effect */

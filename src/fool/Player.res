@@ -58,7 +58,8 @@ let dealDeckToPlayers = (deck, players) => {
 }
 
 let removeCard = (player, card) => {
-  List.keep(player.cards, c => !Card.isEquals(card, c))
+  ...player,
+  cards: List.keep(player.cards, c => !Card.isEquals(card, c)),
 }
 
 let isPlayerExists = (players, player) => {

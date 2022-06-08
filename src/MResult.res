@@ -22,3 +22,12 @@ let fold = (result: result<'a, 'b>, onOk: 'a => unit, onError: 'b => unit): unit
   | Error(b) => onError(b)
   }
 }
+
+let validate = (result, err, isValid) =>
+  Result.flatMap(result, content =>
+    if isValid(content) {
+      Ok(content)
+    } else {
+      Error(err)
+    }
+  )
