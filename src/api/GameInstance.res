@@ -10,17 +10,7 @@ let registerPlayer = (playerId: playerId): result<player, string> => {
   }
 }
 
-let instanceId = ref(0.)
-
-let loginPlayer = sessionId => {
-  if instanceId.contents === 0. {
-    instanceId := Js.Math.random()
-  }
-
-  Log.debug(LoginPlayer, ["GameInstance", string_of_float(instanceId.contents)])
-
-  PlayersMap.findBySessionId(players, sessionId)
-}
+let loginPlayer = sessionId => PlayersMap.findBySessionId(players, sessionId)
 
 let getPlayerWithGame = (playerId, gameId, unpackGame) =>
   players

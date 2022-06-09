@@ -72,7 +72,7 @@ let toggleReady = (game, player) =>
     })
   })
 
-let startGame = (game: inLobby, playerId) => {
+let startGame = (game: inLobby, playerId) =>
   game
   ->MResult.makeOk
   ->Result.flatMap(lobby => GameUtils.isCanStart(lobby, playerId))
@@ -102,7 +102,6 @@ let startGame = (game: inLobby, playerId) => {
     | _ => Error("Can't find next attacker/defender")
     }
   })
-}
 
 let isValidMove = (game, player, card) =>
   Ok(game)
@@ -175,7 +174,7 @@ let isValidBeat = (game, player, to, by) =>
   ->MResult.validate("Player dont have card", _ => !isPlayerHasCard(player, by))
   ->MResult.validate("Invalid card beat", g => !Card.isValidBeat(to, by, g.trump))
 
-let beat = (game, player, to, by) => {
+let beat = (game, player, to, by) =>
   Ok(game)
   ->Result.flatMap(game => isValidBeat(game, player, to, by))
   ->Result.map(game => {
@@ -196,7 +195,6 @@ let beat = (game, player, to, by) => {
       }
     }),
   })
-}
 
 let isValidTake = (game, player) =>
   Ok(game)
