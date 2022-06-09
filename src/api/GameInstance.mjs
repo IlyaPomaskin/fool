@@ -4,7 +4,6 @@ import * as Game from "../fool/Game.mjs";
 import * as Curry from "rescript/lib/es6/curry.js";
 import * as Utils from "../Utils.mjs";
 import * as MOption from "../MOption.mjs";
-import * as MResult from "../MResult.mjs";
 import * as $$Storage from "./Storage.mjs";
 import * as GameUtils from "../fool/GameUtils.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
@@ -133,7 +132,7 @@ $$Storage.PlayersMap.set($$Storage.players, "p1", p1);
 
 $$Storage.PlayersMap.set($$Storage.players, "p2", p2);
 
-Belt_Result.map($$Storage.GameMap.set($$Storage.games, "g1", {
+Belt_Result.flatMap($$Storage.GameMap.set($$Storage.games, "g1", {
           TAG: /* InLobby */0,
           _0: {
             owner: "p1",
@@ -153,15 +152,8 @@ Belt_Result.map($$Storage.GameMap.set($$Storage.games, "g1", {
               }
             }
           }
-        }), (function (game) {
-        MResult.fold(startGame("p2", "g1"), (function (r) {
-                console.log("ok", r);
-                
-              }), (function (e) {
-                console.log("err", e);
-                
-              }));
-        return game;
+        }), (function (param) {
+        return startGame("p2", "g1");
       }));
 
 export {

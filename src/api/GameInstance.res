@@ -80,8 +80,5 @@ games
   "g1",
   InLobby({gameId: "g1", owner: "p1", players: list{p1, p2}, ready: list{p1.id, p2.id}}),
 )
-->Result.map(game => {
-  startGame("p2", "g1")->MResult.fold(r => Js.log2("ok", r), e => Js.log2("err", e))
-  game
-})
+->Result.flatMap(_ => startGame("p2", "g1"))
 ->ignore
