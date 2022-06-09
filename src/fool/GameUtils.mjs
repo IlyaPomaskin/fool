@@ -19,7 +19,7 @@ function isAttacker(game, player) {
 }
 
 function isPlayerHasCard(player, card) {
-  return Belt_List.has(player.cards, card, Utils.equals);
+  return Belt_List.has(player.cards, card, Card.isEquals);
 }
 
 function isCorrectAdditionalCard(game, card) {

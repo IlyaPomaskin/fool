@@ -9,7 +9,7 @@ let isAttacker = (game, player) => {
 }
 
 let isPlayerHasCard = (player, card) => {
-  List.has(player.cards, card, Utils.equals)
+  List.has(player.cards, card, Card.isEquals)
 }
 
 let isCorrectAdditionalCard = (game, card) => {

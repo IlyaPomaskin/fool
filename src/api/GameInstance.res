@@ -13,11 +13,20 @@ let registerPlayer = (playerId: playerId): result<player, string> => {
 let loginPlayer = sessionId => PlayersMap.findBySessionId(players, sessionId)
 
 let getPlayerWithGame = (playerId, gameId, unpackGame) =>
-  players
-  ->PlayersMap.get(playerId)
-  ->Result.flatMap(player =>
-    games->GameMap.get(gameId)->Result.flatMap(unpackGame)->Result.map(game => (game, player))
-  )
+  games
+  ->GameMap.get(gameId)
+  ->Result.flatMap(game => {
+    let players = switch game {
+    | InProgress(g) => g.players
+    | InLobby(g) => g.players
+    }
+
+    players
+    ->Utils.findInList(p => p.id == playerId)
+    ->Option.map(player => (game, player))
+    ->MOption.toResult(`Player not found in game ${gameId}`)
+  })
+  ->Result.flatMap(((game, player)) => unpackGame(game)->Result.map(game => (game, player)))
 
 let createLobby = playerId =>
   players
