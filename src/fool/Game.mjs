@@ -62,7 +62,7 @@ function leaveLobby(game, player) {
 
 function disconnectProgress(game, player) {
   return Belt_Result.map(MResult.validate(MResult.makeOk(game), "Player not in game", (function (g) {
-                    return Belt_List.has(g.players, player, Player.equals);
+                    return !Belt_List.has(g.players, player, Player.equals);
                   })), (function (game) {
                 var isDisconnected = Belt_List.has(game.disconnected, player.id, Utils.equals);
                 return {
@@ -84,7 +84,7 @@ function disconnectProgress(game, player) {
 
 function enterProgress(game, player) {
   return Belt_Result.map(MResult.validate(MResult.makeOk(game), "Player not in game", (function (g) {
-                    return Belt_List.has(g.players, player, Player.equals);
+                    return !Belt_List.has(g.players, player, Player.equals);
                   })), (function (game) {
                 var isDisconnected = Belt_List.has(game.disconnected, player.id, Utils.equals);
                 return {

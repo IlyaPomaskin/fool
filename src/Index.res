@@ -99,7 +99,7 @@ let default = () => {
     // <RDnd.Provider backend={RDnd.Backend.html5}> <Container /> </RDnd.Provider>
     <Dnd.Provider backend={Dnd.Backend.html5}>
       <PlayerScreen sessionId={Some("s:p1")} gameId={Some("g1")} />
-      // <PlayerScreen sessionId={Some("s:p2")} gameId={Some("g1")} />
+      <PlayerScreen sessionId={Some("s:p2")} gameId={Some("g1")} />
     </Dnd.Provider>
   </div>
 }

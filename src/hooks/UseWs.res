@@ -43,7 +43,6 @@ let hook = (~player, ~onMessage, ~onConnect=noop, ~onDisconnect=noop, ~onError=n
         Some(
           () => {
             WebSocket.removeMessageListener(ws, handleMessage)
-            WebSocket.close(ws)
           },
         )
       }

@@ -29,7 +29,7 @@ let leaveLobby = (game: inLobby, player) => Ok(
 let disconnectProgress = (game: inProgress, player) =>
   game
   ->MResult.makeOk
-  ->MResult.validate("Player not in game", g => List.has(g.players, player, Player.equals))
+  ->MResult.validate("Player not in game", g => !List.has(g.players, player, Player.equals))
   ->Result.map(game => {
     let isDisconnected = List.has(game.disconnected, player.id, Utils.equals)
 
@@ -42,7 +42,7 @@ let disconnectProgress = (game: inProgress, player) =>
 let enterProgress = (game: inProgress, player) =>
   game
   ->MResult.makeOk
-  ->MResult.validate("Player not in game", g => List.has(g.players, player, Player.equals))
+  ->MResult.validate("Player not in game", g => !List.has(g.players, player, Player.equals))
   ->Result.map(game => {
     let isDisconnected = List.has(game.disconnected, player.id, Utils.equals)
 
