@@ -1,5 +1,11 @@
 let makeOk = (a: 'a) => Ok(a)
 
+let mapError = (result: result<'a, 'b>, fn: 'b => 'c): result<'a, 'c> =>
+  switch result {
+  | Error(b) => Error(fn(b))
+  | Ok(a) => Ok(a)
+  }
+
 let tap = (result: result<'a, 'b>, fn: 'a => unit): result<'a, 'b> => {
   Result.map(result, content => {
     fn(content)

@@ -3,6 +3,7 @@
 import * as Ws from "ws";
 import * as Log from "../Log.mjs";
 import * as Game from "../fool/Game.mjs";
+import * as Jzon from "rescript-jzon/src/Jzon.mjs";
 import * as MOption from "../MOption.mjs";
 import * as MResult from "../MResult.mjs";
 import * as $$Storage from "./Storage.mjs";
@@ -127,76 +128,70 @@ function createServer(server) {
                         
                       })).on(WsWebSocket.ClientEvents.message, (function (msg, param) {
                       var ws = this ;
-                      Belt_Result.map(MResult.tap(Serializer.deserializeClientMessage(Belt_Option.getWithDefault(WsWebSocket.RawData.toString(msg), "")), Log.logMessageFromClient), (function (msg) {
-                              var tmp;
-                              switch (msg.TAG | 0) {
-                                case /* Player */0 :
-                                    tmp = {
-                                      TAG: /* Error */1,
-                                      _0: "Message from server cannot be parsed as text"
-                                    };
-                                    break;
-                                case /* Lobby */1 :
-                                    switch (msg._0) {
-                                      case /* Create */0 :
-                                          tmp = Belt_Result.map(Belt_Result.flatMap(GameInstance.createLobby(msg._1), GameUtils.unpackLobby), (function (lobby) {
-                                                  return broadcast(lobby.players, {
-                                                              TAG: /* LobbyCreated */1,
-                                                              _0: lobby
-                                                            });
-                                                }));
-                                          break;
-                                      case /* Enter */1 :
-                                          tmp = Belt_Result.map(GameInstance.enterGame(msg._1, msg._2), (function (game) {
-                                                  if (game.TAG === /* InLobby */0) {
-                                                    var lobby = game._0;
-                                                    return broadcast(lobby.players, {
-                                                                TAG: /* LobbyUpdated */2,
-                                                                _0: lobby
-                                                              });
-                                                  }
-                                                  var progress = game._0;
-                                                  return broadcast(progress.players, {
-                                                              TAG: /* ProgressUpdated */4,
-                                                              _0: progress
-                                                            });
-                                                }));
-                                          break;
-                                      case /* Ready */2 :
-                                          tmp = Belt_Result.map(Belt_Result.flatMap(GameInstance.toggleReady(msg._1, msg._2), GameUtils.unpackLobby), (function (lobby) {
-                                                  return broadcast(lobby.players, {
-                                                              TAG: /* LobbyUpdated */2,
-                                                              _0: lobby
-                                                            });
-                                                }));
-                                          break;
-                                      case /* Start */3 :
-                                          tmp = Belt_Result.map(Belt_Result.flatMap(GameInstance.startGame(msg._1, msg._2), GameUtils.unpackProgress), (function (progress) {
-                                                  return broadcast(progress.players, {
-                                                              TAG: /* ProgressCreated */3,
-                                                              _0: progress
-                                                            });
-                                                }));
-                                          break;
-                                      
-                                    }
-                                    break;
-                                case /* Progress */2 :
-                                    tmp = Belt_Result.map(Belt_Result.flatMap(GameInstance.move(msg._1, msg._2, msg._0), GameUtils.unpackProgress), (function (progress) {
-                                            return broadcast(progress.players, {
-                                                        TAG: /* ProgressUpdated */4,
-                                                        _0: progress
-                                                      });
-                                          }));
-                                    break;
-                                
-                              }
-                              return MResult.tapError(tmp, (function (msg) {
-                                            return sendToWs(ws, {
-                                                        TAG: /* ServerError */5,
-                                                        _0: msg
-                                                      });
-                                          }));
+                      MResult.tapError(MResult.tapError(Belt_Result.flatMap(MResult.mapError(MResult.tap(Serializer.deserializeClientMessage(Belt_Option.getWithDefault(WsWebSocket.RawData.toString(msg), "")), Log.logMessageFromClient), Jzon.DecodingError.toString), (function (msg) {
+                                      switch (msg.TAG | 0) {
+                                        case /* Player */0 :
+                                            return {
+                                                    TAG: /* Error */1,
+                                                    _0: "Unknown message from client"
+                                                  };
+                                        case /* Lobby */1 :
+                                            switch (msg._0) {
+                                              case /* Create */0 :
+                                                  return Belt_Result.map(Belt_Result.flatMap(GameInstance.createLobby(msg._1), GameUtils.unpackLobby), (function (lobby) {
+                                                                return broadcast(lobby.players, {
+                                                                            TAG: /* LobbyCreated */1,
+                                                                            _0: lobby
+                                                                          });
+                                                              }));
+                                              case /* Enter */1 :
+                                                  return Belt_Result.map(GameInstance.enterGame(msg._1, msg._2), (function (game) {
+                                                                if (game.TAG === /* InLobby */0) {
+                                                                  var lobby = game._0;
+                                                                  return broadcast(lobby.players, {
+                                                                              TAG: /* LobbyUpdated */2,
+                                                                              _0: lobby
+                                                                            });
+                                                                }
+                                                                var progress = game._0;
+                                                                return broadcast(progress.players, {
+                                                                            TAG: /* ProgressUpdated */4,
+                                                                            _0: progress
+                                                                          });
+                                                              }));
+                                              case /* Ready */2 :
+                                                  return Belt_Result.map(Belt_Result.flatMap(GameInstance.toggleReady(msg._1, msg._2), GameUtils.unpackLobby), (function (lobby) {
+                                                                return broadcast(lobby.players, {
+                                                                            TAG: /* LobbyUpdated */2,
+                                                                            _0: lobby
+                                                                          });
+                                                              }));
+                                              case /* Start */3 :
+                                                  return Belt_Result.map(Belt_Result.flatMap(GameInstance.startGame(msg._1, msg._2), GameUtils.unpackProgress), (function (progress) {
+                                                                return broadcast(progress.players, {
+                                                                            TAG: /* ProgressCreated */3,
+                                                                            _0: progress
+                                                                          });
+                                                              }));
+                                              
+                                            }
+                                        case /* Progress */2 :
+                                            return Belt_Result.map(Belt_Result.flatMap(GameInstance.move(msg._1, msg._2, msg._0), GameUtils.unpackProgress), (function (progress) {
+                                                          return broadcast(progress.players, {
+                                                                      TAG: /* ProgressUpdated */4,
+                                                                      _0: progress
+                                                                    });
+                                                        }));
+                                        
+                                      }
+                                    })), (function (param) {
+                                  console.log("Server error:", param);
+                                  
+                                })), (function (msg) {
+                              return sendToWs(ws, {
+                                          TAG: /* ServerError */5,
+                                          _0: msg
+                                        });
                             }));
                       
                     }));

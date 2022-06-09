@@ -106,7 +106,8 @@ let createServer = server => {
           ->Option.getWithDefault("")
           ->Serializer.deserializeClientMessage
           ->MResult.tap(Log.logMessageFromClient)
-          ->Result.map(msg => {
+          ->MResult.mapError(Jzon.DecodingError.toString)
+          ->Result.flatMap(msg => {
             switch msg {
             | Lobby(Create, playerId, _) =>
               GameInstance.createLobby(playerId)
@@ -131,9 +132,11 @@ let createServer = server => {
               GameInstance.move(playerId, gameId, move)
               ->Result.flatMap(GameUtils.unpackProgress)
               ->Result.map(progress => broadcast(progress.players, ProgressUpdated(progress)))
-            | _ => Error("Message from server cannot be parsed as text")
-            }->MResult.tapError(msg => sendToWs(ws, ServerError(msg)))
+            | _ => Error("Unknown message from client")
+            }
           })
+          ->MResult.tapError(Js.log2("Server error:"))
+          ->MResult.tapError(msg => sendToWs(ws, ServerError(msg)))
           ->ignore
         })
         ->ignore

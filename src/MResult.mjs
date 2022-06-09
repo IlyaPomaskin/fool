@@ -10,6 +10,20 @@ function makeOk(a) {
         };
 }
 
+function mapError(result, fn) {
+  if (result.TAG === /* Ok */0) {
+    return {
+            TAG: /* Ok */0,
+            _0: result._0
+          };
+  } else {
+    return {
+            TAG: /* Error */1,
+            _0: Curry._1(fn, result._0)
+          };
+  }
+}
+
 function tap(result, fn) {
   return Belt_Result.map(result, (function (content) {
                 Curry._1(fn, content);
@@ -50,6 +64,7 @@ function validate(result, err, isInvalid) {
 
 export {
   makeOk ,
+  mapError ,
   tap ,
   tapError ,
   fold ,
