@@ -184,9 +184,11 @@ function createServer(server) {
                                                         }));
                                         
                                       }
-                                    })), (function (param) {
-                                  console.log("Server error:", param);
-                                  
+                                    })), (function (err) {
+                                  return Log.error([
+                                              "Server error:",
+                                              err
+                                            ]);
                                 })), (function (msg) {
                               return sendToWs(ws, {
                                           TAG: /* ServerError */5,
@@ -219,9 +221,7 @@ var isWsServerSet = {
 };
 
 function setWsServer(res) {
-  console.log("isWsServerSet", isWsServerSet.contents);
   if (!isWsServerSet.contents) {
-    console.log("Set handlers");
     isWsServerSet.contents = true;
     return createServer(res.socket.server);
   }

@@ -135,7 +135,7 @@ let createServer = server => {
             | _ => Error("Unknown message from client")
             }
           })
-          ->MResult.tapError(Js.log2("Server error:"))
+          ->MResult.tapError(err => Log.error(["Server error:", err]))
           ->MResult.tapError(msg => sendToWs(ws, ServerError(msg)))
           ->ignore
         })
@@ -149,11 +149,7 @@ let createServer = server => {
 let isWsServerSet = ref(false)
 
 let setWsServer = res => {
-  Js.log2("isWsServerSet", isWsServerSet.contents)
-
   if !isWsServerSet.contents {
-    Js.log("Set handlers")
-
     isWsServerSet := true
 
     createServer(res->Http.ServerResponse.socket->WsWebSocketServer.getServerFromSocket)
