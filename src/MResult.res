@@ -22,7 +22,7 @@ let tapError = (result: result<'a, 'b>, fn: 'b => unit): result<'a, 'b> => {
   result
 }
 
-let fold = (result: result<'a, 'b>, onOk: 'a => unit, onError: 'b => unit): unit => {
+let fold = (result: result<'a, 'b>, onOk: 'a => 'c, onError: 'b => 'c): 'c => {
   switch result {
   | Ok(a) => onOk(a)
   | Error(b) => onError(b)

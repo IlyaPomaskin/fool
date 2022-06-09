@@ -37,7 +37,12 @@ module PlayerTableUI = {
     let draggedCard = MOption.toResult(draggedCard, "No card")
 
     let (cProps, ref) = Dnd.UseDrop.makeInstance(
-      Dnd.UseDrop.makeConfig(~accept="card", ~drop=onDrop, ()),
+      Dnd.UseDrop.makeConfig(
+        ~accept="card",
+        ~drop=onDrop,
+        ~canDrop=(card, _) => Game.isValidMove(game, player, card)->Result.isOk,
+        (),
+      ),
       [],
     )
 
@@ -56,7 +61,7 @@ module PlayerTableUI = {
             !isDefender ||
             draggedCard
             ->Result.flatMap(byCard => Game.isValidBeat(game, player, toCard, byCard))
-            ->Result.isError}
+            ->MResult.fold(_ => false, _ => true)}
           className="my-1 h-16"
           table={game.table}
           onDrop={onBeat}
@@ -68,7 +73,7 @@ module PlayerTableUI = {
 
 module ClientUI = {
   @react.component
-  let make = (~className: string="", ~player, ~game: inProgress, ~onMessage) => {
+  let make = (~className: string="", ~player, ~game: inProgress, ~onDrag, ~onMessage, ()) => {
     let isDefender = GameUtils.isDefender(game, player)
     let isThereCardsOnTable = Table.hasCards(game.table)
     let isPlayerCanMove = GameUtils.isPlayerCanMove(game, player)
@@ -83,7 +88,7 @@ module ClientUI = {
       | Playing => uiStr("Playing")
       }}
       <div>
-        <DeckUI disabled={!isDeckEnabled} isDraggable={true} deck={player.cards} />
+        <DeckUI onDrag disabled={!isDeckEnabled} isDraggable={true} deck={player.cards} />
         <PlayerActionsUI
           className="py-2" game player onPass={_ => onMove(Pass)} onTake={_ => onMove(Take)}
         />
@@ -139,18 +144,18 @@ let useOptimisticGame = (~game, ~player, ~onMessage) => {
 let make = (~game as realGame, ~player, ~onMessage) => {
   let (game, handleOptimisticMessage) = useOptimisticGame(~game=realGame, ~player, ~onMessage)
 
-  let (draggedCard, _) = React.useState(_ => None)
+  let (draggedCard, setDraggedCard) = React.useState(_ => None)
 
   let handleDrop = (card, monitor) => {
     Js.log3("PlayerTableUI drop", card, monitor)
 
-    let didDrop = monitor->Dnd.DropTargetMonitor.didDrop
-    let hId = monitor->Dnd.DropTargetMonitor.getHandlerId
+    // let didDrop = monitor->Dnd.DropTargetMonitor.didDrop
+    // let hId = monitor->Dnd.DropTargetMonitor.getHandlerId
 
-    Js.log2("card", card)
-    Js.log2("hId", hId)
-    Js.log2("didDrop", didDrop)
-    Js.log2("monitor", monitor)
+    // Js.log2("card", card)
+    // Js.log2("hId", hId)
+    // Js.log2("didDrop", didDrop)
+    // Js.log2("monitor", monitor)
 
     handleOptimisticMessage(Progress(Move(card), player.id, game.gameId))
 
@@ -162,6 +167,8 @@ let make = (~game as realGame, ~player, ~onMessage) => {
 
     ignore()
   }
+
+  let handleDrag = card => setDraggedCard(_ => Some(card))
 
   let reorderedPlayers =
     game.players
@@ -207,7 +214,13 @@ let make = (~game as realGame, ~player, ~onMessage) => {
       <div className="m-1">
         <PlayerTableUI draggedCard game player onDrop={handleDrop} onBeat={handleBeat} />
       </div>
-      <ClientUI className="m-1 flex flex-col" player game onMessage={handleOptimisticMessage} />
+      <ClientUI
+        className="m-1 flex flex-col"
+        player
+        game
+        onDrag={handleDrag}
+        onMessage={handleOptimisticMessage}
+      />
     </div>
   </div>
 }

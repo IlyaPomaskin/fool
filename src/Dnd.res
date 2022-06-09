@@ -10,6 +10,7 @@ module DropResult = {
 
 module CollectedProps = {
   type t = {
+    isDropDisabled: bool,
     isDragging: bool,
     draggedCard: card,
     isOver: bool,

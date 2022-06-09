@@ -12,10 +12,25 @@ import * as Caml_option from "rescript/lib/es6/caml_option.js";
 function DeckUI$DndWrapper(Props) {
   var card = Props.card;
   var children = Props.children;
+  var onDrag = Props.onDrag;
   var match = ReactDnd.useDrag({
         type: "card",
-        item: card
+        item: card,
+        collect: (function (monitor) {
+            return {
+                    isDropDisabled: false,
+                    isDragging: monitor.isDragging(),
+                    draggedCard: monitor.getItem(),
+                    isOver: false,
+                    isOverCurrent: false
+                  };
+          })
       }, []);
+  var props = match[0];
+  React.useEffect((function () {
+          Curry._1(onDrag, props.draggedCard);
+          
+        }), [props.draggedCard]);
   return React.createElement("div", {
               ref: match[1],
               className: Utils.cx(["transition duration-150 ease-in-out"])
@@ -66,12 +81,14 @@ function DeckUI(Props) {
   var disabledOpt = Props.disabled;
   var isDraggableOpt = Props.isDraggable;
   var isCardDisabledOpt = Props.isCardDisabled;
+  var onDragOpt = Props.onDrag;
   var className = classNameOpt !== undefined ? classNameOpt : "";
   var disabled = disabledOpt !== undefined ? disabledOpt : false;
   var isDraggable = isDraggableOpt !== undefined ? isDraggableOpt : false;
   var isCardDisabled = isCardDisabledOpt !== undefined ? isCardDisabledOpt : (function (param) {
         return false;
       });
+  var onDrag = onDragOpt !== undefined ? onDragOpt : Utils.noop;
   if (deck) {
     return React.createElement("div", {
                 className: Utils.cx([
@@ -88,6 +105,7 @@ function DeckUI(Props) {
                                           card: card,
                                           disabled: disabled$1
                                         }),
+                                    onDrag: onDrag,
                                     key: key
                                   });
                       } else {

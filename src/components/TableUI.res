@@ -6,7 +6,7 @@ module DndBeatableCard = {
   let make = (~card, ~isDropDisabled, ~beatByClassName, ~onDrop) => {
     let (cProps, ref) = Dnd.UseDrop.makeInstance(
       Dnd.UseDrop.makeConfig(
-        ~canDrop=(card, _) => isDropDisabled(card),
+        ~canDrop=(_, _) => !isDropDisabled(card),
         ~accept="card",
         ~drop=(item, _) => {
           onDrop(card, item)
@@ -14,10 +14,13 @@ module DndBeatableCard = {
           None
         },
         ~collect=monitor => {
-          isDragging: !(monitor->Dnd.DropTargetMonitor.isOver({shallow: false})),
-          draggedCard: monitor->Dnd.DropTargetMonitor.getItem,
-          isOver: monitor->Dnd.DropTargetMonitor.isOver({shallow: false}),
-          isOverCurrent: monitor->Dnd.DropTargetMonitor.isOver({shallow: true}),
+          {
+            isDropDisabled: isDropDisabled(card),
+            isDragging: !(monitor->Dnd.DropTargetMonitor.isOver({shallow: false})),
+            draggedCard: monitor->Dnd.DropTargetMonitor.getItem,
+            isOver: monitor->Dnd.DropTargetMonitor.isOver({shallow: false}),
+            isOverCurrent: monitor->Dnd.DropTargetMonitor.isOver({shallow: true}),
+          }
         },
         (),
       ),
@@ -25,7 +28,11 @@ module DndBeatableCard = {
     )
 
     <div ref className={cx([beatByClassName, "w-12 h-16"])}>
-      <CardUI.EmptyCard className={cx([cProps.isOverCurrent ? "bg-pink-200 opacity-50" : ""])} />
+      <CardUI.EmptyCard
+        className={cx([
+          cProps.isOverCurrent && !cProps.isDropDisabled ? "bg-pink-500 opacity-70" : "",
+        ])}
+      />
     </div>
   }
 }
@@ -53,6 +60,11 @@ module CardsPair = {
   @react.component
   let attacker = (~pair, ()) => {
     let transitions = makeTransitions(Array.keep([pair], ((_, by)) => Option.isSome(by)))
+
+    // let (cProps, ref) = Dnd.UseDrop.makeInstance(
+    //   Dnd.UseDrop.makeConfig(~accept="card", ~drop=onDrop, ()),
+    //   [],
+    // )
 
     <div className="flex flex-col gap-3 relative">
       <CardUI className={Utils.leftRotationClassName} card={fst(pair)} />

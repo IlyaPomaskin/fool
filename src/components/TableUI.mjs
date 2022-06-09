@@ -23,11 +23,12 @@ function TableUI$DndBeatableCard(Props) {
             Curry._2(onDrop, card, item);
             
           }),
-        canDrop: (function (card, param) {
-            return Curry._1(isDropDisabled, card);
+        canDrop: (function (param, param$1) {
+            return !Curry._1(isDropDisabled, card);
           }),
         collect: (function (monitor) {
             return {
+                    isDropDisabled: Curry._1(isDropDisabled, card),
                     isDragging: !monitor.isOver({
                           shallow: false
                         }),
@@ -41,6 +42,7 @@ function TableUI$DndBeatableCard(Props) {
                   };
           })
       }, []);
+  var cProps = match[0];
   return React.createElement("div", {
               ref: match[1],
               className: Utils.cx([
@@ -48,7 +50,7 @@ function TableUI$DndBeatableCard(Props) {
                     "w-12 h-16"
                   ])
             }, React.createElement(CardUI.EmptyCard.make, {
-                  className: Utils.cx([match[0].isOverCurrent ? "bg-pink-200 opacity-50" : ""])
+                  className: Utils.cx([cProps.isOverCurrent && !cProps.isDropDisabled ? "bg-pink-500 opacity-70" : ""])
                 }));
 }
 

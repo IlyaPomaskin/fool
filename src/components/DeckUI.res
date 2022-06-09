@@ -40,13 +40,29 @@ open Utils
 
 module DndWrapper = {
   @react.component
-  let make = (~card, ~children) => {
+  let make = (~card, ~children, ~onDrag) => {
     // let id = Card.cardToString(card)
 
-    let (_, ref, _) = Dnd.UseDrag.makeInstance(
-      Dnd.UseDrag.makeConfig(~\"type"="card", ~item=card, ()),
+    let (props, ref, _) = Dnd.UseDrag.makeInstance(
+      Dnd.UseDrag.makeConfig(
+        ~\"type"="card",
+        ~item=card,
+        ~collect=monitor => {
+          isDropDisabled: false,
+          draggedCard: Dnd.DragSourceMonitor.getItem(monitor),
+          isDragging: Dnd.DragSourceMonitor.isDragging(monitor),
+          isOver: false,
+          isOverCurrent: false,
+        },
+        (),
+      ),
       [],
     )
+
+    React.useEffect1(() => {
+      onDrag(props.draggedCard)
+      None
+    }, [props.draggedCard])
 
     /*
     <EmptyDndDroppable id>
@@ -113,6 +129,7 @@ let make = (
   ~disabled: bool=false,
   ~isDraggable: bool=false,
   ~isCardDisabled: card => bool=_ => false,
+  ~onDrag=noop,
   (),
 ) =>
   switch deck {
@@ -124,7 +141,7 @@ let make = (
         let disabled = disabled || isCardDisabled(card)
 
         switch isDraggable {
-        | true => <DndWrapper key card> <CardUI card disabled /> </DndWrapper>
+        | true => <DndWrapper key card onDrag> <CardUI card disabled /> </DndWrapper>
         | false => <CardUI key card disabled />
         }
       })}

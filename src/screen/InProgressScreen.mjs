@@ -10,6 +10,7 @@ import * as CardUI from "../components/CardUI.mjs";
 import * as DeckUI from "../components/DeckUI.mjs";
 import * as Player from "../fool/Player.mjs";
 import * as MOption from "../MOption.mjs";
+import * as MResult from "../MResult.mjs";
 import * as TableUI from "../components/TableUI.mjs";
 import * as PlayerUI from "../components/PlayerUI.mjs";
 import * as Belt_List from "rescript/lib/es6/belt_List.js";
@@ -69,7 +70,10 @@ function InProgressScreen$PlayerTableUI(Props) {
   var draggedCard$1 = MOption.toResult(draggedCard, "No card");
   var match = ReactDnd.useDrop({
         accept: "card",
-        drop: onDrop
+        drop: onDrop,
+        canDrop: (function (card, param) {
+            return Belt_Result.isOk(Game.isValidMove(game, player, card));
+          })
       }, []);
   return React.createElement("div", {
               className: "relative"
@@ -84,9 +88,13 @@ function InProgressScreen$PlayerTableUI(Props) {
                       isDefender: isDefender,
                       isDropDisabled: (function (toCard) {
                           if (isDefender) {
-                            return Belt_Result.isError(Belt_Result.flatMap(draggedCard$1, (function (byCard) {
+                            return MResult.fold(Belt_Result.flatMap(draggedCard$1, (function (byCard) {
                                               return Game.isValidBeat(game, player, toCard, byCard);
-                                            })));
+                                            })), (function (param) {
+                                          return false;
+                                        }), (function (param) {
+                                          return true;
+                                        }));
                           } else {
                             return true;
                           }
@@ -104,6 +112,7 @@ function InProgressScreen$ClientUI(Props) {
   var classNameOpt = Props.className;
   var player = Props.player;
   var game = Props.game;
+  var onDrag = Props.onDrag;
   var onMessage = Props.onMessage;
   var className = classNameOpt !== undefined ? classNameOpt : "";
   var isDefender = GameUtils.isDefender(game, player);
@@ -143,7 +152,8 @@ function InProgressScreen$ClientUI(Props) {
             }, tmp, React.createElement("div", undefined, React.createElement(DeckUI.make, {
                       deck: player.cards,
                       disabled: !isDeckEnabled,
-                      isDraggable: true
+                      isDraggable: true,
+                      onDrag: onDrag
                     }), React.createElement(InProgressScreen$PlayerActionsUI, {
                       className: "py-2",
                       game: game,
@@ -227,14 +237,9 @@ function InProgressScreen(Props) {
   var match$1 = React.useState(function () {
         
       });
+  var setDraggedCard = match$1[1];
   var handleDrop = function (card, monitor) {
     console.log("PlayerTableUI drop", card, monitor);
-    var didDrop = monitor.didDrop();
-    var hId = monitor.getHandlerId();
-    console.log("card", card);
-    console.log("hId", hId);
-    console.log("didDrop", didDrop);
-    console.log("monitor", monitor);
     Curry._1(handleOptimisticMessage, {
           TAG: /* Progress */2,
           _0: {
@@ -258,6 +263,11 @@ function InProgressScreen(Props) {
           _2: game.gameId
         });
     
+  };
+  var handleDrag = function (card) {
+    return Curry._1(setDraggedCard, (function (param) {
+                  return card;
+                }));
   };
   var reorderedPlayers = Belt_Option.getWithDefault(Belt_Option.map(Belt_Option.map(Belt_Option.flatMap(Utils.listIndexOf(game.players, (function (item) {
                           return Player.equals(item, player);
@@ -314,6 +324,7 @@ function InProgressScreen(Props) {
                       className: "m-1 flex flex-col",
                       player: player,
                       game: game,
+                      onDrag: handleDrag,
                       onMessage: handleOptimisticMessage
                     })));
 }
