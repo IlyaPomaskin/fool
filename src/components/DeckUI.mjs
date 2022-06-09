@@ -7,38 +7,7 @@ import * as React from "react";
 import * as CardUI from "./CardUI.mjs";
 import * as Belt_List from "rescript/lib/es6/belt_List.js";
 import * as ReactDnd from "react-dnd";
-import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
-
-function getDropAnimation(style, snapshot) {
-  var dropAnimation = snapshot.dropAnimation;
-  var transform = (dropAnimation == null) ? Belt_Option.getWithDefault(Caml_option.nullable_to_opt(style.transform), "") : "translate(" + String(dropAnimation.moveTo.x) + "px, " + String(dropAnimation.moveTo.y) + "px)";
-  var transform$1 = transform + " rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))";
-  return Object.assign({}, style, {
-              transform: transform$1
-            });
-}
-
-function getAnimationClassNames(snapshot) {
-  var dropAnimation = snapshot.dropAnimation;
-  var match = snapshot.isDragging;
-  var match$1 = snapshot.isDropAnimating;
-  if (match$1) {
-    if (dropAnimation == null) {
-      if (match) {
-        return "rotate-12 translate-x-1.5 scale-125";
-      } else {
-        return "scale-100";
-      }
-    } else {
-      return "rotate-12 translate-x-1.5 scale-100";
-    }
-  } else if (match) {
-    return "rotate-12 translate-x-1.5 scale-125";
-  } else {
-    return "scale-100";
-  }
-}
 
 function DeckUI$DndWrapper(Props) {
   var card = Props.card;
@@ -141,8 +110,6 @@ var hidden = DeckUI$hidden;
 var make = DeckUI;
 
 export {
-  getDropAnimation ,
-  getAnimationClassNames ,
   DndWrapper ,
   hidden ,
   make ,

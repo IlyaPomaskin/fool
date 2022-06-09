@@ -3,31 +3,31 @@ open Utils
 
 // let spread3: ('a1, 'a2, 'a3) => 'b = %raw(`(x1,x2,x3) => ({ ...x1, ...x2, ...x3 })`)
 
-let getDropAnimation = (
-  style: ReactDnd.draggableStyles,
-  snapshot: ReactDnd.draggableStateSnapshot,
-): ReactDOMStyle.t => {
-  let dropAnimation = snapshot.dropAnimation->Js.Nullable.toOption
+// let getDropAnimation = (
+//   style: ReactDnd.draggableStyles,
+//   snapshot: ReactDnd.draggableStateSnapshot,
+// ): ReactDOMStyle.t => {
+//   let dropAnimation = snapshot.dropAnimation->Js.Nullable.toOption
 
-  let transform = switch dropAnimation {
-  | Some(drop) => `translate(${drop.moveTo.x->string_of_int}px, ${drop.moveTo.y->string_of_int}px)`
-  | _ => style["transform"]->Js.Nullable.toOption->Option.getWithDefault("")
-  }
+//   let transform = switch dropAnimation {
+//   | Some(drop) => `translate(${drop.moveTo.x->string_of_int}px, ${drop.moveTo.y->string_of_int}px)`
+//   | _ => style["transform"]->Js.Nullable.toOption->Option.getWithDefault("")
+//   }
 
-  let transform = `${transform} rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))`
+//   let transform = `${transform} rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))`
 
-  ReactDOMStyle.combine(style->Obj.magic, ReactDOMStyle.make(~transform, ()))
-}
+//   ReactDOMStyle.combine(style->Obj.magic, ReactDOMStyle.make(~transform, ()))
+// }
 
-let getAnimationClassNames = (snapshot: ReactDnd.draggableStateSnapshot) => {
-  let dropAnimation = snapshot.dropAnimation->Js.Nullable.toOption
+// let getAnimationClassNames = (snapshot: ReactDnd.draggableStateSnapshot) => {
+//   let dropAnimation = snapshot.dropAnimation->Js.Nullable.toOption
 
-  switch (snapshot.isDragging, snapshot.isDropAnimating, dropAnimation) {
-  | (_, true, Some(_)) => "rotate-12 translate-x-1.5 scale-100"
-  | (true, _, _) => "rotate-12 translate-x-1.5 scale-125"
-  | (false, _, _) => "scale-100"
-  }
-}
+//   switch (snapshot.isDragging, snapshot.isDropAnimating, dropAnimation) {
+//   | (_, true, Some(_)) => "rotate-12 translate-x-1.5 scale-100"
+//   | (true, _, _) => "rotate-12 translate-x-1.5 scale-125"
+//   | (false, _, _) => "scale-100"
+//   }
+// }
 
 // module EmptyDndDroppable = {
 //   @react.component
@@ -68,7 +68,7 @@ module DndWrapper = {
         }}
       </ReactDnd.Draggable>
     </EmptyDndDroppable>
- */
+*/
 
     <div ref className={cx(["transition duration-150 ease-in-out"])}> children </div>
   }
