@@ -149,23 +149,39 @@ module MakeUseDrag = (DO: DragObject, DR: DropResult, CP: CollectedProps) => {
 }
 
 module Backend = {
-  type factory
+  type factoryHtml5
+  type factoryTouch
 
   @module("react-dnd-html5-backend")
-  external html5: factory = "HTML5Backend"
+  external html5: factoryHtml5 = "HTML5Backend"
 
   @module("react-dnd-touch-backend")
-  external touch: factory = "TouchBackend"
+  external touch: factoryTouch = "TouchBackend"
 }
 
 module Provider = {
-  type a
+  @module("react-dnd") @react.component
+  external makeHtml5: (~backend: Backend.factoryHtml5, ~children: React.element) => React.element =
+    "DndProvider"
+
+  type options = {
+    enableTouchEvents: bool,
+    enableMouseEvents: bool,
+    ignoreContextMenu: bool,
+  }
+
+  @obj
+  external makeOptions: (
+    ~enableTouchEvents: bool,
+    ~enableMouseEvents: bool,
+    ~ignoreContextMenu: bool,
+    unit,
+  ) => options = ""
 
   @module("react-dnd") @react.component
-  external make: (
-    ~backend: Backend.factory,
-    ~options: a,
+  external makeTouch: (
+    ~backend: Backend.factoryTouch,
+    ~options: options,
     ~children: React.element,
-    unit,
   ) => React.element = "DndProvider"
 }
