@@ -132,7 +132,7 @@ let createServer = server => {
               GameInstance.move(playerId, gameId, move)
               ->Result.flatMap(GameUtils.unpackProgress)
               ->Result.map(progress => broadcast(progress.players, ProgressUpdated(progress)))
-            | _ => Error("Unknown message from client")
+            | Player(_, _) => Error("'Player' message dont have handlers")
             }
           })
           ->MResult.tapError(err => Log.error(["Server error:", err]))

@@ -133,7 +133,7 @@ function createServer(server) {
                                         case /* Player */0 :
                                             return {
                                                     TAG: /* Error */1,
-                                                    _0: "Unknown message from client"
+                                                    _0: "'Player' message dont have handlers"
                                                   };
                                         case /* Lobby */1 :
                                             switch (msg._0) {
