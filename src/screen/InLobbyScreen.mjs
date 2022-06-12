@@ -2,7 +2,7 @@
 
 import * as Base from "../components/Base.mjs";
 import * as Curry from "rescript/lib/es6/curry.js";
-import * as Utils from "../Utils.mjs";
+import * as Utils from "../utils/Utils.mjs";
 import * as React from "react";
 import * as PlayerUI from "../components/PlayerUI.mjs";
 import * as Belt_List from "rescript/lib/es6/belt_List.js";

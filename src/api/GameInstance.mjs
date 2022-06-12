@@ -2,8 +2,8 @@
 
 import * as Game from "../fool/Game.mjs";
 import * as Curry from "rescript/lib/es6/curry.js";
-import * as Utils from "../Utils.mjs";
-import * as MOption from "../MOption.mjs";
+import * as Utils from "../utils/Utils.mjs";
+import * as MOption from "../utils/MOption.mjs";
 import * as $$Storage from "./Storage.mjs";
 import * as GameUtils from "../fool/GameUtils.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";

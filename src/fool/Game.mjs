@@ -3,10 +3,10 @@
 import * as Card from "./Card.mjs";
 import * as Deck from "./Deck.mjs";
 import * as Table from "./Table.mjs";
-import * as Utils from "../Utils.mjs";
+import * as Utils from "../utils/Utils.mjs";
 import * as Player from "./Player.mjs";
 import * as Js_math from "rescript/lib/es6/js_math.js";
-import * as MResult from "../MResult.mjs";
+import * as MResult from "../utils/MResult.mjs";
 import * as Belt_List from "rescript/lib/es6/belt_List.js";
 import * as GameUtils from "./GameUtils.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";

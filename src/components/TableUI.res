@@ -19,7 +19,7 @@ module DndBeatableCard = {
     }
   }
 
-  include RDnd.MakeUseDrop(DragObject, EmptyDropResult, CollectedProps)
+  include ReactDnd.MakeUseDrop(DragObject, EmptyDropResult, CollectedProps)
 
   @react.component
   let make = (~card, ~canDrop, ~onDrop) => {

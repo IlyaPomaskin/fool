@@ -1,9 +1,9 @@
 let default = () => {
   <div
     className="select-none flex flex-row flex-wrap justify-items-center w-full container px-12 py-6 gap-12">
-    <RDnd.Provider.makeTouch
-      backend={RDnd.Backend.touch}
-      options={RDnd.Provider.makeOptions(
+    <ReactDnd.Provider.makeTouch
+      backend={ReactDnd.Backend.touch}
+      options={ReactDnd.Provider.makeOptions(
         ~enableTouchEvents=false,
         ~enableMouseEvents=false,
         ~ignoreContextMenu=false,
@@ -11,6 +11,6 @@ let default = () => {
       )}>
       <PlayerScreen sessionId={Some("s:p1")} gameId={Some("g1")} />
       <PlayerScreen sessionId={Some("s:p2")} gameId={Some("g1")} />
-    </RDnd.Provider.makeTouch>
+    </ReactDnd.Provider.makeTouch>
   </div>
 }

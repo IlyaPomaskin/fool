@@ -3,9 +3,9 @@
 import * as Base from "../components/Base.mjs";
 import * as Jzon from "rescript-jzon/src/Jzon.mjs";
 import * as Curry from "rescript/lib/es6/curry.js";
-import * as Utils from "../Utils.mjs";
+import * as Utils from "../utils/Utils.mjs";
 import * as React from "react";
-import * as Serializer from "../Serializer.mjs";
+import * as Serializer from "../utils/Serializer.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
 

@@ -43,7 +43,7 @@ module PlayerTableUI = {
     type t = {isDragging: bool}
   }
 
-  include RDnd.MakeUseDrop(DragObject, EmptyDropResult, CollectedProps)
+  include ReactDnd.MakeUseDrop(DragObject, EmptyDropResult, CollectedProps)
 
   @react.component
   let make = (~game, ~draggedCard, ~player, ~onDrop, ~onBeat) => {
@@ -152,16 +152,16 @@ module DragLayer = {
   module DragLayerCP = {
     type t = {
       item: DragObject.t,
-      itemType: Js.nullable<RDnd.identifier>,
-      currentOffset: RDnd.nullableXyCoords,
+      itemType: Js.nullable<ReactDnd.identifier>,
+      currentOffset: ReactDnd.nullableXyCoords,
     }
   }
 
-  module DndL = RDnd.MakeUseDragLayer(DragObject, DragLayerCP)
+  module DndL = ReactDnd.MakeUseDragLayer(DragObject, DragLayerCP)
 
   let floatToString = float => float->int_of_float->string_of_int
 
-  let getItemStyles = (currentOffset: RDnd.nullableXyCoords) => {
+  let getItemStyles = (currentOffset: ReactDnd.nullableXyCoords) => {
     let coords =
       currentOffset
       ->Js.Nullable.toOption

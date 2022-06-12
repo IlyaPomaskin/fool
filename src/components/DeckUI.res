@@ -50,7 +50,7 @@ module DndWrapper = {
     type t = {draggedCard: card}
   }
 
-  include RDnd.MakeUseDrag(DragObject, EmptyDropResult, CollectedProps)
+  include ReactDnd.MakeUseDrag(DragObject, EmptyDropResult, CollectedProps)
 
   @react.component
   let make = (~card, ~children, ~onDrag) => {

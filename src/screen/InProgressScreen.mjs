@@ -3,21 +3,21 @@
 import * as Base from "../components/Base.mjs";
 import * as Card from "../fool/Card.mjs";
 import * as Game from "../fool/Game.mjs";
-import * as RDnd from "../bindings/RDnd.mjs";
 import * as Curry from "rescript/lib/es6/curry.js";
 import * as Table from "../fool/Table.mjs";
-import * as Utils from "../Utils.mjs";
+import * as Utils from "../utils/Utils.mjs";
 import * as React from "react";
 import * as CardUI from "../components/CardUI.mjs";
 import * as DeckUI from "../components/DeckUI.mjs";
 import * as Player from "../fool/Player.mjs";
-import * as MOption from "../MOption.mjs";
-import * as MResult from "../MResult.mjs";
+import * as MOption from "../utils/MOption.mjs";
+import * as MResult from "../utils/MResult.mjs";
 import * as TableUI from "../components/TableUI.mjs";
 import * as PlayerUI from "../components/PlayerUI.mjs";
+import * as ReactDnd from "../bindings/ReactDnd.mjs";
 import * as Belt_List from "rescript/lib/es6/belt_List.js";
 import * as GameUtils from "../fool/GameUtils.mjs";
-import * as ReactDnd from "react-dnd";
+import * as ReactDnd$1 from "react-dnd";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Belt_Result from "rescript/lib/es6/belt_Result.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
@@ -69,7 +69,7 @@ var EmptyDropResult = {};
 
 var CollectedProps = {};
 
-var include = RDnd.MakeUseDrop(DragObject, EmptyDropResult, CollectedProps);
+var include = ReactDnd.MakeUseDrop(DragObject, EmptyDropResult, CollectedProps);
 
 function InProgressScreen$PlayerTableUI(Props) {
   var game = Props.game;
@@ -79,7 +79,7 @@ function InProgressScreen$PlayerTableUI(Props) {
   var onBeat = Props.onBeat;
   var isDefender = GameUtils.isDefender(game, player);
   var draggedCard$1 = MOption.toResult(draggedCard, "No card");
-  var match = ReactDnd.useDrop({
+  var match = ReactDnd$1.useDrop({
         accept: "card",
         drop: (function (card, monitor) {
             var didDrop = monitor.didDrop();
@@ -235,7 +235,7 @@ var DragObject$1 = {};
 
 var DragLayerCP = {};
 
-var DndL = RDnd.MakeUseDragLayer(DragObject$1, DragLayerCP);
+var DndL = ReactDnd.MakeUseDragLayer(DragObject$1, DragLayerCP);
 
 function floatToString($$float) {
   return String($$float | 0);
@@ -260,7 +260,7 @@ function getItemStyles(currentOffset) {
 }
 
 function InProgressScreen$DragLayer(Props) {
-  var match = ReactDnd.useDragLayer(function (monitor) {
+  var match = ReactDnd$1.useDragLayer(function (monitor) {
         return {
                 item: monitor.getItem(),
                 itemType: monitor.getItemType(),
