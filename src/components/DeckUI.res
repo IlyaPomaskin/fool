@@ -32,27 +32,36 @@ open Utils
 // module EmptyDndDroppable = {
 //   @react.component
 //   let make = (~id, ~children) =>
-//     <ReactDnd.Droppable direction="horizontal" isDropDisabled={true} droppableId={id}>
+//     <ReactDnd.Droppable direction="horizontal" canDrop={true} droppableId={id}>
 //       {(droppableProvided, _) =>
 //         <div ref={droppableProvided.innerRef}> children droppableProvided.placeholder </div>}
 //     </ReactDnd.Droppable>
 // }
 
 module DndWrapper = {
+  module DragObject = {
+    type t = Types.card
+  }
+  module EmptyDropResult = {
+    type t
+  }
+
+  module CollectedProps = {
+    type t = {draggedCard: card}
+  }
+
+  include RDnd.MakeUseDrag(DragObject, EmptyDropResult, CollectedProps)
+
   @react.component
   let make = (~card, ~children, ~onDrag) => {
     // let id = Card.cardToString(card)
 
-    let (props, ref, _) = Dnd.UseDrag.makeInstance(
-      Dnd.UseDrag.makeConfig(
+    let (props, ref, _) = UseDrag.makeInstance(
+      UseDrag.makeConfig(
         ~\"type"="card",
         ~item=card,
         ~collect=monitor => {
-          isDropDisabled: false,
-          draggedCard: Dnd.DragSourceMonitor.getItem(monitor),
-          isDragging: Dnd.DragSourceMonitor.isDragging(monitor),
-          isOver: false,
-          isOverCurrent: false,
+          draggedCard: DragSourceMonitor.getItem(monitor),
         },
         (),
       ),

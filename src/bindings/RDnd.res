@@ -10,45 +10,35 @@ module type CollectedProps = {
   type t
 }
 
-module MakeDnd = (DO: DragObject, DR: DropResult, CP: CollectedProps) => {
-  type identifier = string
+type identifier = string
 
-  module Backend = {
-    type factory
+type xyCoords = {x: float, y: float}
+type nullableXyCoords = Js.Nullable.t<xyCoords>
 
-    @module("react-dnd-html5-backend")
-    external html5: factory = "HTML5Backend"
-  }
-
-  module Provider = {
-    @module("react-dnd") @react.component
-    external make: (~backend: Backend.factory, ~children: React.element, unit) => React.element =
-      "DndProvider"
-  }
-
-  type xyCoords = {x: float, y: float}
-
-  module DragSourceMonitor = {
+module MakeUseDragLayer = (DO: DragObject, CP: CollectedProps) => {
+  module DragLayerMonitor = {
     type t
 
-    @send external receiveHandlerId: (t, Js.Nullable.t<identifier>) => unit = "receiveHandlerId"
-    @send external getHandlerId: t => identifier = "getHandlerId"
-
-    @send external canDrag: t => bool = "canDrag"
     @send external isDragging: t => bool = "isDragging"
     @send external getItemType: t => Js.Nullable.t<identifier> = "getItemType"
     @send external getItem: t => DO.t = "getItem"
-    @send external getDropResult: t => Js.Nullable.t<DR.t> = "getDropResult"
-    @send external didDrop: t => bool = "didDrop"
-    @send external getInitialClientOffset: t => Js.Nullable.t<xyCoords> = "getInitialClientOffset"
-    @send external getClientOffset: t => Js.Nullable.t<xyCoords> = "getClientOffset"
+    @send external getInitialClientOffset: t => nullableXyCoords = "getInitialClientOffset"
     @send
-    external getDifferenceFromInitialOffset: t => Js.Nullable.t<xyCoords> =
+    external getInitialSourceClientOffset: t => nullableXyCoords = "getInitialSourceClientOffset"
+    @send external getClientOffset: t => nullableXyCoords = "getClientOffset"
+    @send
+    external getDifferenceFromInitialOffset: t => nullableXyCoords =
       "getDifferenceFromInitialOffset"
-    @send external getSourceClientOffset: t => Js.Nullable.t<xyCoords> = "getSourceClientOffset"
-    @send external getTargetIds: t => array<identifier> = "getTargetIds"
+    @send external getSourceClientOffset: t => nullableXyCoords = "getSourceClientOffset"
   }
 
+  module UseDragLayer = {
+    @module("react-dnd")
+    external makeInstance: (DragLayerMonitor.t => CP.t) => CP.t = "useDragLayer"
+  }
+}
+
+module MakeUseDrop = (DO: DragObject, DR: DropResult, CP: CollectedProps) => {
   module DropTargetMonitor = {
     type t
 
@@ -63,15 +53,14 @@ module MakeDnd = (DO: DragObject, DR: DropResult, CP: CollectedProps) => {
     @send external getItem: t => DO.t = "getItem"
     @send external getDropResult: t => Js.Nullable.t<DR.t> = "getDropResult"
     @send external didDrop: t => bool = "didDrop"
-    @send external getInitialClientOffset: t => Js.Nullable.t<xyCoords> = "getInitialClientOffset"
+    @send external getInitialClientOffset: t => nullableXyCoords = "getInitialClientOffset"
     @send
-    external getInitialSourceClientOffset: t => Js.Nullable.t<xyCoords> =
-      "getInitialSourceClientOffset"
-    @send external getClientOffset: t => Js.Nullable.t<xyCoords> = "getClientOffset"
+    external getInitialSourceClientOffset: t => nullableXyCoords = "getInitialSourceClientOffset"
+    @send external getClientOffset: t => nullableXyCoords = "getClientOffset"
     @send
-    external getDifferenceFromInitialOffset: t => Js.Nullable.t<xyCoords> =
+    external getDifferenceFromInitialOffset: t => nullableXyCoords =
       "getDifferenceFromInitialOffset"
-    @send external getSourceClientOffset: t => Js.Nullable.t<xyCoords> = "getSourceClientOffset"
+    @send external getSourceClientOffset: t => nullableXyCoords = "getSourceClientOffset"
   }
 
   module UseDrop = {
@@ -91,6 +80,38 @@ module MakeDnd = (DO: DragObject, DR: DropResult, CP: CollectedProps) => {
 
     @module("react-dnd")
     external makeInstance: (config, array<'dep>) => (CP.t, ReactDOM.Ref.t) = "useDrop"
+
+    @module("react-dnd")
+    external makeInstance2: (config, ('a1, 'a2)) => (CP.t, ReactDOM.Ref.t) = "useDrop"
+
+    @module("react-dnd")
+    external makeInstance3: (config, ('a1, 'a2, 'a3)) => (CP.t, ReactDOM.Ref.t) = "useDrop"
+
+    @module("react-dnd")
+    external makeInstance4: (config, ('a1, 'a2, 'a3, 'a4)) => (CP.t, ReactDOM.Ref.t) = "useDrop"
+  }
+}
+
+module MakeUseDrag = (DO: DragObject, DR: DropResult, CP: CollectedProps) => {
+  module DragSourceMonitor = {
+    type t
+
+    @send external receiveHandlerId: (t, Js.Nullable.t<identifier>) => unit = "receiveHandlerId"
+    @send external getHandlerId: t => identifier = "getHandlerId"
+
+    @send external canDrag: t => bool = "canDrag"
+    @send external isDragging: t => bool = "isDragging"
+    @send external getItemType: t => Js.Nullable.t<identifier> = "getItemType"
+    @send external getItem: t => DO.t = "getItem"
+    @send external getDropResult: t => Js.Nullable.t<DR.t> = "getDropResult"
+    @send external didDrop: t => bool = "didDrop"
+    @send external getInitialClientOffset: t => nullableXyCoords = "getInitialClientOffset"
+    @send external getClientOffset: t => nullableXyCoords = "getClientOffset"
+    @send
+    external getDifferenceFromInitialOffset: t => nullableXyCoords =
+      "getDifferenceFromInitialOffset"
+    @send external getSourceClientOffset: t => nullableXyCoords = "getSourceClientOffset"
+    @send external getTargetIds: t => array<identifier> = "getTargetIds"
   }
 
   module UseDrag = {
@@ -125,4 +146,26 @@ module MakeDnd = (DO: DragObject, DR: DropResult, CP: CollectedProps) => {
     @module("react-dnd")
     external makeInstance: (config, array<'dep>) => (CP.t, ReactDOM.Ref.t, 'preview) = "useDrag"
   }
+}
+
+module Backend = {
+  type factory
+
+  @module("react-dnd-html5-backend")
+  external html5: factory = "HTML5Backend"
+
+  @module("react-dnd-touch-backend")
+  external touch: factory = "TouchBackend"
+}
+
+module Provider = {
+  type a
+
+  @module("react-dnd") @react.component
+  external make: (
+    ~backend: Backend.factory,
+    ~options: a,
+    ~children: React.element,
+    unit,
+  ) => React.element = "DndProvider"
 }

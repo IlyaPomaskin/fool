@@ -31,19 +31,53 @@ module PlayerActionsUI = {
 }
 
 module PlayerTableUI = {
+  module DragObject = {
+    type t = Types.card
+  }
+
+  module EmptyDropResult = {
+    type t
+  }
+
+  module CollectedProps = {
+    type t = {isDragging: bool}
+  }
+
+  include RDnd.MakeUseDrop(DragObject, EmptyDropResult, CollectedProps)
+
   @react.component
   let make = (~game, ~draggedCard, ~player, ~onDrop, ~onBeat) => {
     let isDefender = GameUtils.isDefender(game, player)
     let draggedCard = MOption.toResult(draggedCard, "No card")
 
-    let (cProps, ref) = Dnd.UseDrop.makeInstance(
-      Dnd.UseDrop.makeConfig(
+    let (cProps, ref) = UseDrop.makeInstance3(
+      UseDrop.makeConfig(
         ~accept="card",
-        ~drop=onDrop,
-        ~canDrop=(card, _) => Game.isValidMove(game, player, card)->Result.isOk,
+        ~drop={
+          (card, monitor) => {
+            let didDrop = monitor->DropTargetMonitor.didDrop
+
+            Js.log2("IPS move", card->Card.cardToString)
+            Js.log2("IPS didDrop", didDrop)
+            onDrop(card, monitor)
+            None
+          }
+        },
+        ~canDrop=(card, monitor) => {
+          Js.log2("IPS item", DropTargetMonitor.getItem(monitor)->Card.cardToString)
+          Js.log2("IPS itemType", DropTargetMonitor.getItemType(monitor))
+
+          Js.log2("IPS game", Game.toObject(game))
+          Js.log2("IPS player", Player.toObject(player))
+
+          Game.isValidMove(game, player, card)
+          ->MResult.tap(Js.log2("IPS valid"))
+          ->MResult.tapError(Js.log2("IPS err"))
+          ->Result.isOk
+        },
         (),
       ),
-      [],
+      (game, player, onDrop),
     )
 
     <div className="relative">
@@ -57,11 +91,10 @@ module PlayerTableUI = {
         ])}>
         <TableUI
           isDefender
-          isDropDisabled={toCard =>
-            !isDefender ||
+          canDrop={toCard =>
             draggedCard
             ->Result.flatMap(byCard => Game.isValidBeat(game, player, toCard, byCard))
-            ->MResult.fold(_ => false, _ => true)}
+            ->MResult.fold(_ => false, _ => isDefender)}
           className="my-1 h-16"
           table={game.table}
           onDrop={onBeat}
@@ -111,6 +144,54 @@ module OpponentUI = {
   }
 }
 
+module DragLayer = {
+  module DragObject = {
+    type t = Types.card
+  }
+
+  module DragLayerCP = {
+    type t = {
+      item: DragObject.t,
+      itemType: Js.nullable<RDnd.identifier>,
+      currentOffset: RDnd.nullableXyCoords,
+    }
+  }
+
+  module DndL = RDnd.MakeUseDragLayer(DragObject, DragLayerCP)
+
+  let floatToString = float => float->int_of_float->string_of_int
+
+  let getItemStyles = (currentOffset: RDnd.nullableXyCoords) => {
+    let coords =
+      currentOffset
+      ->Js.Nullable.toOption
+      ->Option.map(({x, y}) => (floatToString(x), floatToString(y)))
+
+    switch coords {
+    | Some((x, y)) => ReactDOMStyle.make(~transform=`translate(${x}px, ${y}px)`, ())
+    | _ => ReactDOMStyle.make(~display="none", ())
+    }
+  }
+
+  @react.component
+  let make = () => {
+    let {itemType, item, currentOffset} = DndL.UseDragLayer.makeInstance(monitor => {
+      item: DndL.DragLayerMonitor.getItem(monitor),
+      itemType: DndL.DragLayerMonitor.getItemType(monitor),
+      currentOffset: DndL.DragLayerMonitor.getSourceClientOffset(monitor),
+    })
+
+    <div className="fixed pointer-events-none z-50 left-0 top-0 w-full h-full">
+      <div style={getItemStyles(currentOffset)}>
+        {switch Js.Nullable.toOption(itemType) {
+        | Some("card") => <CardUI card={item} />
+        | _ => React.null
+        }}
+      </div>
+    </div>
+  }
+}
+
 type destination =
   | ToUnknown
   | ToTable
@@ -120,6 +201,7 @@ let useOptimisticGame = (~game, ~player, ~onMessage) => {
   let (optimisticGame, setOptimisticGame) = React.useState(_ => game)
   React.useEffect1(() => {
     setOptimisticGame(_ => game)
+    Js.log("set opt game")
     None
   }, [game])
 
@@ -158,8 +240,6 @@ let make = (~game as realGame, ~player, ~onMessage) => {
     // Js.log2("monitor", monitor)
 
     handleOptimisticMessage(Progress(Move(card), player.id, game.gameId))
-
-    None
   }
 
   let handleBeat = (toCard, byCard) => {
@@ -211,6 +291,7 @@ let make = (~game as realGame, ~player, ~onMessage) => {
       </div>
     </div>
     <div>
+      <DragLayer />
       <div className="m-1">
         <PlayerTableUI draggedCard game player onDrop={handleDrop} onBeat={handleBeat} />
       </div>
