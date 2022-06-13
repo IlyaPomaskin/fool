@@ -34,7 +34,10 @@ module DndBeatableCard = {
 
     <div ref className={cx(["relative z-40 w-12 h-16"])}>
       <CardUI.EmptyCard
-        className={cx([cProps.isOverCurrent && canDrop ? "bg-pink-500 opacity-70" : ""])}
+        className={cx([
+          cProps.isOverCurrent && canDrop ? "bg-pink-500 opacity-70" : "",
+          "border-dashed",
+        ])}
       />
     </div>
   }
@@ -108,7 +111,7 @@ let make = (
 ) => {
   let transitions = makeTransitions(table->List.toArray->Array.reverse)
 
-  <div className={cx(["flex gap-1 flex-row", className])}>
+  <div className={cx(["flex gap-2 flex-row", className])}>
     {transitions
     ->Array.map(({CardTransition.item: pair, props, key}) =>
       <Spring.Div

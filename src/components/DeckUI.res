@@ -39,7 +39,7 @@ module DndWrapper = {
       ref
       className={cx([
         "transition duration-150 ease-in-out",
-        props.isDragging ? "invisible" : "visible",
+        props.isDragging ? "hidden" : "inline-block",
       ])}>
       children
     </div>

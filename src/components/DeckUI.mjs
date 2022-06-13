@@ -41,7 +41,7 @@ function DeckUI$DndWrapper(Props) {
               ref: match[1],
               className: Utils.cx([
                     "transition duration-150 ease-in-out",
-                    props.isDragging ? "invisible" : "visible"
+                    props.isDragging ? "hidden" : "inline-block"
                   ])
             }, children);
 }

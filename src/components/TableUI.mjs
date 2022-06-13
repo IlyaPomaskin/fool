@@ -50,7 +50,10 @@ function TableUI$DndBeatableCard(Props) {
               ref: match[1],
               className: Utils.cx(["relative z-40 w-12 h-16"])
             }, React.createElement(CardUI.EmptyCard.make, {
-                  className: Utils.cx([match[0].isOverCurrent && canDrop$1 ? "bg-pink-500 opacity-70" : ""])
+                  className: Utils.cx([
+                        match[0].isOverCurrent && canDrop$1 ? "bg-pink-500 opacity-70" : "",
+                        "border-dashed"
+                      ])
                 }));
 }
 
@@ -160,7 +163,7 @@ function TableUI(Props) {
   var transitions = makeTransitions(Belt_Array.reverse(Belt_List.toArray(table)));
   return React.createElement("div", {
               className: Utils.cx([
-                    "flex gap-1 flex-row",
+                    "flex gap-2 flex-row",
                     className
                   ])
             }, Belt_Array.map(transitions, (function (param) {
