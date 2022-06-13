@@ -10,50 +10,31 @@ module DndBeatableCard = {
   }
 
   module CollectedProps = {
-    type t = {
-      canDrop: bool,
-      isDragging: bool,
-      draggedCard: card,
-      isOver: bool,
-      isOverCurrent: bool,
-    }
+    type t = {isOverCurrent: bool}
   }
 
   include ReactDnd.MakeUseDrop(DragObject, EmptyDropResult, CollectedProps)
 
   @react.component
   let make = (~card, ~canDrop, ~onDrop) => {
-    let (cProps, ref) = UseDrop.makeInstance(
+    let canDrop = canDrop(card)
+
+    let (cProps, ref) = UseDrop.makeInstance3(
       UseDrop.makeConfig(
-        ~canDrop=(_, _) => canDrop(card),
+        ~canDrop=(_, _) => canDrop,
         ~accept="card",
-        ~drop=(item, monitor) => {
-          let didDrop = monitor->DropTargetMonitor.didDrop
-
-          Js.log3("TU beat", card->Card.cardToString, item->Card.cardToString)
-          Js.log2("TU didDrop", didDrop)
-
-          onDrop(card, item)
-
-          None
-        },
+        ~drop=(item, _) => onDrop(card, item),
         ~collect=monitor => {
-          {
-            canDrop: canDrop(card),
-            isDragging: !(monitor->DropTargetMonitor.isOver({shallow: false})),
-            draggedCard: monitor->DropTargetMonitor.getItem,
-            isOver: monitor->DropTargetMonitor.isOver({shallow: false}),
-            isOverCurrent: monitor->DropTargetMonitor.isOver({shallow: true}),
-          }
+          isOverCurrent: monitor->DropTargetMonitor.isOver({shallow: true}),
         },
         (),
       ),
-      [],
+      (onDrop, card, canDrop),
     )
 
-    <div ref className={cx(["relative z-100 w-12 h-16"])}>
+    <div ref className={cx(["relative z-40 w-12 h-16"])}>
       <CardUI.EmptyCard
-        className={cx([cProps.isOverCurrent && !cProps.canDrop ? "bg-pink-500 opacity-70" : ""])}
+        className={cx([cProps.isOverCurrent && canDrop ? "bg-pink-500 opacity-70" : ""])}
       />
     </div>
   }

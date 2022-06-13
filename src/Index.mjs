@@ -11,9 +11,9 @@ function $$default(param) {
             }, React.createElement(ReactDnd.DndProvider, {
                   backend: ReactDndTouchBackend.TouchBackend,
                   options: {
-                    enableTouchEvents: false,
-                    enableMouseEvents: false,
-                    ignoreContextMenu: false
+                    enableTouchEvents: true,
+                    enableMouseEvents: true,
+                    ignoreContextMenu: true
                   },
                   children: null
                 }, React.createElement(PlayerScreen.make, {

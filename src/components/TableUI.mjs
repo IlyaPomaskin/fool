@@ -25,40 +25,32 @@ function TableUI$DndBeatableCard(Props) {
   var card = Props.card;
   var canDrop = Props.canDrop;
   var onDrop = Props.onDrop;
+  var canDrop$1 = Curry._1(canDrop, card);
   var match = ReactDnd$1.useDrop({
         accept: "card",
-        drop: (function (item, monitor) {
-            var didDrop = monitor.didDrop();
-            console.log("TU beat", Card.cardToString(card), Card.cardToString(item));
-            console.log("TU didDrop", didDrop);
-            Curry._2(onDrop, card, item);
-            
+        drop: (function (item, param) {
+            return Curry._2(onDrop, card, item);
           }),
         canDrop: (function (param, param$1) {
-            return Curry._1(canDrop, card);
+            return canDrop$1;
           }),
         collect: (function (monitor) {
             return {
-                    canDrop: Curry._1(canDrop, card),
-                    isDragging: !monitor.isOver({
-                          shallow: false
-                        }),
-                    draggedCard: monitor.getItem(),
-                    isOver: monitor.isOver({
-                          shallow: false
-                        }),
                     isOverCurrent: monitor.isOver({
                           shallow: true
                         })
                   };
           })
-      }, []);
-  var cProps = match[0];
+      }, [
+        onDrop,
+        card,
+        canDrop$1
+      ]);
   return React.createElement("div", {
               ref: match[1],
-              className: Utils.cx(["relative z-100 w-12 h-16"])
+              className: Utils.cx(["relative z-40 w-12 h-16"])
             }, React.createElement(CardUI.EmptyCard.make, {
-                  className: Utils.cx([cProps.isOverCurrent && !cProps.canDrop ? "bg-pink-500 opacity-70" : ""])
+                  className: Utils.cx([match[0].isOverCurrent && canDrop$1 ? "bg-pink-500 opacity-70" : ""])
                 }));
 }
 

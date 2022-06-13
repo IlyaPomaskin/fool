@@ -53,28 +53,8 @@ module PlayerTableUI = {
     let (cProps, ref) = UseDrop.makeInstance3(
       UseDrop.makeConfig(
         ~accept="card",
-        ~drop={
-          (card, monitor) => {
-            let didDrop = monitor->DropTargetMonitor.didDrop
-
-            Js.log2("IPS move", card->Card.cardToString)
-            Js.log2("IPS didDrop", didDrop)
-            onDrop(card, monitor)
-            None
-          }
-        },
-        ~canDrop=(card, monitor) => {
-          Js.log2("IPS item", DropTargetMonitor.getItem(monitor)->Card.cardToString)
-          Js.log2("IPS itemType", DropTargetMonitor.getItemType(monitor))
-
-          Js.log2("IPS game", Game.toObject(game))
-          Js.log2("IPS player", Player.toObject(player))
-
-          Game.isValidMove(game, player, card)
-          ->MResult.tap(Js.log2("IPS valid"))
-          ->MResult.tapError(Js.log2("IPS err"))
-          ->Result.isOk
-        },
+        ~drop=(card, _) => onDrop(card),
+        ~canDrop=(card, _) => Game.isValidMove(game, player, card)->Result.isOk,
         (),
       ),
       (game, player, onDrop),
@@ -94,7 +74,7 @@ module PlayerTableUI = {
           canDrop={toCard =>
             draggedCard
             ->Result.flatMap(byCard => Game.isValidBeat(game, player, toCard, byCard))
-            ->MResult.fold(_ => false, _ => isDefender)}
+            ->Result.isOk}
           className="my-1 h-16"
           table={game.table}
           onDrop={onBeat}
@@ -181,10 +161,10 @@ module DragLayer = {
       currentOffset: DndL.DragLayerMonitor.getSourceClientOffset(monitor),
     })
 
-    <div className="fixed pointer-events-none z-50 left-0 top-0 w-full h-full">
+    <div className="fixed pointer-events-none z-10 left-0 top-0 w-full h-full">
       <div style={getItemStyles(currentOffset)}>
         {switch Js.Nullable.toOption(itemType) {
-        | Some("card") => <CardUI card={item} />
+        | Some("card") => <CardUI className="relative z-40" card={item} />
         | _ => React.null
         }}
       </div>

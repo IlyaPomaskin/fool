@@ -4,9 +4,9 @@ let default = () => {
     <ReactDnd.Provider.makeTouch
       backend={ReactDnd.Backend.touch}
       options={ReactDnd.Provider.makeOptions(
-        ~enableTouchEvents=false,
-        ~enableMouseEvents=false,
-        ~ignoreContextMenu=false,
+        ~enableTouchEvents=true,
+        ~enableMouseEvents=true,
+        ~ignoreContextMenu=true,
         (),
       )}>
       <PlayerScreen sessionId={Some("s:p1")} gameId={Some("g1")} />
