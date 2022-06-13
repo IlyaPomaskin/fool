@@ -103,3 +103,5 @@ let getFullUrl = (~isWs=false, ()) => {
 
   `${protocol}//${hostname}:${port}`
 }
+
+let any = (a: 'a) => Obj.magic(a)

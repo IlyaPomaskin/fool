@@ -19,7 +19,7 @@ module DndBeatableCard = {
   let make = (~card, ~canDrop, ~onDrop) => {
     let canDrop = canDrop(card)
 
-    let (cProps, ref) = UseDrop.makeInstance3(
+    let (cProps, ref) = UseDrop.makeInstance(
       UseDrop.makeConfig(
         ~canDrop=(_, _) => canDrop,
         ~accept="card",
@@ -29,7 +29,7 @@ module DndBeatableCard = {
         },
         (),
       ),
-      (onDrop, card, canDrop),
+      [any(onDrop), any(card), any(canDrop)],
     )
 
     <div ref className={cx(["relative z-40 w-12 h-16"])}>

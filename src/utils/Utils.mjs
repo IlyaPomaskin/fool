@@ -167,6 +167,10 @@ function getFullUrl(isWsOpt, param) {
   return protocol$1 + "//" + hostname + ":" + port;
 }
 
+function any(a) {
+  return a;
+}
+
 var leftRotationClassName = "-rotate-12 -translate-x-1.5";
 
 var rightRotationClassName = "rotate-12 translate-x-1.5";
@@ -193,6 +197,7 @@ export {
   isEmpty ,
   useStateValue ,
   getFullUrl ,
+  any ,
   
 }
 /* react Not a pure module */

@@ -80,15 +80,6 @@ module MakeUseDrop = (DO: DragObject, DR: DropResult, CP: CollectedProps) => {
 
     @module("react-dnd")
     external makeInstance: (config, array<'dep>) => (CP.t, ReactDOM.Ref.t) = "useDrop"
-
-    @module("react-dnd")
-    external makeInstance2: (config, ('a1, 'a2)) => (CP.t, ReactDOM.Ref.t) = "useDrop"
-
-    @module("react-dnd")
-    external makeInstance3: (config, ('a1, 'a2, 'a3)) => (CP.t, ReactDOM.Ref.t) = "useDrop"
-
-    @module("react-dnd")
-    external makeInstance4: (config, ('a1, 'a2, 'a3, 'a4)) => (CP.t, ReactDOM.Ref.t) = "useDrop"
   }
 }
 

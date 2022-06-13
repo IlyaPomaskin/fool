@@ -50,14 +50,14 @@ module PlayerTableUI = {
     let isDefender = GameUtils.isDefender(game, player)
     let draggedCard = MOption.toResult(draggedCard, "No card")
 
-    let (cProps, ref) = UseDrop.makeInstance3(
+    let (cProps, ref) = UseDrop.makeInstance(
       UseDrop.makeConfig(
         ~accept="card",
         ~drop=(card, _) => onDrop(card),
         ~canDrop=(card, _) => Game.isValidMove(game, player, card)->Result.isOk,
         (),
       ),
-      (game, player, onDrop),
+      [any(game), any(player), any(onDrop)],
     )
 
     <div className="relative">

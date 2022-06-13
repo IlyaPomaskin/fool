@@ -86,9 +86,9 @@ function InProgressScreen$PlayerTableUI(Props) {
             return Belt_Result.isOk(Game.isValidMove(game, player, card));
           })
       }, [
-        game,
-        player,
-        onDrop
+        Utils.any(game),
+        Utils.any(player),
+        Utils.any(onDrop)
       ]);
   return React.createElement("div", {
               className: "relative"

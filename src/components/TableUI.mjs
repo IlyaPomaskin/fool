@@ -42,9 +42,9 @@ function TableUI$DndBeatableCard(Props) {
                   };
           })
       }, [
-        onDrop,
-        card,
-        canDrop$1
+        Utils.any(onDrop),
+        Utils.any(card),
+        Utils.any(canDrop$1)
       ]);
   return React.createElement("div", {
               ref: match[1],
