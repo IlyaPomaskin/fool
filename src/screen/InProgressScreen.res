@@ -181,7 +181,6 @@ let useOptimisticGame = (~game, ~player, ~onMessage) => {
   let (optimisticGame, setOptimisticGame) = React.useState(_ => game)
   React.useEffect1(() => {
     setOptimisticGame(_ => game)
-    Js.log("set opt game")
     None
   }, [game])
 
@@ -208,24 +207,14 @@ let make = (~game as realGame, ~player, ~onMessage) => {
 
   let (draggedCard, setDraggedCard) = React.useState(_ => None)
 
-  let handleDrop = (card, monitor) => {
-    Js.log3("PlayerTableUI drop", card, monitor)
-
-    // let didDrop = monitor->Dnd.DropTargetMonitor.didDrop
-    // let hId = monitor->Dnd.DropTargetMonitor.getHandlerId
-
-    // Js.log2("card", card)
-    // Js.log2("hId", hId)
-    // Js.log2("didDrop", didDrop)
-    // Js.log2("monitor", monitor)
-
+  let handleDrop = card => {
     handleOptimisticMessage(Progress(Move(card), player.id, game.gameId))
+    None
   }
 
   let handleBeat = (toCard, byCard) => {
     handleOptimisticMessage(Progress(Beat(toCard, byCard), player.id, game.gameId))
-
-    ignore()
+    None
   }
 
   let handleDrag = card => setDraggedCard(_ => Some(card))

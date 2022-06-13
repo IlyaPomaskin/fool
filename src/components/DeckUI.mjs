@@ -27,7 +27,8 @@ function DeckUI$DndWrapper(Props) {
         item: card,
         collect: (function (monitor) {
             return {
-                    draggedCard: monitor.getItem()
+                    draggedCard: monitor.getItem(),
+                    isDragging: monitor.isDragging()
                   };
           })
       }, []);
@@ -38,7 +39,10 @@ function DeckUI$DndWrapper(Props) {
         }), [props.draggedCard]);
   return React.createElement("div", {
               ref: match[1],
-              className: Utils.cx(["transition duration-150 ease-in-out"])
+              className: Utils.cx([
+                    "transition duration-150 ease-in-out",
+                    props.isDragging ? "invisible" : "visible"
+                  ])
             }, children);
 }
 

@@ -167,17 +167,6 @@ let flatMapLobbyResult = (game: result<gameState, string>, fn): result<gameState
   }
 }
 
-// ->Result.map(lobby => {
-//   mapLobby(lobby, game => {
-//     let isPlayerInGame = List.has(game.players, player, (p1, p2) => p1.id == p2.id)
-
-//     {
-//       ...game,
-//       players: isPlayerInGame ? game.players : List.add(game.players, player),
-//     }
-//   })
-// })
-
 let unpackLobby = game =>
   switch game {
   | InLobby(game) => Ok(game)
