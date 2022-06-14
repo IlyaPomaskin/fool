@@ -73,16 +73,24 @@ function createServer(server) {
                   return sendToPlayer(player.id, $$event);
                 }));
   };
+  var login = function (req) {
+    var sessionId = MOption.toResult(Belt_Option.flatMap(ServerUtils.getParam(ServerUtils.getSearchParams(ServerUtils.getUrl(req, "ws")), "sessionId"), (function (sessionId) {
+                if (sessionId === "") {
+                  return ;
+                } else {
+                  return sessionId;
+                }
+              })), "No sessionId");
+    var player = Belt_Result.flatMap(sessionId, GameInstance.loginPlayer);
+    return [
+            sessionId,
+            player
+          ];
+  };
   wsServer.on(WsWebSocketServer.ServerEvents.connection, (function (ws, req) {
-          var sessionId = MOption.toResult(Belt_Option.flatMap(ServerUtils.getParam(ServerUtils.getSearchParams(ServerUtils.getUrl(req, "ws")), "sessionId"), (function (sessionId) {
-                      if (sessionId === "") {
-                        return ;
-                      } else {
-                        return sessionId;
-                      }
-                    })), "No sessionId");
-          Log.debug(/* Ws */0, ["login " + Belt_Result.getWithDefault(sessionId, "No sessionId")]);
-          var player = Belt_Result.flatMap(sessionId, GameInstance.loginPlayer);
+          var match = login(req);
+          var player = match[1];
+          var sessionId = match[0];
           if (sessionId.TAG === /* Ok */0) {
             if (player.TAG === /* Ok */0) {
               var player$1 = player._0;

@@ -41,8 +41,7 @@ let createServer = server => {
   let broadcast = (players, event) =>
     players->List.forEach(player => sendToPlayer(player.id, event))
 
-  wsServer
-  ->WsWebSocketServer.on(WsWebSocketServer.ServerEvents.connection, @this (_, ws, req) => {
+  let login = req => {
     let sessionId =
       getUrl(req, "ws")
       ->ServerUtils.getSearchParams
@@ -55,9 +54,14 @@ let createServer = server => {
       })
       ->MOption.toResult("No sessionId")
 
-    Log.debug(Ws, [`login ${sessionId->Result.getWithDefault("No sessionId")}`])
-
     let player = sessionId->Result.flatMap(p => GameInstance.loginPlayer(p))
+
+    (sessionId, player)
+  }
+
+  wsServer
+  ->WsWebSocketServer.on(WsWebSocketServer.ServerEvents.connection, @this (_, ws, req) => {
+    let (sessionId, player) = login(req)
 
     switch (sessionId, player) {
     | (Error(err), _) => {
