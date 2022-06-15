@@ -137,7 +137,7 @@ function PlayerScreen(Props) {
     tmp = React.createElement("div", undefined, Utils.uiStr("unhandled case"));
   }
   return React.createElement("div", {
-              className: "mx-auto max-w-sm w-full"
+              className: "mx-auto max-w-sm w-full z-1"
             }, player !== undefined ? React.createElement("div", undefined, Utils.uiStr("Player: "), React.createElement(PlayerUI.Short.make, {
                         className: "inline break-all",
                         player: player

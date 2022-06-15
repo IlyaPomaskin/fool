@@ -32,7 +32,7 @@ module DndBeatableCard = {
       [any(onDrop), any(card), any(canDrop)],
     )
 
-    <div ref className={cx(["relative z-40 w-12 h-16"])}>
+    <div ref className={cx(["w-12 h-16"])}>
       <CardUI.EmptyCard
         className={cx([
           cProps.isOverCurrent && canDrop ? "bg-pink-500 opacity-70" : "",
@@ -49,9 +49,9 @@ module CardTransition = Spring.MakeTransition({
   type item = tableCards
 })
 
-let makeTransitions = cards =>
+let useCardsTransition = items => {
   CardTransition.use(
-    cards,
+    items,
     ((to, _)) => Card.cardToString(to),
     CardTransition.config(
       ~from={opacity: "0", transform: "scale(1.5)"},
@@ -61,11 +61,13 @@ let makeTransitions = cards =>
       (),
     ),
   )
+}
 
 module CardsPair = {
   @react.component
   let attacker = (~pair, ()) => {
-    let transitions = makeTransitions(Array.keep([pair], ((_, by)) => Option.isSome(by)))
+    let cards = Array.keep([pair], ((_, by)) => Option.isSome(by))
+    let transitions = useCardsTransition(cards)
 
     <div className="flex flex-col gap-3 relative">
       <CardUI className={Utils.leftRotationClassName} card={fst(pair)} />
@@ -87,11 +89,10 @@ module CardsPair = {
   @react.component
   let defender = (~pair, ~canDrop, ~onDrop, ()) => {
     let (toCard, byCard) = pair
-    let beatByClassName = `${Utils.rightRotationClassName} absolute left-1 top-1`
 
     <div className="flex flex-col gap-3 relative">
       <CardUI className={Utils.leftRotationClassName} card={toCard} />
-      <div className=beatByClassName>
+      <div className={`${Utils.rightRotationClassName} absolute left-1 top-1`}>
         {switch byCard {
         | Some(byCard) => <CardUI card={byCard} />
         | None => <DndBeatableCard card={toCard} canDrop onDrop />
@@ -101,27 +102,82 @@ module CardsPair = {
   }
 }
 
-@react.component
-let make = (
-  ~className: string="",
-  ~isDefender=false,
-  ~canDrop=_ => true,
-  ~table: table,
-  ~onDrop,
-) => {
-  let transitions = makeTransitions(table->List.toArray->Array.reverse)
+module CardsList = {
+  @react.component
+  let make = (
+    ~className: string="",
+    ~isDefender=false,
+    ~canDrop=_ => true,
+    ~table: table,
+    ~onDrop,
+  ) => {
+    let transitions = useCardsTransition(table->List.toArray->Array.reverse)
 
-  <div className={cx(["flex gap-2 flex-row", className])}>
-    {transitions
-    ->Array.map(({CardTransition.item: pair, props, key}) =>
-      <Spring.Div
-        key style={ReactDOM.Style.make(~opacity=props.opacity, ~transform=props.transform, ())}>
-        {switch isDefender {
-        | true => <CardsPair.defender pair canDrop onDrop />
-        | false => <CardsPair.attacker pair />
-        }}
-      </Spring.Div>
-    )
-    ->React.array}
+    <div className={cx(["flex gap-2 flex-row", className])}>
+      {transitions
+      ->Array.map(({CardTransition.item: pair, props, key}) =>
+        <Spring.Div
+          key style={ReactDOM.Style.make(~opacity=props.opacity, ~transform=props.transform, ())}>
+          {switch isDefender {
+          | true => <CardsPair.defender pair canDrop onDrop />
+          | false => <CardsPair.attacker pair />
+          }}
+        </Spring.Div>
+      )
+      ->React.array}
+      <CardUI.Base className="invisible" />
+    </div>
+  }
+}
+
+module DragObject = {
+  type t = Types.card
+}
+
+module EmptyDropResult = {
+  type t
+}
+
+module CollectedProps = {
+  type t = {isDragging: bool}
+}
+
+module Drop = ReactDnd.MakeUseDrop(DragObject, EmptyDropResult, CollectedProps)
+
+@react.component
+let make = (~game, ~draggedCard, ~player, ~onDrop, ~onBeat) => {
+  let isDefender = GameUtils.isDefender(game, player)
+  let draggedCard = MOption.toResult(draggedCard, "No card")
+
+  let (_, ref) = Drop.UseDrop.makeInstance(
+    Drop.UseDrop.makeConfig(
+      ~accept="card",
+      ~drop=(card, _) => onDrop(card),
+      ~canDrop=(card, _) => Game.isValidMove(game, player, card)->Result.isOk,
+      (),
+    ),
+    [any(game), any(player), any(onDrop)],
+  )
+
+  <div className="relative">
+    <div
+      ref
+      className={cx([
+        "absolute -mx-6 -my-8 z-[0]",
+        "h-[calc(100%+3rem)]",
+        "w-[calc(100%+3rem)]",
+        "flex flex-row bg-emerald-600 bg-opacity-40",
+      ])}
+    />
+    <CardsList
+      isDefender
+      canDrop={toCard =>
+        draggedCard
+        ->Result.flatMap(byCard => Game.isValidBeat(game, player, toCard, byCard))
+        ->Result.isOk}
+      className="my-1 h-16"
+      table={game.table}
+      onDrop={onBeat}
+    />
   </div>
 }

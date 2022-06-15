@@ -45,7 +45,7 @@ let make = (~gameId=None, ~sessionId=None) => {
     ~onError=_ => setIsConnected(false),
   )
 
-  <div className="mx-auto max-w-sm w-full">
+  <div className="mx-auto max-w-sm w-full z-1">
     {switch player {
     | Some(player) =>
       <div>
