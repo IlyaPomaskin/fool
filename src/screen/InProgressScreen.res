@@ -230,22 +230,7 @@ let make = (~game as realGame, ~player, ~onMessage) => {
   <div>
     <div className="flex">
       <div className="flex m-2 flex-row">
-        {
-          let trumpCard = lastListItem(game.deck)
-
-          switch trumpCard {
-          | Some(Visible(card)) =>
-            <div className="relative flex h-min">
-              <DeckUI.hidden className="z-10" deck={game.deck} />
-              <div className="z-0 relative top-1 -left-2 rotate-90">
-                <CardUI.VisibleCard card />
-              </div>
-            </div>
-          | Some(Hidden) =>
-            <div> <DeckUI.hidden deck={game.deck} /> <CardUI.trump suit={game.trump} /> </div>
-          | None => <CardUI.EmptyCard> <CardUI.trump suit={game.trump} /> </CardUI.EmptyCard>
-          }
-        }
+        <StackUI.deck deck={game.deck} trump={game.trump} />
       </div>
       <div className="flex m-2 w-full justify-evenly">
         {uiList(reorderedPlayers, player =>

@@ -6,9 +6,7 @@ import * as Utils from "../utils/Utils.mjs";
 import * as React from "react";
 import * as CardUI from "./CardUI.mjs";
 import * as ReactDnd from "../bindings/ReactDnd.mjs";
-import * as Belt_List from "rescript/lib/es6/belt_List.js";
 import * as ReactDnd$1 from "react-dnd";
-import * as Caml_option from "rescript/lib/es6/caml_option.js";
 
 var DragObject = {};
 
@@ -41,7 +39,7 @@ function DeckUI$DndWrapper(Props) {
               ref: match[1],
               className: Utils.cx([
                     "transition duration-150 ease-in-out",
-                    props.isDragging ? "hidden" : "inline-block"
+                    props.isDragging ? "invisible" : "visible"
                   ])
             }, children);
 }
@@ -58,40 +56,6 @@ var DndWrapper = {
   UseDrag: DndWrapper_UseDrag,
   make: DeckUI$DndWrapper
 };
-
-function DeckUI$hidden(Props) {
-  var classNameOpt = Props.className;
-  var deck = Props.deck;
-  var text = Props.text;
-  var className = classNameOpt !== undefined ? classNameOpt : "";
-  var cardsAmount = Belt_List.length(deck);
-  var cardsList = Belt_List.mapWithIndex(Belt_List.keepWithIndex(deck, (function (param, index) {
-              return index <= 2;
-            })), (function (index, param) {
-          return index;
-        }));
-  var deckText = text !== undefined ? Caml_option.valFromOption(text) : (
-      cardsAmount !== 0 ? Utils.uiStr(String(cardsAmount)) : Utils.uiStr("0")
-    );
-  return React.createElement("div", {
-              className: Utils.cx([
-                    "relative",
-                    className
-                  ])
-            }, cardsAmount !== 0 ? Utils.uiList(cardsList, (function (index) {
-                      var offset = String((index << 1)) + "px";
-                      return React.createElement("div", {
-                                  key: String(index),
-                                  className: index === 0 ? "relative" : "absolute",
-                                  style: {
-                                    left: offset,
-                                    top: offset
-                                  }
-                                }, React.createElement(CardUI.HiddenCard.make, {}));
-                    })) : React.createElement(CardUI.EmptyCard.make, {}), React.createElement("div", {
-                  className: "absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 text-slate-200"
-                }, deckText));
-}
 
 function DeckUI(Props) {
   var deck = Props.deck;
@@ -111,7 +75,7 @@ function DeckUI(Props) {
     return React.createElement("div", {
                 className: Utils.cx([
                       className,
-                      "leading flex flex-row gap-1"
+                      "leading flex flex-row gap-1 flex-wrap"
                     ])
               }, Utils.uiListWithIndex(deck, (function (index, card) {
                       var key = Card.cardToString(card) + String(index);
@@ -141,13 +105,10 @@ function DeckUI(Props) {
   }
 }
 
-var hidden = DeckUI$hidden;
-
 var make = DeckUI;
 
 export {
   DndWrapper ,
-  hidden ,
   make ,
   
 }
