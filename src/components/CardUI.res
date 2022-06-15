@@ -105,11 +105,12 @@ module VisibleCard = {
 
 module HiddenCard = {
   @react.component
-  let make = (~className: string="") => {
+  let make = (~className: string="", ~children=React.null) => {
     <Base className={cx([className, "overflow-hidden"])}>
       <div
         className="absolute w-full h-full bg-gradient-to-tl from-purple-500 to-pink-500 bg-opacity-50"
       />
+      <div className="relative z-1"> {children} </div>
     </Base>
   }
 }

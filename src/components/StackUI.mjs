@@ -24,16 +24,17 @@ function StackUI$Stack(Props) {
             }, cardsAmount !== 0 ? Utils.uiList(cardsList, (function (index) {
                       var offset = String((index << 1)) + "px";
                       return React.createElement("div", {
-                                  key: String(index),
+                                  key: offset,
                                   className: index === 0 ? "relative" : "absolute",
                                   style: {
                                     left: offset,
                                     top: offset
                                   }
-                                }, React.createElement(CardUI.HiddenCard.make, {}));
-                    })) : React.createElement(CardUI.EmptyCard.make, {}), React.createElement("div", {
-                  className: "absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 text-slate-200"
-                }, deckText));
+                                }, React.createElement(CardUI.HiddenCard.make, {
+                                      className: "flex items-center justify-center text-slate-200",
+                                      children: deckText
+                                    }));
+                    })) : React.createElement(CardUI.EmptyCard.make, {}));
 }
 
 var Stack = {
@@ -65,8 +66,7 @@ function StackUI$deck(Props) {
     return React.createElement(CardUI.EmptyCard.make, {
                 className: "flex items-center justify-center",
                 children: React.createElement(CardUI.trump, {
-                      suit: trump,
-                      className: ""
+                      suit: trump
                     })
               });
   }

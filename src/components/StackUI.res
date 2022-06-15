@@ -20,16 +20,15 @@ module Stack = {
           let offset = `${string_of_int(index * 2)}px`
 
           <div
-            key={string_of_int(index)}
+            key={offset}
             className={index === 0 ? "relative" : "absolute"}
             style={ReactDOMStyle.make(~top=offset, ~left=offset, ())}>
-            <CardUI.HiddenCard />
+            <CardUI.HiddenCard className="flex items-center justify-center text-slate-200">
+              {deckText}
+            </CardUI.HiddenCard>
           </div>
         })
       }}
-      <div className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 text-slate-200">
-        {deckText}
-      </div>
     </div>
   }
 }
@@ -47,7 +46,7 @@ let deck = (~deck, ~trump) => {
   | Some(Hidden) => <div> <Stack deck={deck} /> <CardUI.trump suit={trump} /> </div>
   | None =>
     <CardUI.EmptyCard className="flex items-center justify-center">
-      <CardUI.trump className="" suit={trump} />
+      <CardUI.trump suit={trump} />
     </CardUI.EmptyCard>
   }
 }

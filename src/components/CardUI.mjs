@@ -135,16 +135,20 @@ var VisibleCard = {
 
 function CardUI$HiddenCard(Props) {
   var classNameOpt = Props.className;
+  var childrenOpt = Props.children;
   var className = classNameOpt !== undefined ? classNameOpt : "";
+  var children = childrenOpt !== undefined ? Caml_option.valFromOption(childrenOpt) : null;
   return React.createElement(CardUI$Base, {
               className: Utils.cx([
                     className,
                     "overflow-hidden"
                   ]),
-              children: React.createElement("div", {
-                    className: "absolute w-full h-full bg-gradient-to-tl from-purple-500 to-pink-500 bg-opacity-50"
-                  })
-            });
+              children: null
+            }, React.createElement("div", {
+                  className: "absolute w-full h-full bg-gradient-to-tl from-purple-500 to-pink-500 bg-opacity-50"
+                }), React.createElement("div", {
+                  className: "relative z-1"
+                }, children));
 }
 
 var HiddenCard = {
